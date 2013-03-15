@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<script src="http://yui.yahooapis.com/3.5.1/build/yui/yui-min.js"></script>
+
+
+<title>Insert title here</title>
+</head>
+<body>
+	<div id="inTxt" style="height: 98%; width: 98%"></div>
+<object type="application/x-java-applet" width="0" height="0"
+		name="reader" codebase="./WEB-INF/lib" classid="java:de.schulte.testverteilung.VerteilungApplet.class" archive="vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar">
+		</object>
+	<script>
+		window.onload = function() {
+// var obj = document.createElement('object');
+//obj.setAttribute('name', 'reader');
+//obj.setAttribute('width', '0');
+//obj.setAttribute('height', '0');
+//obj.setAttribute('codebase', './WEB-INF/lib');
+//obj.setAttribute('archive', 'vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar');
+//obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
+//document.getElementById('inTxt').appendChild(obj);
+var ret = document.reader.getContent("8ab628ae-c8cb-4e37-bf31-846d60aec3a4", "server", "admin", "admin", null, null, null);
+
+alert(ret);
+
+		};
+		
+
+
+/* 		 xmlhttp = new XMLHttpRequest();
+
+    
+        xmlhttp.open("GET", "/TestVerteilung/VerteilungServlet", true);
+        xmlhttp.send();
+ */		
+/* 		 var dataString ={"function":"getContent","docId":"8ab628ae-c8cb-4e37-bf31-846d60aec3a4","server":"http://ksul.dyndns.org:9080","username":"admin","password":"admin","proxyHost":"www-proxy", "proxyPort":"8080"};
+
+  $.ajax({
+                type: "GET",
+                data:dataString,
+                url: "VerteilungServlet",
+                complete: function(data){
+               //pairno ta dedomena
+              //  alert(data.message+"\n"+data.test);
+//textEditor.getSession().setValue(data);
+                //vazo ta dedomena sto results div tag.
+      
+            }
+         });
+	 */ 	
+		</script>
+</body>
+</html>

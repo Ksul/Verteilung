@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
+		<script src="src/theme-eclipse.js" type="text/javascript"
+		charset="utf-8"></script>
+		<script src="src/mode-xml.js" type="text/javascript" charset="utf-8"></script>
+		<script src="verteilung.js" type="text/javascript"	charset="utf-8" ></script>
+		<script src="vkbeautify.js" type="text/javascript" charset="utf-8"></script>
+		<script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript" charset="utf-8">
+            var rulesEditor = null;
+            const rulesDoc = "6a1d661c-a115-47ac-8593-e087ec819fd8";
+            window.onload = function() {
+                var zone = document.getElementById('inTxt');
+                zone.addEventListener('dragover', handleDragOver, false);
+                zone.addEventListener('drop', handleRulesSelect, false);
+                initEditor();
+            };
+
+            function initEditor() {
+                rulesEditor = ace.edit("inTxt");
+                rulesEditor.setTheme("ace/theme/eclipse");
+                var xmlMode = require("ace/mode/xml").Mode;
+                rulesEditor.getSession().setMode(new xmlMode());
+                rulesEditor.setShowPrintMargin(false);
+                rulesEditor.setDisplayIndentGuides(true);
+                rulesEditor.commands.addCommand({
+                    name : "save",
+                    bindKey : {
+                        win : "Ctrl-Shift-S",
+                        mac : "Command-s"
+                    },
+                    exec : save
+                });
+                rulesEditor.commands.addCommand({
+                    name : "format",
+                    bindKey : {
+                        win : "Ctrl-Shift-F",
+                        mac : "Command-f"
+                    },
+                    exec : format
+                });
+            }
+		</script>
+	</head>
+	<body>
+		<div id="inTxt" style="height: 98%; width: 98%"></div>
+	</body>
+</html>

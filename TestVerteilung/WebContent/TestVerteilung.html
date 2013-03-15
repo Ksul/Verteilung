@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Test Verteilung</title>
+<script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+<script src="recognition.js" type="text/javascript" charset="utf-8"></script>
+<script src="verteilung.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+	window.onload = function() {
+		manageControls();
+	};
+</script>
+<script type="text/javascript" charset="utf-8">
+	var scriptID = null;
+	var rulesID = null;
+	var inboxID = null;
+	var currentRules = null;
+	var workDocument = null;
+	var scriptMode = false;
+	var runLocal = false;
+	var REC;
+	REC = new Recognition();
+	REC.set(REC);
+	window.onload = function() {
+		init();
+		var xml;
+		if (isLocal()){
+			xml = "doc.xml";
+			loadXML(xml, true, false);
+			}
+		else {
+			if (window.frames.rulesID != null) {
+				xml = window.frames.rulesID.substring(window.frames.rulesID.lastIndexOf('/') + 1);
+				loadXML(xml, true, false);
+			} else
+				window.parent.frames.rules.rulesEditor.getSession().setValue("Regeln konnten nicht geladen werden!");
+		}
+	}
+</script>
+</head>
+<frameset id="frameset1" rows="33px, 78%, 17%">
+	<frameset cols="100%">
+		<frame src="TestVerteilungControl.html" name="control">
+	</frameset>
+	<frameset id="frameset2" cols="40%,60%">
+		<frame src="TestVerteilungText.html" name="cont">
+		<frame src="TestVerteilungRules.html" name="rules">
+		<noframes>
+			<body>
+				<p>This page uses frames. The current browser you are using does
+					not support frames.</p>
+			</body>
+		</noframes>
+	</frameset>
+	<frameset id="frameset3" cols="74%,26%">
+		<frame src="TestVerteilungOutput.html" name="output">
+		<frame src="TestVerteilungProps.html" name="props">
+	</frameset>
+</frameset>
+</html>
