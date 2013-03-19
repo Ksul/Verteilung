@@ -82,10 +82,10 @@ public class WebScriptTest implements HttpServletRequest, HttpServletResponse {
 //		wt.prop.put("proxyPort", "8080");
 //		wt.prop.put("proxyHost", "www-proxy");
 		//wt.prop.put("credentials", null);
-		wt.prop.put("server", "http://localhost:8080");
-		wt.prop.put("username", "admin");
-		wt.prop.put("password", "admin");
-		wt.prop.put("docName", "doc.xml");
+		wt.prop.put("server", "http://lashilfes.lvm.de");
+		wt.prop.put("username", "testa");
+		wt.prop.put("password", "abcde");
+		wt.prop.put("docName", "startseite.jpg");
 		// wt.prop.put("documentId",                          "72429975-5afc-464c-bf78-642129e079ef");
 		wt.prop.put("documentId", "146260d2-5511-4925-a1e6-9fb9d95499d0");
 		// prop.put("docId",                          "8ab628ae-c8cb-4e37-bf31-846d60aec3a4");   
@@ -116,7 +116,7 @@ public class WebScriptTest implements HttpServletRequest, HttpServletResponse {
 //			}
   	  //String a = (String) serv.getTicket(server, username, password, proxyHost, proxyPort, null);
   		wt.prop.put("function", "getNodeId");
-  		wt.prop.put("fileName", "doc.xml");
+  		wt.prop.put("fileName", "startseite.jpg");
   		wt.prop.put("searchFolder", "false");
   		serv.doPost(wt, wt);
   		JSONObject  a = new JSONObject(wt.bos.toString());
