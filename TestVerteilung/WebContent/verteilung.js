@@ -18,15 +18,26 @@ function getUrlParam(name) {
 }
 
 function isLocal() {
-	return (window.parent.location.href.startsWith("file"))
+	return (window.parent.location.href.startsWith("file"));
 }
 
 function getServer() {
 	if (paramServer == null)
-		paramServer = getUrlParam("server")
+		paramServer = getUrlParam("server");
 	return paramServer;
 }
 
+function getUser(){
+	if (paramUser == null)
+		paramUser = getUrlParam("user");
+	return paramUser;
+}
+
+function getPasswort(){
+	if (paramPass == null)
+		paramPass = getUrlParam("password");
+	return paramPass;
+}
 
 function manageControls() {
 	if (window.parent.frames.cont.multiMode && !window.parent.scriptMode) {
@@ -106,15 +117,15 @@ function openPDF(name, fromServer) {
 	try {
   	if (fromServer) {
   		if (isLocal()){
-  			var ticket = window.parent.frames.control.document.reader.getTicket(getServer(), "admin", "admin", getUrlParam("proxy"), getUrlParam("port"), null);
+  			var ticket = window.parent.frames.control.document.reader.getTicket(getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
   			window.open(name + "?alf_ticket=" + ticket);
   		}
   		else {
 				var dataString = {
 						"function"  : "getTicket",
 						"server"    : getServer(),
-						"username"  : "admin",
-						"password"  : "admin",
+						"username"  : getUser(),
+						"password"  : getPassword(),
 						"proxyHost" : getUrlParam("proxy"),
 						"proxyPort" : getUrlParam("port")
 					};
@@ -571,7 +582,7 @@ function imageFieldFormatter(o) {
 		return (function(name) {
 			var docId = "workspace:/SpacesStore/" + window.parent.frames.control.daten[name]["container"];
 			if (isLocal()) {
-				var json = jQuery.parseJSON(window.parent.frames.control.document.reader.moveDocument(docId, window.parent.inboxID, getServer(), "admin", "admin", getUrlParam("proxy"), getUrlParam("port"), null));
+				var json = jQuery.parseJSON(window.parent.frames.control.document.reader.moveDocument(docId, window.parent.inboxID, getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null));
 				if (!json.success)
 					alert("Dokument nicht verschoben: " + json.result);
 			}
@@ -581,8 +592,8 @@ function imageFieldFormatter(o) {
 					"documentId"		: docId,
 					"destinationId"	: window.parent.inboxID,
 					"server"				: getServer(),
-					"username"			: "admin",
-					"password"			: "admin",
+					"username"			: getUser(),
+					"password"			: getPassword(),
 					"proxyHost"			: getUrlParam("proxy"),
 					"proxyPort"			: getUrlParam("port")
 				};
@@ -914,7 +925,7 @@ function upload(dialog) {
 			vkbeautify.xml(window.parent.frames.rules.rulesEditor.getSession().getValue());
 			if (isLocal()) {
 				var ret = window.parent.frames.control.document.reader.updateDocumentByFile(window.parent.rulesID, window.parent.currentRules,
-						"XML-Beschreibung der Dokumente", "application/xml", getServer(), "admin", "admin", getUrlParam("proxy"), getUrlParam("port"), null);
+						"XML-Beschreibung der Dokumente", "application/xml", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
 				if (dialog) {
 					if (ret == 200) {
 						alert("Regeln erfolgreich übertragen!");
@@ -930,8 +941,8 @@ function upload(dialog) {
 				"documentId"   : window.parent.rulesID,
 			  "mimeType"     : "application/xml",
 				"server"       : getServer(),
-				"username"     : "admin",
-				"password"     : "admin",
+				"username"     : getUser(),
+				"password"     : getPassword(),
 				"proxyHost"    : getUrlParam("proxy"),
 				"proxyPort"    : getUrlParam("port")
 			};
@@ -973,12 +984,12 @@ function loadAlfrescoFolder(folderName) {
     daten = new Array();
     tableData = new Array();
 		if (isLocal()) {
-			ret = window.parent.frames.control.document.reader.listFolder(folderName, "false", getServer(), "admin", "admin", getUrlParam("proxy"), getUrlParam("port"));
+			ret = window.parent.frames.control.document.reader.listFolder(folderName, "false", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"));
 			var json = jQuery.parseJSON(ret);
 			var ergebnis = json.result;
 			for ( var i = 0; i < ergebnis.length; i++) {
 				var erg = ergebnis[i];
-				ret = window.parent.frames.control.document.reader.getContent(erg.id, true, getServer(), "admin", "admin",
+				ret = window.parent.frames.control.document.reader.getContent(erg.id, true, getServer(), getUser(), getPassword(),
 						getUrlParam("proxy"), getUrlParam("port"), null);
 				json = jQuery.parseJSON(ret);
 				if (json.success)
@@ -993,8 +1004,8 @@ function loadAlfrescoFolder(folderName) {
 				"function"  : "listFolder",
 				"filePath"  : folderName,
 				"server"    : getServer(),
-				"username"  : "admin",
-				"password"  : "admin",
+				"username"  : getUser(),
+				"password"  : getPassword(),
 				"proxyHost" : getUrlParam("proxy"),
 				"proxyPort" : getUrlParam("port")
 			};
@@ -1017,8 +1028,8 @@ function loadAlfrescoFolder(folderName) {
 						          		"documentId" : erg.id,
 						          		"extract"    : "true",
 						          		"server"     : getServer(),
-						          		"username"   : "admin",
-						          		"password"   : "admin",
+						          		"username"   : getUser(),
+						          		"password"   : getPassword(),
 						          		"proxyHost"  : getUrlParam("proxy"),
 						          		"proxyPort"  : getUrlParam("port")
 						            };
@@ -1065,7 +1076,7 @@ function loadXML(rDoc, loadLocal, dialog) {
 				window.parent.frames.rules.rulesEditor.getSession().setValue(open[0]);
 				window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
 			} else {
-				ret = window.parent.frames.control.document.reader.getContent(rDoc, false, getServer(), "admin", "admin", getUrlParam("proxy"), getUrlParam("port"), null);
+				ret = window.parent.frames.control.document.reader.getContent(rDoc, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
 				var json = jQuery.parseJSON(ret);
 				if (json.success) {
 					window.parent.frames.rules.rulesEditor.getSession().setValue(json.result);
@@ -1081,8 +1092,8 @@ function loadXML(rDoc, loadLocal, dialog) {
 				"documentId" : rDoc,
 				"extract"    : "false",
 				"server"     : getServer(),
-				"username"   : "admin",
-				"password"   : "admin",
+				"username"   : getUser(),
+				"password"   : getPassword(),
 				"proxyHost"  : getUrlParam("proxy"),
 				"proxyPort"  : getUrlParam("port")
 			};
@@ -1230,8 +1241,8 @@ function loadScript() {
 					"documentId" : window.parent.scriptID,
 					"extract"    : "false",
 					"server"     : getServer(),
-					"username"   : "admin",
-					"password"   : "admin",
+					"username"   : getUser(),
+					"password"   : getPassword(),
 					"proxyHost"  : getUrlParam("proxy"),
 					"proxyPort"  : getUrlParam("port")
 				};
@@ -1295,7 +1306,7 @@ function reloadScript(dialog) {
 function get(dialog) {
 	try {
 		if (isLocal()) {
-			var ret = window.parent.frames.control.document.reader.getContent( window.parent.scriptID, false, getServer(), "admin", "admin", getUrlParam("proxy"),
+			var ret = window.parent.frames.control.document.reader.getContent( window.parent.scriptID, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"),
 					getUrlParam("port"), null);
 			var json = jQuery.parseJSON(ret);
 			if (json.success) {
@@ -1311,8 +1322,8 @@ function get(dialog) {
 				"documentId" : window.parent.scriptID,
 				"extract"    : "false",
 				"server"     : getServer(),
-				"username"   : "admin",
-				"password"   : "admin",
+				"username"   : getUser(),
+				"password"   : getPassword(),
 				"proxyHost"  : getUrlParam("proxy"),
 				"proxyPort"  : getUrlParam("port")
 			};
@@ -1351,7 +1362,7 @@ function send(dialog) {
 			if (isLocal()) {
 				window.parent.frames.control.document.reader.save(window.parent.workDocument, window.parent.frames.cont.textEditor.getSession().getValue());
 				var ret = window.parent.frames.control.document.reader.updateDocument(window.parent.scriptID, window.parent.frames.cont.textEditor.getSession().getValue(),
-						"VerteilungsScript", getServer(), "admin", "admin", getUrlParam("proxy"), getUrlParam("port"), null);
+						"VerteilungsScript", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
 				if (dialog) {
 					if (ret == 200) {
 						alert("Script erfolgreich übertragen!");
@@ -1366,8 +1377,8 @@ function send(dialog) {
 					"documentText" : window.parent.frames.cont.textEditor.getSession().getValue(),
 					"description"  : "VerteilungsScript",
 					"server"       : getServer(),
-					"username"     : "admin",
-					"password"     : "admin",
+					"username"     : getUser(),
+					"password"     : getPassword(),
 					"proxyHost"    : getUrlParam("proxy"),
 					"proxyPort"    : getUrlParam("port")
 				};
@@ -1496,19 +1507,19 @@ function init() {
 		if (getUrlParam("local") == null || pattern.test(getUrlParam("local"))) {
 			window.parent.runLocal = true;
 		} else {
-			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("recognition.js", "false", getServer(), "admin", "admin", getUrlParam("proxy"),
+			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("recognition.js", "false", getServer(), getUser(), getPassword(), getUrlParam("proxy"),
 					getUrlParam("port"), null));
 			if (json.success)
 				window.parent.scriptID = json.result;
 			else
 				txt.push("Script nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("doc.xml", "false", getServer(), "admin", "admin", getUrlParam("proxy"), getUrlParam("port"),
+			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("doc.xml", "false", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
 					null));
 			if (json.success)
 				window.parent.rulesID = json.result;
 			else
 				txt.push("Regeln nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("Inbox", "true", getServer(), "admin", "admin", getUrlParam("proxy"), getUrlParam("port"),
+			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("Inbox", "true", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
 					null));
 			if (json.success)
 				window.parent.inboxID = json.result;
@@ -1523,8 +1534,8 @@ function init() {
 				"fileName"     : "recognition.js",
 				"searchFolder" : "false",
 				"server"       : getServer(),
-				"username"     : "admin",
-				"password"     : "admin",
+				"username"     : getUser(),
+				"password"     : getPassword(),
 				"proxyHost"    : getUrlParam("proxy"),
 				"proxyPort"    : getUrlParam("port")
 			};
@@ -1551,8 +1562,8 @@ function init() {
 				"fileName"     : "doc.xml",
 				"searchFolder" : "false",
 				"server"       : getServer(),
-				"username"     : "admin",
-				"password"     : "admin",
+				"username"     : getUser(),
+				"password"     : getPassword(),
 				"proxyHost"    : getUrlParam("proxy"),
 				"proxyPort"    : getUrlParam("port")
 				};
@@ -1579,8 +1590,8 @@ function init() {
 				"fileName"     : "Inbox",
 				"searchFolder" : "true",
 				"server"       : getServer(),
-				"username"     : "admin",
-				"password"     : "admin",
+				"username"     : getUser(),
+				"password"     : getPassword(),
 				"proxyHost"    : getUrlParam("proxy"),
 				"proxyPort"    : getUrlParam("port")
 				};
@@ -1617,3 +1628,5 @@ var searchRules = false;
 var paramServer = null;
 var paramProxy = null;
 var paramPort = null;
+var paramUser = null;
+var paramPass = null;
