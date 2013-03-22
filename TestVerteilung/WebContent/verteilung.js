@@ -33,7 +33,7 @@ function getUser(){
 	return paramUser;
 }
 
-function getPasswort(){
+function getPassword(){
 	if (paramPass == null)
 		paramPass = getUrlParam("password");
 	return paramPass;
@@ -977,6 +977,7 @@ function upload(dialog) {
 
 function loadAlfrescoFolder(folderName) {
 	try {
+		document.body.style.cursor = "wait";
     window.parent.frames.cont.dtable.get("data").reset(null, {
       silent : true
     });
@@ -999,6 +1000,7 @@ function loadAlfrescoFolder(folderName) {
 					alert("Fehler beim Holen des Inhalts: " + json.result);
 			}
 			window.parent.frames.cont.dtable.render("#dtable");
+			document.body.style.cursor = "default";
 		} else {
 			var dataString = {
 				"function"  : "listFolder",
@@ -1014,12 +1016,12 @@ function loadAlfrescoFolder(folderName) {
 				data     : dataString,
 				datatype : "json",
 				url      : "VerteilungServlet",
-			    error    : function (response) {
-                             var r = jQuery.parseJSON(response.responseText);
-                             alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                           },
+			  error    : function (response) {
+                     var r = jQuery.parseJSON(response.responseText);
+                     alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                   },
 				success  : function(data) {
-                             if(data.success[0]) {
+                     if(data.success[0]) {
 					            var ergebnis = data.result[0];
 					            for ( var i = 0; i < ergebnis.length; i++) {
 					              var erg = ergebnis[i];
@@ -1038,17 +1040,19 @@ function loadAlfrescoFolder(folderName) {
 						          	  data         : dataString,
 						          	  datatype     : "json",
 						          	  url          : "VerteilungServlet",
-                                      async        : false,
-						      		  error        : function (response) {
+                          async        : false,
+						      		    error        : function (response) {
 						                               var r = jQuery.parseJSON(response.responseText);
 						                               alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+						                               document.body.style.cursor = "default";
 						                             },
 						          	  success      : function(data) {
-                                                       if (data.sucess[0])
-                                                           loadMultiText(data.result.toString(), erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/"
+                                           if (data.success[0])
+                                             loadMultiText(data.result.toString(), erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/"
 									            	             + erg.id.substring(erg.id.lastIndexOf('/') + 1) + "/content.pdf");
-                                                       else
-                                                           alert("Fehler beim Holen des Inhalts " + data.result[0]);
+                                           else
+                                             alert("Fehler beim Holen des Inhalts " + data.result[0]);
+                                          	document.body.style.cursor = "default";
 							                           }
 						              });	          
 					             }	
