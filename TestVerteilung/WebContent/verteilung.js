@@ -1044,7 +1044,7 @@ function loadAlfrescoFolder(folderName) {
 						                               alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
 						                             },
 						          	  success      : function(data) {
-                                                       if (data.sucess[0])
+                                           if (data.success[0])
                                                            loadMultiText(data.result.toString(), erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/"
 									            	             + erg.id.substring(erg.id.lastIndexOf('/') + 1) + "/content.pdf");
                                                        else
