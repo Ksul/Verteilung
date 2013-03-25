@@ -1,6 +1,11 @@
 *.class
 
 # Package Files #
+<<<<<<< HEAD
 # *.jar
+=======
+#*.jar
+>>>>>>> refs/remotes/origin/master
 *.war
 *.ear
+/TestVerteilung
