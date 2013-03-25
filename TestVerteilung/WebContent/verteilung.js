@@ -33,7 +33,7 @@ function getUser(){
 	return paramUser;
 }
 
-function getPasswort(){
+function getPassword(){
 	if (paramPass == null)
 		paramPass = getUrlParam("password");
 	return paramPass;
