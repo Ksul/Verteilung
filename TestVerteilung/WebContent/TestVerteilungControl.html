@@ -6,23 +6,94 @@
 <script src="verteilung.js" type="text/javascript" charset="utf-8"></script>
 <script src="vkbeautify.js" type="text/javascript" charset="utf-8"></script>
 <script src="jsbeautify.js" type="text/javascript" charset="utf-8"></script>
-<script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+<script src="./jquery-ui-1.10.2/jquery-1.9.1.js"	type="text/javascript" charset="utf-8"></script>
+<script src="./jquery-ui-1.10.2/ui/jquery-ui.js" type="text/javascript"	charset="utf-8"></script>
+
+<!-- <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+<script src="jquery.ui.progressbar.js" type="text/javascript" charset="utf-8"></script>
+ -->
 <script type="text/javascript" charset="utf-8">
 	window.onload = function() {
 		document.getElementById('filesinput').addEventListener('change', readMultiFile, false);
 		if (isLocal()) {
-		  var obj = document.createElement('object');
-		  obj.setAttribute('name', 'reader');
-		  obj.setAttribute('width', '0');
-		  obj.setAttribute('height', '0');
-		  obj.setAttribute('codebase', './WEB-INF/lib');
-		  obj.setAttribute('archive',	'vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,commons-io-2.4.jar');
-		  obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
-		  document.getElementById('appl').appendChild(obj);
+			var obj = document.createElement('object');
+			obj.setAttribute('name', 'reader');
+			obj.setAttribute('width', '0');
+			obj.setAttribute('height', '0');
+			obj.setAttribute('codebase', './WEB-INF/lib');
+			obj
+					.setAttribute(
+							'archive',
+							'vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,commons-io-2.4.jar');
+			obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
+			document.getElementById('appl').appendChild(obj);
 		}
 	};
 </script>
 <style type="text/css">
+.ui-widget {
+	font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+	font-size: 1.1em;
+}
+
+.ui-widget .ui-widget {
+	font-size: 1em;
+}
+
+.ui-widget input,.ui-widget select,.ui-widget textarea,.ui-widget button
+	{
+	font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+	font-size: 1em;
+}
+
+.ui-widget-content {
+	border: 1px solid #dddddd;
+	background: #eeeeee
+		url(./ressource/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top
+		repeat-x;
+	color: #333333;
+}
+
+.ui-widget-content a {
+	color: #333333;
+}
+
+.ui-widget-header {
+	border: 1px solid #e78f08;
+	background: #f6a828
+		url(./ressource/ui-bg_gloss-wave_35_f6a828_500x100.png) 50% 50%
+		repeat-x;
+	color: #ffffff;
+	font-weight: bold;
+}
+
+.ui-widget-header a {
+	color: #ffffff;
+}
+
+.ui-progressbar {
+	height: 2em;
+	text-align: left;
+}
+
+.ui-progressbar .ui-progressbar-value {
+	margin: -1px;
+	height: 100%;
+}
+
+.progress-label {
+	float: left;
+	margin-left: 50%;
+	margin-top: 0px;
+	font-weight: bold;
+	text-shadow: 1px 1px 0 #fff;
+}
+
+#progressbar {
+	width: 300px;
+	height: 20px;
+}
+
 input.search {
 	background-image: url('ressource/search.png');
 	width: 24px;
@@ -233,7 +304,6 @@ input.docUnknown:disabled {
 	cursor: text;
 	disabled: true;
 }
-
 </style>
 </head>
 <body style="margin: 0; padding: 0">
@@ -242,14 +312,16 @@ input.docUnknown:disabled {
 			<td width="30%"><input id="filesinput" name="filesinput"
 				type="file" multiple="multiple" size="50" />
 			</td>
-			<td width="60px" align="center"><input onclick="loadAlfrescoFolder('Firmen-Home/Archiv/Unbekannt');"
-				name="docUnknown" id="docUnknown" type="submit" class="docUnknown" title="Load Unknown"
-				value="" />
+			<td width="60px" align="center"><input
+				onclick="loadAlfrescoFolder('Firmen-Home/Archiv/Unbekannt');"
+				name="docUnknown" id="docUnknown" type="submit" class="docUnknown"
+				title="Load Unknown" value="" />
 			</td>
-			<td width="60px" align="center"><input onclick="loadAlfrescoFolder('Firmen-Home/Archiv/Fehler');"
-				name="docError" id="docError" type="submit" class="docError" title="Load Error"
-				value="" />
-			</td>			
+			<td width="60px" align="center"><input
+				onclick="loadAlfrescoFolder('Firmen-Home/Archiv/Fehler');"
+				name="docError" id="docError" type="submit" class="docError"
+				title="Load Error" value="" />
+			</td>
 			<td width="60px" align="center"><input onclick="work();"
 				name="play" id="play" type="submit" class="play" title="Recognize"
 				value="" />
@@ -301,7 +373,9 @@ input.docUnknown:disabled {
 				name="send" id="send" type="submit" class="upload" title="Upload"
 				value="" style="display: none" />
 			</td>
-			<td width="50%"></td>
+			<td width="50%">
+				<div id="progressbar" class="progressbar"> <div class="progress-label"></div></div>
+			</td>
 			<td width="60px" align="center"><input onclick="format();"
 				name="beautify" id="beautify" type="submit" class="beautify"
 				title="Format" value="" />
@@ -322,9 +396,8 @@ input.docUnknown:disabled {
 				name="unfoldall" id="unfoldall" type="submit" class="maximize"
 				title="Unfold All" value="" /></td>
 			<td width="60px" align="center"><input
-				onclick="loadXML(window.parent.rulesID, false, true);"
-				name="load" id="load" type="submit" class="download"
-				title="Download" value="" />
+				onclick="loadXML(window.parent.rulesID, false, true);" name="load"
+				id="load" type="submit" class="download" title="Download" value="" />
 			</td>
 			<td width="60px" align="center"><input onclick="upload(true);"
 				name="upload" id="upload" type="submit" class="upload"

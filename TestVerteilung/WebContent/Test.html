@@ -1,56 +1,113 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<script src="http://yui.yahooapis.com/3.5.1/build/yui/yui-min.js"></script>
+<title>jQuery UI Progressbar</title>
+<!-- <link type="text/css" href="./Test.css" rel="stylesheet" />
+ -->
+<script type="text/javascript" src="./jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="./jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+<style type="text/css">
+.ui-widget {
+	font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+	font-size: 1.1em;
+}
 
+.ui-widget .ui-widget {
+	font-size: 1em;
+}
 
-<title>Insert title here</title>
+.ui-widget input,.ui-widget select,.ui-widget textarea,.ui-widget button
+	{
+	font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+	font-size: 1em;
+}
+
+.ui-widget-content {
+	border: 1px solid #dddddd;
+	background: #eeeeee
+		url(./ressource/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top
+		repeat-x;
+	color: #333333;
+}
+
+.ui-widget-content a {
+	color: #333333;
+}
+
+.ui-widget-header {
+	border: 1px solid #e78f08;
+	background: #f6a828
+		url(./ressource/ui-bg_gloss-wave_35_f6a828_500x100.png) 50% 50%
+		repeat-x;
+	color: #ffffff;
+	font-weight: bold;
+}
+
+.ui-widget-header a {
+	color: #ffffff;
+}
+
+.ui-progressbar {
+	height: 2em;
+	text-align: left;
+}
+
+.ui-progressbar .ui-progressbar-value {
+	margin: -1px;
+	height: 100%;
+}
+
+.progress-label {
+	float: left;
+	margin-left: 50%;
+	margin-top: 0px;
+	font-weight: bold;
+	text-shadow: 1px 1px 0 #fff;
+}
+</style>
+<script type="text/javascript">
+	$(function() {
+		var progressbar = $("#progressbar"), progressLabel = $(".progress-label");
+		progressbar.progressbar({
+			value : false,
+			change : function() {
+			  //value = Math.round(value);
+				progressLabel.text(Math.round(progressbar.progressbar("value")) + "%");
+			},
+			complete : function() {
+				progressLabel.text("");
+				progressbar.progressbar("destroy");
+			}
+		});
+		function progress() {
+			var val = progressbar.progressbar("value") || 0;
+			val = val +0.46;
+			progressbar.progressbar("value", val + 1);
+			if (val < 99) {
+				setTimeout(progress, 100);
+			}
+		}
+		setTimeout(progress, 3000);
+	});
+	
+	function sleep(ms) {
+		var dt = new Date();
+		dt.setTime(dt.getTime() + ms);
+		while (new Date().getTime() < dt.getTime())
+			;
+	}
+</script>
+
+<style>
+/* Größe für die Progressbar */
+#progressbar {
+	width: 300px;
+	height: 20px;
+}
+</style>
 </head>
 <body>
-	<div id="inTxt" style="height: 98%; width: 98%"></div>
-<object type="application/x-java-applet" width="0" height="0"
-		name="reader" codebase="./WEB-INF/lib" classid="java:de.schulte.testverteilung.VerteilungApplet.class" archive="vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar">
-		</object>
-	<script>
-		window.onload = function() {
-// var obj = document.createElement('object');
-//obj.setAttribute('name', 'reader');
-//obj.setAttribute('width', '0');
-//obj.setAttribute('height', '0');
-//obj.setAttribute('codebase', './WEB-INF/lib');
-//obj.setAttribute('archive', 'vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar');
-//obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
-//document.getElementById('inTxt').appendChild(obj);
-var ret = document.reader.getContent("8ab628ae-c8cb-4e37-bf31-846d60aec3a4", "server", "admin", "admin", null, null, null);
+	<!--Die Progressbar-->
+	<div id="progressbar"><div class="progress-label">Lade...</div></div>
 
-alert(ret);
-
-		};
-		
-
-
-/* 		 xmlhttp = new XMLHttpRequest();
-
-    
-        xmlhttp.open("GET", "/TestVerteilung/VerteilungServlet", true);
-        xmlhttp.send();
- */		
-/* 		 var dataString ={"function":"getContent","docId":"8ab628ae-c8cb-4e37-bf31-846d60aec3a4","server":"http://ksul.dyndns.org:9080","username":"admin","password":"admin","proxyHost":"www-proxy", "proxyPort":"8080"};
-
-  $.ajax({
-                type: "GET",
-                data:dataString,
-                url: "VerteilungServlet",
-                complete: function(data){
-               //pairno ta dedomena
-              //  alert(data.message+"\n"+data.test);
-//textEditor.getSession().setValue(data);
-                //vazo ta dedomena sto results div tag.
-      
-            }
-         });
-	 */ 	
-		</script>
 </body>
 </html>

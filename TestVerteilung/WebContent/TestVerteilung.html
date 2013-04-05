@@ -4,15 +4,14 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Test Verteilung</title>
 <script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="./jquery-ui-1.10.2/jquery-1.9.1.js" charset="utf-8"></script>
 <script src="recognition.js" type="text/javascript" charset="utf-8"></script>
 <script src="verteilung.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
 	window.onload = function() {
 		manageControls();
 	};
-</script>
-<script type="text/javascript" charset="utf-8">
+
 	var scriptID = null;
 	var rulesID = null;
 	var inboxID = null;
@@ -26,11 +25,10 @@
 	window.onload = function() {
 		init();
 		var xml;
-		if (isLocal()){
+		if (isLocal()) {
 			xml = "doc.xml";
 			loadXML(xml, true, false);
-			}
-		else {
+		} else {
 			if (window.frames.rulesID != null) {
 				xml = window.frames.rulesID.substring(window.frames.rulesID.lastIndexOf('/') + 1);
 				loadXML(xml, true, false);
@@ -40,6 +38,7 @@
 	}
 </script>
 </head>
+<div id="progressbar"></div>
 <frameset id="frameset1" rows="33px, 78%, 17%">
 	<frameset cols="100%">
 		<frame src="TestVerteilungControl.html" name="control">

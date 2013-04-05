@@ -39,6 +39,21 @@ function getPassword(){
 	return paramPass;
 }
 
+function showProgress() {
+	$(function() {
+		var progressbar = $("#progressbar"), progressLabel = $(".progress-label");
+		progressbar.progressbar({
+			value : 0,
+			change : function() {
+				progressLabel.text(Math.round(progressbar.progressbar("value")) + "%");
+			},
+			complete : function() {
+				setTimeout(function(){progressLabel.text("");progressbar.progressbar("destroy");}, 3000);				
+			}
+		});
+	});
+}
+
 function manageControls() {
 	if (window.parent.frames.cont.multiMode && !window.parent.scriptMode) {
 		window.parent.frames.cont.document.getElementById('inTxt').style.display = 'none';
@@ -249,9 +264,9 @@ function readFiles(files) {
 		var count = files.length;
 		var maxLen = 1000000;
 		var first = true;
-        var reader;
-        var blob;
-		for ( var i = 0; i < files.length; i++) {
+    var reader;
+    var blob;
+		for ( var i = 0; i < count; i++) {
 			var f = files[i];
 			if (f) {
 
@@ -277,18 +292,20 @@ function readFiles(files) {
 										type           : "POST",
 										data           : dataString,
 										datatype       : "json",
+										async          : false,
 										url            : "VerteilungServlet",
-                                        error          : function (response) {
-                                                           var r = jQuery.parseJSON(response.responseText);
-                                                           alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                                         },
+                    error          : function (response) {
+                                       var r = jQuery.parseJSON(response.responseText);
+                                       alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                                     },
 										success        : function(data) {
 											                 if (data.success[0]) {
-											                	 if (files.length == 1)
+											                	 if (count == 1)
 											                		 loadText(data.result[0].toString(), theFile.name, theFile.type, null);
-											                	 else
+											                	 else {
 											                		 loadMultiText(data.result[0].toString(), theFile.name, theFile.type, "false", "false", null);
-											                	 } else
+											                	 }
+											                 } else
 											                		 alert ("Fehler beim Lesen des PDF: " + data.result[0]);
 											                 }
 									});
@@ -977,7 +994,8 @@ function upload(dialog) {
 
 function loadAlfrescoFolder(folderName) {
 	try {
-    window.parent.frames.cont.dtable.get("data").reset(null, {
+		showProgress();
+	   window.parent.frames.cont.dtable.get("data").reset(null, {
       silent : true
     });
     var ret;
@@ -1014,15 +1032,18 @@ function loadAlfrescoFolder(folderName) {
 				data     : dataString,
 				datatype : "json",
 				url      : "VerteilungServlet",
-			    error    : function (response) {
-                             var r = jQuery.parseJSON(response.responseText);
-                             alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                           },
+			  error    : function (response) {
+                     var r = jQuery.parseJSON(response.responseText);
+                     alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                   },
 				success  : function(data) {
-                             if(data.success[0]) {
+                    if(data.success[0]) {
 					            var ergebnis = data.result[0];
-					            for ( var i = 0; i < ergebnis.length; i++) {
-					              var erg = ergebnis[i];
+					            var anzahl = ergebnis.length;
+					            var count = 1;
+					            for ( var i = 0; i < anzahl; i++) {
+					            	$('#progressbar').progressbar('value', (count++ / (anzahl *2)) * 100);
+					            	var erg = ergebnis[i];
 						            var dataString = {
 						          		"function"   : "getContent",
 						          		"documentId" : erg.id,
@@ -1038,17 +1059,19 @@ function loadAlfrescoFolder(folderName) {
 						          	  data         : dataString,
 						          	  datatype     : "json",
 						          	  url          : "VerteilungServlet",
-                                      async        : false,
-						      		  error        : function (response) {
+                          async        : false,
+						      		    error        : function (response) {
 						                               var r = jQuery.parseJSON(response.responseText);
 						                               alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
 						                             },
 						          	  success      : function(data) {
-                                           if (data.success[0])
-                                                           loadMultiText(data.result.toString(), erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/"
+                                           if (data.success[0]) {
+                                          	 $('#progressbar').progressbar('value', (count++ / (anzahl *2)) * 100);
+                                             loadMultiText(data.result.toString(), erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/"
 									            	             + erg.id.substring(erg.id.lastIndexOf('/') + 1) + "/content.pdf");
-                                                       else
-                                                           alert("Fehler beim Holen des Inhalts " + data.result[0]);
+                                           }
+                                          else
+                                             alert("Fehler beim Holen des Inhalts " + data.result[0]);
 							                           }
 						              });	          
 					             }	
