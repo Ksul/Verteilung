@@ -365,12 +365,12 @@ input.docUnknown:disabled {
 				name="saveScript" id="saveScript" type="submit" class="save"
 				title="Save" value="" style="display: none" />
 			</td>
-			<td width="60px" align="center"><input onclick="get(true);"
-				name="get" id="get" type="submit" class="download" title="Download"
+			<td width="60px" align="center"><input onclick="getScript(true);"
+				name="getScript" id="getScript" type="submit" class="download" title="Download"
 				value="" style="display: none" />
 			</td>
-			<td width="60px" align="center"><input onclick="send(true);"
-				name="send" id="send" type="submit" class="upload" title="Upload"
+			<td width="60px" align="center"><input onclick="sendScript(true);"
+				name="sendScript" id="sendScript" type="submit" class="upload" title="Upload"
 				value="" style="display: none" />
 			</td>
 			<td width="50%">
@@ -396,12 +396,12 @@ input.docUnknown:disabled {
 				name="unfoldall" id="unfoldall" type="submit" class="maximize"
 				title="Unfold All" value="" /></td>
 			<td width="60px" align="center"><input
-				onclick="loadXML(window.parent.rulesID, false, true);" name="load"
-				id="load" type="submit" class="download" title="Download" value="" />
+				onclick="getRules(window.parent.rulesID, false, true);" name="getRules"
+				id="getRules" type="submit" class="download" title="Download Regeln" value="" />
 			</td>
-			<td width="60px" align="center"><input onclick="upload(true);"
-				name="upload" id="upload" type="submit" class="upload"
-				title="Upload" value="" />
+			<td width="60px" align="center"><input onclick="sendRules(true);"
+				name="sendRules" id="sendRules" type="submit" class="upload"
+				title="Sende Regeln" value="" />
 			</td>
 			<td width="60px" align="center"><input
 				onclick="save(window.parent.currentRules, vkbeautify.xml(window.parent.frames.rules.rulesEditor.getSession().getValue()), true);"

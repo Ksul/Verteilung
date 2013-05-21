@@ -93,8 +93,8 @@ function manageControls() {
 		window.parent.frames.control.document.getElementById('pdf').style.display = 'none';
 		window.parent.frames.control.document.getElementById('script').style.display = 'none';
 		window.parent.frames.control.document.getElementById('close').style.display = 'block';
-		window.parent.frames.control.document.getElementById('send').style.display = 'block';
-		window.parent.frames.control.document.getElementById('get').style.display = 'block';
+		window.parent.frames.control.document.getElementById('sendScript').style.display = 'block';
+		window.parent.frames.control.document.getElementById('getScript').style.display = 'block';
 		window.parent.frames.control.document.getElementById('saveScript').style.display = 'block';
 		window.parent.frames.control.document.getElementById('reloadScript').style.display = 'block';
 		window.parent.frames.control.document.getElementById('beautifyScript').style.display = 'block';
@@ -107,8 +107,8 @@ function manageControls() {
 		window.parent.frames.control.document.getElementById('pdf').style.display = 'block';
 		window.parent.frames.control.document.getElementById('script').style.display = 'block';
 		window.parent.frames.control.document.getElementById('close').style.display = 'none';
-		window.parent.frames.control.document.getElementById('send').style.display = 'none';
-		window.parent.frames.control.document.getElementById('get').style.display = 'none';
+		window.parent.frames.control.document.getElementById('sendScript').style.display = 'none';
+		window.parent.frames.control.document.getElementById('getScript').style.display = 'none';
 		window.parent.frames.control.document.getElementById('saveScript').style.display = 'none';
 		window.parent.frames.control.document.getElementById('reloadScript').style.display = 'none';
 		window.parent.frames.control.document.getElementById('beautifyScript').style.display = 'none';
@@ -120,11 +120,11 @@ function manageControls() {
 		window.parent.frames.control.document.getElementById('docUnknown').setAttribute("disabled", true);
 		window.parent.frames.control.document.getElementById('docError').setAttribute("disabled", true);
 	}
-  if (window.parent.runLocal) {
-		window.parent.frames.control.document.getElementById('send').setAttribute("disabled", true);
-		window.parent.frames.control.document.getElementById('get').setAttribute("disabled", true);
-		window.parent.frames.control.document.getElementById('load').setAttribute("disabled", true);
-		window.parent.frames.control.document.getElementById('upload').setAttribute("disabled", true);
+  if (window.parent.runLocal || (window.parent.scriptID == null && window.parent.rulesID == null)) {
+		window.parent.frames.control.document.getElementById('sendScript').setAttribute("disabled", true);
+		window.parent.frames.control.document.getElementById('getScript').setAttribute("disabled", true);
+		window.parent.frames.control.document.getElementById('getRules').setAttribute("disabled", true);
+		window.parent.frames.control.document.getElementById('sendRules').setAttribute("disabled", true);
   }
 }
 
@@ -149,10 +149,18 @@ function openPDF(name, fromServer) {
 						data        : dataString,
 						datatype    : "json",
 						url         : "VerteilungServlet",
-    			  error       : function (response) {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                          },
+                        error    : function (response) {
+                            try {
+                                var r = jQuery.parseJSON(response.responseText);
+                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                            } catch(e)  {
+                                var str = "FEHLER:\n";
+                                str = str + e.toString() + "\n";
+                                for ( var prop in e)
+                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                                alert(str + "\n" + response.responseText);
+                            }
+                        },
 						success     : function(data) {
 													   window.open(name + "?alf_ticket=" + data.result.toString());
 						              }
@@ -294,10 +302,18 @@ function readFiles(files) {
 										datatype       : "json",
 										async          : false,
 										url            : "VerteilungServlet",
-                    error          : function (response) {
-                                       var r = jQuery.parseJSON(response.responseText);
-                                       alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                     },
+                                        error    : function (response) {
+                                            try {
+                                                var r = jQuery.parseJSON(response.responseText);
+                                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                                            } catch(e)  {
+                                                var str = "FEHLER:\n";
+                                                str = str + e.toString() + "\n";
+                                                for ( var prop in e)
+                                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                                                alert(str + "\n" + response.responseText);
+                                            }
+                                        },
 										success        : function(data) {
 											                 if (data.success[0]) {
 											                	 if (count == 1)
@@ -337,10 +353,18 @@ function readFiles(files) {
 										data           : dataString,
 										datatype       : "json",
 										url            : "VerteilungServlet",
-			      			  error          : function (response) {
-                                       var r = jQuery.parseJSON(response.responseText);
-                                       alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                     },
+                                        error    : function (response) {
+                                            try {
+                                                var r = jQuery.parseJSON(response.responseText);
+                                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                                            } catch(e)  {
+                                                var str = "FEHLER:\n";
+                                                str = str + e.toString() + "\n";
+                                                for ( var prop in e)
+                                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                                                alert(str + "\n" + response.responseText);
+                                            }
+                                        },
 										success        : function(data) {
 																			 if (data.success[0]) {
 											                   if (data.result[0].entry.length == 1)
@@ -620,10 +644,18 @@ function imageFieldFormatter(o) {
 					datatype				: "json",
 					url							: "VerteilungServlet",
 					async						: false,
-  			  error           : function (response) {
-                              var r = jQuery.parseJSON(response.responseText);
-                              alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                            },				
+                    error    : function (response) {
+                        try {
+                            var r = jQuery.parseJSON(response.responseText);
+                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                        } catch(e)  {
+                            var str = "FEHLER:\n";
+                            str = str + e.toString() + "\n";
+                            for ( var prop in e)
+                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                            alert(str + "\n" + response.responseText);
+                        }
+                    },
 					success					: function(data) {
 						                  if (data.success[0])
 						                  	alert("Dokument verschoben!")
@@ -808,10 +840,18 @@ function doTest() {
 		  	data       : dataString,
 			  datatype   : "json",
 		  	url        : "VerteilungServlet",
-		    error      : function (response) {
-                       var r = jQuery.parseJSON(response.responseText);
-                       alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                     },
+            error    : function (response) {
+                try {
+                    var r = jQuery.parseJSON(response.responseText);
+                    alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                } catch(e)  {
+                    var str = "FEHLER:\n";
+                    str = str + e.toString() + "\n";
+                    for ( var prop in e)
+                        str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                    alert(str + "\n" + response.responseText);
+                }
+            },
 			  success    : function(data) {
 			  	             if (data.success[0]){
 				                 window.parent.REC.currentDocument.setContent(data.result[0].text.toString());
@@ -935,7 +975,7 @@ function work() {
 	}
 }
 
-function upload(dialog) {
+function sendRules(dialog) {
 	try {
 		var erg = false;
 		if (window.parent.currentRules.endsWith("doc.xml")) {
@@ -968,10 +1008,18 @@ function upload(dialog) {
 				data           : dataString,
 				datatype       : "json",
 				url            : "VerteilungServlet",
-			  error          : function (response) {
-                           var r = jQuery.parseJSON(response.responseText);
-                           alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                         },
+                error    : function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch(e)  {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for ( var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                },
 				success        : function(data) {
 					                 if (data.success[0]){
 					                   if (dialog)
@@ -1021,6 +1069,7 @@ function loadAlfrescoFolder(folderName) {
 			var dataString = {
 				"function"  : "listFolder",
 				"filePath"  : folderName,
+                "withFolder": "false",
 				"server"    : getServer(),
 				"username"  : getUser(),
 				"password"  : getPassword(),
@@ -1032,10 +1081,18 @@ function loadAlfrescoFolder(folderName) {
 				data     : dataString,
 				datatype : "json",
 				url      : "VerteilungServlet",
-			  error    : function (response) {
-                     var r = jQuery.parseJSON(response.responseText);
-                     alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                   },
+                error    : function (response) {
+                             try {
+                               var r = jQuery.parseJSON(response.responseText);
+                               alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                             } catch(e)  {
+                               var str = "FEHLER:\n";
+                               str = str + e.toString() + "\n";
+                               for ( var prop in e)
+                                 str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                               alert(str + "\n" + response.responseText);
+                             }
+                },
 				success  : function(data) {
                     if(data.success[0]) {
 					            var ergebnis = data.result[0];
@@ -1059,11 +1116,19 @@ function loadAlfrescoFolder(folderName) {
 						          	  data         : dataString,
 						          	  datatype     : "json",
 						          	  url          : "VerteilungServlet",
-                          async        : false,
-						      		    error        : function (response) {
-						                               var r = jQuery.parseJSON(response.responseText);
-						                               alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-						                             },
+                                      async        : false,
+                                        error    : function (response) {
+                                            try {
+                                                var r = jQuery.parseJSON(response.responseText);
+                                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                                            } catch(e)  {
+                                                var str = "FEHLER:\n";
+                                                str = str + e.toString() + "\n";
+                                                for ( var prop in e)
+                                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                                                alert(str + "\n" + response.responseText);
+                                            }
+                                        },
 						          	  success      : function(data) {
                                            if (data.success[0]) {
                                           	 $('#progressbar').progressbar('value', (count++ / (anzahl *2)) * 100);
@@ -1090,7 +1155,7 @@ function loadAlfrescoFolder(folderName) {
 	}
 }
 
-function loadXML(rDoc, loadLocal, dialog) {
+function getRules(rDoc, loadLocal, dialog) {
 	try {
 		if (isLocal()) {
 			var ret;
@@ -1134,10 +1199,18 @@ function loadXML(rDoc, loadLocal, dialog) {
 										  	 } else
 												   alert("Regeln konnten nicht übertragen werden: " + data.result[0]);
 				               },
-			  error        : function (response) {
-                         var r = jQuery.parseJSON(response.responseText);
-                         alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                       }
+                error    : function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch(e)  {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for ( var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                }
 			});
 		}
 		window.parent.currentRules = "doc.xml";
@@ -1274,10 +1347,18 @@ function loadScript() {
 					data         : dataString,
 					datatype     : "json",
 					url          : "VerteilungServlet",
-  			  error        : function (response) {
-                           var r = jQuery.parseJSON(response.responseText);
-                           alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                         },
+                    error    : function (response) {
+                        try {
+                            var r = jQuery.parseJSON(response.responseText);
+                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                        } catch(e)  {
+                            var str = "FEHLER:\n";
+                            str = str + e.toString() + "\n";
+                            for ( var prop in e)
+                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                            alert(str + "\n" + response.responseText);
+                        }
+                    },
 					success      : function(data) {
 						               if (data.success[0]){
                 						 content = data.result[0].toString();
@@ -1326,7 +1407,7 @@ function reloadScript(dialog) {
 	}
 }
 
-function get(dialog) {
+function getScript(dialog) {
 	try {
 		if (isLocal()) {
 			var ret = window.parent.frames.control.document.reader.getContent( window.parent.scriptID, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"),
@@ -1355,10 +1436,18 @@ function get(dialog) {
 				data         : dataString,
 				datatype     : "json",
 				url          : "VerteilungServlet",
-			  error        : function (response) {
-                         var r = jQuery.parseJSON(response.responseText);
-                         alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                       },
+                error    : function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch(e)  {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for ( var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                },
 				success      : function(data) {
 					               if (data.success[0]) {
 					                 if (dialog)
@@ -1378,7 +1467,7 @@ function get(dialog) {
 	}
 }
 
-function send(dialog) {
+function sendScript(dialog) {
 	try {
 		var erg = false;
 		if (window.parent.workDocument.endsWith("recognition.js")) {
@@ -1410,10 +1499,18 @@ function send(dialog) {
 					data           : dataString,
 					datatype       : "json",
 					url            : "VerteilungServlet",
-  			  error          : function (response) {
-                             var r = jQuery.parseJSON(response.responseText);
-                             alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                           },
+                    error    : function (response) {
+                        try {
+                            var r = jQuery.parseJSON(response.responseText);
+                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                        } catch(e)  {
+                            var str = "FEHLER:\n";
+                            str = str + e.toString() + "\n";
+                            for ( var prop in e)
+                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                            alert(str + "\n" + response.responseText);
+                        }
+                    },
 					success        : function(data) {
 						                 if (data.success[0]){
 						                   if (dialog)
@@ -1523,6 +1620,7 @@ function stringToBytes(str) {
 }
 
 function init() {
+    if (window.parent.REC.exist(getServer())) {
 	if (isLocal()) {
 		var json;
 		var txt = [];
@@ -1552,7 +1650,7 @@ function init() {
 				alert(txt.join("\n"));
 		}
 	} else {
-		var dataString = {
+     	var dataString = {
 				"function"     : "getNodeId",
 				"fileName"     : "recognition.js",
 				"searchFolder" : "false",
@@ -1568,10 +1666,18 @@ function init() {
 				datatype       : "json",
 				url            : "VerteilungServlet",
 				async          : false,
-			  error          : function (response) {
-                           var r = jQuery.parseJSON(response.responseText);
-                           alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                         },
+                error    : function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch(e)  {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for ( var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                },
 				success        : function(data) {
 				                   if (data.success[0])
 				                      window.parent.scriptID = data.result[0];
@@ -1596,10 +1702,18 @@ function init() {
 					datatype     : "json",
 					url          : "VerteilungServlet",
 					async        : false,
-  			        error        : function (response) {
-                                     var r = jQuery.parseJSON(response.responseText);
-                                     alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                  },
+                    error    : function (response) {
+                        try {
+                            var r = jQuery.parseJSON(response.responseText);
+                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                        } catch(e)  {
+                            var str = "FEHLER:\n";
+                            str = str + e.toString() + "\n";
+                            for ( var prop in e)
+                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                            alert(str + "\n" + response.responseText);
+                        }
+                    },
 					success      : function(data) {
                                      if (data.success[0])
                                        window.parent.rulesID = data.result[0];
@@ -1624,10 +1738,18 @@ function init() {
 					datatype     : "json",
 					url          : "VerteilungServlet",
 					async        : false,
-  			        error        : function (response) {
-                                     var r = jQuery.parseJSON(response.responseText);
-                                     alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                   },
+                    error    : function (response) {
+                        try {
+                            var r = jQuery.parseJSON(response.responseText);
+                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                        } catch(e)  {
+                            var str = "FEHLER:\n";
+                            str = str + e.toString() + "\n";
+                            for ( var prop in e)
+                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                            alert(str + "\n" + response.responseText);
+                        }
+                    },
 					success      : function(data) {
 					                 if (data.success[0])
 					                   window.parent.inboxID = data.result[0];
@@ -1637,6 +1759,7 @@ function init() {
 					               }
 				});
 		}
+    }
 	manageControls();
 }
 
