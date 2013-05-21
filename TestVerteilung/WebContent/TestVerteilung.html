@@ -32,8 +32,14 @@
 			if (window.frames.rulesID != null) {
 				xml = window.frames.rulesID.substring(window.frames.rulesID.lastIndexOf('/') + 1);
 				loadXML(xml, true, false);
-			} else
-				window.parent.frames.rules.rulesEditor.getSession().setValue("Regeln konnten nicht geladen werden!");
+			} else {
+                $.get('doc.xml', function(msg)
+                {
+                    window.parent.frames.rules.rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
+                    window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
+                });
+            }
+			//	window.parent.frames.rules.rulesEditor.getSession().setValue("Regeln konnten nicht geladen werden!");
 		}
 	}
 </script>
