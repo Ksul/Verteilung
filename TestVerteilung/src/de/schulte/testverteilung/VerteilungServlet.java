@@ -101,6 +101,7 @@ public class VerteilungServlet extends HttpServlet {
 		String username = req.getParameter("username");
 		String password = req.getParameter("password");
 		String clear = req.getParameter("clear");
+        String withFolder = req.getParameter("withFolder");
 		String extract = req.getParameter("extract");
 		String searchFolder = req.getParameter("searchFolder");
 		String proxyHost = "".equals(req.getParameter("proxyHost")) ? null : req.getParameter("proxyHost");
@@ -111,7 +112,7 @@ public class VerteilungServlet extends HttpServlet {
 		try {
 			if (value == null || "".equals(value)) {
 				obj.append("success", false);
-				obj.append("result", "Function Name is mising");
+				obj.append("result", "Function Name is missing!\nPlease check for Tomcat maxPostSize and maxHeaderSizer Property for HTTPConnector");
 			} else {
 				if (value.equalsIgnoreCase("openPDF")) {
 					openPDF(resp, fileName);
@@ -144,7 +145,7 @@ public class VerteilungServlet extends HttpServlet {
 							proxyPort);
 				}
 				if (value.equalsIgnoreCase("listFolder")) {
-					ret = listFolder(filePath, false, server, username, password, proxyHost, proxyPort);
+					ret = listFolder(filePath, withFolder, server, username, password, proxyHost, proxyPort);
 				}
 				if (value.equalsIgnoreCase("extract")) {
 					ret = extract(documentText, fileName, clear);
@@ -349,10 +350,10 @@ public class VerteilungServlet extends HttpServlet {
 		return ret;
 	}
 
-	protected Object listFolder(String filePath, boolean listFolder, String server, String username, String password,
+	protected Object listFolder(String filePath, String listFolder, String server, String username, String password,
 			String proxyHost, String proxyPort) throws IOException, VerteilungException {
 		ArrayList<Properties> liste = new ArrayList<Properties>();
-		boolean folder = false;
+        boolean folder = false;
 		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
 		AlfrescoResponse response = connector.listFolderByPath(filePath);
 		if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
@@ -384,7 +385,7 @@ public class VerteilungServlet extends HttpServlet {
 									&& el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:contentStreamMimeType"))
 								p.put("typ", el.getFirstChild(CMISConstants.VALUE).getText());
 						}
-						if (p.containsKey("name") && p.containsKey("id") && p.containsKey("typ") && (listFolder || !folder)) {
+						if (p.containsKey("name") && p.containsKey("id") && (listFolder.equalsIgnoreCase("true") || !folder)) {
 							liste.add(p);
 							break;
 						}
