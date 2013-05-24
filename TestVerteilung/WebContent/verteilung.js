@@ -1308,87 +1308,98 @@ function openFile(name) {
 }
 
 function loadScript() {
-	try {
-		var fs = window.parent.document.getElementById('frameset2');
-		if (fs) {
-			fs.cols = "90%,10%";
-		}
-		oldContent = window.parent.frames.cont.textEditor.getSession().getValue();
-		var content;
-		if (window.parent.REC.exist(modifiedScript) && modifiedScript - length > 0) {
-			content = modifiedScript;
-		} else {
-			if (isLocal()) {
-				var open = openFile("recognition.js");
-				content = open[0];
-				window.parent.workDocument = open[1];
-				eval(content);
-				window.parent.REC = new Recognition();
-				window.parent.REC.set(window.parent.REC);
-				removeMarkers(markers, window.parent.frames['cont'].textEditor);
-				window.parent.frames.cont.textEditor.getSession().setMode(new window.parent.frames.cont.jsMode());
-				window.parent.frames.cont.textEditor.getSession().setValue(content);
-				window.parent.frames.cont.textEditor.setShowInvisibles(false);
-				window.parent.scriptMode = true;
-				manageControls();
-			} else {
-				var dataString = {
-					"function"   : "getContent",
-					"documentId" : window.parent.scriptID,
-					"extract"    : "false",
-					"server"     : getServer(),
-					"username"   : getUser(),
-					"password"   : getPassword(),
-					"proxyHost"  : getUrlParam("proxy"),
-					"proxyPort"  : getUrlParam("port")
-				};
-				$.ajax({
-					type         : "POST",
-					data         : dataString,
-					datatype     : "json",
-					url          : "VerteilungServlet",
-                    error    : function (response) {
-                        try {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                        } catch(e)  {
-                            var str = "FEHLER:\n";
-                            str = str + e.toString() + "\n";
-                            for ( var prop in e)
-                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                            alert(str + "\n" + response.responseText);
+    try {
+        var fs = window.parent.document.getElementById('frameset2');
+        if (fs) {
+            fs.cols = "90%,10%";
+        }
+        oldContent = window.parent.frames.cont.textEditor.getSession().getValue();
+        var content;
+        if (window.parent.REC.exist(modifiedScript) && modifiedScript - length > 0) {
+            content = modifiedScript;
+        } else {
+            if (isLocal()) {
+                var open = openFile("recognition.js");
+                content = open[0];
+                window.parent.workDocument = open[1];
+                eval(content);
+                window.parent.REC = new Recognition();
+                window.parent.REC.set(window.parent.REC);
+                removeMarkers(markers, window.parent.frames['cont'].textEditor);
+                window.parent.frames.cont.textEditor.getSession().setMode(new window.parent.frames.cont.jsMode());
+                window.parent.frames.cont.textEditor.getSession().setValue(content);
+                window.parent.frames.cont.textEditor.setShowInvisibles(false);
+                window.parent.scriptMode = true;
+                manageControls();
+            } else {
+                if (window.parent.REC.exist(window.parent.scriptID)) {
+                    var dataString = {
+                        "function": "getContent",
+                        "documentId": window.parent.scriptID,
+                        "extract": "false",
+                        "server": getServer(),
+                        "username": getUser(),
+                        "password": getPassword(),
+                        "proxyHost": getUrlParam("proxy"),
+                        "proxyPort": getUrlParam("port")
+                    };
+                    $.ajax({
+                        type: "POST",
+                        data: dataString,
+                        datatype: "json",
+                        url: "VerteilungServlet",
+                        error: function (response) {
+                            try {
+                                var r = jQuery.parseJSON(response.responseText);
+                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                            } catch (e) {
+                                var str = "FEHLER:\n";
+                                str = str + e.toString() + "\n";
+                                for (var prop in e)
+                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                                alert(str + "\n" + response.responseText);
+                            }
+                        },
+                        success: function (data) {
+                            if (data.success[0]) {
+                                content = data.result[0].toString();
+                                window.parent.workDocument = "recognition.js";
+                                eval(content);
+                                window.parent.REC = new Recognition();
+                                window.parent.REC.set(window.parent.REC);
+                                removeMarkers(markers, window.parent.frames['cont'].textEditor);
+                                window.parent.frames.cont.textEditor.getSession().setMode(new window.parent.frames.cont.jsMode());
+                                window.parent.frames.cont.textEditor.getSession().setValue(content);
+                                window.parent.frames.cont.textEditor.setShowInvisibles(false);
+                                window.parent.scriptMode = true;
+                                manageControls();
+                            } else
+                                alert("Script konnte nicht gefunden werden: " + data.result[0]);
                         }
-                    },
-					success      : function(data) {
-						               if (data.success[0]){
-                						 content = data.result[0].toString();
-		                				 window.parent.workDocument = "recognition.js";
-		                				 eval(content);
-		                 				 window.parent.REC = new Recognition();
-		                 				 window.parent.REC.set(window.parent.REC);
-		                				 removeMarkers(markers, window.parent.frames['cont'].textEditor);
-			                			 window.parent.frames.cont.textEditor.getSession().setMode(new window.parent.frames.cont.jsMode());
-		                				 window.parent.frames.cont.textEditor.getSession().setValue(content);
-			                 			 window.parent.frames.cont.textEditor.setShowInvisibles(false);
-						                 window.parent.scriptMode = true;
-					                	 manageControls();
-						               } else
-						              	 alert("Script konnte nicht gefunden werden: " + data.result[0]);
-					               }
-				});
-			}
-		}
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-		var fs = window.parent.document.getElementById('frameset2');
-		if (fs) {
-			fs.cols = "40%,60%";
-		}
-	}
+                    });
+                }
+                else {
+                    $.get('recognition.js', function (msg) {
+                        window.parent.frames.cont.textEditor.getSession().setMode(new window.parent.frames.cont.jsMode());
+                        window.parent.frames.cont.textEditor.getSession().setValue(msg);
+                        window.parent.frames.cont.textEditor.setShowInvisibles(false);
+                        window.parent.scriptMode = true;
+                        manageControls();
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        var str = "FEHLER:\n";
+        str = str + e.toString() + "\n";
+        for (var prop in e)
+            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+        alert(str);
+        var fs = window.parent.document.getElementById('frameset2');
+        if (fs) {
+            fs.cols = "40%,60%";
+        }
+    }
 }
 
 function reloadScript(dialog) {
@@ -1408,63 +1419,63 @@ function reloadScript(dialog) {
 }
 
 function getScript(dialog) {
-	try {
-		if (isLocal()) {
-			var ret = window.parent.frames.control.document.reader.getContent( window.parent.scriptID, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"),
-					getUrlParam("port"), null);
-			var json = jQuery.parseJSON(ret);
-			if (json.success) {
-				save(window.parent.workDocument, window.parent.frames.cont.textEditor.getSession().getValue(), false);
-				window.parent.frames.cont.textEditor.getSession().setValue(json.result);
-				if (dialog)
-					alert("Script erfolgreich heruntergeladen!");
-			} else
-				alert("Fehler bei der Übertragung: " + json.result);
-		} else {
-			var dataString = {
-				"function"   : "getContent",
-				"documentId" : window.parent.scriptID,
-				"extract"    : "false",
-				"server"     : getServer(),
-				"username"   : getUser(),
-				"password"   : getPassword(),
-				"proxyHost"  : getUrlParam("proxy"),
-				"proxyPort"  : getUrlParam("port")
-			};
-			$.ajax({
-				type         : "POST",
-				data         : dataString,
-				datatype     : "json",
-				url          : "VerteilungServlet",
-                error    : function (response) {
+    try {
+        if (isLocal()) {
+            var ret = window.parent.frames.control.document.reader.getContent(window.parent.scriptID, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"),
+                getUrlParam("port"), null);
+            var json = jQuery.parseJSON(ret);
+            if (json.success) {
+                save(window.parent.workDocument, window.parent.frames.cont.textEditor.getSession().getValue(), false);
+                window.parent.frames.cont.textEditor.getSession().setValue(json.result);
+                if (dialog)
+                    alert("Script erfolgreich heruntergeladen!");
+            } else
+                alert("Fehler bei der Übertragung: " + json.result);
+        } else {
+            var dataString = {
+                "function": "getContent",
+                "documentId": window.parent.scriptID,
+                "extract": "false",
+                "server": getServer(),
+                "username": getUser(),
+                "password": getPassword(),
+                "proxyHost": getUrlParam("proxy"),
+                "proxyPort": getUrlParam("port")
+            };
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                datatype: "json",
+                url: "VerteilungServlet",
+                error: function (response) {
                     try {
                         var r = jQuery.parseJSON(response.responseText);
                         alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                    } catch(e)  {
+                    } catch (e) {
                         var str = "FEHLER:\n";
                         str = str + e.toString() + "\n";
-                        for ( var prop in e)
+                        for (var prop in e)
                             str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
                         alert(str + "\n" + response.responseText);
                     }
                 },
-				success      : function(data) {
-					               if (data.success[0]) {
-					                 if (dialog)
-						                 alert("Script erfolgreich heruntergeladen!");
-					                 window.parent.frames.cont.textEditor.getSession().setValue(data.result.toString());
-				                 } else
-				                	 alert("Script konnte nicht geladen werden: " + data.result[0]);
-				               }
-			});
-		}
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+                success: function (data) {
+                    if (data.success[0]) {
+                        if (dialog)
+                            alert("Script erfolgreich heruntergeladen!");
+                        window.parent.frames.cont.textEditor.getSession().setValue(data.result.toString());
+                    } else
+                        alert("Script konnte nicht geladen werden: " + data.result[0]);
+                }
+            });
+        }
+    } catch (e) {
+        var str = "FEHLER:\n";
+        str = str + e.toString() + "\n";
+        for (var prop in e)
+            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+        alert(str);
+    }
 }
 
 function sendScript(dialog) {
