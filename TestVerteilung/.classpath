@@ -26,5 +26,10 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/slf4j-api-1.6.6.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/bcprov-jdk15on-147.jar"/>
+	<classpathentry kind="src" path=".apt_generated">
+		<attributes>
+			<attribute name="optional" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="WebContent/WEB-INF/classes"/>
 </classpath>
