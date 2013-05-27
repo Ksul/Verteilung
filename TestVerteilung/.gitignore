@@ -1,2 +1,5 @@
 .idea
-/.classpath
+.classpath
+.factorypath
+.project
+.web-site-config
