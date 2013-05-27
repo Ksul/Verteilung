@@ -2028,7 +2028,14 @@ Recognition.prototype.buildDate = function(text) {
 	var monate = new Array("Januar", "Februar", "M\u00e4rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember");
 	var tmp;
 	var i;
-	var dat = new Date(text);
+    var dat;
+    var dateParts = text.split(".");
+    if (dateParts.length == 3) {
+        dat = new Date(dateParts[2], (dateParts[1] - 1), dateParts[0]);
+    }
+    if (!this.isDate(dat)) {
+	     dat = new Date(text);
+    }
 	if (!this.isDate(dat)) {
 		text = text.replace(/ /g, '');
 		for (i = 0; i < monate.length; i++) {
