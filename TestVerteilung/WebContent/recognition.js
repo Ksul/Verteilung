@@ -2027,25 +2027,19 @@ Recognition.prototype.replaceVar = function(str) {
 Recognition.prototype.buildDate = function(text) {
 	var monate = new Array("Januar", "Februar", "M\u00e4rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember");
 	var tmp;
+    var txt;
 	var i;
     var dat;
-    var dateParts = text.split(".");
-    if (dateParts.length == 3) {
-        dat = new Date(dateParts[2], (dateParts[1] - 1), dateParts[0]);
-    }
-    if (!this.isDate(dat)) {
-	     dat = new Date(text);
-    }
 	if (!this.isDate(dat)) {
-		text = text.replace(/ /g, '');
+	     txt = text.replace(/ /g, '');
 		for (i = 0; i < monate.length; i++) {
-			var pos = text.indexOf(monate[i]);
+			var pos = txt.indexOf(monate[i]);
 			if (pos != -1) {
 				var form = this.numberFormat(i + 1, "00") + ".";
-				if (pos > 0 && text.charAt(pos - 1) != ".")
+				if (pos > 0 && txt.charAt(pos - 1) != ".")
 					form = "." + form;
-				text = text.replace(monate[i], form);
-				tmp = text.split(".");
+				txt = txt.replace(monate[i], form);
+				tmp = txt.split(".");
 				while (tmp.length < 3)
 					tmp.unshift("01");
 				for ( var k = tmp.length; k > 0; k--) {
@@ -2058,12 +2052,15 @@ Recognition.prototype.buildDate = function(text) {
 					if (k != tmp.length && tmp[k - 1].length == 1)
 						tmp[k - 1] = "0" + tmp[k - 1];
 				}
-				text = tmp.join(".");
+                var k = tmp[0];
+                tmp[0] = tmp[1];
+                tmp[1] = k;
+				txt = tmp.join("/");
+                dat = new Date(txt);
 				break;
 			}
 		}
 	}
-	tmp = text;
 	if (!this.isDate(dat)) {
 		var jahr = text.toString().substr(6);
 		if (jahr.length == 2) {
@@ -2076,13 +2073,16 @@ Recognition.prototype.buildDate = function(text) {
 		var tag = text.toString().slice(0, 2);
 		dat = new Date(jahr + "/" + mon + "/" + tag);
 	}
+    if (!this.isDate(dat)) {
+        dat = new Date(text);
+    }
 	if (!this.isDate(dat)) {
-		tmp = text.toString().split("/")[0] + "/01/20" + text.toString().split("/")[1];
-		dat = new Date(tmp);
+		txt = text.toString().split("/")[0] + "/01/20" + text.toString().split("/")[1];
+		dat = new Date(txt);
 	}
 	if (!this.isDate(dat)) {
-		tmp = this.formatNumber(this.getPosition(monate, text.toString().split(" ")[0]) + 1, 2) + "/01/" + text.toString().split(" ")[1];
-		dat = new Date(tmp);
+		txt = this.formatNumber(this.getPosition(monate, text.toString().split(" ")[0]) + 1, 2) + "/01/" + text.toString().split(" ")[1];
+		dat = new Date(txt);
 	}
 	return dat;
 };

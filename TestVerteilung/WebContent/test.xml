@@ -11,7 +11,7 @@ maxDebugLength="40">
 		<archivPosition folder="Archiv/Test/{id}" />
 		<searchItem name="Titel" fix="Test für Titel" expected="new String('Test für Titel')" target="cm:title" />
 		<searchItem name="Datum" eval="new Date(2012,01,01)" expected="new Date(2012,01,01)" objectTyp="date" target="my:documentDate" />
-		<searchItem name="id" value="Datum" expected="new String('2012')">
+		<searchItem name="id" value="Datum" objectTyp="date" expected="new String('2012')">
 			<format formatString="YYYY" />
 		</searchItem>
 		<searchItem name="Test 1" text="Datum" word="1" readOverReturn="true" objectTyp="date" expected="new Date(1965, 4, 1)" />
