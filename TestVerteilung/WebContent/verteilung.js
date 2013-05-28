@@ -779,7 +779,7 @@ function printResults(results) {
 				if (window.parent.REC.exist(results[key].getValue()) && tmp.valueOf() == results[key].getValue().valueOf())
 					ret = ret + " [OK]";
 				else
-					ret = ret + " [FALSE] " + tmp.valueOf();
+					ret = ret + " [FALSE] " + tmp;
 			}
 			ret = ret + "\n";
 		}
@@ -810,74 +810,76 @@ function doBack() {
 }
 
 function doTest() {
-	try {
-		if (isLocal()) {
-			var open = openFile("test.txt");
-			var content = open[0];
-			window.parent.REC.currentDocument.setContent(content);
-			removeMarkers(markers, window.parent.frames['cont'].textEditor);
-			window.parent.frames.cont.textEditor.getSession().setValue(content);
-			if (!window.parent.currentRules.endsWith("test.xml")) {
-				open = openFile("test.xml");
-				window.parent.currentRules = open[1];
-				window.parent.frames.rules.rulesEditor.getSession().setValue(open[0]);
-			}
-			window.parent.REC.testRules(window.parent.frames.rules.rulesEditor.getSession().getValue());
-			setXMLPosition(window.parent.REC.currXMLName);
-			markers = setMarkers(window.parent.REC.positions, window.parent.frames.cont.textEditor);
-			window.parent.frames.props.propsEditor.getSession().setValue(printResults(window.parent.REC.results));
-			fillMessageBox(window.parent.REC.getMessage(), true);
-			window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
-			window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
-		} else {
-			var dataString = {
-				"function" : "doTest",
-				"fileName" : "test.txt",
-				"filePath" : "test.xml"
-			}
-  		$.ajax({
-	  		type       : "POST",
-		  	data       : dataString,
-			  datatype   : "json",
-		  	url        : "VerteilungServlet",
-            error    : function (response) {
-                try {
-                    var r = jQuery.parseJSON(response.responseText);
-                    alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                } catch(e)  {
-                    var str = "FEHLER:\n";
-                    str = str + e.toString() + "\n";
-                    for ( var prop in e)
-                        str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                    alert(str + "\n" + response.responseText);
+    try {
+        if (isLocal()) {
+            var open = openFile("test.txt");
+            var content = open[0];
+            window.parent.REC.currentDocument.setContent(content);
+            removeMarkers(markers, window.parent.frames['cont'].textEditor);
+            window.parent.frames.cont.textEditor.getSession().setValue(content);
+            if (!window.parent.currentRules.endsWith("test.xml")) {
+                open = openFile("test.xml");
+                window.parent.currentRules = open[1];
+                window.parent.frames.rules.rulesEditor.getSession().setValue(open[0]);
+            }
+            window.parent.REC.testRules(window.parent.frames.rules.rulesEditor.getSession().getValue());
+            setXMLPosition(window.parent.REC.currXMLName);
+            markers = setMarkers(window.parent.REC.positions, window.parent.frames.cont.textEditor);
+            window.parent.frames.props.propsEditor.getSession().setValue(printResults(window.parent.REC.results));
+            fillMessageBox(window.parent.REC.getMessage(), true);
+            window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
+            window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
+            manageControls();
+        } else {
+            var dataString = {
+                "function": "doTest",
+                "fileName": "test.txt",
+                "filePath": "test.xml"
+            }
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                datatype: "json",
+                url: "VerteilungServlet",
+                error: function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch (e) {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for (var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                },
+                success: function (data) {
+                    if (data.success[0]) {
+                        window.parent.REC.currentDocument.setContent(data.result[0].text.toString());
+                        removeMarkers(markers, window.parent.frames['cont'].textEditor);
+                        window.parent.frames.cont.textEditor.getSession().setValue(data.result[0].text.toString());
+                        window.parent.currentRules = "test.xml";
+                        window.parent.frames.rules.rulesEditor.getSession().setValue(data.result[0].xml.toString());
+                        window.parent.REC.testRules(window.parent.frames.rules.rulesEditor.getSession().getValue());
+                        setXMLPosition(window.parent.REC.currXMLName);
+                        markers = setMarkers(window.parent.REC.positions, window.parent.frames.cont.textEditor);
+                        window.parent.frames.props.propsEditor.getSession().setValue(printResults(window.parent.REC.results));
+                        fillMessageBox(window.parent.REC.getMessage(), true);
+                        window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
+                        window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
+                        manageControls();
+                    } else
+                        alert("Fehler: " + data.result[0]);
                 }
-            },
-			  success    : function(data) {
-			  	             if (data.success[0]){
-				                 window.parent.REC.currentDocument.setContent(data.result[0].text.toString());
-				                 removeMarkers(markers, window.parent.frames['cont'].textEditor);
-			                   window.parent.frames.cont.textEditor.getSession().setValue(data.result[0].text.toString());
-				                 window.parent.currentRules = "test.xml";
-				                 window.parent.frames.rules.rulesEditor.getSession().setValue(data.result[0].xml.toString());
-				                 window.parent.REC.testRules(window.parent.frames.rules.rulesEditor.getSession().getValue());
-			                   setXMLPosition(window.parent.REC.currXMLName);
-				                 markers = setMarkers(window.parent.REC.positions, window.parent.frames.cont.textEditor);
-				                 window.parent.frames.props.propsEditor.getSession().setValue(printResults(window.parent.REC.results));
-				                 fillMessageBox(window.parent.REC.getMessage(), true);
-				                 window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
-				                 window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
-			  	             } else
-			  	            	 alert("Fehler: " + data.result[0]);
-			               }
-		  });
-		}
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+            });
+        }
+    } catch (e) {
+        var str = "FEHLER:\n";
+        str = str + e.toString() + "\n";
+        for (var prop in e)
+            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+        alert(str);
+    }
 }
 
 function work() {
