@@ -35,10 +35,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Properties;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -138,7 +135,7 @@ public class VerteilungApplet extends Applet {
 			public AlfrescoResponse run() {
 				AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
 				try {
-					return connector.listFolderByPath(filePath);
+					return connector.listFolder(filePath, true);
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
 					e.printStackTrace();
@@ -207,7 +204,7 @@ public class VerteilungApplet extends Applet {
 		return ret;
 	}
 
-	public static String getNodeId(final String nodeName, final String type, final String server, final String username,
+	public static String getNodeId(final String cmisQuery, final String server, final String username,
 			final String password, final String proxyHost, final String proxyPort, final Credentials credentials) {
 
 		JSONObject ret = new JSONObject();
@@ -219,7 +216,7 @@ public class VerteilungApplet extends Applet {
 					public AlfrescoResponse run() throws VerteilungException {
 						AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
 								credentials);
-						return connector.getNode(nodeName, type.equalsIgnoreCase("true"));
+						return connector.getNode(cmisQuery);
 					}
 				});
 			} catch (PrivilegedActionException e) {
@@ -234,19 +231,36 @@ public class VerteilungApplet extends Applet {
 						"Dokument konnte nicht gefunden werden." + response.getStatusText() + "\n" + response.getStackTrace());
 			} else {
 
-				Document<Feed> entryDoc = response.getDocument();
 
-				Feed root = entryDoc.getRoot();
+                Document<Feed> entryDoc = response.getDocument();
+                Feed root = entryDoc.getRoot();
+                List<Entry> entries = root.getEntries();
+                if (entries.size() > 0) {
+                    Iterator<Element> it = root.getEntries().get(0).getElements().iterator();
+                    while (it.hasNext()) {
 
-				Iterator<Element> it = root.getEntries().get(0).getElements().iterator();
+                        Element element = (Element) it.next();
+                        if (element.getQName().equals(CMISConstants.ATOMOBJECT)) {
 
-				while (it.hasNext()) {
-					Element element = (Element) it.next();
-					if (element.getQName().equals(CMISConstants.ATOMOBJECT)) {
-						ret.put("success", true);
-						ret.put("result", element.getElements().get(0).getElements().get(0).getElements().get(0).getText());
-					}
-				}
+                            Iterator it1 = element.getElements().get(0).getElements().iterator();
+                            while (it1.hasNext()) {
+                                Element el = (Element) it1.next();
+                                if (el.getAttributeValue("propertyDefinitionId") != null
+                                        && el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:objectId")) {
+                                    String erg = el.getFirstChild(CMISConstants.VALUE).getText();
+                                    erg = erg.substring(erg.lastIndexOf('/') + 1);
+                                    ret.put("success", true);
+                                    ret.put("result", erg);
+                                    break;
+                                }
+                            }
+
+                        }
+                    }
+                } else {
+                    ret.put("success", false);
+                    ret.put("result", "Kein Knoten zu Kriterium " + cmisQuery + " gefunden!");
+                }
 			}
 		} catch (JSONException e) {
 			System.out.println(e.getLocalizedMessage());

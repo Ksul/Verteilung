@@ -12,14 +12,17 @@
 		manageControls();
 	};
 
+    var alfrescoMode = false;
 	var scriptID = null;
 	var rulesID = null;
 	var inboxID = null;
+    var rootID = null;
 	var currentRules = null;
 	var workDocument = null;
 	var scriptMode = false;
 	var runLocal = false;
 	var REC;
+    var treeObject;
 	REC = new Recognition();
 	REC.set(REC);
 	window.onload = function() {

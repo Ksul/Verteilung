@@ -164,7 +164,7 @@
 	text-decoration: none;
 }
 
-/*** Test Counts */
+/*** WebScriptTest Counts */
 
 #qunit-tests b.counts                       { color: black; }
 #qunit-tests b.passed                       { color: #5E740B; }

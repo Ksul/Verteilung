@@ -55,14 +55,33 @@ function showProgress() {
 }
 
 function manageControls() {
+
+
+
 	if (window.parent.frames.cont.multiMode && !window.parent.scriptMode) {
 		window.parent.frames.cont.document.getElementById('inTxt').style.display = 'none';
 		window.parent.frames.cont.document.getElementById('dtable').style.display = 'block';
 	} else {
-		window.parent.frames['control'].document.getElementById('pdf').style.display = 'block';
-		window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
-		window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
+
+        if (window.parent.alfrescoMode) {
+            window.parent.frames.cont.document.getElementById('tree').style.display = 'block';
+            window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
+            window.parent.frames.cont.document.getElementById('inTxt').style.display = 'none';
+            window.parent.frames.control.document.getElementById('closeAlfresco').style.display = 'block';
+            window.parent.frames.control.document.getElementById('docAlfresco').setAttribute("disabled", true);
+        }
+        else {
+            window.parent.frames.cont.document.getElementById('tree').style.display = 'none';
+            window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
+            window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
+            window.parent.frames.control.document.getElementById('closeAlfresco').style.display = 'none';
+            window.parent.frames.control.document.getElementById('docAlfresco').removeAttribute("disabled");
+        }
+
+		window.parent.frames.control.document.getElementById('pdf').style.display = 'block';
+
 	}
+
 	if (window.parent.frames.cont.textEditor.getSession().getValue().length == 0) {
 		window.parent.frames.control.document.getElementById('searchCont').setAttribute("disabled", true);
 
@@ -113,13 +132,7 @@ function manageControls() {
 		window.parent.frames.control.document.getElementById('reloadScript').style.display = 'none';
 		window.parent.frames.control.document.getElementById('beautifyScript').style.display = 'none';
 	}
-	if(window.parent.rulesID != null && window.parent.scriptID != null && !window.parent.scriptMode) {
-		window.parent.frames.control.document.getElementById('docUnknown').removeAttribute("disabled");
-		window.parent.frames.control.document.getElementById('docError').removeAttribute("disabled");
-	} else {
-		window.parent.frames.control.document.getElementById('docUnknown').setAttribute("disabled", true);
-		window.parent.frames.control.document.getElementById('docError').setAttribute("disabled", true);
-	}
+
   if (window.parent.runLocal || (window.parent.scriptID == null && window.parent.rulesID == null)) {
 		window.parent.frames.control.document.getElementById('sendScript').setAttribute("disabled", true);
 		window.parent.frames.control.document.getElementById('getScript').setAttribute("disabled", true);
@@ -1042,6 +1055,17 @@ function sendRules(dialog) {
 	}
 }
 
+function loadAlfresco(){
+    window.parent.alfrescoMode = true;
+
+    manageControls();
+}
+
+function closeAlfresco(){
+    window.parent.alfrescoMode = false;
+    manageControls();
+}
+
 function loadAlfrescoFolder(folderName) {
 	try {
 		showProgress();
@@ -1061,7 +1085,7 @@ function loadAlfrescoFolder(folderName) {
 						getUrlParam("proxy"), getUrlParam("port"), null);
 				json = jQuery.parseJSON(ret);
 				if (json.success)
-				  loadMultiText(json.result, erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/" + erg.id.substring(erg.id.lastIndexOf('/') + 1)
+				  loadMultiText(json.result, erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/" + erg.id
 						  + "/content.pdf");
 				else
 					alert("Fehler beim Holen des Inhalts: " + json.result);
@@ -1135,7 +1159,7 @@ function loadAlfrescoFolder(folderName) {
                                            if (data.success[0]) {
                                           	 $('#progressbar').progressbar('value', (count++ / (anzahl *2)) * 100);
                                              loadMultiText(data.result.toString(), erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/"
-									            	             + erg.id.substring(erg.id.lastIndexOf('/') + 1) + "/content.pdf");
+									            	             + erg.id + "/content.pdf");
                                            }
                                           else
                                              alert("Fehler beim Holen des Inhalts " + data.result[0]);
@@ -1632,6 +1656,8 @@ function stringToBytes(str) {
 	return re;
 }
 
+
+
 function init() {
     if (window.parent.REC.exist(getServer())) {
 	if (isLocal()) {
@@ -1641,32 +1667,38 @@ function init() {
 		if (getUrlParam("local") == null || pattern.test(getUrlParam("local"))) {
 			window.parent.runLocal = true;
 		} else {
-			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("recognition.js", "false", getServer(), getUser(), getPassword(), getUrlParam("proxy"),
+			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getServer(), getUser(), getPassword(), getUrlParam("proxy"),
 					getUrlParam("port"), null));
 			if (json.success)
 				window.parent.scriptID = json.result;
 			else
 				txt.push("Script nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("doc.xml", "false", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
+			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
 					null));
 			if (json.success)
 				window.parent.rulesID = json.result;
 			else
 				txt.push("Regeln nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("Inbox", "true", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
+			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
 					null));
 			if (json.success)
 				window.parent.inboxID = json.result;
 			else
 				txt.push("Inbox nicht gefunden! Fehler: " + json.result);
+            json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
+                null));
+            if (json.success)
+                window.parent.rootID = json.result;
+            else
+                txt.push("Archiv nicht gefunden! Fehler: " + json.result);
+
 			if (txt.length > 0)
 				alert(txt.join("\n"));
 		}
 	} else {
      	var dataString = {
 				"function"     : "getNodeId",
-				"fileName"     : "recognition.js",
-				"searchFolder" : "false",
+				"cmisQuery"    : "SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'",
 				"server"       : getServer(),
 				"username"     : getUser(),
 				"password"     : getPassword(),
@@ -1701,8 +1733,7 @@ function init() {
 			});
 		var dataString = {
 				"function"     : "getNodeId",
-				"fileName"     : "doc.xml",
-				"searchFolder" : "false",
+				"cmisQuery"    : "SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'",
 				"server"       : getServer(),
 				"username"     : getUser(),
 				"password"     : getPassword(),
@@ -1737,8 +1768,7 @@ function init() {
 				});
 			var dataString = {
 				"function"     : "getNodeId",
-				"fileName"     : "Inbox",
-				"searchFolder" : "true",
+				"cmisQuery"     : "SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'",
 				"server"       : getServer(),
 				"username"     : getUser(),
 				"password"     : getPassword(),
@@ -1771,6 +1801,41 @@ function init() {
 					                 }   					             	 
 					               }
 				});
+        var dataString = {
+            "function"     : "getNodeId",
+            "cmisQuery"    : "SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')",
+            "server"       : getServer(),
+            "username"     : getUser(),
+            "password"     : getPassword(),
+            "proxyHost"    : getUrlParam("proxy"),
+            "proxyPort"    : getUrlParam("port")
+        };
+        $.ajax({
+            type         : "POST",
+            data         : dataString,
+            datatype     : "json",
+            url          : "VerteilungServlet",
+            async        : false,
+            error    : function (response) {
+                try {
+                    var r = jQuery.parseJSON(response.responseText);
+                    alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                } catch(e)  {
+                    var str = "FEHLER:\n";
+                    str = str + e.toString() + "\n";
+                    for ( var prop in e)
+                        str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                    alert(str + "\n" + response.responseText);
+                }
+            },
+            success      : function(data) {
+                if (data.success[0])
+                    window.parent.rootID = data.result[0];
+                else{
+                    alert("Archiv nicht gefunden! " + data.result[0]);
+                }
+            }
+        });
 		}
     }
 	manageControls();

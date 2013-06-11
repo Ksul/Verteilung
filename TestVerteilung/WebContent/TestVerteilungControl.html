@@ -271,16 +271,16 @@ input.reload {
 	cursor: pointer;
 }
 
-input.docError {
-	background-image: url('ressource/docError.png');
+input.docAlfresco {
+	background-image: url('ressource/alfresco.png');
 	width: 24px;
 	height: 24px;
 	border: 0;
 	cursor: pointer;
 }
 
-input.docError:disabled {
-	background-image: url('ressource/docError-bw.png');
+input.docAlfresco:disabled {
+	background-image: url('ressource/alfresco-bw.png');
 	width: 24px;
 	height: 24px;
 	border: 0;
@@ -288,22 +288,7 @@ input.docError:disabled {
 	disabled: true;
 }
 
-input.docUnknown {
-	background-image: url('ressource/docUnknown.png');
-	width: 24px;
-	height: 24px;
-	border: 0;
-	cursor: pointer;
-}
 
-input.docUnknown:disabled {
-	background-image: url('ressource/docUnknown-bw.png');
-	width: 24px;
-	height: 24px;
-	border: 0;
-	cursor: text;
-	disabled: true;
-}
 </style>
 </head>
 <body style="margin: 0; padding: 0">
@@ -313,15 +298,14 @@ input.docUnknown:disabled {
 				type="file" multiple="multiple" size="50" />
 			</td>
 			<td width="60px" align="center"><input
-				onclick="loadAlfrescoFolder('Firmen-Home/Archiv/Unbekannt');"
-				name="docUnknown" id="docUnknown" type="submit" class="docUnknown"
-				title="Load Unknown" value="" />
+				onclick="loadAlfresco();"
+				name="docAlfresco" id="docAlfresco" type="submit" class="docAlfresco"
+				title="Load Alfresco" value="" />
 			</td>
-			<td width="60px" align="center"><input
-				onclick="loadAlfrescoFolder('Firmen-Home/Archiv/Fehler');"
-				name="docError" id="docError" type="submit" class="docError"
-				title="Load Error" value="" />
-			</td>
+            <td width="60px" align="center"><input onclick="closeAlfresco();"
+                id="closeAlfresco" value="" type="submit" title="Close" class="close"
+                style="display: none" />
+            </td>
 			<td width="60px" align="center"><input onclick="work();"
 				name="play" id="play" type="submit" class="play" title="Recognize"
 				value="" />
@@ -349,8 +333,8 @@ input.docUnknown:disabled {
 			</td>
 			<td width="60px" align="center"><input onclick="doBack();"
 				id="back" value="" type="submit" title="Close" class="close"
-				style="display: none" /></td>
-
+				style="display: none" />
+            </td>
 			<td width="60px" align="center"><input onclick="closeScript();"
 				name="close" id="close" type="submit" class="close" title="Close"
 				value="" style="display: none" />

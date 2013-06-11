@@ -1,113 +1,73 @@
-<html>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>jQuery UI Progressbar</title>
-<!-- <link type="text/css" href="./Test.css" rel="stylesheet" />
- -->
-<script type="text/javascript" src="./jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-<script type="text/javascript" src="./jquery-ui-1.10.2/ui/jquery-ui.js"></script>
-<style type="text/css">
-.ui-widget {
-	font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
-	font-size: 1.1em;
-}
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>jsTree &raquo; Demo</title>
+    <meta name="title" content="jsTree - jQuery tree plugin - Demo"/>
+    <meta name="description" content="A demo covering most of the functions and plugins."/>
+    <meta name="ttw" content="8gy2z6g"/>
+<head>
+    <script type="text/javascript" src="jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="jquery.cookie.js"></script>
+    <script type="text/javascript" src="jquery.hotkeys.js"></script>
+    <script type="text/javascript" src="jquery.jstree.js"></script>
 
-.ui-widget .ui-widget {
-	font-size: 1em;
-}
+    <script>
 
-.ui-widget input,.ui-widget select,.ui-widget textarea,.ui-widget button
-	{
-	font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
-	font-size: 1em;
-}
+        function getServer() {
+            return "http://ksul.dyndns.org:9080";
+        }
 
-.ui-widget-content {
-	border: 1px solid #dddddd;
-	background: #eeeeee
-		url(./ressource/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top
-		repeat-x;
-	color: #333333;
-}
+        function getUser()  {
+            return "admin";
+        }
 
-.ui-widget-content a {
-	color: #333333;
-}
+        function getPassword(){
+            return "admin";
+        }
 
-.ui-widget-header {
-	border: 1px solid #e78f08;
-	background: #f6a828
-		url(./ressource/ui-bg_gloss-wave_35_f6a828_500x100.png) 50% 50%
-		repeat-x;
-	color: #ffffff;
-	font-weight: bold;
-}
 
-.ui-widget-header a {
-	color: #ffffff;
-}
 
-.ui-progressbar {
-	height: 2em;
-	text-align: left;
-}
+        $(document).ready(function () {
+            var tree = $("#tree").jstree();
+            var treeObject = jQuery.jstree._reference(tree);
+            var settings = {
+                "themes": {
+                    "theme": "corral",
+                    "dots": true,
+                    "icons": true
+                },
+                "json_data": {
+                    "ajax": {
+                        "url": "/TestVerteilung/VerteilungServlet",
 
-.ui-progressbar .ui-progressbar-value {
-	margin: -1px;
-	height: 100%;
-}
-
-.progress-label {
-	float: left;
-	margin-left: 50%;
-	margin-top: 0px;
-	font-weight: bold;
-	text-shadow: 1px 1px 0 #fff;
-}
-</style>
-<script type="text/javascript">
-	$(function() {
-		var progressbar = $("#progressbar"), progressLabel = $(".progress-label");
-		progressbar.progressbar({
-			value : false,
-			change : function() {
-			  //value = Math.round(value);
-				progressLabel.text(Math.round(progressbar.progressbar("value")) + "%");
-			},
-			complete : function() {
-				progressLabel.text("");
-				progressbar.progressbar("destroy");
-			}
-		});
-		function progress() {
-			var val = progressbar.progressbar("value") || 0;
-			val = val +0.46;
-			progressbar.progressbar("value", val + 1);
-			if (val < 99) {
-				setTimeout(progress, 100);
-			}
-		}
-		setTimeout(progress, 3000);
-	});
-	
-	function sleep(ms) {
-		var dt = new Date();
-		dt.setTime(dt.getTime() + ms);
-		while (new Date().getTime() < dt.getTime())
-			;
-	}
-</script>
-
-<style>
-/* Größe für die Progressbar */
-#progressbar {
-	width: 300px;
-	height: 20px;
-}
-</style>
+                        "data": function (n) {
+                            return {
+                                "function": "listFolderAsJSON",
+                                "filePath": n.attr ? n.attr("id") : "",
+                                "server": "http://ksul.dyndns.org:9080",
+                                "username": "admin",
+                                "password": "admin",
+                                "searchFolder": "true",
+                                "withFolder": "true",
+                                "proxyHost": "www-proxy",
+                                "proxyPort": "8080"
+                            };
+                        }
+                    }
+                },
+                "plugins": [ "themes", "json_data", "ui", "crrm", "cookies", "dnd", "search", "types", "hotkeys", "contextmenu"]
+            };
+            treeObject._set_settings(settings);
+              treeObject.init()  ;
+        });
+    </script>
 </head>
 <body>
-	<!--Die Progressbar-->
-	<div id="progressbar"><div class="progress-label">Lade...</div></div>
-
+<div id="tree">
+</div>
 </body>
+
 </html>

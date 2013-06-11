@@ -94,6 +94,7 @@ public class VerteilungServlet extends HttpServlet {
 		String documentText = req.getParameter("documentText");
 		String filePath = req.getParameter("filePath");
 		String fileName = req.getParameter("fileName");
+        String cmisQuery = req.getParameter("cmisQuery");
 		String destinationFolder = req.getParameter("destinationFolder");
 		String description = req.getParameter("description");
 		String mimeType = req.getParameter("mimeType");
@@ -141,12 +142,18 @@ public class VerteilungServlet extends HttpServlet {
 							proxyHost, proxyPort);
 				}
 				if (value.equalsIgnoreCase("getNodeId")) {
-					ret = getNodeId(fileName, searchFolder.equalsIgnoreCase("true"), server, username, password, proxyHost,
+					ret = getNodeId(cmisQuery, server, username, password, proxyHost,
 							proxyPort);
 				}
 				if (value.equalsIgnoreCase("listFolder")) {
-					ret = listFolder(filePath, withFolder, server, username, password, proxyHost, proxyPort);
+					ret = listFolder(filePath, withFolder, true, server, username, password, proxyHost, proxyPort);
 				}
+                if (value.equalsIgnoreCase("listFolderAsJSON")) {
+                    ret = listFolderAsJSON(filePath, withFolder, server, username, password, proxyHost, proxyPort);
+                    out.write(ret.toString());
+                    out.close();
+                    return;
+                }
 				if (value.equalsIgnoreCase("extract")) {
 					ret = extract(documentText, fileName, clear);
 				}
@@ -252,7 +259,7 @@ public class VerteilungServlet extends HttpServlet {
 			Document<Element> doc = response.getDocument();
 			Entry responseEntry = (Entry) doc.getRoot();
 			String tmp = responseEntry.getId().getPath();
-			final String id = tmp.substring(tmp.lastIndexOf(":") + 1);
+            final String id = tmp.substring(tmp.lastIndexOf(":") + 1);
 			response = connector.updateContent(documentText, description, id);
 			if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
 				response = connector.checkin(id, false, "");
@@ -306,38 +313,49 @@ public class VerteilungServlet extends HttpServlet {
 		return ret;
 	}
 
-	protected Object getNodeId(String fileName, boolean type, String server, String username, String password,
-			String proxyHost, String proxyPort) throws VerteilungException {
+    protected Object getNodeId(String cmisQuery, String server, String username, String password,
+                               String proxyHost, String proxyPort) throws VerteilungException {
 
-		String ret = "";
+        String ret = "";
 
-		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
-		AlfrescoResponse response = connector.getNode(fileName, type);
+        AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
+        AlfrescoResponse response = connector.getNode(cmisQuery);
 
-		if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-			throw new VerteilungException("Dokument konnte nicht gefunden werden."
-					+ response.getStatusText());
-		} else {
-			Document<Feed> entryDoc = response.getDocument();
-			Feed root = entryDoc.getRoot();
-			List<Entry> entries = root.getEntries();
-			if (entries.size() > 0) {
-				Iterator<Element> it = root.getEntries().get(0).getElements().iterator();
-				while (it.hasNext()) {
-					Element element = (Element) it.next();
-					if (element.getQName().equals(CMISConstants.ATOMOBJECT)) {
-						ret = element.getElements().get(0).getElements().get(0).getElements().get(0).getText();
-						break;
-					}
-				}
-			} else {
-				throw new VerteilungException("Kein Node zu Kriterium " + fileName + " gefunden!");
-			}
-		}
-		return ret;
-	}
+        if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
+            throw new VerteilungException("Dokument konnte nicht gefunden werden."
+                    + response.getStatusText());
+        } else {
+            Document<Feed> entryDoc = response.getDocument();
+            Feed root = entryDoc.getRoot();
+            List<Entry> entries = root.getEntries();
+            if (entries.size() > 0) {
+                Iterator<Element> it = root.getEntries().get(0).getElements().iterator();
+                while (it.hasNext()) {
 
-	protected Object uploadFile(String filePath, String fileName, String destinationFolder, String description,
+                    Element element = (Element) it.next();
+                    if (element.getQName().equals(CMISConstants.ATOMOBJECT)) {
+
+                        Iterator it1 = element.getElements().get(0).getElements().iterator();
+                        while (it1.hasNext()) {
+                            Element el = (Element) it1.next();
+                            if (el.getAttributeValue("propertyDefinitionId") != null
+                                    && el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:objectId")) {
+                                ret = el.getFirstChild(CMISConstants.VALUE).getText();
+                                ret = ret.substring(ret.lastIndexOf('/') + 1);
+                                break;
+                            }
+                        }
+
+                    }
+                }
+            } else {
+                throw new VerteilungException("Kein Knoten zu Kriterium " + cmisQuery + " gefunden!");
+            }
+        }
+        return ret;
+    }
+
+    protected Object uploadFile(String filePath, String fileName, String destinationFolder, String description,
 			String mimeType, String server, String username, String password, String proxyHost, String proxyPort)
 			throws IOException, VerteilungException {
 		String ret = null;
@@ -350,16 +368,17 @@ public class VerteilungServlet extends HttpServlet {
 		return ret;
 	}
 
-	protected Object listFolder(String filePath, String listFolder, String server, String username, String password,
+	protected Object listFolder(String filePath, String listFolder, boolean byPath, String server, String username, String password,
 			String proxyHost, String proxyPort) throws IOException, VerteilungException {
 		ArrayList<Properties> liste = new ArrayList<Properties>();
         boolean folder = false;
 		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
-		AlfrescoResponse response = connector.listFolderByPath(filePath);
+		AlfrescoResponse response = connector.listFolder(filePath, byPath);
 		if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
 			throw new VerteilungException("Verzeichnis konnte nicht gelesen werden: " + response.getStatusText()+ "\n" + response.getStackTrace());
 		} else {
 			Document<Feed> entryDoc = response.getDocument();
+
 			Feed root = entryDoc.getRoot();
 			Iterator<Entry> it = root.getEntries().iterator();
 			while (it.hasNext()) {
@@ -373,14 +392,32 @@ public class VerteilungServlet extends HttpServlet {
 						while (it2.hasNext()) {
 							Element el = it2.next();
 							if (el.getAttributeValue("propertyDefinitionId") != null
-									&& el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:objectId"))
-								p.put("id", el.getFirstChild(CMISConstants.VALUE).getText());
+									&& el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:objectId")) {
+                                String id = el.getFirstChild(CMISConstants.VALUE).getText();
+								p.put("id", id.substring(id.lastIndexOf('/') + 1));
+                            }
 							if (el.getAttributeValue("propertyDefinitionId") != null
 									&& el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:name"))
 								p.put("name", el.getFirstChild(CMISConstants.VALUE).getText());
+                            if (el.getElements().size() > 0) {
+                                Iterator<Element> it3 = el.getElements().iterator();
+                                while (it3.hasNext()){
+                                    Element el1 = it3.next();
+                                    if (el1.getElements().size() > 0) {
+                                        Iterator<Element> it4 = el1.getElements().iterator();
+                                        while (it4.hasNext()){
+                                            Element el2 = it4.next();
+                                            if (el2.getAttributeValue("propertyDefinitionId") != null && el2.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cm:title"))
+                                                p.put("title", el2.getFirstChild(CMISConstants.VALUE).getText());
+                                        }
+                                    }
+                                }
+                            }
 							if (el.getAttributeValue("propertyDefinitionId") != null
-									&& el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:objectTypeId"))
-								folder = el.getFirstChild(CMISConstants.VALUE).getText().equals("cmis:folder");
+									&& el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:objectTypeId")) {
+								folder = el.getFirstChild(CMISConstants.VALUE).getText().equals("cmis:folder") || el.getFirstChild(CMISConstants.VALUE).getText().equals("F:my:archivFolder");
+                                p.put("folder", folder);
+                            }
 							if (el.getAttributeValue("propertyDefinitionId") != null
 									&& el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:contentStreamMimeType"))
 								p.put("typ", el.getFirstChild(CMISConstants.VALUE).getText());
@@ -396,7 +433,51 @@ public class VerteilungServlet extends HttpServlet {
 		return liste;
 	}
 
-	protected Object extract(String documentText, String fileName, String clear) {
+    protected JSONArray listFolderAsJSON(String filePath, String listFolder, String server, String username, String password,
+                                         String proxyHost, String proxyPort) throws IOException, VerteilungException, JSONException {
+        JSONObject o;
+        JSONObject o1;
+        JSONArray list = new JSONArray();
+        if (filePath == null || filePath.length() == 0) {
+            filePath = (String) getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort);
+            o = new JSONObject();
+            o1 = new JSONObject();
+            o.put("id", filePath);
+            o.put("rel", "root");
+            o.put("state", "closed");
+            o1.put("attr", o);
+            o1.put("data", "Archiv");
+            o1.put("state", "closed");
+            list.put(o1);
+        } else {
+
+            ArrayList<Properties> liste = (ArrayList<Properties>) listFolder(filePath, listFolder, false, server, username, password, proxyHost, proxyPort);
+
+
+            for (int i = 0; i < liste.size(); i++) {
+                Properties p = (Properties) liste.get(i);
+                o = new JSONObject();
+                o1 = new JSONObject();
+                o.put("id", p.getProperty("id"));
+                if (((Boolean) p.get("folder")).booleanValue()) {
+                    o.put("rel", "folder");
+                    o1.put("state", "closed");
+                } else {
+                    o.put("rel", "default");
+                    o1.put("state", "");
+                }
+                if (p.containsKey("title") &&  p.getProperty("title").length() > 0)
+                    o1.put("data", p.getProperty("title"));
+                else
+                    o1.put("data", p.getProperty("name"));
+                o1.put("attr", o);
+                list.put(o1);
+            }
+        }
+        return list;
+    }
+
+    protected Object extract(String documentText, String fileName, String clear) {
 		Object ret;
 		if (clear.equalsIgnoreCase("true"))
 			entries.clear();
@@ -496,5 +577,6 @@ public class VerteilungServlet extends HttpServlet {
 		}
 		return ret;
 	}
+
 
 }

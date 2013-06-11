@@ -478,7 +478,7 @@ QUnit = {
 		if ( config.testTimeout && defined.setTimeout ) {
 			clearTimeout( config.timeout );
 			config.timeout = window.setTimeout(function() {
-				QUnit.ok( false, "Test timed out" );
+				QUnit.ok( false, "WebScriptTest timed out" );
 				config.semaphore = 1;
 				QUnit.start();
 			}, config.testTimeout );
@@ -1563,7 +1563,7 @@ function runLoggingCallbacks( key, scope, args ) {
 	}
 }
 
-// Test for equality any JavaScript type.
+// WebScriptTest for equality any JavaScript type.
 // Author: Philippe Rathé <prathe@gmail.com>
 QUnit.equiv = (function() {
 

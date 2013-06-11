@@ -2896,7 +2896,7 @@ function Recognition() {
 				this.content = inhalt;
 				this.properties = new Array();
 			},
-			name : 'Test',
+			name : 'WebScriptTest',
 			childByNamePath : function() {
 				return null;
 			},
@@ -2920,7 +2920,7 @@ function Recognition() {
 			createNode : function(name, typ) {
 				return this;
 			},
-			displayPath : 'Test/Test',
+			displayPath : 'WebScriptTest/WebScriptTest',
 			save : function() {
 			},
 			remove : function() {
