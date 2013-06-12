@@ -65,10 +65,7 @@
                         }
                     }
                 },
-                "plugins": [ "themes", "json_data", "ui", "crrm", "cookies", "dnd", "search", "types", "hotkeys", "contextmenu"],
-                "core": {
-                    "initially_open": ["8c0021ee-beea-4506-b10e-9ef2de262ad2" ]
-                }
+                "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "types", "hotkeys", "contextmenu"]
             }).bind("select_node.jstree",function (event, data) {
                         if (data.rslt.obj.attr("rel") == "default") {
                             var dataString = {
@@ -84,6 +81,7 @@
                             $.ajax({
                                 type: "POST",
                                 data: dataString,
+                                cache: false,
                                 datatype: "json",
                                 url: "VerteilungServlet",
                                 success: function (data) {
