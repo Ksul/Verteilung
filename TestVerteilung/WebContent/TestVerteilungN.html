@@ -1,0 +1,827 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Test Verteilung</title>
+<script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/theme-chrome.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/theme-eclipse.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/mode-xml.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/mode-javascript.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/mode-text.js" type="text/javascript" charset="utf-8"></script>
+
+<script src="./recognition.js" type="text/javascript" charset="utf-8"></script>
+<script src="./verteilung.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="./jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="./jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+<script type="text/javascript" src="./jquery.layout.js"></script>
+<script type="text/javascript" src="jquery.cookie.js" charset="utf-8"></script>
+<script type="text/javascript" src="jquery.hotkeys.js" charset="utf-8"></script>
+<script type="text/javascript" src="jquery.jstree.js" charset="utf-8"></script>
+
+<script src="vkbeautify.js" type="text/javascript" charset="utf-8"></script>
+<script src="jsbeautify.js" type="text/javascript" charset="utf-8"></script>
+
+<script src="yui-min.js" type="text/javascript" type="text/javascript" charset="utf-8"></script>
+
+<link rel="stylesheet" href="./themes/redmond/jquery-ui.css"/>
+<link type="text/css" rel="stylesheet" href="./themes/layout/layout-default.css"/>
+
+<style type="text/css">
+
+        /* remove padding & scrolling from panes that are 'containers' for nested layouts */
+    .ui-layout-south {
+        border: 0; /* cosmetic */
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .ui-layout-north {
+        border: 0; /* cosmetic */
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .ui-layout-west {
+        border: 0; /* cosmetic */
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .ui-layout-center {
+        border: 0; /* cosmetic */
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .inner-west {
+        border: 0; /* cosmetic */
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .header {
+        background: #80ade5 url(./ressource/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
+        border-bottom: 1px solid #777;
+        font-weight: normal;
+        font-size: 6pt;
+        text-align: center;
+        padding: 2px 0 4px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .inner-center {
+        border: 0; /* cosmetic */
+        padding: 0;
+        overflow: hidden;
+    }
+
+
+</style>
+
+<style type="text/css">
+.ui-widget {
+    font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+    font-size: 1.1em;
+}
+
+.ui-widget .ui-widget {
+    font-size: 1em;
+}
+
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+    font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+    font-size: 1em;
+}
+
+.ui-widget-content {
+    border: 1px solid #dddddd;
+    background: #eeeeee url(./ressource/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x;
+    color: #333333;
+}
+
+.ui-widget-content a {
+    color: #333333;
+}
+
+.ui-widget-header {
+    border: 1px solid #e78f08;
+    background: #f6a828 url(./ressource/ui-bg_gloss-wave_35_f6a828_500x100.png) 50% 50% repeat-x;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.ui-widget-header a {
+    color: #ffffff;
+}
+
+.ui-progressbar {
+    height: 2em;
+    text-align: left;
+}
+
+.ui-progressbar .ui-progressbar-value {
+    margin: -1px;
+    height: 100%;
+}
+
+.progress-label {
+    float: left;
+    margin-left: 50%;
+    margin-top: 0px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
+
+#progressbar {
+    width: 300px;
+    height: 20px;
+}
+
+input.search {
+    background-image: url('ressource/search.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.search:disabled {
+    background-image: url('ressource/search-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.save {
+    background-image: url('ressource/save.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.save:disabled {
+    background-image: url('ressource/save-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.play {
+    background-image: url('ressource/play.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.play:disabled {
+    background-image: url('ressource/play-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.maximize {
+    background-image: url('ressource/maximize.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.maximize:disabled {
+    background-image: url('ressource/maximize-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.minimize {
+    background-image: url('ressource/minimize.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.minimize:disabled {
+    background-image: url('ressource/minimize-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.upload {
+    background-image: url('ressource/upload.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.upload:disabled {
+    background-image: url('ressource/upload-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.download {
+    background-image: url('ressource/download.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.download:disabled {
+    background-image: url('ressource/download-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.beautify {
+    background-image: url('ressource/beautify.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.beautify:disabled {
+    background-image: url('ressource/beautify-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.pdf {
+    background-image: url('ressource/file_pdf.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.pdf:disabled {
+    background-image: url('ressource/file_pdf-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.close {
+    background-image: url('ressource/exit.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.test {
+    background-image: url('ressource/tabicon_pipette.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.reload {
+    background-image: url('ressource/refresh.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.docAlfresco {
+    background-image: url('ressource/alfresco.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+input.docAlfresco:disabled {
+    background-image: url('ressource/alfresco-bw.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
+}
+
+input.settings {
+    background-image: url('ressource/settings.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+
+</style>
+
+<style type="text/css">
+    .yui3-skin-sam .yui3-datatable-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        font-family: arial, sans-serif;
+        font-size: 10px;
+    }
+</style>
+
+
+<script type="text/javascript">
+
+function toggleLiveResizing() {
+    $.each($.layout.config.borderPanes, function (i, pane) {
+        var o = myLayout.options[ pane ];
+        o.livePaneResizing = !o.livePaneResizing;
+    });
+}
+;
+
+function toggleStateManagement(skipAlert, mode) {
+    if (!$.layout.plugins.stateManagement) return;
+
+    var options = myLayout.options.stateManagement
+            , enabled = options.enabled // current setting
+            ;
+    if ($.type(mode) === "boolean") {
+        if (enabled === mode) return; // already correct
+        enabled = options.enabled = mode
+    }
+    else
+        enabled = options.enabled = !enabled; // toggle option
+
+    if (!enabled) { // if disabling state management...
+        myLayout.deleteCookie(); // ...clear cookie so will NOT be found on next refresh
+        if (!skipAlert)
+            alert('This layout will reload as the options specify \nwhen the page is refreshed.');
+    }
+    else if (!skipAlert)
+        alert('This layout will save & restore its last state \nwhen the page is refreshed.');
+
+    // update text on button
+    var $Btn = $('#btnToggleState'), text = $Btn.html();
+    if (enabled)
+        $Btn.html(text.replace(/Enable/i, "Disable"));
+    else
+        $Btn.html(text.replace(/Disable/i, "Enable"));
+}
+;
+
+// set EVERY 'state' here so will undo ALL layout changes
+// used by the 'Reset State' button: myLayout.loadState( stateResetSettings )
+var stateResetSettings = {
+    north__size: 200, north__initClosed: false, north__initHidden: false, south__size: 400, south__initClosed: false, south__initHidden: false, west__size: 200, west__initClosed: false, west__initHidden: false, east__size: 300, east__initClosed: false, east__initHidden: false
+};
+
+var myLayout;
+
+$(document).ready(function () {
+
+    // this layout could be created with NO OPTIONS - but showing some here just as a sample...
+    // myLayout = $('body').layout(); -- syntax with No Options
+
+    myLayout = $('body').layout({
+
+        //	reference only - these options are NOT required because 'true' is the default
+        closable: true	// pane can open & close
+        , resizable: true	// when open, pane can be resized
+        , slidable: true	// when closed, pane can 'slide' open over other panes - closes on mouse-out
+        , livePaneResizing: true
+
+        //	some resizing/toggling settings
+        , north__slidable: false	// OVERRIDE the pane-default of 'slidable=true'
+        , north__togglerLength_closed: '100%'	// toggle-button is full-width of resizer-bar
+        , north__spacing_closed: 20		// big resizer-bar when open (zero height)
+
+
+        //	some pane-size settings
+        , west__size: .6, west__minSize: 0, center__size: .4, south__size: .17, north__size: 33, north__minSize:33, south__spacing_open: 8, south__childOptions: {
+            west__paneSelector: ".inner-west", center__paneSelector: ".inner-center", west__size: .74, center__size: .26, spacing_open: 8  // ALL panes
+            , spacing_closed: 12 // ALL panes
+
+
+        }
+        //	enable state management
+        , stateManagement__enabled: true // automatic cookie load & save enabled by default
+
+        , showDebugMessages: true // log and/or display messages from debugging & testing code
+    });
+
+    // if there is no state-cookie, then DISABLE state management initially
+    var cookieExists = !$.isEmptyObject(myLayout.readCookie());
+    if (!cookieExists) toggleStateManagement(true, false);
+
+    myLayout
+        // add event to the 'Close' button in the East pane dynamically...
+            .bindButton('#btnCloseEast', 'close', 'east')
+
+        // add event to the 'Toggle South' buttons in Center AND South panes dynamically...
+            .bindButton('.south-toggler', 'toggle', 'south')
+
+        // add MULTIPLE events to the 'Open All Panes' button in the Center pane dynamically...
+            .bindButton('#openAllPanes', 'open', 'north')
+            .bindButton('#openAllPanes', 'open', 'south')
+            .bindButton('#openAllPanes', 'open', 'west')
+            .bindButton('#openAllPanes', 'open', 'east')
+
+        // add MULTIPLE events to the 'Close All Panes' button in the Center pane dynamically...
+            .bindButton('#closeAllPanes', 'close', 'north')
+            .bindButton('#closeAllPanes', 'close', 'south')
+            .bindButton('#closeAllPanes', 'close', 'west')
+            .bindButton('#closeAllPanes', 'close', 'east')
+
+        // add MULTIPLE events to the 'Toggle All Panes' button in the Center pane dynamically...
+            .bindButton('#toggleAllPanes', 'toggle', 'north')
+            .bindButton('#toggleAllPanes', 'toggle', 'south')
+            .bindButton('#toggleAllPanes', 'toggle', 'west')
+            .bindButton('#toggleAllPanes', 'toggle', 'east')
+    ;
+
+    // 'Reset State' button requires updated functionality in rc29.15+
+    if ($.layout.revision && $.layout.revision >= 0.032915)
+        $('#btnReset').show();
+
+});
+
+
+// Script for West area
+
+window.onload = function () {
+
+    document.getElementById('filesinput').addEventListener('change', readMultiFile, false);
+    if (isLocal()) {
+        var obj = document.createElement('object');
+        obj.setAttribute('name', 'reader');
+        obj.setAttribute('width', '0');
+        obj.setAttribute('height', '0');
+        obj.setAttribute('codebase', './WEB-INF/lib');
+        obj
+                .setAttribute(
+                        'archive',
+                        'vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,commons-io-2.4.jar');
+        obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
+        document.getElementById('appl').appendChild(obj);
+    }
+
+
+    propsEditor = ace.edit("inProps");
+    propsEditor.setReadOnly(true);
+    propsEditor.renderer.setShowGutter(false);
+    propsEditor.setShowPrintMargin(false);
+
+    outputEditor = ace.edit("inOutput");
+    outputEditor.setReadOnly(true);
+    outputEditor.setShowPrintMargin(false);
+
+    var zoneRules = document.getElementById('inRules');
+    zoneRules.addEventListener('dragover', handleDragOver, false);
+    zoneRules.addEventListener('drop', handleRulesSelect, false);
+
+    rulesEditor = ace.edit("inRules");
+    rulesEditor.setTheme("ace/theme/eclipse");
+    var xmlMode = require("ace/mode/xml").Mode;
+    rulesEditor.getSession().setMode(new xmlMode());
+    rulesEditor.setShowPrintMargin(false);
+    rulesEditor.setDisplayIndentGuides(true);
+    rulesEditor.commands.addCommand({
+        name : "save",
+        bindKey : {
+            win : "Ctrl-Shift-S",
+            mac : "Command-s"
+        },
+        exec : save
+    });
+    rulesEditor.commands.addCommand({
+        name : "format",
+        bindKey : {
+            win : "Ctrl-Shift-F",
+            mac : "Command-f"
+        },
+        exec : format
+    });
+
+    textEditor = ace.edit("inTxt");
+    textEditor.setTheme("ace/theme/chrome");
+    textEditor.setShowInvisibles(true);
+    textEditor.setShowPrintMargin(false);
+    jsMode = require("ace/mode/javascript").Mode;
+    txtMode = require("ace/mode/text").Mode;
+    textEditor.getSession().setMode(new txtMode());
+    var zone = document.getElementById('inTxt');
+    zone.addEventListener('dragover', handleDragOver, false);
+    zone.addEventListener('drop', handleFileSelect, false);
+    YUI({
+        gallery: 'gallery-2012.08.08-20-03'
+    }).use('datatable', 'gallery-datatable-row-expansion', callBack);
+    tree = $("#tree").jstree({
+        "themes": {
+            "theme": "corral",
+            "dots": true,
+            "icons": true
+        },
+        "json_data": {
+            "ajax": {
+                "url": "/TestVerteilung/VerteilungServlet",
+                dataType: "json",
+                cache: false,
+                "data": function (n) {
+                    return {
+                        "function": "listFolderAsJSON",
+                        "filePath": n.attr ? n.attr("id") : "",
+                        "server": getServer(),
+                        "username": getUser(),
+                        "password": getPassword(),
+                        "searchFolder": "true",
+                        "withFolder": "true",
+                        "proxyHost": getUrlParam("proxy"),
+                        "proxyPort": getUrlParam("port")
+                    };
+                }
+            }
+        },
+        "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "types", "hotkeys", "contextmenu"]
+    }).bind("select_node.jstree",function (event, data) {
+                if (data.rslt.obj.attr("rel") == "default") {
+                    var dataString = {
+                        "function": "getContent",
+                        "documentId": data.rslt.obj.attr("id"),
+                        "extract": "true",
+                        "server": getServer(),
+                        "username": getUser(),
+                        "password": getPassword(),
+                        "proxyHost": getUrlParam("proxy"),
+                        "proxyPort": getUrlParam("port")
+                    };
+                    $.ajax({
+                        type: "POST",
+                        data: dataString,
+                        cache: false,
+                        datatype: "json",
+                        url: "VerteilungServlet",
+                        success: function (data) {
+                            if (data.success[0]) {
+                                textEditor.getSession().setValue(data.result.toString());
+                                alfrescoMode = false;
+                                manageControls();
+
+                            } else
+                                alert("Daten konnten nicht übertragen werden: " + data.result[0]);
+                        },
+                        error: function (response) {
+                            try {
+                                var r = jQuery.parseJSON(response.responseText);
+                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                            } catch (e) {
+                                var str = "FEHLER:\n";
+                                str = str + e.toString() + "\n";
+                                for (var prop in e)
+                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                                alert(str + "\n" + response.responseText);
+                            }
+                        }
+                    });
+                }
+            }).delegate("a", "click", function (event, data) {
+                event.preventDefault();
+            });
+
+
+    init();
+    var xml;
+    if (isLocal()) {
+        xml = "doc.xml";
+        getRules(xml, true, false);
+    } else {
+        if (rulesID != null) {
+            xml = rulesID.substring(rulesID.lastIndexOf('/') + 1);
+            getRules(xml, true, false);
+        } else {
+            $.get('doc.xml', function(msg)
+            {
+                rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
+                rulesEditor.getSession().foldAll(1);
+                currentRules = "doc.xml";
+            });
+        }
+        //	window.parent.frames.rules.rulesEditor.getSession().setValue("Regeln konnten nicht geladen werden!");
+    }
+
+
+
+};
+
+var rulesEditor;
+var textEditor;
+var propsEditor;
+var outputEditor;
+var alfrescoMode = false;
+var scriptID = null;
+var rulesID = null;
+var inboxID = null;
+var rootID = null;
+var currentRules = null;
+var scriptMode = false;
+var runLocal = false;
+var REC;
+var treeObject;
+var tree;
+var workDocument = null;
+var multiMode = false;
+var currentPDF = false;
+var showMulti = false;
+var currentFile = null;
+var currentContainer = null;
+var jsMode;
+var txtMode;
+REC = new Recognition();
+REC.set(REC);
+
+
+treeObject = jQuery.jstree._reference(tree);
+
+
+
+</script>
+
+
+</head>
+<body>
+
+<!-- manually attach allowOverflow method to pane -->
+<div class="ui-layout-north" onmouseover="myLayout.allowOverflow('north')" onmouseout="myLayout.resetOverflow(this)">
+    <table style="">
+        <tr>
+            <td width="30%"><input id="filesinput" name="filesinput"
+                                   type="file" multiple="multiple" size="50"/>
+            </td>
+            <td width="60px" align="center"><input
+                    onclick="openSettings();"
+                    name="settings" id="settings" type="submit" class="settings"
+                    title="Open Settings" value=""/>
+            </td>
+            <td width="60px" align="center"><input
+                    onclick="loadAlfresco();"
+                    name="docAlfresco" id="docAlfresco" type="submit" class="docAlfresco"
+                    title="Load Alfresco" value=""/>
+            </td>
+            <td width="60px" align="center"><input onclick="closeAlfresco();"
+                                                   id="closeAlfresco" value="" type="submit" title="Close" class="close"
+                                                   style="display: none"/>
+            </td>
+            <td width="60px" align="center"><input onclick="work();"
+                                                   name="play" id="play" type="submit" class="play" title="Recognize"
+                                                   value=""/>
+            </td>
+            <td width="60px" align="center"><input onclick="doTest();"
+                                                   name="test" id="test" type="submit" class="test" title="Test"
+                                                   value=""/>
+            </td>
+            <td width="60px" align="center"><input
+                    onclick="openPDF(window.parent.frames.cont.currentFile);" id="pdf"
+                    type="submit" class="pdf" title="PDF" value="" style="display: none"/>
+            </td>
+            <td width="60px" align="center"><input onclick="loadScript();"
+                                                   name="loadScript" id="script" type="image"
+                                                   src="ressource/file_edit.png" title="Script" value="Script"/>
+            </td>
+            <td width="60px" align="center"><input
+                    onclick="var needle = prompt('Find:', this.textEditor.getCopyText());window.parent.frames.cont.textEditor.find(needle);"
+                    name="searchCont" id="searchCont" type="submit" class="search"
+                    title="Search" value=""/>
+            </td>
+            <td width="60px" align="center"><input onclick="formatScript();"
+                                                   name="beautifyScript" id="beautifyScript" type="submit"
+                                                   class="beautify" title="Format" value="" style="display: none"/>
+            </td>
+            <td width="60px" align="center"><input onclick="doBack();"
+                                                   id="back" value="" type="submit" title="Close" class="close"
+                                                   style="display: none"/>
+            </td>
+            <td width="60px" align="center"><input onclick="closeScript();"
+                                                   name="close" id="close" type="submit" class="close" title="Close"
+                                                   value="" style="display: none"/>
+            </td>
+            <td width="60px" align="center"><input
+                    onclick="reloadScript(true);" name="reloadScript" id="reloadScript"
+                    type="submit" class="reload" title="Reload" value=""
+                    style="display: none"/>
+            </td>
+            <td width="60px" align="center"><input
+                    onclick="save(this.workDocument, this.textEditor.getSession().getValue(), true);modifiedScript=null;"
+                    name="saveScript" id="saveScript" type="submit" class="save"
+                    title="Save" value="" style="display: none"/>
+            </td>
+            <td width="60px" align="center"><input onclick="getScript(true);"
+                                                   name="getScript" id="getScript" type="submit" class="download"
+                                                   title="Download"
+                                                   value="" style="display: none"/>
+            </td>
+            <td width="60px" align="center"><input onclick="sendScript(true);"
+                                                   name="sendScript" id="sendScript" type="submit" class="upload"
+                                                   title="Upload"
+                                                   value="" style="display: none"/>
+            </td>
+            <td width="50%">
+                <div id="progressbar" class="progressbar">
+                    <div class="progress-label"></div>
+                </div>
+            </td>
+            <td width="60px" align="center"><input onclick="format();"
+                                                   name="beautify" id="beautify" type="submit" class="beautify"
+                                                   title="Format" value=""/>
+            </td>
+
+            <td width="60px" align="center"><input
+                    onclick="var needle = prompt('Find:', this.rulesEditor.getCopyText());this.rulesEditor.find(needle);"
+                    name="searchRules" id="searchRules" type="submit" class="search"
+                    title="Search" value=""/>
+            </td>
+            <td width="60px" align="center"><input
+                    onclick="this.rulesEditor.getSession().foldAll(1);"
+                    name="foldall" id="foldall" type="submit" class="minimize"
+                    title="Fold All" value=""/>
+            </td>
+            <td width="60px" align="center"><input
+                    onclick="this.rulesEditor.getSession().unfold();"
+                    name="unfoldall" id="unfoldall" type="submit" class="maximize"
+                    title="Unfold All" value=""/></td>
+            <td width="60px" align="center"><input
+                    onclick="getRules(window.parent.rulesID, false, true);" name="getRules"
+                    id="getRules" type="submit" class="download" title="Download Regeln" value=""/>
+            </td>
+            <td width="60px" align="center"><input onclick="sendRules(true);"
+                                                   name="sendRules" id="sendRules" type="submit" class="upload"
+                                                   title="Sende Regeln" value=""/>
+            </td>
+            <td width="60px" align="center"><input
+                    onclick="save(this.currentRules, vkbeautify.xml(this.rulesEditor.getSession().getValue()), true);"
+                    name="save" id="save" type="submit" class="save" title="Save"
+                    value=""/>
+            </td>
+            <td id="appl" width="0px"></td>
+        </tr>
+    </table>
+
+</div>
+
+<!-- allowOverflow auto-attached by option: west__showOverflowOnHover = true -->
+
+
+<div class="ui-layout-south">
+    <div class="inner-west">
+        <div id="inOutput" style="height: 100%; width: 100%"> </div>
+        </div>
+    <div class="inner-center">
+        <div id="inProps" style="height: 100%; width: 100%"></div>
+    </div>
+</div>
+
+<div class="ui-layout-west">
+    <div class="header">Outer - West</div>
+
+    <div class="content">
+
+    <div class="example yui3-skin-sam">
+        <div id="dtable"></div>
+        <div id="labels"></div>
+    </div>
+    <div id="inTxt" style="height: 100%; width: 100%"></div>
+    <div id="tree"></div>
+        </div>
+</div>
+
+<div class="ui-layout-center">
+    <div id="inRules" style="height: 100%; width: 100%"></div>
+</div>
+
+</body>
+</html>

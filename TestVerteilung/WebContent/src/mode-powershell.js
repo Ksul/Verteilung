@@ -74,8 +74,8 @@ var PowershellHighlightRules = function() {
       ("Get-Alias|Import-Alias|New-Alias|Set-Alias|Get-AuthenticodeSignature|Set-AuthenticodeSignature|" +
        "Set-Location|Get-ChildItem|Clear-Item|Get-Command|Measure-Command|Trace-Command|" +
        "Add-Computer|Checkpoint-Computer|Remove-Computer|Restart-Computer|Restore-Computer|Stop-Computer|" +
-       "Reset-ComputerMachinePassword|Test-ComputerSecureChannel|Add-Content|Get-Content|Set-Content|Clear-Content|" +
-       "Get-Command|Invoke-Command|Enable-ComputerRestore|Disable-ComputerRestore|Get-ComputerRestorePoint|Test-Connection|" +
+       "Reset-ComputerMachinePassword|WebScriptTest-ComputerSecureChannel|Add-Content|Get-Content|Set-Content|Clear-Content|" +
+       "Get-Command|Invoke-Command|Enable-ComputerRestore|Disable-ComputerRestore|Get-ComputerRestorePoint|WebScriptTest-Connection|" +
        "ConvertFrom-CSV|ConvertTo-CSV|ConvertTo-Html|ConvertTo-Xml|ConvertFrom-SecureString|ConvertTo-SecureString|" +
        "Copy-Item|Export-Counter|Get-Counter|Import-Counter|Get-Credential|Get-Culture|" +
        "Get-ChildItem|Get-Date|Set-Date|Remove-Item|Compare-Object|Get-Event|" +
@@ -94,7 +94,7 @@ var PowershellHighlightRules = function() {
        "Move-Item|Compare-Object|Group-Object|Measure-Object|New-Object|Select-Object|" +
        "Sort-Object|Where-Object|Out-Default|Out-File|Out-GridView|Out-Host|" +
        "Out-Null|Out-Printer|Out-String|Convert-Path|Join-Path|Resolve-Path|" +
-       "Split-Path|Test-Path|Get-Pfxcertificate|Pop-Location|Push-Location|Get-Process|" +
+       "Split-Path|WebScriptTest-Path|Get-Pfxcertificate|Pop-Location|Push-Location|Get-Process|" +
        "Start-Process|Stop-Process|Wait-Process|Enable-PSBreakpoint|Disable-PSBreakpoint|Get-PSBreakpoint|" +
        "Set-PSBreakpoint|Remove-PSBreakpoint|Get-PSDrive|New-PSDrive|Remove-PSDrive|Get-PSProvider|" +
        "Set-PSdebug|Enter-PSSession|Exit-PSSession|Export-PSSession|Get-PSSession|Import-PSSession|" +
@@ -109,7 +109,7 @@ var PowershellHighlightRules = function() {
        "Update-Formatdata|Update-Typedata|Clear-Variable|Get-Variable|New-Variable|Remove-Variable|" +
        "Set-Variable|New-WebServiceProxy|Where-Object|Write-Debug|Write-Error|Write-Host|" +
        "Write-Output|Write-Progress|Write-Verbose|Write-Warning|Set-WmiInstance|Invoke-WmiMethod|" +
-       "Get-WmiObject|Remove-WmiObject|Connect-WSMan|Disconnect-WSMan|Test-WSMan|Invoke-WSManAction|" +
+       "Get-WmiObject|Remove-WmiObject|Connect-WSMan|Disconnect-WSMan|WebScriptTest-WSMan|Invoke-WSManAction|" +
        "Disable-WSManCredSSP|Enable-WSManCredSSP|Get-WSManCredSSP|New-WSManInstance|Get-WSManInstance|Set-WSManInstance|" +
        "Remove-WSManInstance|Set-WSManQuickConfig|New-WSManSessionOption").split("|"));
 

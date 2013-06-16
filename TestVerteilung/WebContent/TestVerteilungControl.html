@@ -9,10 +9,15 @@
 <script src="./jquery-ui-1.10.2/jquery-1.9.1.js"	type="text/javascript" charset="utf-8"></script>
 <script src="./jquery-ui-1.10.2/ui/jquery-ui.js" type="text/javascript"	charset="utf-8"></script>
 
+
+
+
 <!-- <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
 <script src="jquery.ui.progressbar.js" type="text/javascript" charset="utf-8"></script>
  -->
 <script type="text/javascript" charset="utf-8">
+
+
 	window.onload = function() {
 		document.getElementById('filesinput').addEventListener('change', readMultiFile, false);
 		if (isLocal()) {
@@ -288,6 +293,14 @@ input.docAlfresco:disabled {
 	disabled: true;
 }
 
+input.settings {
+    background-image: url('ressource/settings.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
 
 </style>
 </head>
@@ -297,6 +310,11 @@ input.docAlfresco:disabled {
 			<td width="30%"><input id="filesinput" name="filesinput"
 				type="file" multiple="multiple" size="50" />
 			</td>
+            <td width="60px" align="center"><input
+                    onclick="openSettings();"
+                    name="settings" id="settings" type="submit" class="settings"
+                    title="Open Settings" value="" />
+            </td>
 			<td width="60px" align="center"><input
 				onclick="loadAlfresco();"
 				name="docAlfresco" id="docAlfresco" type="submit" class="docAlfresco"

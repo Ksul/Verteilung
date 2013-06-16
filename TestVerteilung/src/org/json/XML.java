@@ -136,7 +136,7 @@ public class XML {
         String     tagName;
         Object     token;
 
-// Test for and skip past these forms:
+// WebScriptTest for and skip past these forms:
 //      <!-- ... -->
 //      <!   ...   >
 //      <![  ... ]]>

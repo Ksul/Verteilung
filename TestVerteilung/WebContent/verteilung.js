@@ -10,7 +10,7 @@ function getUrlParam(name) {
 	name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
 	var regexS = "[\\?&]" + name + "=([^&#]*)";
 	var regex = new RegExp(regexS);
-	var results = regex.exec(window.parent.location.href);
+	var results = regex.exec(this.location.href);
 	if (results == null)
 		return null;
 	else
@@ -18,7 +18,7 @@ function getUrlParam(name) {
 }
 
 function isLocal() {
-	return (window.parent.location.href.startsWith("file"));
+	return (this.location.href.startsWith("file"));
 }
 
 function getServer() {
@@ -58,86 +58,86 @@ function manageControls() {
 
 
 
-	if (window.parent.frames.cont.multiMode && !window.parent.scriptMode) {
-		window.parent.frames.cont.document.getElementById('inTxt').style.display = 'none';
-		window.parent.frames.cont.document.getElementById('dtable').style.display = 'block';
+	if (this.multiMode && !this.scriptMode) {
+		document.getElementById('inTxt').style.display = 'none';
+		document.getElementById('dtable').style.display = 'block';
 	} else {
 
-        if (window.parent.alfrescoMode) {
-            window.parent.frames.cont.document.getElementById('tree').style.display = 'block';
-            window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
-            window.parent.frames.cont.document.getElementById('inTxt').style.display = 'none';
-            window.parent.frames.control.document.getElementById('closeAlfresco').style.display = 'block';
-            window.parent.frames.control.document.getElementById('docAlfresco').setAttribute("disabled", true);
+        if (this.alfrescoMode) {
+            document.getElementById('tree').style.display = 'block';
+            document.getElementById('dtable').style.display = 'none';
+            document.getElementById('inTxt').style.display = 'none';
+            document.getElementById('closeAlfresco').style.display = 'block';
+            document.getElementById('docAlfresco').setAttribute("disabled", true);
         }
         else {
-            window.parent.frames.cont.document.getElementById('tree').style.display = 'none';
-            window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
-            window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
-            window.parent.frames.control.document.getElementById('closeAlfresco').style.display = 'none';
-            window.parent.frames.control.document.getElementById('docAlfresco').removeAttribute("disabled");
+            document.getElementById('tree').style.display = 'none';
+            document.getElementById('inTxt').style.display = 'block';
+            document.getElementById('dtable').style.display = 'none';
+            document.getElementById('closeAlfresco').style.display = 'none';
+            document.getElementById('docAlfresco').removeAttribute("disabled");
         }
 
-		window.parent.frames.control.document.getElementById('pdf').style.display = 'block';
+		document.getElementById('pdf').style.display = 'block';
 
 	}
 
-	if (window.parent.frames.cont.textEditor.getSession().getValue().length == 0) {
-		window.parent.frames.control.document.getElementById('searchCont').setAttribute("disabled", true);
+	if (this.textEditor.getSession().getValue().length == 0) {
+		document.getElementById('searchCont').setAttribute("disabled", true);
 
 	} else {
-		window.parent.frames.control.document.getElementById('searchCont').removeAttribute("disabled");
+		document.getElementById('searchCont').removeAttribute("disabled");
 	}
-	if (window.parent.frames.cont.textEditor.getSession().getValue().length == 0 && !window.parent.frames.cont.multiMode) {
-		window.parent.frames.control.document.getElementById('play').setAttribute("disabled", true);
+	if (this.textEditor.getSession().getValue().length == 0 && !this.multiMode) {
+		document.getElementById('play').setAttribute("disabled", true);
 	} else {
-		window.parent.frames.control.document.getElementById('play').removeAttribute("disabled");
+		document.getElementById('play').removeAttribute("disabled");
 	}
 	if (isLocal()) {
-		window.parent.frames.control.document.getElementById('save').removeAttribute("disabled");
-		window.parent.frames.control.document.getElementById('saveScript').removeAttribute("disabled");
+		document.getElementById('save').removeAttribute("disabled");
+		document.getElementById('saveScript').removeAttribute("disabled");
 	} else {
-		window.parent.frames.control.document.getElementById('save').setAttribute("disabled", true);
-		window.parent.frames.control.document.getElementById('saveScript').setAttribute("disabled", true);
+		document.getElementById('save').setAttribute("disabled", true);
+		document.getElementById('saveScript').setAttribute("disabled", true);
 	}
-	if (!window.parent.frames.cont.multiMode && window.parent.frames.cont.currentPDF)
-		window.parent.frames.control.document.getElementById('pdf').removeAttribute("disabled");
+	if (!this.multiMode && this.currentPDF)
+		document.getElementById('pdf').removeAttribute("disabled");
 	else
-		window.parent.frames.control.document.getElementById('pdf').setAttribute("disabled", true);
-	if (window.parent.scriptMode) {
-		window.parent.frames.control.document.getElementById('filesinput').style.display = 'none';
-		window.parent.frames.control.document.getElementById('play').style.display = 'none';
-		window.parent.frames.control.document.getElementById('test').style.display = 'none';
-		window.parent.frames.control.document.getElementById('back').style.display = 'none';
-		window.parent.frames.control.document.getElementById('pdf').style.display = 'none';
-		window.parent.frames.control.document.getElementById('script').style.display = 'none';
-		window.parent.frames.control.document.getElementById('close').style.display = 'block';
-		window.parent.frames.control.document.getElementById('sendScript').style.display = 'block';
-		window.parent.frames.control.document.getElementById('getScript').style.display = 'block';
-		window.parent.frames.control.document.getElementById('saveScript').style.display = 'block';
-		window.parent.frames.control.document.getElementById('reloadScript').style.display = 'block';
-		window.parent.frames.control.document.getElementById('beautifyScript').style.display = 'block';
+		document.getElementById('pdf').setAttribute("disabled", true);
+	if (this.scriptMode) {
+		document.getElementById('filesinput').style.display = 'none';
+		document.getElementById('play').style.display = 'none';
+		document.getElementById('test').style.display = 'none';
+		document.getElementById('back').style.display = 'none';
+		document.getElementById('pdf').style.display = 'none';
+		document.getElementById('script').style.display = 'none';
+		document.getElementById('close').style.display = 'block';
+		document.getElementById('sendScript').style.display = 'block';
+		document.getElementById('getScript').style.display = 'block';
+		document.getElementById('saveScript').style.display = 'block';
+		document.getElementById('reloadScript').style.display = 'block';
+		document.getElementById('beautifyScript').style.display = 'block';
 	} else {
-		window.parent.frames.control.document.getElementById('filesinput').style.display = 'block';
-		window.parent.frames.control.document.getElementById('play').style.display = 'block';
-		window.parent.frames.control.document.getElementById('test').style.display = 'block';
-		if (window.parent.frames.cont.showMulti)
-			window.parent.frames.control.document.getElementById('back').style.display = 'block';
-		window.parent.frames.control.document.getElementById('pdf').style.display = 'block';
-		window.parent.frames.control.document.getElementById('script').style.display = 'block';
-		window.parent.frames.control.document.getElementById('close').style.display = 'none';
-		window.parent.frames.control.document.getElementById('sendScript').style.display = 'none';
-		window.parent.frames.control.document.getElementById('getScript').style.display = 'none';
-		window.parent.frames.control.document.getElementById('saveScript').style.display = 'none';
-		window.parent.frames.control.document.getElementById('reloadScript').style.display = 'none';
-		window.parent.frames.control.document.getElementById('beautifyScript').style.display = 'none';
+		document.getElementById('filesinput').style.display = 'block';
+		document.getElementById('play').style.display = 'block';
+		document.getElementById('test').style.display = 'block';
+		if (this.showMulti)
+			document.getElementById('back').style.display = 'block';
+		document.getElementById('pdf').style.display = 'block';
+		document.getElementById('script').style.display = 'block';
+		document.getElementById('close').style.display = 'none';
+		document.getElementById('sendScript').style.display = 'none';
+		document.getElementById('getScript').style.display = 'none';
+		document.getElementById('saveScript').style.display = 'none';
+		document.getElementById('reloadScript').style.display = 'none';
+		document.getElementById('beautifyScript').style.display = 'none';
 	}
 
-  if (window.parent.runLocal || (window.parent.scriptID == null && window.parent.rulesID == null)) {
-		window.parent.frames.control.document.getElementById('sendScript').setAttribute("disabled", true);
-		window.parent.frames.control.document.getElementById('getScript').setAttribute("disabled", true);
-		window.parent.frames.control.document.getElementById('getRules').setAttribute("disabled", true);
-		window.parent.frames.control.document.getElementById('sendRules').setAttribute("disabled", true);
+  if (this.runLocal || (this.scriptID == null && this.rulesID == null)) {
+		document.getElementById('sendScript').setAttribute("disabled", true);
+		document.getElementById('getScript').setAttribute("disabled", true);
+		document.getElementById('getRules').setAttribute("disabled", true);
+		document.getElementById('sendRules').setAttribute("disabled", true);
   }
 }
 
@@ -145,7 +145,7 @@ function openPDF(name, fromServer) {
 	try {
   	if (fromServer) {
   		if (isLocal()){
-  			var ticket = window.parent.frames.control.document.reader.getTicket(getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
+  			var ticket = document.reader.getTicket(getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
   			window.open(name + "?alf_ticket=" + ticket);
   		}
   		else {
@@ -182,7 +182,7 @@ function openPDF(name, fromServer) {
   	 }
 			else {
 				if (isLocal())
-	  			window.parent.frames.control.document.reader.openPDF(name);
+	  			document.reader.openPDF(name);
 	  		else 
 			  window.open("/TestVerteilung/VerteilungServlet?function=openPDF&fileName=" + name, "_blank");
 		}
@@ -196,30 +196,30 @@ function openPDF(name, fromServer) {
 }
 
 function loadText(txt, name, typ, container) {
-	window.parent.frames.cont.multiMode = false;
-	window.parent.frames.cont.currentFile = name;
-	window.parent.frames.cont.currentContainer = container;
-	removeMarkers(markers, window.parent.frames['cont'].textEditor);
-	window.parent.frames.cont.textEditor.getSession().setValue(txt);
+	this.multiMode = false;
+	this.currentFile = name;
+	this.currentContainer = container;
+	removeMarkers(markers, this.textEditor);
+	this.textEditor.getSession().setValue(txt);
 	fillMessageBox("", false);
-	window.parent.frames.props.propsEditor.getSession().setValue("");
+	this.propsEditor.getSession().setValue("");
 	manageControls();
 }
 
 function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) {
 	try {
-		window.parent.frames.cont.multiMode = true;
+		this.multiMode = true;
 		var dat = new Array();
-		window.parent.REC.currentDocument.setContent(txt);
-		window.parent.REC.testRules(window.parent.frames['rules'].rulesEditor.getSession().getValue());
+		this.REC.currentDocument.setContent(txt);
+		this.REC.testRules(this.rulesEditor.getSession().getValue());
 		dat["text"] = txt;
 		dat["file"] = name;
-		dat["log"] = window.parent.REC.getMessage();
-		dat["result"] = window.parent.REC.results;
-		dat["position"] = window.parent.REC.positions;
-		dat["xml"] = window.parent.REC.currXMLName;
+		dat["log"] = this.REC.getMessage();
+		dat["result"] = this.REC.results;
+		dat["position"] = this.REC.positions;
+		dat["xml"] = this.REC.currXMLName;
 		dat["typ"] = typ;
-		dat["error"] = window.parent.REC.errors;
+		dat["error"] = this.REC.errors;
 		dat["container"] = container;
 		dat["notDeleteable"] = notDeleteable;
 		dat["alfContainer"] = alfContainer;
@@ -227,13 +227,13 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
 		var row = new Array();
 		row["id"] = uuid();
 		row["feld"] = name;
-		row["xml"] = window.parent.REC.currXMLName.join(" : ");
-		row["error"] = window.parent.REC.errors;
+		row["xml"] = this.REC.currXMLName.join(" : ");
+		row["error"] = this.REC.errors;
 		var ergebnis = new Array();
-		ergebnis["error"] = window.parent.REC.errors.length > 0;
+		ergebnis["error"] = this.REC.errors.length > 0;
 		row["result"] = ergebnis;
 		tableData.push(row);
-		window.parent.frames.cont.dtable.get("data").add(tableData, {
+		this.dtable.get("data").add(tableData, {
 			silent : false
 		});
 		manageControls();
@@ -261,23 +261,23 @@ function handleDragOver(evt) {
 }
 
 function readMultiFile(evt) {
-	window.parent.frames.cont.multiMode = false;
-	window.parent.frames.cont.currentPDF = false;
+	this.multiMode = false;
+	this.currentPDF = false;
 	var files = evt.target.files;
 	readFiles(files);
 }
 
 function readFiles(files) {
 	try {
-		if (!window.parent.currentRules.endsWith("doc.xml")) {
+		if (!this.currentRules.endsWith("doc.xml")) {
 			var open = openFile("doc.xml");
-			window.parent.currentRules = open[1];
-			window.parent.frames.rules.rulesEditor.getSession().setValue(open[0]);
-			window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
+			this.currentRules = open[1];
+			this.rulesEditor.getSession().setValue(open[0]);
+			this.rulesEditor.getSession().foldAll(1);
 		}
-		window.parent.frames.cont.textEditor.getSession().setValue("");
+		this.textEditor.getSession().setValue("");
 		fillMessageBox("", false);
-		window.parent.frames.cont.dtable.get("data").reset(null, {
+		this.dtable.get("data").reset(null, {
 			silent : true
 		});
 		daten = new Array();
@@ -292,7 +292,7 @@ function readFiles(files) {
 			if (f) {
 
 				if (f.name.toLowerCase().endsWith(".pdf")) {
-					window.parent.frames.cont.currentPDF = true;
+					this.currentPDF = true;
 					reader = new FileReader();
 					reader.onloadend = (function(theFile, clear) {
 						return function(evt) {
@@ -300,8 +300,8 @@ function readFiles(files) {
 								var str = btoa(evt.target.result);
 								if (isLocal()) {
 									for ( var k = 0; k < Math.ceil(str.length / maxLen); k++)
-										window.parent.frames.control.document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
-									window.parent.frames.control.document.reader.extract(theFile.name, files.length > 1, theFile.type);
+										document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
+									document.reader.extract(theFile.name, files.length > 1, theFile.type);
 								} else {
 									var dataString = {
 										"function"     : "extract",
@@ -354,8 +354,8 @@ function readFiles(files) {
 								var str = btoa(evt.target.result);
 								if (isLocal()) {
 									for ( var k = 0; k < Math.ceil(str.length / maxLen); k++)
-										window.parent.frames.control.document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
-									count = count + window.parent.frames.control.document.reader.extractZIP(theFile.name) - 1;
+										document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
+									count = count + document.reader.extractZIP(theFile.name) - 1;
 								} else {
 									var dataString = {
 										"function"     : "extractZIP",
@@ -418,12 +418,12 @@ function readFiles(files) {
 					r.readAsText(f);
 				}
 			} else {
-				window.parent.frames['cont'].textEditor.getSession().setValue(window.parent.frames['cont'].textEditor.getSession().getValue() + " Failed to load file!\n");
+				this.textEditor.getSession().setValue(this.textEditor.getSession().getValue() + " Failed to load file!\n");
 			}
 			first = false;
 		}
 
-		window.parent.frames.cont.dtable.render("#dtable");
+		this.dtable.render("#dtable");
 	} catch (e) {
 		var str = "FEHLER:\n";
 		str = str + e.toString() + "\n";
@@ -460,8 +460,8 @@ function callBack(Y) {
 			nodeFormatter : imageFieldFormatter,
 			sortable : true,
 			sortFn : function(a, b, desc) {
-				var aCount = window.parent.frames.control.daten[a.getAttrs().feld]["error"].length;
-				var bCount = window.parent.frames.control.daten[b.getAttrs().feld]["error"].length;
+				var aCount = daten[a.getAttrs().feld]["error"].length;
+				var bCount = daten[b.getAttrs().feld]["error"].length;
 				order = (aCount > bCount) ? 1 : (aCount < bCount) ? -1 : 0;
 				return desc ? -order : order;
 			}
@@ -507,16 +507,16 @@ function imageFieldFormatter(o) {
 	image.style.marginRight = "5px";
 	image.onclick = function() {
 		return (function(name, rowNumber) {
-			currentDocument.setContent(window.parent.frames.control.daten[name]["text"]);
-			testRules(window.parent.frames['rules'].rulesEditor.getSession().getValue());
-			window.parent.frames.control.daten[name].log = mess;
-			window.parent.frames.control.daten[name].result = results;
-			window.parent.frames.control.daten[name].position = positions;
-			window.parent.frames.control.daten[name].xml = currXMLName;
-			window.parent.frames.control.daten[name].error = errors;
+			currentDocument.setContent(this.daten[name]["text"]);
+			testRules(this.rulesEditor.getSession().getValue());
+			daten[name].log = mess;
+			daten[name].result = results;
+			daten[name].position = positions;
+			daten[name].xml = currXMLName;
+			daten[name].error = errors;
 			var row = null;
-			for ( var i = 0; i < window.parent.frames.control.tableData.length; i++) {
-				var r = window.parent.frames.control.tableData[i];
+			for ( var i = 0; i < this.tableData.length; i++) {
+				var r = this.tableData[i];
 				if (r.feld == name) {
 					row = r;
 					break;
@@ -528,7 +528,7 @@ function imageFieldFormatter(o) {
 			ergebnis["error"] = errors.length > 0;
 			row["result"] = ergebnis;
 			tableData[rowNumber] = row;
-			window.parent.frames.cont.dtable.modifyRow(rowNumber, row);
+			this.dtable.modifyRow(rowNumber, row);
 		})(o.data.feld, o.rowIndex);
 	};
 	o.cell.appendChild(image);
@@ -543,15 +543,15 @@ function imageFieldFormatter(o) {
 	image.style.marginRight = "5px";
 	image.onclick = function() {
 		return (function(name) {
-			window.parent.frames.cont.multiMode = false;
-			window.parent.frames.cont.showMulti = true;
-			window.parent.frames.cont.currentFile = window.parent.frames.control.daten[name]["file"];
-			setXMLPosition(window.parent.frames.control.daten[name]["xml"]);
-			removeMarkers(markers, window.parent.frames['cont'].textEditor);
-			markers = setMarkers(window.parent.frames.control.daten[name]["position"], window.parent.frames['cont'].textEditor);
-			window.parent.frames.cont.textEditor.getSession().setValue(window.parent.frames.control.daten[name]["text"]);
-			window.parent.frames.props.propsEditor.getSession().setValue(printResults(window.parent.frames.control.daten[name]["result"]));
-			fillMessageBox(window.parent.frames.control.daten[name]["log"], true);
+			this.multiMode = false;
+			this.showMulti = true;
+			this.currentFile = this.daten[name]["file"];
+			setXMLPosition(this.daten[name]["xml"]);
+			removeMarkers(markers, this.textEditor);
+			markers = setMarkers(this.daten[name]["position"], this.textEditor);
+			this.textEditor.getSession().setValue(this.daten[name]["text"]);
+			this.propsEditor.getSession().setValue(printResults(this.daten[name]["result"]));
+			fillMessageBox(this.daten[name]["log"], true);
 			manageControls();
 		})(o.data.feld);
 	};
@@ -559,7 +559,7 @@ function imageFieldFormatter(o) {
 	image = document.createElement("div");
 	image.href = "#";
 	image.title = "Ergebnis löschen";
-	if (window.parent.frames.control.daten[o.data.feld]["notDeleteable"] != "true") {
+	if (daten[o.data.feld]["notDeleteable"] != "true") {
 	  image.style.backgroundImage = "url(ressource/delete.png)";
 	  image.style.cursor = "pointer";
 	}
@@ -580,18 +580,18 @@ function imageFieldFormatter(o) {
 				} catch (e) {
 					alert("Permission to delete file was denied.");
 				}
-				window.parent.frames.cont.currentFile = window.parent.frames.control.daten[name]["file"];
-				window.parent.frames.cont.textEditor.getSession().setValue("");
-				window.parent.frames.props.propsEditor.getSession().setValue("");
+				this.currentFile = daten[name]["file"];
+				this.textEditor.getSession().setValue("");
+				this.propsEditor.getSession().setValue("");
 				fillMessageBox("", false);
-				window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
-				if (window.parent.frames.cont.currentFile.length > 0) {
+				this.rulesEditor.getSession().foldAll(1);
+				if (this.currentFile.length > 0) {
 					var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-					file.initWithPath(window.parent.frames.cont.currentFile);
+					file.initWithPath(this.currentFile);
 					if (file.exists() == true)
 						file.remove(false);
 				}
-				window.parent.frames.cont.dtable.removeRow(rowNumber);
+				this.dtable.removeRow(rowNumber);
 			}
 		})(o.data.feld, o.rowIndex);
 	};
@@ -611,16 +611,16 @@ function imageFieldFormatter(o) {
 	image.title = "PDF anzeigen";
 	image.onclick = function() {
 		return (function(name) {
-			if (typeof window.parent.frames.control.daten[name]["container"] != "undefined" && window.parent.frames.control.daten[name]["container"] != null) {
-				openPDF(window.parent.frames.control.daten[name]["container"], true);
+			if (typeof daten[name]["container"] != "undefined" && daten[name]["container"] != null) {
+				openPDF(daten[name]["container"], true);
 			} else {
-				openPDF(window.parent.frames.control.daten[name]["file"]);
+				openPDF(daten[name]["file"]);
 			}
 		})(o.data.feld);
 	};
 	o.cell.appendChild(image);
 		image = document.createElement("div");
-	if (window.parent.frames.control.daten[o.data.feld]["alfContainer"] == "true") {
+	if (daten[o.data.feld]["alfContainer"] == "true") {
 		image.style.backgroundImage = "url(ressource/move-file.png)";
 		image.style.cursor = "pointer";
 	} else {
@@ -634,9 +634,9 @@ function imageFieldFormatter(o) {
 	image.title = "Zur Inbox verschieben";
 	image.onclick = function() {
 		return (function(name) {
-			var docId = "workspace:/SpacesStore/" + window.parent.frames.control.daten[name]["container"];
+			var docId = "workspace:/SpacesStore/" + this.daten[name]["container"];
 			if (isLocal()) {
-				var json = jQuery.parseJSON(window.parent.frames.control.document.reader.moveDocument(docId, window.parent.inboxID, getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null));
+				var json = jQuery.parseJSON(document.reader.moveDocument(docId, this.inboxID, getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null));
 				if (!json.success)
 					alert("Dokument nicht verschoben: " + json.result);
 			}
@@ -644,8 +644,8 @@ function imageFieldFormatter(o) {
 				var dataString = {
 					"function"			: "moveDocument",
 					"documentId"		: docId,
-					"destinationId"	: window.parent.inboxID,
-					"server"				: getServer(),
+					"destinationId"	    : this.inboxID,
+					"server"			: getServer(),
 					"username"			: getUser(),
 					"password"			: getPassword(),
 					"proxyHost"			: getUrlParam("proxy"),
@@ -701,25 +701,25 @@ function uuid() {
 
 function doReRunAll() {
 	try {
-		window.parent.frames.cont.textEditor.getSession().setValue("");
+		this.textEditor.getSession().setValue("");
 		fillMessageBox("", false);
 		for ( var i = 0; i < tableData.length; i++) {
-			var name = window.parent.frames.cont.dtable.get("data").getByClientId(window.parent.frames.cont.dtable.getRow(i).getData()["yui3-record"]).get("feld");
-			window.parent.REC.currentDocument.setContent(window.parent.frames.control.daten[name].text);
-			window.parent.REC.testRules(window.parent.frames['rules'].rulesEditor.getSession().getValue());
-			window.parent.frames.control.daten[name].log = window.parent.REC.mess;
-			window.parent.frames.control.daten[name].result = window.parent.REC.results;
-			window.parent.frames.control.daten[name].position = window.parent.REC.positions;
-			window.parent.frames.control.daten[name].xml = window.parent.REC.currXMLName;
-			window.parent.frames.control.daten[name].error = window.parent.REC.errors;
+			var name = this.dtable.get("data").getByClientId(this.dtable.getRow(i).getData()["yui3-record"]).get("feld");
+			this.REC.currentDocument.setContent(this.daten[name].text);
+			this.REC.testRules(this.rulesEditor.getSession().getValue());
+			this.daten[name].log = this.REC.mess;
+			this.daten[name].result = this.REC.results;
+			this.daten[name].position = this.REC.positions;
+			this.daten[name].xml = this.REC.currXMLName;
+			this.daten[name].error = this.REC.errors;
 			var row = tableData[i];
-			row["xml"] = window.parent.REC.currXMLName.join(" : ");
-			row["error"] = window.parent.REC.errors;
+			row["xml"] = this.REC.currXMLName.join(" : ");
+			row["error"] = this.REC.errors;
 			var ergebnis = new Array();
-			ergebnis["error"] = window.parent.REC.errors.length > 0;
+			ergebnis["error"] = this.REC.errors.length > 0;
 			row["result"] = ergebnis;
 			tableData[i] = row;
-			window.parent.frames.cont.dtable.modifyRow(i, row);
+			this.dtable.modifyRow(i, row);
 		}
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -732,7 +732,7 @@ function doReRunAll() {
 
 function setMarkers(positions, editor) {
 	var markers = new Array();
-	if (window.parent.REC.exist(positions)) {
+	if (this.REC.exist(positions)) {
 		/*
 		 * var cssText = ".ace-chrome .ace_marker-layer .ace_step1 {background:
 		 * rgb(252, 0, 0);}"; var cssClass = "ace-chrome"; var dom =
@@ -759,18 +759,18 @@ function removeMarkers(markers, editor) {
 }
 
 function setXMLPosition(position) {
-	window.parent.frames['rules'].rulesEditor.getSession().foldAll(1);
-	var text = window.parent.frames['rules'].rulesEditor.getSession().getValue();
+	this.rulesEditor.getSession().foldAll(1);
+	var text = this.rulesEditor.getSession().getValue();
 	var pos = 0;
 	for ( var i = 0; i < position.length; i++)
 		pos = text.indexOf("<archivTyp name=\"" + position[i] + "\"", pos);
 	if (pos != -1) {
 		pos1 = text.indexOf("</archivTyp>", pos);
 		if (pos1 != -1) {
-			var p = window.parent.REC.convertPosition(text, pos, pos1 + 12, "");
-			window.parent.frames['rules'].rulesEditor.getSession().unfold(p.startRow + 1, true);
-			window.parent.frames['rules'].rulesEditor.gotoLine(p.startRow + 1);
-			window.parent.frames['rules'].rulesEditor.selection.setSelectionRange(new Range(p.startRow, p.startColumn, p.endRow, p.endColumn));
+			var p = this.REC.convertPosition(text, pos, pos1 + 12, "");
+			this.rulesEditor.getSession().unfold(p.startRow + 1, true);
+			this.rulesEditor.gotoLine(p.startRow + 1);
+			this.rulesEditor.selection.setSelectionRange(new Range(p.startRow, p.startColumn, p.endRow, p.endColumn));
 		}
 	}
 }
@@ -785,11 +785,11 @@ function printResults(results) {
 	}
 	maxLength++;
 	for (key in results) {
-		if (window.parent.REC.exist(results[key])) {
+		if (this.REC.exist(results[key])) {
 			ret = ret + key + blanks.substr(0, maxLength - key.length) + ": " + results[key].getValue();
-			if (window.parent.REC.exist(results[key].expected)) {
+			if (this.REC.exist(results[key].expected)) {
 				var tmp = eval(results[key].expected);
-				if (window.parent.REC.exist(results[key].getValue()) && tmp.valueOf() == results[key].getValue().valueOf())
+				if (this.REC.exist(results[key].getValue()) && tmp.valueOf() == results[key].getValue().valueOf())
 					ret = ret + " [OK]";
 				else
 					ret = ret + " [FALSE] " + tmp;
@@ -806,19 +806,19 @@ function fillMessageBox(text, reverse) {
 		if (text.startsWith("\n"))
 			text = text.substr(1);
 	}
-	window.parent.frames.output.outputEditor.getSession().setValue(text);
+	this.outputEditor.getSession().setValue(text);
 }
 
 function doBack() {
-	window.parent.frames.cont.multiMode = true;
-	window.parent.frames.cont.showMulti = false;
-	window.parent.frames.cont.document.getElementById('inTxt').style.display = 'none';
-	window.parent.frames.cont.document.getElementById('dtable').style.display = 'block';
-	window.parent.frames.control.document.getElementById('back').style.display = 'none';
-	window.parent.frames.cont.textEditor.getSession().setValue("");
+	this.multiMode = true;
+	this.showMulti = false;
+	document.getElementById('inTxt').style.display = 'none';
+	document.getElementById('dtable').style.display = 'block';
+	document.getElementById('back').style.display = 'none';
+	this.textEditor.getSession().setValue("");
 	fillMessageBox("", false);
-	window.parent.frames.props.propsEditor.getSession().setValue("");
-	window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
+	this.propsEditor.getSession().setValue("");
+	this.rulesEditor.getSession().foldAll(1);
 	manageControls();
 }
 
@@ -827,21 +827,21 @@ function doTest() {
         if (isLocal()) {
             var open = openFile("test.txt");
             var content = open[0];
-            window.parent.REC.currentDocument.setContent(content);
-            removeMarkers(markers, window.parent.frames['cont'].textEditor);
-            window.parent.frames.cont.textEditor.getSession().setValue(content);
-            if (!window.parent.currentRules.endsWith("test.xml")) {
+            this.REC.currentDocument.setContent(content);
+            removeMarkers(markers, this.textEditor);
+            this.textEditor.getSession().setValue(content);
+            if (!this.currentRules.endsWith("test.xml")) {
                 open = openFile("test.xml");
-                window.parent.currentRules = open[1];
-                window.parent.frames.rules.rulesEditor.getSession().setValue(open[0]);
+                this.currentRules = open[1];
+                this.rulesEditor.getSession().setValue(open[0]);
             }
-            window.parent.REC.testRules(window.parent.frames.rules.rulesEditor.getSession().getValue());
-            setXMLPosition(window.parent.REC.currXMLName);
-            markers = setMarkers(window.parent.REC.positions, window.parent.frames.cont.textEditor);
-            window.parent.frames.props.propsEditor.getSession().setValue(printResults(window.parent.REC.results));
-            fillMessageBox(window.parent.REC.getMessage(), true);
-            window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
-            window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
+            this.REC.testRules(this.rulesEditor.getSession().getValue());
+            setXMLPosition(this.REC.currXMLName);
+            markers = setMarkers(this.REC.positions, this.textEditor);
+            this.propsEditor.getSession().setValue(printResults(this.REC.results));
+            fillMessageBox(this.REC.getMessage(), true);
+            document.getElementById('inTxt').style.display = 'block';
+            document.getElementById('dtable').style.display = 'none';
             manageControls();
         } else {
             var dataString = {
@@ -868,18 +868,18 @@ function doTest() {
                 },
                 success: function (data) {
                     if (data.success[0]) {
-                        window.parent.REC.currentDocument.setContent(data.result[0].text.toString());
-                        removeMarkers(markers, window.parent.frames['cont'].textEditor);
-                        window.parent.frames.cont.textEditor.getSession().setValue(data.result[0].text.toString());
-                        window.parent.currentRules = "test.xml";
-                        window.parent.frames.rules.rulesEditor.getSession().setValue(data.result[0].xml.toString());
-                        window.parent.REC.testRules(window.parent.frames.rules.rulesEditor.getSession().getValue());
-                        setXMLPosition(window.parent.REC.currXMLName);
-                        markers = setMarkers(window.parent.REC.positions, window.parent.frames.cont.textEditor);
-                        window.parent.frames.props.propsEditor.getSession().setValue(printResults(window.parent.REC.results));
-                        fillMessageBox(window.parent.REC.getMessage(), true);
-                        window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
-                        window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
+                        this.REC.currentDocument.setContent(data.result[0].text.toString());
+                        removeMarkers(markers, this.textEditor);
+                        this.textEditor.getSession().setValue(data.result[0].text.toString());
+                        this.currentRules = "test.xml";
+                        this.rulesEditor.getSession().setValue(data.result[0].xml.toString());
+                        this.REC.testRules(this.rulesEditor.getSession().getValue());
+                        setXMLPosition(this.REC.currXMLName);
+                        markers = setMarkers(this.REC.positions, this.textEditor);
+                        this.propsEditor.getSession().setValue(printResults(this.REC.results));
+                        fillMessageBox(this.REC.getMessage(), true);
+                        document.getElementById('inTxt').style.display = 'block';
+                        document.getElementById('dtable').style.display = 'none';
                         manageControls();
                     } else
                         alert("Fehler: " + data.result[0]);
@@ -897,14 +897,14 @@ function doTest() {
 
 function work() {
 	var selectMode = false;
-	if (window.parent.frames.cont.multiMode)
+	if (this.multiMode)
 		doReRunAll()
 	else {
-		var range = window.parent.frames.rules.rulesEditor.getSelectionRange();
-		var sel = window.parent.frames.rules.rulesEditor.getSession().getTextRange(range);
+		var range = this.rulesEditor.getSelectionRange();
+		var sel = this.rulesEditor.getSession().getTextRange(range);
 		if (sel.length > 0) {
 			if (!sel.startsWith("<")) {
-				var start = window.parent.frames.rules.rulesEditor.find('<', {
+				var start = this.rulesEditor.find('<', {
 					backwards : true,
 					wrap : false,
 					caseSensitive : false,
@@ -915,7 +915,7 @@ function work() {
 				range.setStart(start.start);
 			}
 			if (!sel.endsWith("/>")) {
-				var end = window.parent.frames.rules.rulesEditor.find('>', {
+				var end = this.rulesEditor.find('>', {
 					backwards : false,
 					wrap : false,
 					caseSensitive : false,
@@ -925,11 +925,11 @@ function work() {
 				});
 				range.setEnd(end.end);
 			}
-			sel = window.parent.frames.rules.rulesEditor.getSession().getTextRange(range);
+			sel = this.rulesEditor.getSession().getTextRange(range);
 			if (!sel.endsWith("/>")) {
 				var tmp = sel.substring(1, sel.indexOf(" "));
 				tmp = "</" + tmp + ">";
-				end = window.parent.frames.rules.rulesEditor.find(tmp, {
+				end = this.rulesEditor.find(tmp, {
 					backwards : false,
 					wrap : false,
 					caseSensitive : false,
@@ -939,12 +939,12 @@ function work() {
 				});
 				range.setEnd(end.end);
 			}
-			window.parent.frames['rules'].rulesEditor.selection.setSelectionRange(range);
-			sel = window.parent.frames.rules.rulesEditor.getSession().getTextRange(range);
+			this.rulesEditor.selection.setSelectionRange(range);
+			sel = this.rulesEditor.getSession().getTextRange(range);
 			if (!sel.startsWith("<tags") && !sel.startsWith("<category") && !sel.startsWith("<archivPosition")) {
 				selectMode = true;
 				if (!sel.startsWith("<searchItem ")) {
-					start = window.parent.frames.rules.rulesEditor.find('<searchItem', {
+					start = this.rulesEditor.find('<searchItem', {
 						backwards : true,
 						wrap : false,
 						caseSensitive : false,
@@ -953,7 +953,7 @@ function work() {
 						regExp : false
 					});
 					range.setStart(start.start);
-					end = window.parent.frames.rules.rulesEditor.find('</searchItem>', {
+					end = this.rulesEditor.find('</searchItem>', {
 						backwards : false,
 						wrap : false,
 						caseSensitive : false,
@@ -962,8 +962,8 @@ function work() {
 						regExp : false
 					});
 					range.setEnd(end.end);
-					window.parent.frames['rules'].rulesEditor.selection.setSelectionRange(range);
-					sel = window.parent.frames.rules.rulesEditor.getSession().getTextRange(range);
+					this.rulesEditor.selection.setSelectionRange(range);
+					sel = this.rulesEditor.getSession().getTextRange(range);
 				}
 				if (!sel.startsWith("<archivTyp "))
 					sel = "<archivTyp name='' searchString=''>" + sel;
@@ -974,29 +974,29 @@ function work() {
 				if (!sel.endsWith("</documentTypes>"))
 					sel = sel + "</documentTypes>";
 			} else
-				sel = window.parent.frames.rules.rulesEditor.getSession().getValue();
+				sel = this.rulesEditor.getSession().getValue();
 		} else
-			sel = window.parent.frames.rules.rulesEditor.getSession().getValue();
-		window.parent.REC.currentDocument.setContent(window.parent.frames['cont'].textEditor.getSession().getValue());
-		removeMarkers(markers, window.parent.frames.cont.textEditor);
-		window.parent.REC.testRules(sel);
+			sel = this.rulesEditor.getSession().getValue();
+		this.REC.currentDocument.setContent(this.textEditor.getSession().getValue());
+		removeMarkers(markers, this.textEditor);
+		this.REC.testRules(sel);
 		if (!selectMode)
-			setXMLPosition(window.parent.REC.currXMLName);
-		markers = setMarkers(window.parent.REC.positions, window.parent.frames.cont.textEditor);
-		fillMessageBox(window.parent.REC.getMessage(), true);
-		window.parent.frames.props.propsEditor.getSession().setValue(printResults(window.parent.REC.results));
-		window.parent.frames.cont.document.getElementById('inTxt').style.display = 'block';
-		window.parent.frames.cont.document.getElementById('dtable').style.display = 'none';
+			setXMLPosition(this.REC.currXMLName);
+		markers = setMarkers(this.REC.positions, this.textEditor);
+		fillMessageBox(this.REC.getMessage(), true);
+		this.propsEditor.getSession().setValue(printResults(this.REC.results));
+		document.getElementById('inTxt').style.display = 'block';
+		document.getElementById('dtable').style.display = 'none';
 	}
 }
 
 function sendRules(dialog) {
 	try {
 		var erg = false;
-		if (window.parent.currentRules.endsWith("doc.xml")) {
-			vkbeautify.xml(window.parent.frames.rules.rulesEditor.getSession().getValue());
+		if (this.currentRules.endsWith("doc.xml")) {
+			vkbeautify.xml(this.rulesEditor.getSession().getValue());
 			if (isLocal()) {
-				var ret = window.parent.frames.control.document.reader.updateDocumentByFile(window.parent.rulesID, window.parent.currentRules,
+				var ret = document.reader.updateDocumentByFile(this.rulesID, this.currentRules,
 						"XML-Beschreibung der Dokumente", "application/xml", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
 				if (dialog) {
 					if (ret == 200) {
@@ -1008,9 +1008,9 @@ function sendRules(dialog) {
 			} else {
 			var dataString = {
 				"function"     : "updateDocument",
-				"documentText" : window.parent.rules.rulesEditor.getSession().getValue(),
+				"documentText" : this.rulesEditor.getSession().getValue(),
 				"description"  : "XML-Beschreibung der Dokumente",
-				"documentId"   : window.parent.rulesID,
+				"documentId"   : this.rulesID,
 			  "mimeType"     : "application/xml",
 				"server"       : getServer(),
 				"username"     : getUser(),
@@ -1056,32 +1056,36 @@ function sendRules(dialog) {
 }
 
 function loadAlfresco(){
-    window.parent.alfrescoMode = true;
+    this.alfrescoMode = true;
 
     manageControls();
 }
 
 function closeAlfresco(){
-    window.parent.alfrescoMode = false;
+    this.alfrescoMode = false;
     manageControls();
+}
+
+function openSettings(){
+    this.$( "#dialog-form" ).dialog( "open" );
 }
 
 function loadAlfrescoFolder(folderName) {
 	try {
 		showProgress();
-	   window.parent.frames.cont.dtable.get("data").reset(null, {
+	   this.dtable.get("data").reset(null, {
       silent : true
     });
     var ret;
     daten = new Array();
     tableData = new Array();
 		if (isLocal()) {
-			ret = window.parent.frames.control.document.reader.listFolder(folderName, "false", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"));
+			ret = document.reader.listFolder(folderName, "false", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"));
 			var json = jQuery.parseJSON(ret);
 			var ergebnis = json.result;
 			for ( var i = 0; i < ergebnis.length; i++) {
 				var erg = ergebnis[i];
-				ret = window.parent.frames.control.document.reader.getContent(erg.id, true, getServer(), getUser(), getPassword(),
+				ret = document.reader.getContent(erg.id, true, getServer(), getUser(), getPassword(),
 						getUrlParam("proxy"), getUrlParam("port"), null);
 				json = jQuery.parseJSON(ret);
 				if (json.success)
@@ -1090,7 +1094,7 @@ function loadAlfrescoFolder(folderName) {
 				else
 					alert("Fehler beim Holen des Inhalts: " + json.result);
 			}
-			window.parent.frames.cont.dtable.render("#dtable");
+			this.dtable.render("#dtable");
 		} else {
 			var dataString = {
 				"function"  : "listFolder",
@@ -1166,7 +1170,7 @@ function loadAlfrescoFolder(folderName) {
 							                           }
 						              });	          
 					             }	
-					             window.parent.frames.cont.dtable.render("#dtable");
+					             this.dtable.render("#dtable");
 					           } else
 					          	 alert("Fehler beim Lesen des Verzeichnisses: " + data.result[0]);
 				}
@@ -1187,14 +1191,14 @@ function getRules(rDoc, loadLocal, dialog) {
 			var ret;
 			if (loadLocal) {
 				var open = openFile(rDoc);
-				window.parent.frames.rules.rulesEditor.getSession().setValue(open[0]);
-				window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
+				this.rulesEditor.getSession().setValue(open[0]);
+				this.rulesEditor.getSession().foldAll(1);
 			} else {
-				ret = window.parent.frames.control.document.reader.getContent(rDoc, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
+				ret = document.reader.getContent(rDoc, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
 				var json = jQuery.parseJSON(ret);
 				if (json.success) {
-					window.parent.frames.rules.rulesEditor.getSession().setValue(json.result);
-					window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
+					this.rulesEditor.getSession().setValue(json.result);
+					this.rulesEditor.getSession().foldAll(1);
 					if (dialog)
 						alert("Regeln erfolgreich übertragen!");
 				} else
@@ -1220,8 +1224,8 @@ function getRules(rDoc, loadLocal, dialog) {
 											   if (data.success[0]) {
 					                 if (dialog)
 						                 alert("Regeln erfolgreich übertragen!");
-				                  	window.parent.frames.rules.rulesEditor.getSession().setValue(data.result[0].toString());
-					                window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
+				                  	this.rulesEditor.getSession().setValue(data.result[0].toString());
+					                this.rulesEditor.getSession().foldAll(1);
 										  	 } else
 												   alert("Regeln konnten nicht übertragen werden: " + data.result[0]);
 				               },
@@ -1239,7 +1243,7 @@ function getRules(rDoc, loadLocal, dialog) {
                 }
 			});
 		}
-		window.parent.currentRules = "doc.xml";
+		this.currentRules = "doc.xml";
 	} catch (e) {
 		var str = "FEHLER:\n";
 		str = str + e.toString() + "\n";
@@ -1251,13 +1255,13 @@ function getRules(rDoc, loadLocal, dialog) {
 
 function format() {
 	try {
-		var xml = window.parent.frames.rules.rulesEditor.getSession().getValue();
+		var xml = this.rulesEditor.getSession().getValue();
 		xml = vkbeautify.xml(xml);
-		window.parent.frames.rules.rulesEditor.getSession().setValue(xml);
+		this.rulesEditor.getSession().setValue(xml);
 		// window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
 		if (typeof currXMLName != "undefined" && currXMLName != null) {
 			setXMLPosition(currXMLName);
-			markers = setMarkers(positions, window.parent.frames['cont'].textEditor);
+			markers = setMarkers(positions, this.textEditor);
 		}
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -1270,9 +1274,9 @@ function format() {
 
 function formatScript() {
 	try {
-		var txt = window.parent.frames.cont.textEditor.getSession().getValue();
+		var txt = this.textEditor.getSession().getValue();
 		txt = js_beautify(txt);
-		window.parent.frames.cont.textEditor.getSession().setValue(txt);
+		this.textEditor.getSession().setValue(txt);
 	} catch (e) {
 		var str = "FEHLER:\n";
 		str = str + e.toString() + "\n";
@@ -1285,7 +1289,7 @@ function formatScript() {
 function save(file, text, dialog) {
 	try {
 		var ret = true;
-		window.parent.frames.control.document.reader.save(file, text)
+		document.reader.save(file, text)
 		if (dialog)
 			alert(file + " erfolgreich gesichert!");
 		return ret;
@@ -1308,8 +1312,8 @@ function handleRulesSelect(evt) {
 			var r = new FileReader();
 			r.onload = function(e) {
 				var contents = e.target.result;
-				window.parent.frames['rules'].rulesEditor.getSession().setValue(contents);
-				window.parent.frames['rules'].rulesEditor.getSession().foldAll(1);
+				this.rulesEditor.getSession().setValue(contents);
+				this.rulesEditor.getSession().foldAll(1);
 			};
 			r.readAsText(f);
 		} else {
@@ -1322,7 +1326,7 @@ function openFile(name) {
 	try {
 		var contents = "";
 		var datafile = "file://" + window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1) + name;
-		contents = window.parent.frames.control.document.reader.openFile(datafile);
+		contents = document.reader.openFile(datafile);
 		return [ contents, datafile ];
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -1335,33 +1339,33 @@ function openFile(name) {
 
 function loadScript() {
     try {
-        var fs = window.parent.document.getElementById('frameset2');
+        var fs = document.getElementById('frameset2');
         if (fs) {
             fs.cols = "90%,10%";
         }
-        oldContent = window.parent.frames.cont.textEditor.getSession().getValue();
+        oldContent = this.textEditor.getSession().getValue();
         var content;
-        if (window.parent.REC.exist(modifiedScript) && modifiedScript - length > 0) {
+        if (this.REC.exist(modifiedScript) && modifiedScript - length > 0) {
             content = modifiedScript;
         } else {
             if (isLocal()) {
                 var open = openFile("recognition.js");
                 content = open[0];
-                window.parent.workDocument = open[1];
+                this.workDocument = open[1];
                 eval(content);
-                window.parent.REC = new Recognition();
-                window.parent.REC.set(window.parent.REC);
-                removeMarkers(markers, window.parent.frames['cont'].textEditor);
-                window.parent.frames.cont.textEditor.getSession().setMode(new window.parent.frames.cont.jsMode());
-                window.parent.frames.cont.textEditor.getSession().setValue(content);
-                window.parent.frames.cont.textEditor.setShowInvisibles(false);
-                window.parent.scriptMode = true;
+                this.REC = new Recognition();
+                this.REC.set(this.REC);
+                removeMarkers(markers, this.textEditor);
+                this.textEditor.getSession().setMode(new jsMode());
+                this.textEditor.getSession().setValue(content);
+                this.textEditor.setShowInvisibles(false);
+                this.scriptMode = true;
                 manageControls();
             } else {
-                if (window.parent.REC.exist(window.parent.scriptID)) {
+                if (this.REC.exist(this.scriptID)) {
                     var dataString = {
                         "function": "getContent",
-                        "documentId": window.parent.scriptID,
+                        "documentId": this.scriptID,
                         "extract": "false",
                         "server": getServer(),
                         "username": getUser(),
@@ -1389,15 +1393,15 @@ function loadScript() {
                         success: function (data) {
                             if (data.success[0]) {
                                 content = data.result[0].toString();
-                                window.parent.workDocument = "recognition.js";
+                                this.workDocument = "recognition.js";
                                 eval(content);
-                                window.parent.REC = new Recognition();
-                                window.parent.REC.set(window.parent.REC);
-                                removeMarkers(markers, window.parent.frames['cont'].textEditor);
-                                window.parent.frames.cont.textEditor.getSession().setMode(new window.parent.frames.cont.jsMode());
-                                window.parent.frames.cont.textEditor.getSession().setValue(content);
-                                window.parent.frames.cont.textEditor.setShowInvisibles(false);
-                                window.parent.scriptMode = true;
+                                this.REC = new Recognition();
+                                this.REC.set(this.REC);
+                                removeMarkers(markers, this.textEditor);
+                                this.textEditor.getSession().setMode(new jsMode());
+                                this.textEditor.getSession().setValue(content);
+                                this.textEditor.setShowInvisibles(false);
+                                this.scriptMode = true;
                                 manageControls();
                             } else
                                 alert("Script konnte nicht gefunden werden: " + data.result[0]);
@@ -1406,10 +1410,10 @@ function loadScript() {
                 }
                 else {
                     $.get('recognition.js', function (msg) {
-                        window.parent.frames.cont.textEditor.getSession().setMode(new window.parent.frames.cont.jsMode());
-                        window.parent.frames.cont.textEditor.getSession().setValue(msg);
-                        window.parent.frames.cont.textEditor.setShowInvisibles(false);
-                        window.parent.scriptMode = true;
+                        this.textEditor.getSession().setMode(new jsMode());
+                        this.textEditor.getSession().setValue(msg);
+                        this.textEditor.setShowInvisibles(false);
+                        this.scriptMode = true;
                         manageControls();
                     });
                 }
@@ -1421,7 +1425,7 @@ function loadScript() {
         for (var prop in e)
             str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
         alert(str);
-        var fs = window.parent.document.getElementById('frameset2');
+        var fs = document.getElementById('frameset2');
         if (fs) {
             fs.cols = "40%,60%";
         }
@@ -1430,10 +1434,10 @@ function loadScript() {
 
 function reloadScript(dialog) {
 	try {
-		modifiedScript = window.parent.frames.cont.textEditor.getSession().getValue();
+		modifiedScript = this.textEditor.getSession().getValue();
 		eval(modifiedScript);
-		window.parent.REC = new Recognition();
-		window.parent.REC.set(window.parent.REC);
+		this.REC = new Recognition();
+		this.REC.set(this.REC);
 		alert("Script erfolgreich aktualisiert");
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -1447,12 +1451,12 @@ function reloadScript(dialog) {
 function getScript(dialog) {
     try {
         if (isLocal()) {
-            var ret = window.parent.frames.control.document.reader.getContent(window.parent.scriptID, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"),
+            var ret = document.reader.getContent(this.scriptID, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"),
                 getUrlParam("port"), null);
             var json = jQuery.parseJSON(ret);
             if (json.success) {
-                save(window.parent.workDocument, window.parent.frames.cont.textEditor.getSession().getValue(), false);
-                window.parent.frames.cont.textEditor.getSession().setValue(json.result);
+                save(this.workDocument, this.textEditor.getSession().getValue(), false);
+                this.textEditor.getSession().setValue(json.result);
                 if (dialog)
                     alert("Script erfolgreich heruntergeladen!");
             } else
@@ -1460,7 +1464,7 @@ function getScript(dialog) {
         } else {
             var dataString = {
                 "function": "getContent",
-                "documentId": window.parent.scriptID,
+                "documentId": this.scriptID,
                 "extract": "false",
                 "server": getServer(),
                 "username": getUser(),
@@ -1489,7 +1493,7 @@ function getScript(dialog) {
                     if (data.success[0]) {
                         if (dialog)
                             alert("Script erfolgreich heruntergeladen!");
-                        window.parent.frames.cont.textEditor.getSession().setValue(data.result.toString());
+                        this.textEditor.getSession().setValue(data.result.toString());
                     } else
                         alert("Script konnte nicht geladen werden: " + data.result[0]);
                 }
@@ -1507,10 +1511,10 @@ function getScript(dialog) {
 function sendScript(dialog) {
 	try {
 		var erg = false;
-		if (window.parent.workDocument.endsWith("recognition.js")) {
+		if (this.workDocument.endsWith("recognition.js")) {
 			if (isLocal()) {
-				window.parent.frames.control.document.reader.save(window.parent.workDocument, window.parent.frames.cont.textEditor.getSession().getValue());
-				var ret = window.parent.frames.control.document.reader.updateDocument(window.parent.scriptID, window.parent.frames.cont.textEditor.getSession().getValue(),
+				document.reader.save(this.workDocument, this.textEditor.getSession().getValue());
+				var ret = document.reader.updateDocument(this.scriptID, this.textEditor.getSession().getValue(),
 						"VerteilungsScript", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
 				if (dialog) {
 					if (ret == 200) {
@@ -1522,8 +1526,8 @@ function sendScript(dialog) {
 			} else {
 				var dataString = {
 					"function"     : "updateDocument",
-					"documentId"   : window.parent.scriptID,
-					"documentText" : window.parent.frames.cont.textEditor.getSession().getValue(),
+					"documentId"   : this.scriptID,
+					"documentText" : this.textEditor.getSession().getValue(),
 					"description"  : "VerteilungsScript",
 					"server"       : getServer(),
 					"username"     : getUser(),
@@ -1574,13 +1578,13 @@ function closeScript() {
 		if (fs) {
 			fs.cols = "40%,60%";
 		}
-		window.parent.frames.cont.textEditor.getSession().setMode(new window.parent.frames.cont.txtMode());
-		if (window.parent.REC.exist(oldContent) && oldContent.length > 0)
-			window.parent.frames.cont.textEditor.getSession().setValue(oldContent);
+		this.textEditor.getSession().setMode(new txtMode());
+		if (this.REC.exist(oldContent) && oldContent.length > 0)
+			this.textEditor.getSession().setValue(oldContent);
 		else
-			window.parent.frames.cont.textEditor.getSession().setValue("");
-		window.parent.frames.cont.textEditor.setShowInvisibles(true);
-		window.parent.scriptMode = false;
+			this.textEditor.getSession().setValue("");
+		this.textEditor.setShowInvisibles(true);
+		this.scriptMode = false;
 		manageControls();
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -1589,45 +1593,6 @@ function closeScript() {
 			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
 		alert(str);
 	}
-}
-
-function show() {
-	var printWin = window.parent.frames['test'];
-	YUI({
-		win : printWin
-	}).use("datatable", function(Y) {
-
-		// A table from data with keys that work fine as column names
-		var simple = new Y.DataTable({
-			columns : [ {
-				key : "id",
-				label : "ID"
-			}, {
-				key : "name",
-				label : "Name"
-			}, {
-				key : "price",
-				label : "Preis"
-			} ],
-			data : [ {
-				id : "ga_3475",
-				name : "gadget",
-				price : "$6.99"
-			}, {
-				id : "sp_9980",
-				name : "sprocket",
-				price : "$3.75"
-			}, {
-				id : "wi_0650",
-				name : "widget",
-				price : "$4.25"
-			} ],
-			summary : "Price sheet for inventory parts",
-			caption : "Example table with simple columns"
-		});
-
-		simple.render("#simple");
-	});
 }
 
 function stringToBytes(str) {
@@ -1659,36 +1624,36 @@ function stringToBytes(str) {
 
 
 function init() {
-    if (window.parent.REC.exist(getServer())) {
+    if (this.REC.exist(getServer())) {
 	if (isLocal()) {
 		var json;
 		var txt = [];
 		var pattern = new RegExp("true", "ig");
 		if (getUrlParam("local") == null || pattern.test(getUrlParam("local"))) {
-			window.parent.runLocal = true;
+			this.runLocal = true;
 		} else {
-			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getServer(), getUser(), getPassword(), getUrlParam("proxy"),
+			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getServer(), getUser(), getPassword(), getUrlParam("proxy"),
 					getUrlParam("port"), null));
 			if (json.success)
-				window.parent.scriptID = json.result;
+				this.scriptID = json.result;
 			else
 				txt.push("Script nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
+			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
 					null));
 			if (json.success)
-				window.parent.rulesID = json.result;
+				this.rulesID = json.result;
 			else
 				txt.push("Regeln nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
+			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
 					null));
 			if (json.success)
-				window.parent.inboxID = json.result;
+				this.inboxID = json.result;
 			else
 				txt.push("Inbox nicht gefunden! Fehler: " + json.result);
-            json = jQuery.parseJSON(window.parent.frames.control.document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
+            json = jQuery.parseJSON(document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
                 null));
             if (json.success)
-                window.parent.rootID = json.result;
+                this.rootID = json.result;
             else
                 txt.push("Archiv nicht gefunden! Fehler: " + json.result);
 
@@ -1725,7 +1690,7 @@ function init() {
                 },
 				success        : function(data) {
 				                   if (data.success[0])
-				                      window.parent.scriptID = data.result[0];
+				                      this.scriptID = data.result[0];
 				                    else{
 				                      alert("Script nicht gefunden! " + data.result[0]);
 				                    }
@@ -1760,7 +1725,7 @@ function init() {
                     },
 					success      : function(data) {
                                      if (data.success[0])
-                                       window.parent.rulesID = data.result[0];
+                                       this.rulesID = data.result[0];
                                      else{
                                        alert("Regeln nicht gefunden! " + data.result[0]);
                                     }
@@ -1795,7 +1760,7 @@ function init() {
                     },
 					success      : function(data) {
 					                 if (data.success[0])
-					                   window.parent.inboxID = data.result[0];
+					                   this.inboxID = data.result[0];
 					                 else{
 					                   alert("Inbox nicht gefunden! " + data.result[0]);
 					                 }   					             	 
@@ -1830,7 +1795,7 @@ function init() {
             },
             success      : function(data) {
                 if (data.success[0])
-                    window.parent.rootID = data.result[0];
+                    this.rootID = data.result[0];
                 else{
                     alert("Archiv nicht gefunden! " + data.result[0]);
                 }

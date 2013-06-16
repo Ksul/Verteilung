@@ -1,0 +1,295 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+<title>Simple Layout Demo</title>
+
+<link type="text/css" rel="stylesheet" href="./themes/layout/layout-default.css" />
+
+
+
+<!-- LAYOUT v 1.3.0 -->
+<script type="text/javascript" src="./jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="./jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+<script type="text/javascript" src="./jquery.layout.js"></script>
+
+<!--<script type="text/javascript" src="/lib/js/debug.js"></script>-->
+
+<style type="text/css">
+
+        /* remove padding & scrolling from panes that are 'containers' for nested layouts */
+    .ui-layout-south  {
+        border:			0; /* cosmetic */
+        padding:		0;
+        overflow:		hidden;
+    }
+
+    .ui-layout-north  {
+        border:			0; /* cosmetic */
+        padding:		0;
+        overflow:		hidden;
+    }
+
+    .ui-layout-west  {
+        border:			0; /* cosmetic */
+        padding:		0;
+        overflow:		hidden;
+    }
+
+    .ui-layout-east  {
+        border:			0; /* cosmetic */
+        padding:		0;
+        overflow:		hidden;
+    }
+
+    .ui-layout-center {
+        border:			0; /* cosmetic */
+        padding:		0;
+        overflow:		hidden;
+    }
+    .header {
+        background: #80ade5 url(./ressource/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
+        border-bottom: 1px solid #777;
+        font-weight: normal;
+        font-size: 8pt;
+        text-align: center;
+        padding: 0px 0 0px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .toggler-east-closed ,
+    .toggler-west-open    { background: url(./ressource/toggle-lt.gif) no-repeat center right; }
+    .toggler-west-closed ,
+    .toggler-east-open    { background: url(./resource/toggle-rt.gif) no-repeat center left; }
+
+        /* CUSTOM pin/close buttons */
+    span.button-pin ,
+    span.button-close {
+        position:	absolute;
+        top:		0;
+        width: 		20px;
+        height:		20px;
+        z-index:	2;
+        display:	block;
+        cursor: 	pointer;
+    }
+    span.button-close-west	{ left:	 0; }
+    span.button-close-east	{ right: 0; }
+    span.button-pin-west	{ right: 1px; }
+    span.button-pin-east	{ left:	 1px; }
+
+        /* CUSTOM close-buttons */
+    span.button-close-west			{ background: url(./ressource/go-lt-off.gif) no-repeat center; }
+    span.button-close-west:hover	{ background: url(./ressource/go-lt-on.gif)  no-repeat center; }
+    span.button-close-east			{ background: url(./ressource/go-rt-off.gif) no-repeat center; }
+    span.button-close-east:hover	{ background: url(./ressource/go-rt-on.gif)  no-repeat center; }
+
+        /* STANDARD toggler-buttons - when the east/west panes are 'closed' */
+    .toggler-west-closed		{ background: url(./ressource/go-rt-off.gif) no-repeat center; }
+    .toggler-west-closed:hover	{ background: url(./ressource/go-rt-on.gif)  no-repeat center; }
+    .toggler-east-closed		{ background: url(./ressource/go-lt-off.gif) no-repeat center; }
+    .toggler-east-closed:hover	{ background: url(./ressourcce/go-lt-on.gif)  no-repeat center; }
+
+    #mainContent .ui-layout-resizer-west-closed	{ border-left:  1px solid #BBB !important; }
+    #mainContent .ui-layout-resizer-east-closed	{ border-right: 1px solid #BBB !important; }
+    #mainContent .ui-layout-resizer:hover .ui-layout-toggler {
+        opacity: 0.4;
+        filter: alpha(opacity=40);
+    }
+    #mainContent .ui-layout-resizer:hover .ui-layout-toggler:hover {
+        opacity: 1;
+        filter: alpha(opacity=100);
+        background: #FD9 !important;
+        border-color: #CB7 !important;
+    }
+
+</style>
+
+
+
+<script type="text/javascript">
+
+    function toggleLiveResizing () {
+        $.each( $.layout.config.borderPanes, function (i, pane) {
+            var o = myLayout.options[ pane ];
+            o.livePaneResizing = !o.livePaneResizing;
+        });
+    };
+
+    function toggleStateManagement ( skipAlert, mode ) {
+        if (!$.layout.plugins.stateManagement) return;
+
+        var options	= myLayout.options.stateManagement
+                ,	enabled	= options.enabled // current setting
+                ;
+        if ($.type( mode ) === "boolean") {
+            if (enabled === mode) return; // already correct
+            enabled	= options.enabled = mode
+        }
+        else
+            enabled	= options.enabled = !enabled; // toggle option
+
+        if (!enabled) { // if disabling state management...
+            myLayout.deleteCookie(); // ...clear cookie so will NOT be found on next refresh
+            if (!skipAlert)
+                alert( 'This layout will reload as the options specify \nwhen the page is refreshed.' );
+        }
+        else if (!skipAlert)
+            alert( 'This layout will save & restore its last state \nwhen the page is refreshed.' );
+
+        // update text on button
+
+    };
+
+    // set EVERY 'state' here so will undo ALL layout changes
+    // used by the 'Reset State' button: myLayout.loadState( stateResetSettings )
+    var stateResetSettings = {
+        north__size:		200
+        ,	north__initClosed:	false
+        ,	north__initHidden:	false
+        ,	south__size:        400
+        ,	south__initClosed:	false
+        ,	south__initHidden:	false
+        ,	west__size:			200
+        ,	west__initClosed:	false
+        ,	west__initHidden:	false
+        ,	east__size:			300
+        ,	east__initClosed:	false
+        ,	east__initHidden:	false
+        , center__initHidden:   true
+    };
+
+    var myLayout;
+
+    $(document).ready(function () {
+
+
+
+
+        // this layout could be created with NO OPTIONS - but showing some here just as a sample...
+        // myLayout = $('body').layout(); -- syntax with No Options
+
+        myLayout = $('body').layout({
+
+            //	reference only - these options are NOT required because 'true' is the default
+            closable:					true	// pane can open & close
+            ,	resizable:					true	// when open, pane can be resized
+            ,	slidable:					true	// when closed, pane can 'slide' open over other panes - closes on mouse-out
+            ,	livePaneResizing:			true
+            ,	togglerClass:			"toggler"
+
+            //	some resizing/toggling settings
+            ,	north__slidable:			false	// OVERRIDE the pane-default of 'slidable=true'
+            ,   north__size:                33
+            ,   north__minSize:             33
+            ,   north__maxSize:             33
+            ,   north__resizable:          false
+            ,	north__togglerLength_closed: '100%'	// toggle-button is full-width of resizer-bar
+            ,	north__spacing_closed:		20		// big resizer-bar when open (zero height)
+
+
+            //	some pane-size settings
+            , west: {
+                size:					.6
+            ,	minSize:				0
+            ,	togglerLength_closed:	21			// make toggler 'square' - 21x21
+            ,	togglerAlign_closed:	"top"		// align to top of resizer
+            ,	togglerLength_open:		0			// NONE - using custom togglers INSIDE west-pane
+            ,	togglerTip_open:		"Close West Pane"
+            ,	togglerTip_closed:		"Open West Pane"
+            ,	slideTrigger_open:		"click" 	// default
+            ,	initClosed:				false
+
+            ,	fxSettings_open:		{ easing: "easeOutBounce" }
+
+            }
+            , center:{
+               initHidden:              true
+            ,  size:                    "auto"
+            ,  initClosed:              false
+            }
+            ,	east__size:                .4
+            ,   south__size:                 .17
+            ,   north__size:                 33
+
+
+            ,   south__spacing_open:        8
+            ,	south__childOptions: {
+                	west__paneSelector:		".inner-west"
+                ,	center__paneSelector:	".inner-center"
+                ,	west__size:				.74
+                ,	center__size:			.26
+                ,	spacing_open:			8  // ALL panes
+                ,	spacing_closed:			12 // ALL panes
+
+
+            }
+                //	enable state management
+            ,	stateManagement__enabled:	true // automatic cookie load & save enabled by default
+
+            ,	showDebugMessages:			true // log and/or display messages from debugging & testing code
+        });
+
+        // if there is no state-cookie, then DISABLE state management initially
+        var cookieExists = !$.isEmptyObject( myLayout.readCookie() );
+        if (!cookieExists) toggleStateManagement( true, false );
+        var westSelector = "body > .ui-layout-west"; // outer-west pane
+        var eastSelector = "body > .ui-layout-east"; // outer-east pane
+
+
+        $("<span></span>").attr("id", "west-closer" ).prependTo( westSelector );
+        $("<span></span>").attr("id", "east-closer").prependTo( eastSelector );
+        // BIND layout events to close-buttons to make them functional
+        myLayout.addCloseBtn("#west-closer", "west");
+        myLayout.addCloseBtn("#east-closer", "east");
+
+        // 'Reset State' button requires updated functionality in rc29.15+
+        if ($.layout.revision && $.layout.revision >= 0.032915)
+            $('#btnReset').show();
+
+    });
+
+</script>
+
+
+</head>
+<body>
+
+<!-- manually attach allowOverflow method to pane -->
+<div class="ui-layout-north" onmouseover="myLayout.allowOverflow('north')" onmouseout="myLayout.resetOverflow(this)">
+    This is the north pane, closable, slidable and resizable
+
+  </div>
+
+<!-- allowOverflow auto-attached by option: west__showOverflowOnHover = true -->
+
+
+<div class="ui-layout-south">
+    <div class="inner-west">South-West</div>
+    <div class="inner-center">South-Center</div>
+</div>
+
+<div class="ui-layout-west">
+    <div class="header">Outer - West</div>
+
+    <div class="content">
+    This is the WEST pane
+        </div>
+</div>
+
+<div class="ui-layout-east">
+    <div class="header">East</div>
+
+    <div class="content">
+        This is the EAST pane
+    </div>
+</div>
+
+<div class="ui-layout-center">
+    Center
+</div>
+
+</body>
+</html>
