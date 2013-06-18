@@ -1,5 +1,5 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 
@@ -19,38 +19,8 @@
 
 <style type="text/css">
 
-        /* remove padding & scrolling from panes that are 'containers' for nested layouts */
-    .ui-layout-south  {
-        border:			0; /* cosmetic */
-        padding:		0;
-        overflow:		hidden;
-    }
 
-    .ui-layout-north  {
-        border:			0; /* cosmetic */
-        padding:		0;
-        overflow:		hidden;
-    }
-
-    .ui-layout-west  {
-        border:			0; /* cosmetic */
-        padding:		0;
-        overflow:		hidden;
-    }
-
-    .ui-layout-east  {
-        border:			0; /* cosmetic */
-        padding:		0;
-        overflow:		hidden;
-    }
-
-    .ui-layout-center {
-        border:			0; /* cosmetic */
-        padding:		0;
-        overflow:		hidden;
-    }
-
-    .ui-layout-south.inner-west {
+    .ui-layout-pane {
         border:			0; /* cosmetic */
         padding:		0;
         overflow:		hidden;
@@ -118,6 +88,7 @@
         cursor: 	pointer;
     }
     span.button-close-west	{ left:	 0; }
+    span.button-close-south	{ left:	 0; }
     span.button-close-center{ right: 0; }
     span.button-pin-west	{ right: 1px; }
     span.button-pin-center	{ left:	 1px; }
@@ -125,6 +96,8 @@
         /* CUSTOM close-buttons */
     span.button-close-west			{ background: url(./ressource/go-lt-off.gif) no-repeat center; }
     span.button-close-west:hover	{ background: url(./ressource/go-lt-on.gif)  no-repeat center; }
+    span.button-close-south			{ background: url(./ressource/go-lt-off.gif) no-repeat center; }
+    span.button-close-south:hover	{ background: url(./ressource/go-lt-on.gif)  no-repeat center; }
     span.button-close-center		{ background: url(./ressource/go-rt-off.gif) no-repeat center; }
     span.button-close-center:hover	{ background: url(./ressource/go-rt-on.gif)  no-repeat center; }
 
@@ -289,13 +262,14 @@
         var cookieExists = !$.isEmptyObject( myLayout.readCookie() );
         if (!cookieExists) toggleStateManagement( true, false );
         var westSelector = "body > .ui-layout-west"; // outer-west pane
-        var centerSelector = "body > .ui-layout-center"; // outer-east pane
+        var southSelector = "body > .ui-layout-south > .inner-west"; // outer-east pane
 
 
         $("<span></span>").attr("id", "west-closer" ).prependTo( westSelector );
-
+        $("<span></span>").attr("id", "south-closer" ).prependTo( southSelector );
         // BIND layout events to close-buttons to make them functional
         myLayout.addCloseBtn("#west-closer", "west");
+        myLayout.addCloseBtn("#south-closer", "south");
 
 
         // 'Reset State' button requires updated functionality in rc29.15+
