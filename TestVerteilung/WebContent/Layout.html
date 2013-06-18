@@ -16,6 +16,7 @@
 
 <!--<script type="text/javascript" src="/lib/js/debug.js"></script>-->
 
+
 <style type="text/css">
 
         /* remove padding & scrolling from panes that are 'containers' for nested layouts */
@@ -48,6 +49,12 @@
         padding:		0;
         overflow:		hidden;
     }
+
+    .ui-layout-south.inner-west {
+        border:			0; /* cosmetic */
+        padding:		0;
+        overflow:		hidden;
+    }
     .header {
         background: #80ade5 url(./ressource/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
         border-bottom: 1px solid #777;
@@ -59,53 +66,78 @@
         overflow: hidden;
     }
 
-    .toggler-east-closed ,
+    html .resizer-west-open ,
+     html .resizer-east-open {
+        opacity: 0.1 !important;
+        filter: alpha(opacity=10) !important;
+    }
+    .resizer-west-open ,
+    .resizer-east-open {
+        background-color: #999;
+        opacity: 0.1;
+        filter: alpha(opacity=10);
+    }
+    .resizer-west-open:hover ,
+    .resizer-east-open:hover {
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    .resizer-dragging {
+        /* see draggable.opacity option
+        opacity: 0.5;
+        filter: alpha(opacity=50);
+        */
+    }
+    .resizer-dragging-limit	{ background: #FF3300 !important; }
+
+    .resizer-west-closed ,
+    .resizer-east-closed {
+        background: #D1E6FC url(./ressource/D1E6FC_40x100_textures_10_dots_medium_90.png) 0 0 repeat;
+        border-top: 1px solid #777;
+        border-bottom: 1px solid #777;
+    }
+    .resizer-west-closed:hover ,
+    .resizer-east-closed:hover {
+        background: #D1E6FC;
+    }
+
+    .toggler-center-closed ,
     .toggler-west-open    { background: url(./ressource/toggle-lt.gif) no-repeat center right; }
     .toggler-west-closed ,
-    .toggler-east-open    { background: url(./resource/toggle-rt.gif) no-repeat center left; }
+    .toggler-center-open    { background: url(./ressource/toggle-rt.gif) no-repeat center left; }
 
         /* CUSTOM pin/close buttons */
     span.button-pin ,
     span.button-close {
         position:	absolute;
         top:		0;
-        width: 		20px;
-        height:		20px;
+        width: 		13px;
+        height:		13px;
         z-index:	2;
         display:	block;
         cursor: 	pointer;
     }
     span.button-close-west	{ left:	 0; }
-    span.button-close-east	{ right: 0; }
+    span.button-close-center{ right: 0; }
     span.button-pin-west	{ right: 1px; }
-    span.button-pin-east	{ left:	 1px; }
+    span.button-pin-center	{ left:	 1px; }
 
         /* CUSTOM close-buttons */
     span.button-close-west			{ background: url(./ressource/go-lt-off.gif) no-repeat center; }
     span.button-close-west:hover	{ background: url(./ressource/go-lt-on.gif)  no-repeat center; }
-    span.button-close-east			{ background: url(./ressource/go-rt-off.gif) no-repeat center; }
-    span.button-close-east:hover	{ background: url(./ressource/go-rt-on.gif)  no-repeat center; }
+    span.button-close-center		{ background: url(./ressource/go-rt-off.gif) no-repeat center; }
+    span.button-close-center:hover	{ background: url(./ressource/go-rt-on.gif)  no-repeat center; }
 
         /* STANDARD toggler-buttons - when the east/west panes are 'closed' */
-    .toggler-west-closed		{ background: url(./ressource/go-rt-off.gif) no-repeat center; }
-    .toggler-west-closed:hover	{ background: url(./ressource/go-rt-on.gif)  no-repeat center; }
-    .toggler-east-closed		{ background: url(./ressource/go-lt-off.gif) no-repeat center; }
-    .toggler-east-closed:hover	{ background: url(./ressourcce/go-lt-on.gif)  no-repeat center; }
+    .toggler-west-closed		    { background: url(./ressource/go-rt-off.gif) no-repeat center; }
+    .toggler-west-closed:hover	    { background: url(./ressource/go-rt-on.gif)  no-repeat center; }
+    .toggler-center-closed		    { background: url(./ressource/go-lt-off.gif) no-repeat center; }
+    .toggler-center-closed:hover    { background: url(./ressource/go-lt-on.gif)  no-repeat center;}
 
-    #mainContent .ui-layout-resizer-west-closed	{ border-left:  1px solid #BBB !important; }
-    #mainContent .ui-layout-resizer-east-closed	{ border-right: 1px solid #BBB !important; }
-    #mainContent .ui-layout-resizer:hover .ui-layout-toggler {
-        opacity: 0.4;
-        filter: alpha(opacity=40);
-    }
-    #mainContent .ui-layout-resizer:hover .ui-layout-toggler:hover {
-        opacity: 1;
-        filter: alpha(opacity=100);
-        background: #FD9 !important;
-        border-color: #CB7 !important;
-    }
+
 
 </style>
+
 
 
 
@@ -143,23 +175,6 @@
 
     };
 
-    // set EVERY 'state' here so will undo ALL layout changes
-    // used by the 'Reset State' button: myLayout.loadState( stateResetSettings )
-    var stateResetSettings = {
-        north__size:		200
-        ,	north__initClosed:	false
-        ,	north__initHidden:	false
-        ,	south__size:        400
-        ,	south__initClosed:	false
-        ,	south__initHidden:	false
-        ,	west__size:			200
-        ,	west__initClosed:	false
-        ,	west__initHidden:	false
-        ,	east__size:			300
-        ,	east__initClosed:	false
-        ,	east__initHidden:	false
-        , center__initHidden:   true
-    };
 
     var myLayout;
 
@@ -173,59 +188,97 @@
 
         myLayout = $('body').layout({
 
+            defaults: {
+                size:					"auto"
+                ,	minSize:				13
+                ,	paneClass:				"pane" 		// default = 'ui-layout-pane'
+
+                ,	togglerClass:			"toggler"	// default = 'ui-layout-toggler'
+                ,	buttonClass:			"button"	// default = 'ui-layout-button'
+                ,	contentSelector:		".content"	// inner div to auto-size so only it scrolls, not the entire pane!
+                ,	contentIgnoreSelector:	"span"		// 'paneSelector' for content to 'ignore' when measuring room for content
+                ,	togglerLength_open:		0			// WIDTH of toggler on north/south edges - HEIGHT on east/west edges
+                ,	togglerLength_closed:	0			// "100%" OR -1 = full height
+                ,	hideTogglerOnSlide:		true		// hide the toggler when pane is 'slid open'
+                ,	togglerTip_open:		"Close This Pane"
+                ,	togglerTip_closed:		"Open This Pane"
+                ,	resizerTip:				"Resize This Pane"
+                //	effect defaults - overridden on some panes
+                ,	fxName:					"slide"		// none, slide, drop, scale
+                ,	fxSpeed_open:			800
+                ,	fxSpeed_close:			1000
+                ,	fxSettings_open:		{ easing: "easeInQuint" }
+                ,	fxSettings_close:		{ easing: "easeOutQuint" }
+                ,   closable:				true	// pane can open & close
+                ,	resizable:				true	// when open, pane can be resized
+                ,	slidable:				true	// when closed, pane can 'slide' open over other panes - closes on mouse-out
+                ,	livePaneResizing:		true
+
+            }
+
             //	reference only - these options are NOT required because 'true' is the default
-            closable:					true	// pane can open & close
-            ,	resizable:					true	// when open, pane can be resized
-            ,	slidable:					true	// when closed, pane can 'slide' open over other panes - closes on mouse-out
-            ,	livePaneResizing:			true
-            ,	togglerClass:			"toggler"
 
-            //	some resizing/toggling settings
-            ,	north__slidable:			false	// OVERRIDE the pane-default of 'slidable=true'
-            ,   north__size:                33
-            ,   north__minSize:             33
-            ,   north__maxSize:             33
-            ,   north__resizable:          false
-            ,	north__togglerLength_closed: '100%'	// toggle-button is full-width of resizer-bar
-            ,	north__spacing_closed:		20		// big resizer-bar when open (zero height)
 
+           , north: {
+            	slidable:			false	// OVERRIDE the pane-default of 'slidable=true'
+            ,   size:                33
+            ,   minSize:             33
+            ,   maxSize:             33
+            ,   resizable:          false
+                }
 
             //	some pane-size settings
             , west: {
                 size:					.6
-            ,	minSize:				0
-            ,	togglerLength_closed:	21			// make toggler 'square' - 21x21
+            ,	togglerLength_closed:	13			// make toggler 'square' - 21x21
             ,	togglerAlign_closed:	"top"		// align to top of resizer
             ,	togglerLength_open:		0			// NONE - using custom togglers INSIDE west-pane
             ,	togglerTip_open:		"Close West Pane"
             ,	togglerTip_closed:		"Open West Pane"
             ,	slideTrigger_open:		"click" 	// default
             ,	initClosed:				false
-
+            ,   spacing_closed:		    13
             ,	fxSettings_open:		{ easing: "easeOutBounce" }
 
             }
-            , center:{
+            , east:{
                initHidden:              true
-            ,  size:                    "auto"
-            ,  initClosed:              false
+            ,  size:                    .4
+            ,  initClosed:              true
             }
-            ,	east__size:                .4
-            ,   south__size:                 .17
-            ,   north__size:                 33
-
-
-            ,   south__spacing_open:        8
-            ,	south__childOptions: {
-                	west__paneSelector:		".inner-west"
-                ,	center__paneSelector:	".inner-center"
-                ,	west__size:				.74
-                ,	center__size:			.26
-                ,	spacing_open:			8  // ALL panes
-                ,	spacing_closed:			12 // ALL panes
-
-
+            , center: {
+                initHidden:             false
+                ,  size:                "auto"
+                ,  initClosed:          false
+                ,   resizable:          true
             }
+            , south:{
+                size:                   0.17
+            ,   childOptions: {
+                    west:{
+                        paneSelector:		".inner-west"
+                    ,   size:                .74
+                    ,	togglerLength_closed:	13			// make toggler 'square' - 21x21
+                    ,	togglerAlign_closed:	"top"		// align to top of resizer
+                    ,	togglerLength_open:		0			// NONE - using custom togglers INSIDE west-pane
+                    ,	togglerTip_open:		"Close West Pane"
+                    ,	togglerTip_closed:		"Open West Pane"
+                    ,	slideTrigger_open:		"click" 	// default
+                    ,	initClosed:				false
+                    ,   spacing_closed:		    13
+                    ,	fxSettings_open:		{ easing: "easeOutBounce" }
+
+                    }
+                    , center:{
+                        size:                 "auto"
+                    ,   paneSelector:	      ".inner-center"
+                    }
+                    ,	spacing_open:			8  // ALL panes
+                    ,	spacing_closed:			12 // ALL panes
+
+                }
+            }
+
                 //	enable state management
             ,	stateManagement__enabled:	true // automatic cookie load & save enabled by default
 
@@ -236,14 +289,14 @@
         var cookieExists = !$.isEmptyObject( myLayout.readCookie() );
         if (!cookieExists) toggleStateManagement( true, false );
         var westSelector = "body > .ui-layout-west"; // outer-west pane
-        var eastSelector = "body > .ui-layout-east"; // outer-east pane
+        var centerSelector = "body > .ui-layout-center"; // outer-east pane
 
 
         $("<span></span>").attr("id", "west-closer" ).prependTo( westSelector );
-        $("<span></span>").attr("id", "east-closer").prependTo( eastSelector );
+
         // BIND layout events to close-buttons to make them functional
         myLayout.addCloseBtn("#west-closer", "west");
-        myLayout.addCloseBtn("#east-closer", "east");
+
 
         // 'Reset State' button requires updated functionality in rc29.15+
         if ($.layout.revision && $.layout.revision >= 0.032915)
@@ -260,22 +313,40 @@
 <!-- manually attach allowOverflow method to pane -->
 <div class="ui-layout-north" onmouseover="myLayout.allowOverflow('north')" onmouseout="myLayout.resetOverflow(this)">
     This is the north pane, closable, slidable and resizable
-
-  </div>
+</div>
 
 <!-- allowOverflow auto-attached by option: west__showOverflowOnHover = true -->
 
 
 <div class="ui-layout-south">
-    <div class="inner-west">South-West</div>
-    <div class="inner-center">South-Center</div>
+    <div class="inner-west">
+        <div class="header">Console</div>
+        <div class="ui-layout-content">
+        South-West
+    </div>
+        </div>
+    <div class="inner-center">
+        <div class="header">Results</div>
+        <div class="ui-layout-content">
+        South-Center
+    </div>
+        </div>
 </div>
 
 <div class="ui-layout-west">
     <div class="header">Outer - West</div>
 
     <div class="content">
-    This is the WEST pane
+        This is the WEST pane
+    </div>
+</div>
+
+
+<div class="ui-layout-center">
+    <div class="header">East</div>
+
+    <div class="content">
+    Center
         </div>
 </div>
 
@@ -287,9 +358,6 @@
     </div>
 </div>
 
-<div class="ui-layout-center">
-    Center
-</div>
 
 </body>
 </html>
