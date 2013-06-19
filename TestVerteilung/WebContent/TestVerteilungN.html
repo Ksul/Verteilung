@@ -637,6 +637,7 @@ var currentFile = null;
 var currentContainer = null;
 var jsMode;
 var txtMode;
+var layoutState;
 REC = new Recognition();
 REC.set(REC);
 
@@ -773,29 +774,36 @@ treeObject = jQuery.jstree._reference(tree);
 
 <div class="ui-layout-south">
     <div class="inner-west">
-        <div id="inOutput" style="height: 100%; width: 100%"> </div>
+        <div class="header">Console</div>
+        <div class="content">
+            <div id="inOutput" style="height: 100%; width: 100%"></div>
         </div>
+    </div>
     <div class="inner-center">
-        <div id="inProps" style="height: 100%; width: 100%"></div>
+        <div class="header">Results</div>
+        <div class="content">
+            <div id="inProps" style="height: 100%; width: 100%"></div>
+        </div>
     </div>
 </div>
 
 <div class="ui-layout-west">
-    <div class="header">Outer - West</div>
-
+    <div id="headerWest" class="header">West</div>
     <div class="content">
-
-    <div class="example yui3-skin-sam">
-        <div id="dtable"></div>
-        <div id="labels"></div>
-    </div>
-    <div id="inTxt" style="height: 100%; width: 100%"></div>
-    <div id="tree"></div>
+        <div class="example yui3-skin-sam">
+            <div id="dtable"></div>
+            <div id="labels"></div>
         </div>
+        <div id="inTxt" style="height: 100%; width: 100%"></div>
+        <div id="tree"></div>
+    </div>
 </div>
 
 <div class="ui-layout-center">
-    <div id="inRules" style="height: 100%; width: 100%"></div>
+    <div class="header">Rules</div>
+    <div class="content">
+        <div id="inRules" style="height: 100%; width: 100%"></div>
+    </div>
 </div>
 
 </body>

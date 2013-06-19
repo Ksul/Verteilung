@@ -201,6 +201,7 @@ function loadText(txt, name, typ, container) {
 	this.currentContainer = container;
 	removeMarkers(markers, this.textEditor);
 	this.textEditor.getSession().setValue(txt);
+    document.getElementById("headerWest").firstChild.nodeValue = name;
 	fillMessageBox("", false);
 	this.propsEditor.getSession().setValue("");
 	manageControls();
@@ -237,7 +238,6 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
 			silent : false
 		});
 		manageControls();
-
 	} catch (e) {
 		var str = "FEHLER:\n";
 		str = str + e.toString() + "\n";
@@ -1339,6 +1339,7 @@ function openFile(name) {
 
 function loadScript() {
     try {
+        layoutState = myLayout.state;
         myLayout.sizePane("west", "100%");
         oldContent = this.textEditor.getSession().getValue();
         var content;
@@ -1422,10 +1423,7 @@ function loadScript() {
         for (var prop in e)
             str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
         alert(str);
-        var fs = document.getElementById('frameset2');
-        if (fs) {
-            fs.cols = "40%,60%";
-        }
+        myLayout.sizePane("west", state.west.size);
     }
 }
 
@@ -1571,10 +1569,7 @@ function sendScript(dialog) {
 
 function closeScript() {
 	try {
-		var fs = window.parent.document.getElementById('frameset2');
-		if (fs) {
-			fs.cols = "40%,60%";
-		}
+        myLayout.sizePane("west", state.west.size);
 		this.textEditor.getSession().setMode(new txtMode());
 		if (this.REC.exist(oldContent) && oldContent.length > 0)
 			this.textEditor.getSession().setValue(oldContent);
