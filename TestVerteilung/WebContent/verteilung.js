@@ -1339,10 +1339,7 @@ function openFile(name) {
 
 function loadScript() {
     try {
-        var fs = document.getElementById('frameset2');
-        if (fs) {
-            fs.cols = "90%,10%";
-        }
+        myLayout.sizePane("west", "100%");
         oldContent = this.textEditor.getSession().getValue();
         var content;
         if (this.REC.exist(modifiedScript) && modifiedScript - length > 0) {

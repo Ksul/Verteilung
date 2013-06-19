@@ -36,79 +36,6 @@
         overflow: hidden;
     }
 
-    html .resizer-west-open ,
-     html .resizer-east-open {
-        opacity: 0.1 !important;
-        filter: alpha(opacity=10) !important;
-    }
-    .resizer-west-open ,
-    .resizer-east-open {
-        background-color: #999;
-        opacity: 0.1;
-        filter: alpha(opacity=10);
-    }
-    .resizer-west-open:hover ,
-    .resizer-east-open:hover {
-        opacity: 1;
-        filter: alpha(opacity=100);
-    }
-    .resizer-dragging {
-        /* see draggable.opacity option
-        opacity: 0.5;
-        filter: alpha(opacity=50);
-        */
-    }
-    .resizer-dragging-limit	{ background: #FF3300 !important; }
-
-    .resizer-west-closed ,
-    .resizer-east-closed {
-        background: #D1E6FC url(./ressource/D1E6FC_40x100_textures_10_dots_medium_90.png) 0 0 repeat;
-        border-top: 1px solid #777;
-        border-bottom: 1px solid #777;
-    }
-    .resizer-west-closed:hover ,
-    .resizer-east-closed:hover {
-        background: #D1E6FC;
-    }
-
-    .toggler-center-closed ,
-    .toggler-west-open    { background: url(./ressource/toggle-lt.gif) no-repeat center right; }
-    .toggler-west-closed ,
-    .toggler-center-open    { background: url(./ressource/toggle-rt.gif) no-repeat center left; }
-
-        /* CUSTOM pin/close buttons */
-    span.button-pin ,
-    span.button-close {
-        position:	absolute;
-        top:		0;
-        width: 		13px;
-        height:		13px;
-        z-index:	2;
-        display:	block;
-        cursor: 	pointer;
-    }
-    span.button-close-west	{ left:	 0; }
-    span.button-close-south	{ left:	 0; }
-    span.button-close-center{ right: 0; }
-    span.button-pin-west	{ right: 1px; }
-    span.button-pin-center	{ left:	 1px; }
-
-        /* CUSTOM close-buttons */
-    span.button-close-west			{ background: url(./ressource/go-lt-off.gif) no-repeat center; }
-    span.button-close-west:hover	{ background: url(./ressource/go-lt-on.gif)  no-repeat center; }
-    span.button-close-south			{ background: url(./ressource/go-lt-off.gif) no-repeat center; }
-    span.button-close-south:hover	{ background: url(./ressource/go-lt-on.gif)  no-repeat center; }
-    span.button-close-center		{ background: url(./ressource/go-rt-off.gif) no-repeat center; }
-    span.button-close-center:hover	{ background: url(./ressource/go-rt-on.gif)  no-repeat center; }
-
-        /* STANDARD toggler-buttons - when the east/west panes are 'closed' */
-    .toggler-west-closed		    { background: url(./ressource/go-rt-off.gif) no-repeat center; }
-    .toggler-west-closed:hover	    { background: url(./ressource/go-rt-on.gif)  no-repeat center; }
-    .toggler-center-closed		    { background: url(./ressource/go-lt-off.gif) no-repeat center; }
-    .toggler-center-closed:hover    { background: url(./ressource/go-lt-on.gif)  no-repeat center;}
-
-
-
 </style>
 
 
@@ -165,16 +92,9 @@
                 size:					"auto"
                 ,	minSize:				13
                 ,	paneClass:				"pane" 		// default = 'ui-layout-pane'
-
-                ,	togglerClass:			"toggler"	// default = 'ui-layout-toggler'
-                ,	buttonClass:			"button"	// default = 'ui-layout-button'
+                ,	initClosed:				false
                 ,	contentSelector:		".content"	// inner div to auto-size so only it scrolls, not the entire pane!
                 ,	contentIgnoreSelector:	"span"		// 'paneSelector' for content to 'ignore' when measuring room for content
-                ,	togglerLength_open:		0			// WIDTH of toggler on north/south edges - HEIGHT on east/west edges
-                ,	togglerLength_closed:	0			// "100%" OR -1 = full height
-                ,	hideTogglerOnSlide:		true		// hide the toggler when pane is 'slid open'
-                ,	togglerTip_open:		"Close This Pane"
-                ,	togglerTip_closed:		"Open This Pane"
                 ,	resizerTip:				"Resize This Pane"
                 //	effect defaults - overridden on some panes
                 ,	fxName:					"slide"		// none, slide, drop, scale
@@ -186,44 +106,31 @@
                 ,	resizable:				true	// when open, pane can be resized
                 ,	slidable:				true	// when closed, pane can 'slide' open over other panes - closes on mouse-out
                 ,	livePaneResizing:		true
-
+                ,	spacing_open:			8  // ALL panes
+                ,	spacing_closed:			12 // ALL panes
             }
 
             //	reference only - these options are NOT required because 'true' is the default
 
 
            , north: {
-            	slidable:			false	// OVERRIDE the pane-default of 'slidable=true'
+            	slidable:			true	// OVERRIDE the pane-default of 'slidable=true'
             ,   size:                33
-            ,   minSize:             33
-            ,   maxSize:             33
             ,   resizable:          false
                 }
 
             //	some pane-size settings
             , west: {
                 size:					.6
-            ,	togglerLength_closed:	13			// make toggler 'square' - 21x21
-            ,	togglerAlign_closed:	"top"		// align to top of resizer
-            ,	togglerLength_open:		0			// NONE - using custom togglers INSIDE west-pane
-            ,	togglerTip_open:		"Close West Pane"
-            ,	togglerTip_closed:		"Open West Pane"
-            ,	slideTrigger_open:		"click" 	// default
-            ,	initClosed:				false
-            ,   spacing_closed:		    13
             ,	fxSettings_open:		{ easing: "easeOutBounce" }
-
-            }
-            , east:{
-               initHidden:              true
-            ,  size:                    .4
-            ,  initClosed:              true
+                ,   closable:				true	// pane can open & close
+                ,	resizable:				true	// when open, pane can be resized
+                ,	slidable:				true
             }
             , center: {
                 initHidden:             false
-                ,  size:                "auto"
+                ,  size:                .4
                 ,  initClosed:          false
-                ,   resizable:          true
             }
             , south:{
                 size:                   0.17
@@ -231,24 +138,12 @@
                     west:{
                         paneSelector:		".inner-west"
                     ,   size:                .74
-                    ,	togglerLength_closed:	13			// make toggler 'square' - 21x21
-                    ,	togglerAlign_closed:	"top"		// align to top of resizer
-                    ,	togglerLength_open:		0			// NONE - using custom togglers INSIDE west-pane
-                    ,	togglerTip_open:		"Close West Pane"
-                    ,	togglerTip_closed:		"Open West Pane"
-                    ,	slideTrigger_open:		"click" 	// default
-                    ,	initClosed:				false
-                    ,   spacing_closed:		    13
-                    ,	fxSettings_open:		{ easing: "easeOutBounce" }
 
                     }
                     , center:{
                         size:                 "auto"
                     ,   paneSelector:	      ".inner-center"
                     }
-                    ,	spacing_open:			8  // ALL panes
-                    ,	spacing_closed:			12 // ALL panes
-
                 }
             }
 
@@ -261,20 +156,6 @@
         // if there is no state-cookie, then DISABLE state management initially
         var cookieExists = !$.isEmptyObject( myLayout.readCookie() );
         if (!cookieExists) toggleStateManagement( true, false );
-        var westSelector = "body > .ui-layout-west"; // outer-west pane
-        var southSelector = "body > .ui-layout-south > .inner-west"; // outer-east pane
-
-
-        $("<span></span>").attr("id", "west-closer" ).prependTo( westSelector );
-        $("<span></span>").attr("id", "south-closer" ).prependTo( southSelector );
-        // BIND layout events to close-buttons to make them functional
-        myLayout.addCloseBtn("#west-closer", "west");
-        myLayout.addCloseBtn("#south-closer", "south");
-
-
-        // 'Reset State' button requires updated functionality in rc29.15+
-        if ($.layout.revision && $.layout.revision >= 0.032915)
-            $('#btnReset').show();
 
     });
 
@@ -324,13 +205,6 @@
         </div>
 </div>
 
-<div class="ui-layout-east">
-    <div class="header">East</div>
-
-    <div class="content">
-        This is the EAST pane
-    </div>
-</div>
 
 
 </body>
