@@ -412,23 +412,28 @@ $(document).ready(function () {
             ,   closable:				true	// pane can open & close
             ,	resizable:				true	// when open, pane can be resized
             ,	slidable:				true
+            ,   onresize:	            function () { textEditor.resize(); }
         }
         , center: {
             initHidden:             false
             ,  size:                .4
             ,  initClosed:          false
+            ,  onresize:	        function () { rulesEditor.resize(); }
+
         }
         , south:{
             size:                   0.17
             ,   childOptions: {
                 west:{
                     paneSelector:		".inner-west"
-                    ,   size:                .74
+                    ,   size:            .74
+                    ,  onresize:	     function () { outputEditor.resize(); }
 
                 }
                 , center:{
                     size:                 "auto"
-                    ,   paneSelector:	      ".inner-center"
+                    ,   paneSelector:	  ".inner-center"
+                    ,  onresize:	        function () { propsEditor.resize(); }
                 }
             }
         }
@@ -776,25 +781,25 @@ treeObject = jQuery.jstree._reference(tree);
     <div class="inner-west">
         <div class="header">Console</div>
         <div class="content">
-            <div id="inOutput" style="height: 100%; width: 100%"></div>
+            <div id="inOutput" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
         </div>
     </div>
     <div class="inner-center">
         <div class="header">Results</div>
         <div class="content">
-            <div id="inProps" style="height: 100%; width: 100%"></div>
+            <div id="inProps" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
         </div>
     </div>
 </div>
 
 <div class="ui-layout-west">
-    <div id="headerWest" class="header">West</div>
+    <div id="headerWest" class="header"> </div>
     <div class="content">
         <div class="example yui3-skin-sam">
             <div id="dtable"></div>
             <div id="labels"></div>
         </div>
-        <div id="inTxt" style="height: 100%; width: 100%"></div>
+        <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
         <div id="tree"></div>
     </div>
 </div>
@@ -802,7 +807,7 @@ treeObject = jQuery.jstree._reference(tree);
 <div class="ui-layout-center">
     <div class="header">Rules</div>
     <div class="content">
-        <div id="inRules" style="height: 100%; width: 100%"></div>
+        <div id="inRules" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
     </div>
 </div>
 

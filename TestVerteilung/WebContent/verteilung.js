@@ -1423,7 +1423,7 @@ function loadScript() {
         for (var prop in e)
             str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
         alert(str);
-        myLayout.sizePane("west", state.west.size);
+        myLayout.sizePane("west", layoutState.west.size);
     }
 }
 
@@ -1569,7 +1569,7 @@ function sendScript(dialog) {
 
 function closeScript() {
 	try {
-        myLayout.sizePane("west", state.west.size);
+        myLayout.sizePane("west", layoutState.west.size);
 		this.textEditor.getSession().setMode(new txtMode());
 		if (this.REC.exist(oldContent) && oldContent.length > 0)
 			this.textEditor.getSession().setValue(oldContent);
