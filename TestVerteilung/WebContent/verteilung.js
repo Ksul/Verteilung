@@ -1067,6 +1067,21 @@ function closeAlfresco(){
 }
 
 function openSettings(){
+    var serverInput = document.getElementById('server');
+    if (this.REC.exist(paramServer))
+        serverInput.setAttribute('value',paramServer);
+    var userInput = document.getElementById('user');
+    if (this.REC.exist(paramUser))
+        userInput.setAttribute('value',paramUser);
+    var passInput = document.getElementById('server');
+    if (this.REC.exist(paramPass))
+       passInput.setAttribute('value',paramPass);
+    var proxyInput = document.getElementById('proxy');
+    if (this.REC.exist(paramProxy))
+        proxyInput.setAttribute('value',paramProxy);
+    var portInput = document.getElementById('port');
+    if (this.REC.exist(paramPort))
+        portInput.setAttribute('value',paramPort);
     this.$( "#dialog-form" ).dialog( "open" );
 }
 
@@ -1616,6 +1631,22 @@ function stringToBytes(str) {
 
 
 function init() {
+    var cookie = $.cookie("settings");
+    if (this.REC.exist(cookie)) {
+        settings = $.parseJSON(cookie);
+        for (var set in settings.settings){
+           if (set.key == "server")
+                paramServer = set.value;
+            if (set.key == "user")
+                paramUser = set.value;
+            if (set.key == "password")
+                paramPass = set.value;
+            if (set.key == "proxy")
+                paramProxy = set.value;
+            if (set.key == "port")
+                paramPort = set.value;
+        }
+    }
     if (this.REC.exist(getServer())) {
 	if (isLocal()) {
 		var json;
@@ -1806,8 +1837,3 @@ var oldContent = null;
 var modifiedScript = null;
 var searchCont = false;
 var searchRules = false;
-var paramServer = null;
-var paramProxy = null;
-var paramPort = null;
-var paramUser = null;
-var paramPass = null;
