@@ -21,22 +21,11 @@ function isLocal() {
 	return (this.location.href.startsWith("file"));
 }
 
-function getServer() {
-	if (paramServer == null)
-		paramServer = getUrlParam("server");
-	return paramServer;
-}
-
-function getUser(){
-	if (paramUser == null)
-		paramUser = getUrlParam("user");
-	return paramUser;
-}
-
-function getPassword(){
-	if (paramPass == null)
-		paramPass = getUrlParam("password");
-	return paramPass;
+function getSettings(key){
+    if (settings.settings.filter(function(o) {return o.key.indexOf(key) >= 0;}).length == 0){
+        settings.settings.push({"key":key, "value":getUrlParam(key)});
+    }
+    return settings.settings.filter(function(o) {return o.key.indexOf(key) >= 0;})[0].value;
 }
 
 function showProgress() {
@@ -145,17 +134,17 @@ function openPDF(name, fromServer) {
 	try {
   	if (fromServer) {
   		if (isLocal()){
-  			var ticket = document.reader.getTicket(getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
+  			var ticket = document.reader.getTicket(getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
   			window.open(name + "?alf_ticket=" + ticket);
   		}
   		else {
 				var dataString = {
 						"function"  : "getTicket",
-						"server"    : getServer(),
-						"username"  : getUser(),
-						"password"  : getPassword(),
-						"proxyHost" : getUrlParam("proxy"),
-						"proxyPort" : getUrlParam("port")
+						"server"    : getSettings("server"),
+						"username"  : getSettings("user"),
+						"password"  : getSettings("password"),
+						"proxyHost" : getSettings("proxy"),
+						"proxyPort" : getSettings("port")
 					};
 					$.ajax({
 						type        : "POST",
@@ -636,7 +625,7 @@ function imageFieldFormatter(o) {
 		return (function(name) {
 			var docId = "workspace:/SpacesStore/" + this.daten[name]["container"];
 			if (isLocal()) {
-				var json = jQuery.parseJSON(document.reader.moveDocument(docId, this.inboxID, getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null));
+				var json = jQuery.parseJSON(document.reader.moveDocument(docId, this.inboxID, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null));
 				if (!json.success)
 					alert("Dokument nicht verschoben: " + json.result);
 			}
@@ -645,11 +634,11 @@ function imageFieldFormatter(o) {
 					"function"			: "moveDocument",
 					"documentId"		: docId,
 					"destinationId"	    : this.inboxID,
-					"server"			: getServer(),
-					"username"			: getUser(),
-					"password"			: getPassword(),
-					"proxyHost"			: getUrlParam("proxy"),
-					"proxyPort"			: getUrlParam("port")
+					"server"			: getSettings("server"),
+					"username"			: getSettings("user"),
+					"password"			: getSettings("password"),
+					"proxyHost"			: getSettings("proxy"),
+					"proxyPort"			: getSettings("port")
 				};
 				$.ajax({
 					type						: "POST",
@@ -997,7 +986,7 @@ function sendRules(dialog) {
 			vkbeautify.xml(this.rulesEditor.getSession().getValue());
 			if (isLocal()) {
 				var ret = document.reader.updateDocumentByFile(this.rulesID, this.currentRules,
-						"XML-Beschreibung der Dokumente", "application/xml", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
+						"XML-Beschreibung der Dokumente", "application/xml", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
 				if (dialog) {
 					if (ret == 200) {
 						alert("Regeln erfolgreich übertragen!");
@@ -1012,11 +1001,11 @@ function sendRules(dialog) {
 				"description"  : "XML-Beschreibung der Dokumente",
 				"documentId"   : this.rulesID,
 			  "mimeType"     : "application/xml",
-				"server"       : getServer(),
-				"username"     : getUser(),
-				"password"     : getPassword(),
-				"proxyHost"    : getUrlParam("proxy"),
-				"proxyPort"    : getUrlParam("port")
+				"server"       : getSettings("server"),
+				"username"     : getSettings("user"),
+				"password"     : getSettings("password"),
+				"proxyHost"    : getSettings("proxy"),
+				"proxyPort"    : getSettings("port")
 			};
 			$.ajax({
 				type           : "POST",
@@ -1068,20 +1057,15 @@ function closeAlfresco(){
 
 function openSettings(){
     var serverInput = document.getElementById('server');
-    if (this.REC.exist(paramServer))
-        serverInput.setAttribute('value',paramServer);
+    serverInput.setAttribute('value',getSettings("server"));
     var userInput = document.getElementById('user');
-    if (this.REC.exist(paramUser))
-        userInput.setAttribute('value',paramUser);
-    var passInput = document.getElementById('server');
-    if (this.REC.exist(paramPass))
-       passInput.setAttribute('value',paramPass);
+    userInput.setAttribute('value',getSettings("user"));
+    var passInput = document.getElementById('password');
+    passInput.setAttribute('value', getSettings("password"));
     var proxyInput = document.getElementById('proxy');
-    if (this.REC.exist(paramProxy))
-        proxyInput.setAttribute('value',paramProxy);
+    proxyInput.setAttribute('value', getSettings("proxy"));
     var portInput = document.getElementById('port');
-    if (this.REC.exist(paramPort))
-        portInput.setAttribute('value',paramPort);
+    portInput.setAttribute('value', getSettings("port"));
     this.$( "#dialog-form" ).dialog( "open" );
 }
 
@@ -1095,16 +1079,16 @@ function loadAlfrescoFolder(folderName) {
     daten = new Array();
     tableData = new Array();
 		if (isLocal()) {
-			ret = document.reader.listFolder(folderName, "false", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"));
+			ret = document.reader.listFolder(folderName, "false", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
 			var json = jQuery.parseJSON(ret);
 			var ergebnis = json.result;
 			for ( var i = 0; i < ergebnis.length; i++) {
 				var erg = ergebnis[i];
-				ret = document.reader.getContent(erg.id, true, getServer(), getUser(), getPassword(),
-						getUrlParam("proxy"), getUrlParam("port"), null);
+				ret = document.reader.getContent(erg.id, true, getSettings("server"), getSettings("user"), getSettings("password"),
+						getSettings("proxy"), getSettings("port"), null);
 				json = jQuery.parseJSON(ret);
 				if (json.success)
-				  loadMultiText(json.result, erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/" + erg.id
+				  loadMultiText(json.result, erg.name, erg.typ, "true", "true", getSettings("server") + "/alfresco/s/cmis/s/workspace:SpacesStore/i/" + erg.id
 						  + "/content.pdf");
 				else
 					alert("Fehler beim Holen des Inhalts: " + json.result);
@@ -1115,11 +1099,11 @@ function loadAlfrescoFolder(folderName) {
 				"function"  : "listFolder",
 				"filePath"  : folderName,
                 "withFolder": "false",
-				"server"    : getServer(),
-				"username"  : getUser(),
-				"password"  : getPassword(),
-				"proxyHost" : getUrlParam("proxy"),
-				"proxyPort" : getUrlParam("port")
+				"server"    : getSettings("server"),
+				"username"  : getSettings("user"),
+				"password"  : getSettings("password"),
+				"proxyHost" : getSettings("proxy"),
+				"proxyPort" : getSettings("port")
 			};
 			$.ajax({
 				type     : "POST",
@@ -1150,11 +1134,11 @@ function loadAlfrescoFolder(folderName) {
 						          		"function"   : "getContent",
 						          		"documentId" : erg.id,
 						          		"extract"    : "true",
-						          		"server"     : getServer(),
-						          		"username"   : getUser(),
-						          		"password"   : getPassword(),
-						          		"proxyHost"  : getUrlParam("proxy"),
-						          		"proxyPort"  : getUrlParam("port")
+						          		"server"     : getSettings("server"),
+						          		"username"   : getSettings("user"),
+						          		"password"   : getSettings("password"),
+						          		"proxyHost"  : getSettings("proxy"),
+						          		"proxyPort"  : getSettings("port")
 						            };
 						            $.ajax({
 						          	  type         : "POST",
@@ -1177,7 +1161,7 @@ function loadAlfrescoFolder(folderName) {
 						          	  success      : function(data) {
                                            if (data.success[0]) {
                                           	 $('#progressbar').progressbar('value', (count++ / (anzahl *2)) * 100);
-                                             loadMultiText(data.result.toString(), erg.name, erg.typ, "true", "true", getServer() + "/alfresco/s/cmis/s/workspace:SpacesStore/i/"
+                                             loadMultiText(data.result.toString(), erg.name, erg.typ, "true", "true", getSettings("server") + "/alfresco/s/cmis/s/workspace:SpacesStore/i/"
 									            	             + erg.id + "/content.pdf");
                                            }
                                           else
@@ -1209,7 +1193,7 @@ function getRules(rDoc, loadLocal, dialog) {
 				this.rulesEditor.getSession().setValue(open[0]);
 				this.rulesEditor.getSession().foldAll(1);
 			} else {
-				ret = document.reader.getContent(rDoc, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
+				ret = document.reader.getContent(rDoc, false, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
 				var json = jQuery.parseJSON(ret);
 				if (json.success) {
 					this.rulesEditor.getSession().setValue(json.result);
@@ -1224,11 +1208,11 @@ function getRules(rDoc, loadLocal, dialog) {
 				"function"   : "getContent",
 				"documentId" : rDoc,
 				"extract"    : "false",
-				"server"     : getServer(),
-				"username"   : getUser(),
-				"password"   : getPassword(),
-				"proxyHost"  : getUrlParam("proxy"),
-				"proxyPort"  : getUrlParam("port")
+				"server"     : getSettings("server"),
+				"username"   : getSettings("user"),
+				"password"   : getSettings("password"),
+				"proxyHost"  : getSettings("proxy"),
+				"proxyPort"  : getSettings("port")
 			};
 			$.ajax({
 				type         : "POST",
@@ -1380,11 +1364,11 @@ function loadScript() {
                         "function": "getContent",
                         "documentId": this.scriptID,
                         "extract": "false",
-                        "server": getServer(),
-                        "username": getUser(),
-                        "password": getPassword(),
-                        "proxyHost": getUrlParam("proxy"),
-                        "proxyPort": getUrlParam("port")
+                        "server": getSettings("server"),
+                        "username": getSettings("user"),
+                        "password": getSettings("password"),
+                        "proxyHost": getSettings("proxy"),
+                        "proxyPort": getSettings("port")
                     };
                     $.ajax({
                         type: "POST",
@@ -1461,8 +1445,8 @@ function reloadScript(dialog) {
 function getScript(dialog) {
     try {
         if (isLocal()) {
-            var ret = document.reader.getContent(this.scriptID, false, getServer(), getUser(), getPassword(), getUrlParam("proxy"),
-                getUrlParam("port"), null);
+            var ret = document.reader.getContent(this.scriptID, false, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
+                getSettings("port"), null);
             var json = jQuery.parseJSON(ret);
             if (json.success) {
                 save(this.workDocument, this.textEditor.getSession().getValue(), false);
@@ -1476,11 +1460,11 @@ function getScript(dialog) {
                 "function": "getContent",
                 "documentId": this.scriptID,
                 "extract": "false",
-                "server": getServer(),
-                "username": getUser(),
-                "password": getPassword(),
-                "proxyHost": getUrlParam("proxy"),
-                "proxyPort": getUrlParam("port")
+                "server": getSettings("server"),
+                "username": getSettings("user"),
+                "password": getSettings("password"),
+                "proxyHost": getSettings("proxy"),
+                "proxyPort": getSettings("port")
             };
             $.ajax({
                 type: "POST",
@@ -1525,7 +1509,7 @@ function sendScript(dialog) {
 			if (isLocal()) {
 				document.reader.save(this.workDocument, this.textEditor.getSession().getValue());
 				var ret = document.reader.updateDocument(this.scriptID, this.textEditor.getSession().getValue(),
-						"VerteilungsScript", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"), null);
+						"VerteilungsScript", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
 				if (dialog) {
 					if (ret == 200) {
 						alert("Script erfolgreich übertragen!");
@@ -1539,11 +1523,11 @@ function sendScript(dialog) {
 					"documentId"   : this.scriptID,
 					"documentText" : this.textEditor.getSession().getValue(),
 					"description"  : "VerteilungsScript",
-					"server"       : getServer(),
-					"username"     : getUser(),
-					"password"     : getPassword(),
-					"proxyHost"    : getUrlParam("proxy"),
-					"proxyPort"    : getUrlParam("port")
+					"server"       : getSettings("server"),
+					"username"     : getSettings("user"),
+					"password"     : getSettings("password"),
+					"proxyHost"    : getSettings("proxy"),
+					"proxyPort"    : getSettings("port")
 				};
 				$.ajax({
 					type           : "POST",
@@ -1634,20 +1618,11 @@ function init() {
     var cookie = $.cookie("settings");
     if (this.REC.exist(cookie)) {
         settings = $.parseJSON(cookie);
-        for (var set in settings.settings){
-           if (set.key == "server")
-                paramServer = set.value;
-            if (set.key == "user")
-                paramUser = set.value;
-            if (set.key == "password")
-                paramPass = set.value;
-            if (set.key == "proxy")
-                paramProxy = set.value;
-            if (set.key == "port")
-                paramPort = set.value;
-        }
+    } else {
+        settings = {};
+        settings.settings = [];
     }
-    if (this.REC.exist(getServer())) {
+    if (this.REC.exist(getSettings("server"))) {
 	if (isLocal()) {
 		var json;
 		var txt = [];
@@ -1655,25 +1630,25 @@ function init() {
 		if (getUrlParam("local") == null || pattern.test(getUrlParam("local"))) {
 			this.runLocal = true;
 		} else {
-			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getServer(), getUser(), getPassword(), getUrlParam("proxy"),
-					getUrlParam("port"), null));
+			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
+					getSettings("port"), null));
 			if (json.success)
 				this.scriptID = json.result;
 			else
 				txt.push("Script nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
+			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
 					null));
 			if (json.success)
 				this.rulesID = json.result;
 			else
 				txt.push("Regeln nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
+			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
 					null));
 			if (json.success)
 				this.inboxID = json.result;
 			else
 				txt.push("Inbox nicht gefunden! Fehler: " + json.result);
-            json = jQuery.parseJSON(document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getServer(), getUser(), getPassword(), getUrlParam("proxy"), getUrlParam("port"),
+            json = jQuery.parseJSON(document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
                 null));
             if (json.success)
                 this.rootID = json.result;
@@ -1687,11 +1662,11 @@ function init() {
      	var dataString = {
 				"function"     : "getNodeId",
 				"cmisQuery"    : "SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'",
-				"server"       : getServer(),
-				"username"     : getUser(),
-				"password"     : getPassword(),
-				"proxyHost"    : getUrlParam("proxy"),
-				"proxyPort"    : getUrlParam("port")
+				"server"       : getSettings("server"),
+				"username"     : getSettings("user"),
+				"password"     : getSettings("password"),
+				"proxyHost"    : getSettings("proxy"),
+				"proxyPort"    : getSettings("port")
 			};
 			$.ajax({
 				type           : "POST",
@@ -1722,11 +1697,11 @@ function init() {
 		var dataString = {
 				"function"     : "getNodeId",
 				"cmisQuery"    : "SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'",
-				"server"       : getServer(),
-				"username"     : getUser(),
-				"password"     : getPassword(),
-				"proxyHost"    : getUrlParam("proxy"),
-				"proxyPort"    : getUrlParam("port")
+				"server"       : getSettings("server"),
+				"username"     : getSettings("user"),
+				"password"     : getSettings("password"),
+				"proxyHost"    : getSettings("proxy"),
+				"proxyPort"    : getSettings("port")
 				};
 				$.ajax({
 					type         : "POST",
@@ -1757,11 +1732,11 @@ function init() {
 			var dataString = {
 				"function"     : "getNodeId",
 				"cmisQuery"     : "SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'",
-				"server"       : getServer(),
-				"username"     : getUser(),
-				"password"     : getPassword(),
-				"proxyHost"    : getUrlParam("proxy"),
-				"proxyPort"    : getUrlParam("port")
+				"server"       : getSettings("server"),
+				"username"     : getSettings("user"),
+				"password"     : getSettings("password"),
+				"proxyHost"    : getSettings("proxy"),
+				"proxyPort"    : getSettings("port")
 				};
 				$.ajax({
 					type         : "POST",
@@ -1792,11 +1767,11 @@ function init() {
         var dataString = {
             "function"     : "getNodeId",
             "cmisQuery"    : "SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')",
-            "server"       : getServer(),
-            "username"     : getUser(),
-            "password"     : getPassword(),
-            "proxyHost"    : getUrlParam("proxy"),
-            "proxyPort"    : getUrlParam("port")
+            "server"       : getSettings("server"),
+            "username"     : getSettings("user"),
+            "password"     : getSettings("password"),
+            "proxyHost"    : getSettings("proxy"),
+            "proxyPort"    : getSettings("port")
         };
         $.ajax({
             type         : "POST",
