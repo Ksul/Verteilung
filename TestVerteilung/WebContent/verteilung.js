@@ -22,8 +22,13 @@ function isLocal() {
 }
 
 function getSettings(key){
+    var ret;
     if (settings.settings.filter(function(o) {return o.key.indexOf(key) >= 0;}).length == 0){
-        settings.settings.push({"key":key, "value":getUrlParam(key)});
+        var urlPar = getUrlParam(key);
+        if (urlPar == null)
+            return null;
+        else
+            settings.settings.push({"key":key, "value":urlPar});
     }
     return settings.settings.filter(function(o) {return o.key.indexOf(key) >= 0;})[0].value;
 }
@@ -1057,15 +1062,15 @@ function closeAlfresco(){
 
 function openSettings(){
     var serverInput = document.getElementById('server');
-    serverInput.setAttribute('value',getSettings("server"));
+    serverInput.value = getSettings("server");
     var userInput = document.getElementById('user');
-    userInput.setAttribute('value',getSettings("user"));
+    userInput.value = getSettings("user");
     var passInput = document.getElementById('password');
-    passInput.setAttribute('value', getSettings("password"));
+    passInput.value = getSettings("password");
     var proxyInput = document.getElementById('proxy');
-    proxyInput.setAttribute('value', getSettings("proxy"));
+    proxyInput.value =getSettings("proxy");
     var portInput = document.getElementById('port');
-    portInput.setAttribute('value', getSettings("port"));
+    portInput.value = getSettings("port");
     this.$( "#dialog-form" ).dialog( "open" );
 }
 
