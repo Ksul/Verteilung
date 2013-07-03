@@ -24,6 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import org.json.*;
+
 import java.util.Iterator;
 
 
@@ -113,7 +115,7 @@ public class XML {
         }
         for (i = 0; i < length; i += 1) {
             if (Character.isWhitespace(string.charAt(i))) {
-                throw new JSONException("'" + string + 
+                throw new JSONException("'" + string +
                         "' contains a space character.");
             }
         }
@@ -376,7 +378,7 @@ public class XML {
      * Convert a JSONObject into a well-formed, element-normal XML string.
      * @param object A JSONObject.
      * @return  A string.
-     * @throws  JSONException
+     * @throws JSONException
      */
     public static String toString(Object object) throws JSONException {
         return toString(object, null);

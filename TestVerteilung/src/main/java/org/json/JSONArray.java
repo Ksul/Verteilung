@@ -24,6 +24,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import org.json.*;
+import org.json.JSONException;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -223,7 +226,7 @@ public class JSONArray {
      *
      * @param index The index must be between 0 and length() - 1.
      * @return      The value.
-     * @throws   JSONException If the key is not found or if the value cannot
+     * @throws JSONException If the key is not found or if the value cannot
      *  be converted to a number.
      */
     public double getDouble(int index) throws JSONException {
@@ -244,7 +247,7 @@ public class JSONArray {
      *
      * @param index The index must be between 0 and length() - 1.
      * @return      The value.
-     * @throws   JSONException If the key is not found or if the value is not a number.
+     * @throws JSONException If the key is not found or if the value is not a number.
      */
     public int getInt(int index) throws JSONException {
         Object object = this.get(index);
@@ -298,7 +301,7 @@ public class JSONArray {
      *
      * @param index The index must be between 0 and length() - 1.
      * @return      The value.
-     * @throws   JSONException If the key is not found or if the value cannot
+     * @throws JSONException If the key is not found or if the value cannot
      *  be converted to a number.
      */
     public long getLong(int index) throws JSONException {

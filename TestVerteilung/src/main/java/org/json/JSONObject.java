@@ -24,6 +24,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import org.json.*;
+import org.json.JSONException;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -448,7 +451,7 @@ public class JSONObject {
      *
      * @param key   A key string.
      * @return      The object associated with the key.
-     * @throws      JSONException if the key is not found.
+     * @throws JSONException if the key is not found.
      */
     public Object get(String key) throws JSONException {
         if (key == null) {
@@ -468,7 +471,7 @@ public class JSONObject {
      *
      * @param key   A key string.
      * @return      The truth.
-     * @throws      JSONException
+     * @throws JSONException
      *  if the value is not a Boolean or the String "true" or "false".
      */
     public boolean getBoolean(String key) throws JSONException {
@@ -512,7 +515,7 @@ public class JSONObject {
      *
      * @param key   A key string.
      * @return      The integer value.
-     * @throws   JSONException if the key is not found or if the value cannot
+     * @throws JSONException if the key is not found or if the value cannot
      *  be converted to an integer.
      */
     public int getInt(String key) throws JSONException {
@@ -533,7 +536,7 @@ public class JSONObject {
      *
      * @param key   A key string.
      * @return      A JSONArray which is the value.
-     * @throws      JSONException if the key is not found or
+     * @throws JSONException if the key is not found or
      *  if the value is not a JSONArray.
      */
     public JSONArray getJSONArray(String key) throws JSONException {
@@ -551,7 +554,7 @@ public class JSONObject {
      *
      * @param key   A key string.
      * @return      A JSONObject which is the value.
-     * @throws      JSONException if the key is not found or
+     * @throws JSONException if the key is not found or
      *  if the value is not a JSONObject.
      */
     public JSONObject getJSONObject(String key) throws JSONException {
@@ -569,7 +572,7 @@ public class JSONObject {
      *
      * @param key   A key string.
      * @return      The long value.
-     * @throws   JSONException if the key is not found or if the value cannot
+     * @throws JSONException if the key is not found or if the value cannot
      *  be converted to a long.
      */
     public long getLong(String key) throws JSONException {
@@ -634,7 +637,7 @@ public class JSONObject {
      *
      * @param key   A key string.
      * @return      A string which is the value.
-     * @throws   JSONException if there is no string value for the key.
+     * @throws JSONException if there is no string value for the key.
      */
     public String getString(String key) throws JSONException {
         Object object = this.get(key);
