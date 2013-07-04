@@ -26,10 +26,18 @@
 			obj.setAttribute('width', '0');
 			obj.setAttribute('height', '0');
 			obj.setAttribute('codebase', './WEB-INF/lib');
-			obj
-					.setAttribute(
-							'archive',
-							'vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,commons-io-2.4.jar');
+			obj.setAttribute('archive',
+							'vt.jar, ' +
+                            'pdfbox-1.6.0.jar, ' +
+                            'plugin.jar, ' +
+                            'commons-codec-1.6.jar, ' +
+                            'commons-httpclient-3.0.1.jar, ' +
+                            'abdera-1.1.2.jar, ' +
+                            'axiom.jar, ' +
+                            'commons-logging-1.1.1.jar, ' +
+                            'fontbox-1.6.0.jar, ' +
+                            'jempbox-1.6.0.jar, ' +
+                            'commons-io-2.4.jar');
 			obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
 			document.getElementById('appl').appendChild(obj);
 		}

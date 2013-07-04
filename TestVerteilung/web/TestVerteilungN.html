@@ -117,6 +117,7 @@ h1 { font-size: 1.2em; margin: .6em 0; }
 }
 
 input.search {
+    background-color: transparent;
     background-image: url('./resource/search.png');
     width: 24px;
     height: 24px;
@@ -124,8 +125,11 @@ input.search {
     cursor: pointer;
 }
 
+
+
 input.search:disabled {
     background-image: url('./resource/search-bw.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -135,14 +139,16 @@ input.search:disabled {
 
 input.save {
     background-image: url('./resource/save.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
-    cursor: pointer;
+    cursor: pointer
 }
 
 input.save:disabled {
     background-image: url('./resource/save-bw.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -152,6 +158,7 @@ input.save:disabled {
 
 input.play {
     background-image: url('./resource/play.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -160,6 +167,7 @@ input.play {
 
 input.play:disabled {
     background-image: url('./resource/play-bw.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -169,6 +177,7 @@ input.play:disabled {
 
 input.maximize {
     background-image: url('./resource/maximize.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -177,6 +186,7 @@ input.maximize {
 
 input.maximize:disabled {
     background-image: url('./resource/maximize-bw.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -186,6 +196,7 @@ input.maximize:disabled {
 
 input.minimize {
     background-image: url('./resource/minimize.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -203,6 +214,7 @@ input.minimize:disabled {
 
 input.upload {
     background-image: url('./resource/upload.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -211,6 +223,7 @@ input.upload {
 
 input.upload:disabled {
     background-image: url('./resource/upload-bw.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -220,6 +233,7 @@ input.upload:disabled {
 
 input.download {
     background-image: url('./resource/download.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -228,6 +242,7 @@ input.download {
 
 input.download:disabled {
     background-image: url('./resource/download-bw.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -237,6 +252,7 @@ input.download:disabled {
 
 input.beautify {
     background-image: url('./resource/beautify.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -245,6 +261,7 @@ input.beautify {
 
 input.beautify:disabled {
     background-image: url('./resource/beautify-bw.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -254,6 +271,7 @@ input.beautify:disabled {
 
 input.pdf {
     background-image: url('./resource/file_pdf.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -262,6 +280,7 @@ input.pdf {
 
 input.pdf:disabled {
     background-image: url('./resource/file_pdf-bw.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -271,6 +290,7 @@ input.pdf:disabled {
 
 input.close {
     background-image: url('./resource/exit.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -279,6 +299,7 @@ input.close {
 
 input.test {
     background-image: url('./resource/tabicon_pipette.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -287,6 +308,7 @@ input.test {
 
 input.reload {
     background-image: url('./resource/refresh.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -295,6 +317,7 @@ input.reload {
 
 input.docAlfresco {
     background-image: url('./resource/alfresco.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -303,6 +326,7 @@ input.docAlfresco {
 
 input.docAlfresco:disabled {
     background-image: url('./resource/alfresco-bw.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -312,6 +336,7 @@ input.docAlfresco:disabled {
 
 input.settings {
     background-image: url('./resource/settings.png');
+    background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
@@ -539,10 +564,18 @@ window.onload = function () {
         obj.setAttribute('width', '0');
         obj.setAttribute('height', '0');
         obj.setAttribute('codebase', './WEB-INF/lib');
-        obj
-                .setAttribute(
-                        'archive',
-                        'vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,commons-io-2.4.jar');
+        obj.setAttribute('archive',
+                        'vt.jar, ' +
+                        'pdfbox-1.6.0.jar, ' +
+                        'plugin.jar, ' +
+                        'commons-codec-1.6.jar, ' +
+                        'commons-httpclient-3.0.1.jar, ' +
+                        'abdera-1.1.2.jar, ' +
+                        'axiom.jar, ' +
+                        'commons-logging-1.1.1.jar, ' +
+                        'fontbox-1.6.0.jar, ' +
+                        'jempbox-1.6.0.jar, ' +
+                        'commons-io-2.4.jar');
         obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
         document.getElementById('appl').appendChild(obj);
     }
