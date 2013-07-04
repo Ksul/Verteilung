@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="verteilung.js" type="text/javascript" charset="utf-8"></script>
+<script src="vkbeautify.js" type="text/javascript" charset="utf-8"></script>
+<script src="jsbeautify.js" type="text/javascript" charset="utf-8"></script>
+<script src="./jquery-ui-1.10.2/jquery-1.9.1.js"	type="text/javascript" charset="utf-8"></script>
+<script src="./jquery-ui-1.10.2/ui/jquery-ui.js" type="text/javascript"	charset="utf-8"></script>
+
+
+
+
+<!-- <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+<script src="jquery.ui.progressbar.js" type="text/javascript" charset="utf-8"></script>
+ -->
+<script type="text/javascript" charset="utf-8">
+
+
+	window.onload = function() {
+		document.getElementById('filesinput').addEventListener('change', readMultiFile, false);
+		if (isLocal()) {
+			var obj = document.createElement('object');
+			obj.setAttribute('name', 'reader');
+			obj.setAttribute('width', '0');
+			obj.setAttribute('height', '0');
+			obj.setAttribute('codebase', './WEB-INF/lib');
+			obj
+					.setAttribute(
+							'archive',
+							'vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,commons-io-2.4.jar');
+			obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
+			document.getElementById('appl').appendChild(obj);
+		}
+	};
+</script>
+<style type="text/css">
+.ui-widget {
+	font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+	font-size: 1.1em;
+}
+
+.ui-widget .ui-widget {
+	font-size: 1em;
+}
+
+.ui-widget input,.ui-widget select,.ui-widget textarea,.ui-widget button
+	{
+	font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+	font-size: 1em;
+}
+
+.ui-widget-content {
+	border: 1px solid #dddddd;
+	background: #eeeeee
+		url(./ressource/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top
+		repeat-x;
+	color: #333333;
+}
+
+.ui-widget-content a {
+	color: #333333;
+}
+
+.ui-widget-header {
+	border: 1px solid #e78f08;
+	background: #f6a828
+		url(./ressource/ui-bg_gloss-wave_35_f6a828_500x100.png) 50% 50%
+		repeat-x;
+	color: #ffffff;
+	font-weight: bold;
+}
+
+.ui-widget-header a {
+	color: #ffffff;
+}
+
+.ui-progressbar {
+	height: 2em;
+	text-align: left;
+}
+
+.ui-progressbar .ui-progressbar-value {
+	margin: -1px;
+	height: 100%;
+}
+
+.progress-label {
+	float: left;
+	margin-left: 50%;
+	margin-top: 0px;
+	font-weight: bold;
+	text-shadow: 1px 1px 0 #fff;
+}
+
+#progressbar {
+	width: 300px;
+	height: 20px;
+}
+
+input.search {
+	background-image: url('ressource/search.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.search:disabled {
+	background-image: url('ressource/search-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.save {
+	background-image: url('ressource/save.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.save:disabled {
+	background-image: url('ressource/save-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.play {
+	background-image: url('ressource/play.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.play:disabled {
+	background-image: url('ressource/play-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.maximize {
+	background-image: url('ressource/maximize.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.maximize:disabled {
+	background-image: url('ressource/maximize-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.minimize {
+	background-image: url('ressource/minimize.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.minimize:disabled {
+	background-image: url('ressource/minimize-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.upload {
+	background-image: url('ressource/upload.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.upload:disabled {
+	background-image: url('ressource/upload-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.download {
+	background-image: url('ressource/download.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.download:disabled {
+	background-image: url('ressource/download-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.beautify {
+	background-image: url('ressource/beautify.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.beautify:disabled {
+	background-image: url('ressource/beautify-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.pdf {
+	background-image: url('ressource/file_pdf.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.pdf:disabled {
+	background-image: url('ressource/file_pdf-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.close {
+	background-image: url('ressource/exit.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.test {
+	background-image: url('ressource/tabicon_pipette.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.reload {
+	background-image: url('ressource/refresh.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.docAlfresco {
+	background-image: url('ressource/alfresco.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: pointer;
+}
+
+input.docAlfresco:disabled {
+	background-image: url('ressource/alfresco-bw.png');
+	width: 24px;
+	height: 24px;
+	border: 0;
+	cursor: text;
+	disabled: true;
+}
+
+input.settings {
+    background-image: url('ressource/settings.png');
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+
+</style>
+</head>
+<body style="margin: 0; padding: 0">
+	<table style="">
+		<tr>
+			<td width="30%"><input id="filesinput" name="filesinput"
+				type="file" multiple="multiple" size="50" />
+			</td>
+            <td width="60px" align="center"><input
+                    onclick="openSettings();"
+                    name="settings" id="settings" type="submit" class="settings"
+                    title="Open Settings" value="" />
+            </td>
+			<td width="60px" align="center"><input
+				onclick="loadAlfresco();"
+				name="docAlfresco" id="docAlfresco" type="submit" class="docAlfresco"
+				title="Load Alfresco" value="" />
+			</td>
+            <td width="60px" align="center"><input onclick="closeAlfresco();"
+                id="closeAlfresco" value="" type="submit" title="Close" class="close"
+                style="display: none" />
+            </td>
+			<td width="60px" align="center"><input onclick="work();"
+				name="play" id="play" type="submit" class="play" title="Recognize"
+				value="" />
+			</td>
+			<td width="60px" align="center"><input onclick="doTest();"
+				name="test" id="test" type="submit" class="test" title="Test"
+				value="" />
+			</td>
+			<td width="60px" align="center"><input
+				onclick="openPDF(window.parent.frames.cont.currentFile);" id="pdf"
+				type="submit" class="pdf" title="PDF" value="" style="display: none" />
+			</td>
+			<td width="60px" align="center"><input onclick="loadScript();"
+				name="loadScript" id="script" type="image"
+				src="ressource/file_edit.png" title="Script" value="Script" />
+			</td>
+			<td width="60px" align="center"><input
+				onclick="var needle = prompt('Find:', window.parent.frames.cont.textEditor.getCopyText());window.parent.frames.cont.textEditor.find(needle);"
+				name="searchCont" id="searchCont" type="submit" class="search"
+				title="Search" value="" />
+			</td>
+			<td width="60px" align="center"><input onclick="formatScript();"
+				name="beautifyScript" id="beautifyScript" type="submit"
+				class="beautify" title="Format" value="" style="display: none" />
+			</td>
+			<td width="60px" align="center"><input onclick="doBack();"
+				id="back" value="" type="submit" title="Close" class="close"
+				style="display: none" />
+            </td>
+			<td width="60px" align="center"><input onclick="closeScript();"
+				name="close" id="close" type="submit" class="close" title="Close"
+				value="" style="display: none" />
+			</td>
+			<td width="60px" align="center"><input
+				onclick="reloadScript(true);" name="reloadScript" id="reloadScript"
+				type="submit" class="reload" title="Reload" value=""
+				style="display: none" />
+			</td>
+			<td width="60px" align="center"><input
+				onclick="save(window.parent.workDocument, window.parent.frames.cont.textEditor.getSession().getValue(), true);modifiedScript=null;"
+				name="saveScript" id="saveScript" type="submit" class="save"
+				title="Save" value="" style="display: none" />
+			</td>
+			<td width="60px" align="center"><input onclick="getScript(true);"
+				name="getScript" id="getScript" type="submit" class="download" title="Download"
+				value="" style="display: none" />
+			</td>
+			<td width="60px" align="center"><input onclick="sendScript(true);"
+				name="sendScript" id="sendScript" type="submit" class="upload" title="Upload"
+				value="" style="display: none" />
+			</td>
+			<td width="50%">
+				<div id="progressbar" class="progressbar"> <div class="progress-label"></div></div>
+			</td>
+			<td width="60px" align="center"><input onclick="format();"
+				name="beautify" id="beautify" type="submit" class="beautify"
+				title="Format" value="" />
+			</td>
+
+			<td width="60px" align="center"><input
+				onclick="var needle = prompt('Find:', window.parent.frames.rules.rulesEditor.getCopyText());window.parent.frames.rules.rulesEditor.find(needle);"
+				name="searchRules" id="searchRules" type="submit" class="search"
+				title="Search" value="" />
+			</td>
+			<td width="60px" align="center"><input
+				onclick="window.parent.frames.rules.rulesEditor.getSession().foldAll(1);"
+				name="foldall" id="foldall" type="submit" class="minimize"
+				title="Fold All" value="" />
+			</td>
+			<td width="60px" align="center"><input
+				onclick="window.parent.frames.rules.rulesEditor.getSession().unfold();"
+				name="unfoldall" id="unfoldall" type="submit" class="maximize"
+				title="Unfold All" value="" /></td>
+			<td width="60px" align="center"><input
+				onclick="getRules(window.parent.rulesID, false, true);" name="getRules"
+				id="getRules" type="submit" class="download" title="Download Regeln" value="" />
+			</td>
+			<td width="60px" align="center"><input onclick="sendRules(true);"
+				name="sendRules" id="sendRules" type="submit" class="upload"
+				title="Sende Regeln" value="" />
+			</td>
+			<td width="60px" align="center"><input
+				onclick="save(window.parent.currentRules, vkbeautify.xml(window.parent.frames.rules.rulesEditor.getSession().getValue()), true);"
+				name="save" id="save" type="submit" class="save" title="Save"
+				value="" />
+			</td>
+			<td id="appl" width="0px"></td>
+		</tr>
+	</table>
+
+</body>
+</html>
