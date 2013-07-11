@@ -29,8 +29,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -78,6 +77,48 @@ public class VerteilungApplet extends Applet {
 			jse.printStackTrace();
 		}
 	}
+
+    public  boolean isURLAvailable(String urlString, String proxyHost, String proxyPort)  {
+
+        URL url = null;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            return false;
+        }
+        if (url.getProtocol().equalsIgnoreCase("file")) {
+            File file = null;
+            try {
+                file = new File(url.toURI());
+            } catch (URISyntaxException e) {
+                return false;
+            }
+            return file.exists();
+        } else if (url.getProtocol().equalsIgnoreCase("http")) {
+            InputStream inputStream = null;
+            try {
+                if (proxyHost != null && proxyPort != null) {
+                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+                    inputStream =  url.openConnection(proxy).getInputStream();
+                } else
+                    inputStream = url.openConnection().getInputStream();
+
+                inputStream = url.openStream();
+                return true;
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
 	public String getTicket(final String server, final String username, final String password, final String proxyHost,
 			final String proxyPort, final Credentials credentials) {

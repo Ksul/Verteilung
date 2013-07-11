@@ -43,15 +43,11 @@ public class VerteilungServletTest {
 
     @Test
     public void testListFolderAsJSON() throws Exception {
-
         when(request.getParameter("function")).thenReturn("listFolderAsJSON");
         when(request.getParameter("filePath")).thenReturn("8c0021ee-beea-4506-b10e-9ef2de262ad2");
         when(request.getParameter("withFolder")).thenReturn("true");
         when(request.getParameter("searchFolder")).thenReturn("true");
-
-
         servlet.doPost(request, response);
-
         verify(request, atLeast(1)).getParameter("username"); // only if you want to verify username was called...
         writer.flush(); // it may not have been flushed yet...
         System.out.println(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8")) ;
@@ -59,9 +55,22 @@ public class VerteilungServletTest {
     }
 
     @Test
-    public void testGetNodeId() throws Exception {
+     public void testGetNodeId() throws Exception {
         when(request.getParameter("function")).thenReturn("getNodeId");
         when(request.getParameter("cmisQuery")).thenReturn("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')");
+        servlet.doPost(request, response);
+        writer.flush(); // it may not have been flushed yet...
+        System.out.println(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8")) ;
+        assertTrue(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8").contains("success\":[true]"));
+    }
+
+    @Test
+    public void testIsURLAvailable() throws Exception {
+        when(request.getParameter("function")).thenReturn("isURLAvailable");
+        when(request.getParameter("server")).thenReturn("http://ksul.dyndns.org:9081");
+        when(request.getParameter("proxyHost")).thenReturn("");
+        when(request.getParameter("proxyPort")).thenReturn("");
+
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
         System.out.println(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8")) ;

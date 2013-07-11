@@ -17,20 +17,43 @@ function getUrlParam(name) {
 		return results[1];
 }
 
-function checkServerStatus(url) {
-
-    $.ajax({
-        url: url,
-        async: false,
-        cache: false,
-        type:'HEAD',
-        error: function(){
-            alfrescoServerAvail = false;
-        },
-        success: function(){
-            alfrescoServerAvail = true;
-        }
-    });
+function checkServerStatus(url, proxy, port) {
+    var ret;
+    if (isLocal()){
+        ret = document.reader.isURLAvailable(url,  proxy, port);
+    }
+    else {
+        var dataString = {
+            "function"  : "isURLAvailable",
+            "server"    : url,
+            "proxyHost" : proxy,
+            "proxyPort" : port
+        };
+        $.ajax({
+            type        : "POST",
+            data        : dataString,
+            datatype    : "json",
+            cache       : false,
+            async       : false,
+            url         : "/TestVerteilung/VerteilungServlet",
+            error    : function (response) {
+                try {
+                    var r = jQuery.parseJSON(response.responseText);
+                    alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                } catch(e)  {
+                    var str = "FEHLER:\n";
+                    str = str + e.toString() + "\n";
+                    for ( var prop in e)
+                        str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                    alert(str + "\n" + response.responseText);
+                }
+            },
+            success     : function(data) {
+                ret = data.result.toString();
+            }
+        });
+    }
+     return ret == "true";
 }
 
 function isLocal() {
@@ -1644,8 +1667,8 @@ function init() {
         settings.settings = [];
     }
     if (this.REC.exist(getSettings("server")))
-        checkServerStatus(getSettings("server") + "/alfresco/favicon.ico");
-    if (alfrescoServerAvail) {
+        checkServerStatus(getSettings("server"), getSettings("proxy"), getSettings("port"));
+    if (alfrescoServerAvailable) {
         var txt = [];
         if (isLocal()) {
             var json;

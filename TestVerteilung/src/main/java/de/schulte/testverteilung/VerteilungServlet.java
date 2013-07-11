@@ -1,5 +1,8 @@
 package de.schulte.testverteilung;
 
+import java.io.File;
+import java.net.*;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -9,7 +12,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -118,7 +120,11 @@ public class VerteilungServlet extends HttpServlet {
 				if (value.equalsIgnoreCase("openPDF")) {
 					openPDF(resp, fileName);
 					return;
-				} 
+				}
+
+                if (value.equalsIgnoreCase("isURLAvailable")) {
+                    ret = isURLAvailable(server, proxyHost, proxyPort);
+                }
 			
 				if (value.equalsIgnoreCase("getContent")) {
 					ret = getContent(documentId, extract.equalsIgnoreCase("true"), server, username, password, proxyHost,
@@ -179,7 +185,50 @@ public class VerteilungServlet extends HttpServlet {
 		out.close();
 	}
 
-	protected void openPDF(HttpServletResponse resp, String fileName) throws IOException {
+    protected  boolean isURLAvailable(String urlString, String proxyHost, String proxyPort)  {
+
+        URL url = null;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+           return false;
+        }
+        if (url.getProtocol().equalsIgnoreCase("file")) {
+            File file = null;
+            try {
+                file = new File(url.toURI());
+            } catch (URISyntaxException e) {
+                return false;
+            }
+            return file.exists();
+        } else if (url.getProtocol().equalsIgnoreCase("http")) {
+            InputStream inputStream = null;
+            try {
+                if (proxyHost != null && proxyPort != null) {
+                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+                    inputStream =  url.openConnection(proxy).getInputStream();
+                } else
+                    inputStream = url.openConnection().getInputStream();
+
+                inputStream = url.openStream();
+                return true;
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
+    protected void openPDF(HttpServletResponse resp, String fileName) throws IOException {
 		boolean found = false;
 		FileEntry entry = null;
 		Iterator<FileEntry> it = entries.iterator();
