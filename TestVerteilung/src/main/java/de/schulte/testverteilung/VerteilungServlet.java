@@ -450,6 +450,8 @@ public class VerteilungServlet extends HttpServlet {
             o1.put("state", "closed");
             list.put(o1);
         } else {
+            if (filePath.equals("-1"))
+                filePath = (String) getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort);
 
             ArrayList<Properties> liste = (ArrayList<Properties>) listFolder(filePath, listFolder, false, server, username, password, proxyHost, proxyPort);
 

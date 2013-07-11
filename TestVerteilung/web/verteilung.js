@@ -1,10 +1,10 @@
-String.prototype.endsWith = function(str) {
-	return (this.match(str+"$")==str);
-}
+String.prototype.endsWith = function (str) {
+    return (this.match(str + "$") == str);
+};
 
-String.prototype.startsWith = function(str) {
-	return (this.match("^"+str)==str);
-}
+String.prototype.startsWith = function (str) {
+    return (this.match("^" + str) == str);
+};
 
 function getUrlParam(name) {
 	name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -15,6 +15,22 @@ function getUrlParam(name) {
 		return null;
 	else
 		return results[1];
+}
+
+function checkServerStatus(url) {
+
+    $.ajax({
+        url: url,
+        async: false,
+        cache: false,
+        type:'HEAD',
+        error: function(){
+            alfrescoServerAvail = false;
+        },
+        success: function(){
+            alfrescoServerAvail = true;
+        }
+    });
 }
 
 function isLocal() {
@@ -50,8 +66,6 @@ function showProgress() {
 
 function manageControls() {
 
-
-
 	if (this.multiMode && !this.scriptMode) {
 		document.getElementById('inTxt').style.display = 'none';
 		document.getElementById('dtable').style.display = 'block';
@@ -69,7 +83,10 @@ function manageControls() {
             document.getElementById('inTxt').style.display = 'block';
             document.getElementById('dtable').style.display = 'none';
             document.getElementById('closeAlfresco').style.display = 'none';
-            document.getElementById('docAlfresco').removeAttribute("disabled");
+            if (! alfrescoServerAvail)
+                document.getElementById('docAlfresco').setAttribute("disabled", true);
+            else
+                document.getElementById('docAlfresco').removeAttribute("disabled");
         }
 
 		document.getElementById('pdf').style.display = 'block';
@@ -1618,7 +1635,6 @@ function stringToBytes(str) {
 }
 
 
-
 function init() {
     var cookie = $.cookie("settings");
     if (this.REC.exist(cookie)) {
@@ -1627,186 +1643,191 @@ function init() {
         settings = {};
         settings.settings = [];
     }
-    if (this.REC.exist(getSettings("server"))) {
-	if (isLocal()) {
-		var json;
-		var txt = [];
-		var pattern = new RegExp("true", "ig");
-		if (getUrlParam("local") == null || pattern.test(getUrlParam("local"))) {
-			this.runLocal = true;
-		} else {
-			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
-					getSettings("port"), null));
-			if (json.success)
-				this.scriptID = json.result;
-			else
-				txt.push("Script nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
-					null));
-			if (json.success)
-				this.rulesID = json.result;
-			else
-				txt.push("Regeln nicht gefunden! Fehler: " + json.result);
-			json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
-					null));
-			if (json.success)
-				this.inboxID = json.result;
-			else
-				txt.push("Inbox nicht gefunden! Fehler: " + json.result);
-            json = jQuery.parseJSON(document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
-                null));
-            if (json.success)
-                this.rootID = json.result;
-            else
-                txt.push("Archiv nicht gefunden! Fehler: " + json.result);
+    if (this.REC.exist(getSettings("server")))
+        checkServerStatus(getSettings("server") + "/alfresco/favicon.ico");
+    if (alfrescoServerAvail) {
+        var txt = [];
+        if (isLocal()) {
+            var json;
 
-			if (txt.length > 0)
-				alert(txt.join("\n"));
-		}
-	} else {
-     	var dataString = {
-				"function"     : "getNodeId",
-				"cmisQuery"    : "SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'",
-				"server"       : getSettings("server"),
-				"username"     : getSettings("user"),
-				"password"     : getSettings("password"),
-				"proxyHost"    : getSettings("proxy"),
-				"proxyPort"    : getSettings("port")
-			};
-			$.ajax({
-				type           : "POST",
-				data           : dataString,
-				datatype       : "json",
-				url            : "/TestVerteilung/VerteilungServlet",
-				async          : false,
-                error    : function (response) {
+            var pattern = new RegExp("true", "ig");
+            if (getUrlParam("local") == null || pattern.test(getUrlParam("local"))) {
+                this.runLocal = true;
+            } else {
+                json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
+                    getSettings("port"), null));
+                if (json.success)
+                    this.scriptID = json.result;
+                else
+                    txt.push("Script nicht gefunden! Fehler: " + json.result);
+                json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
+                    null));
+                if (json.success)
+                    this.rulesID = json.result;
+                else
+                    txt.push("Regeln nicht gefunden! Fehler: " + json.result);
+                json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
+                    null));
+                if (json.success)
+                    this.inboxID = json.result;
+                else
+                    txt.push("Inbox nicht gefunden! Fehler: " + json.result);
+                json = jQuery.parseJSON(document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
+                    null));
+                if (json.success)
+                    this.rootID = json.result;
+                else
+                    txt.push("Archiv nicht gefunden! Fehler: " + json.result);
+
+
+            }
+        } else {
+            var dataString = {
+                "function": "getNodeId",
+                "cmisQuery": "SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'",
+                "server": getSettings("server"),
+                "username": getSettings("user"),
+                "password": getSettings("password"),
+                "proxyHost": getSettings("proxy"),
+                "proxyPort": getSettings("port")
+            };
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                datatype: "json",
+                url: "/TestVerteilung/VerteilungServlet",
+                async: false,
+                error: function (response) {
                     try {
                         var r = jQuery.parseJSON(response.responseText);
                         alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                    } catch(e)  {
+                    } catch (e) {
                         var str = "FEHLER:\n";
                         str = str + e.toString() + "\n";
-                        for ( var prop in e)
+                        for (var prop in e)
                             str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
                         alert(str + "\n" + response.responseText);
                     }
                 },
-				success        : function(data) {
-				                   if (data.success[0])
-				                      this.scriptID = data.result[0];
-				                    else{
-				                      alert("Script nicht gefunden! " + data.result[0]);
-				                    }
-				                 }
-			});
-		var dataString = {
-				"function"     : "getNodeId",
-				"cmisQuery"    : "SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'",
-				"server"       : getSettings("server"),
-				"username"     : getSettings("user"),
-				"password"     : getSettings("password"),
-				"proxyHost"    : getSettings("proxy"),
-				"proxyPort"    : getSettings("port")
-				};
-				$.ajax({
-					type         : "POST",
-					data         : dataString,
-					datatype     : "json",
-					url          : "/TestVerteilung/VerteilungServlet",
-					async        : false,
-                    error    : function (response) {
-                        try {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                        } catch(e)  {
-                            var str = "FEHLER:\n";
-                            str = str + e.toString() + "\n";
-                            for ( var prop in e)
-                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                            alert(str + "\n" + response.responseText);
-                        }
-                    },
-					success      : function(data) {
-                                     if (data.success[0])
-                                       this.rulesID = data.result[0];
-                                     else{
-                                       alert("Regeln nicht gefunden! " + data.result[0]);
-                                    }
-					              }
-				});
-			var dataString = {
-				"function"     : "getNodeId",
-				"cmisQuery"     : "SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'",
-				"server"       : getSettings("server"),
-				"username"     : getSettings("user"),
-				"password"     : getSettings("password"),
-				"proxyHost"    : getSettings("proxy"),
-				"proxyPort"    : getSettings("port")
-				};
-				$.ajax({
-					type         : "POST",
-					data         : dataString,
-					datatype     : "json",
-					url          : "/TestVerteilung/VerteilungServlet",
-					async        : false,
-                    error    : function (response) {
-                        try {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                        } catch(e)  {
-                            var str = "FEHLER:\n";
-                            str = str + e.toString() + "\n";
-                            for ( var prop in e)
-                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                            alert(str + "\n" + response.responseText);
-                        }
-                    },
-					success      : function(data) {
-					                 if (data.success[0])
-					                   this.inboxID = data.result[0];
-					                 else{
-					                   alert("Inbox nicht gefunden! " + data.result[0]);
-					                 }   					             	 
-					               }
-				});
-        var dataString = {
-            "function"     : "getNodeId",
-            "cmisQuery"    : "SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')",
-            "server"       : getSettings("server"),
-            "username"     : getSettings("user"),
-            "password"     : getSettings("password"),
-            "proxyHost"    : getSettings("proxy"),
-            "proxyPort"    : getSettings("port")
-        };
-        $.ajax({
-            type         : "POST",
-            data         : dataString,
-            datatype     : "json",
-            url          : "/TestVerteilung/VerteilungServlet",
-            async        : false,
-            error    : function (response) {
-                try {
-                    var r = jQuery.parseJSON(response.responseText);
-                    alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                } catch(e)  {
-                    var str = "FEHLER:\n";
-                    str = str + e.toString() + "\n";
-                    for ( var prop in e)
-                        str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                    alert(str + "\n" + response.responseText);
+                success: function (data) {
+                    if (data.success[0])
+                        this.scriptID = data.result[0];
+                    else {
+                        txt.push("Script nicht gefunden! " + data.result[0]);
+                    }
                 }
-            },
-            success      : function(data) {
-                if (data.success[0])
-                    this.rootID = data.result[0];
-                else{
-                    alert("Archiv nicht gefunden! " + data.result[0]);
+            });
+            var dataString = {
+                "function": "getNodeId",
+                "cmisQuery": "SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'",
+                "server": getSettings("server"),
+                "username": getSettings("user"),
+                "password": getSettings("password"),
+                "proxyHost": getSettings("proxy"),
+                "proxyPort": getSettings("port")
+            };
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                datatype: "json",
+                url: "/TestVerteilung/VerteilungServlet",
+                async: false,
+                error: function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch (e) {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for (var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                },
+                success: function (data) {
+                    if (data.success[0])
+                        this.rulesID = data.result[0];
+                    else {
+                        txt.push("Regeln nicht gefunden! " + data.result[0]);
+                    }
                 }
-            }
-        });
-		}
+            });
+            var dataString = {
+                "function": "getNodeId",
+                "cmisQuery": "SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'",
+                "server": getSettings("server"),
+                "username": getSettings("user"),
+                "password": getSettings("password"),
+                "proxyHost": getSettings("proxy"),
+                "proxyPort": getSettings("port")
+            };
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                datatype: "json",
+                url: "/TestVerteilung/VerteilungServlet",
+                async: false,
+                error: function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch (e) {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for (var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                },
+                success: function (data) {
+                    if (data.success[0])
+                        this.inboxID = data.result[0];
+                    else {
+                        txt.push("Inbox nicht gefunden! " + data.result[0]);
+                    }
+                }
+            });
+            var dataString = {
+                "function": "getNodeId",
+                "cmisQuery": "SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')",
+                "server": getSettings("server"),
+                "username": getSettings("user"),
+                "password": getSettings("password"),
+                "proxyHost": getSettings("proxy"),
+                "proxyPort": getSettings("port")
+            };
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                datatype: "json",
+                url: "/TestVerteilung/VerteilungServlet",
+                async: false,
+                error: function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch (e) {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for (var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                },
+                success: function (data) {
+                    if (data.success[0])
+                        this.rootID = data.result[0];
+                    else {
+                        txt.push("Archiv nicht gefunden! " + data.result[0]);
+                    }
+                }
+            });
+        }
+        if (txt.length > 0)
+            alert(txt.join("\n"));
     }
-	manageControls();
+
+    manageControls();
 }
 
 var Range = require("ace/range").Range;
