@@ -106,7 +106,7 @@ function manageControls() {
             document.getElementById('inTxt').style.display = 'block';
             document.getElementById('dtable').style.display = 'none';
             document.getElementById('closeAlfresco').style.display = 'none';
-            if (! alfrescoServerAvail)
+            if (! alfrescoServerAvailable)
                 document.getElementById('docAlfresco').setAttribute("disabled", true);
             else
                 document.getElementById('docAlfresco').removeAttribute("disabled");
@@ -1667,7 +1667,7 @@ function init() {
         settings.settings = [];
     }
     if (this.REC.exist(getSettings("server")))
-        checkServerStatus(getSettings("server"), getSettings("proxy"), getSettings("port"));
+        alfrescoServerAvailable = checkServerStatus(getSettings("server"), getSettings("proxy"), getSettings("port"));
     if (alfrescoServerAvailable) {
         var txt = [];
         if (isLocal()) {
