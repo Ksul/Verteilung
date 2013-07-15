@@ -57,7 +57,7 @@ function checkServerStatus(url, proxy, port) {
 }
 
 function isLocal() {
-	return (this.location.href.startsWith("file"));
+	return (location.href.startsWith("file"));
 }
 
 function getSettings(key){
@@ -89,12 +89,13 @@ function showProgress() {
 
 function manageControls() {
 
-	if (this.multiMode && !this.scriptMode) {
-		document.getElementById('inTxt').style.display = 'none';
-		document.getElementById('dtable').style.display = 'block';
-	} else {
 
-        if (this.alfrescoMode) {
+    if (multiMode && !scriptMode) {
+        document.getElementById('inTxt').style.display = 'none';
+        document.getElementById('dtable').style.display = 'block';
+    } else {
+
+        if (alfrescoMode) {
             document.getElementById('tree').style.display = 'block';
             document.getElementById('dtable').style.display = 'none';
             document.getElementById('inTxt').style.display = 'none';
@@ -106,73 +107,85 @@ function manageControls() {
             document.getElementById('inTxt').style.display = 'block';
             document.getElementById('dtable').style.display = 'none';
             document.getElementById('closeAlfresco').style.display = 'none';
-            if (! alfrescoServerAvailable)
+            if (!alfrescoServerAvailable)
                 document.getElementById('docAlfresco').setAttribute("disabled", true);
             else
                 document.getElementById('docAlfresco').removeAttribute("disabled");
         }
 
-		document.getElementById('pdf').style.display = 'block';
+        document.getElementById('pdf').style.display = 'block';
 
-	}
+    }
 
-	if (this.textEditor.getSession().getValue().length == 0) {
-		document.getElementById('searchCont').setAttribute("disabled", true);
+    if (textEditor.getSession().getValue().length == 0) {
+        document.getElementById('searchCont').setAttribute("disabled", true);
 
-	} else {
-		document.getElementById('searchCont').removeAttribute("disabled");
-	}
-	if (this.textEditor.getSession().getValue().length == 0 && !this.multiMode) {
-		document.getElementById('play').setAttribute("disabled", true);
-	} else {
-		document.getElementById('play').removeAttribute("disabled");
-	}
-	if (isLocal()) {
-		document.getElementById('save').removeAttribute("disabled");
-		document.getElementById('saveScript').removeAttribute("disabled");
-	} else {
-		document.getElementById('save').setAttribute("disabled", true);
-		document.getElementById('saveScript').setAttribute("disabled", true);
-	}
-	if (!this.multiMode && this.currentPDF)
-		document.getElementById('pdf').removeAttribute("disabled");
-	else
-		document.getElementById('pdf').setAttribute("disabled", true);
-	if (this.scriptMode) {
-		document.getElementById('filesinput').style.display = 'none';
-		document.getElementById('play').style.display = 'none';
-		document.getElementById('test').style.display = 'none';
-		document.getElementById('back').style.display = 'none';
-		document.getElementById('pdf').style.display = 'none';
-		document.getElementById('script').style.display = 'none';
-		document.getElementById('close').style.display = 'block';
-		document.getElementById('sendScript').style.display = 'block';
-		document.getElementById('getScript').style.display = 'block';
-		document.getElementById('saveScript').style.display = 'block';
-		document.getElementById('reloadScript').style.display = 'block';
-		document.getElementById('beautifyScript').style.display = 'block';
-	} else {
-		document.getElementById('filesinput').style.display = 'block';
-		document.getElementById('play').style.display = 'block';
-		document.getElementById('test').style.display = 'block';
-		if (this.showMulti)
-			document.getElementById('back').style.display = 'block';
-		document.getElementById('pdf').style.display = 'block';
-		document.getElementById('script').style.display = 'block';
-		document.getElementById('close').style.display = 'none';
-		document.getElementById('sendScript').style.display = 'none';
-		document.getElementById('getScript').style.display = 'none';
-		document.getElementById('saveScript').style.display = 'none';
-		document.getElementById('reloadScript').style.display = 'none';
-		document.getElementById('beautifyScript').style.display = 'none';
-	}
-
-  if (this.runLocal || (this.scriptID == null && this.rulesID == null)) {
-		document.getElementById('sendScript').setAttribute("disabled", true);
-		document.getElementById('getScript').setAttribute("disabled", true);
-		document.getElementById('getRules').setAttribute("disabled", true);
-		document.getElementById('sendRules').setAttribute("disabled", true);
-  }
+    } else {
+        document.getElementById('searchCont').removeAttribute("disabled");
+    }
+    if (textEditor.getSession().getValue().length == 0 && !multiMode) {
+        document.getElementById('play').setAttribute("disabled", true);
+    } else {
+        document.getElementById('play').removeAttribute("disabled");
+    }
+    if (isLocal()) {
+        document.getElementById('save').removeAttribute("disabled");
+        document.getElementById('saveScript').removeAttribute("disabled");
+    } else {
+        document.getElementById('save').setAttribute("disabled", true);
+        document.getElementById('saveScript').setAttribute("disabled", true);
+    }
+    if (!multiMode && currentPDF)
+        document.getElementById('pdf').removeAttribute("disabled");
+    else
+        document.getElementById('pdf').setAttribute("disabled", true);
+    if (scriptMode) {
+        document.getElementById('filesinput').style.display = 'none';
+        document.getElementById('play').style.display = 'none';
+        document.getElementById('test').style.display = 'none';
+        document.getElementById('back').style.display = 'none';
+        document.getElementById('pdf').style.display = 'none';
+        document.getElementById('script').style.display = 'none';
+        document.getElementById('closeScript').style.display = 'block';
+        document.getElementById('sendScript').style.display = 'block';
+        document.getElementById('getScript').style.display = 'block';
+        document.getElementById('saveScript').style.display = 'block';
+        document.getElementById('reloadScript').style.display = 'block';
+        document.getElementById('beautifyScript').style.display = 'block';
+    } else {
+        document.getElementById('filesinput').style.display = 'block';
+        document.getElementById('play').style.display = 'block';
+        document.getElementById('test').style.display = 'block';
+        if (showMulti)
+            document.getElementById('back').style.display = 'block';
+        document.getElementById('pdf').style.display = 'block';
+        document.getElementById('script').style.display = 'block';
+        document.getElementById('closeScript').style.display = 'none';
+        document.getElementById('sendScript').style.display = 'none';
+        document.getElementById('getScript').style.display = 'none';
+        document.getElementById('saveScript').style.display = 'none';
+        document.getElementById('reloadScript').style.display = 'none';
+        document.getElementById('beautifyScript').style.display = 'none';
+    }
+    if (runLocal || (scriptID == null && rulesID == null)) {
+        document.getElementById('sendScript').setAttribute("disabled", true);
+        document.getElementById('getScript').setAttribute("disabled", true);
+        document.getElementById('getRules').setAttribute("disabled", true);
+        document.getElementById('sendRules').setAttribute("disabled", true);
+    }
+    if (testMode) {
+        document.getElementById('test').style.display = 'none';
+        document.getElementById('closeTest').style.display = 'block';
+        document.getElementById('docAlfresco').style.display = 'none';
+        document.getElementById('script').style.display = 'none';
+        document.getElementById('pdf').style.display = 'none';
+    } else {
+        document.getElementById('test').style.display = 'block';
+        document.getElementById('closeTest').style.display = 'none';
+        document.getElementById('docAlfresco').style.display = 'block';
+        document.getElementById('script').style.display = 'block';
+        document.getElementById('pdf').style.display = 'block';
+    }
 }
 
 function openPDF(name, fromServer) {
@@ -230,31 +243,32 @@ function openPDF(name, fromServer) {
 }
 
 function loadText(txt, name, typ, container) {
-	this.multiMode = false;
-	this.currentFile = name;
-	this.currentContainer = container;
-	removeMarkers(markers, this.textEditor);
-	this.textEditor.getSession().setValue(txt);
+	multiMode = false;
+	currentFile = name;
+    currentContent = txt;
+	currentContainer = container;
+	removeMarkers(markers, textEditor);
+	textEditor.getSession().setValue(txt);
     document.getElementById("headerWest").firstChild.nodeValue = name;
 	fillMessageBox("", false);
-	this.propsEditor.getSession().setValue("");
+	propsEditor.getSession().setValue("");
 	manageControls();
 }
 
 function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) {
 	try {
-		this.multiMode = true;
+		multiMode = true;
 		var dat = new Array();
-		this.REC.currentDocument.setContent(txt);
-		this.REC.testRules(this.rulesEditor.getSession().getValue());
+		REC.currentDocument.setContent(txt);
+		REC.testRules(rulesEditor.getSession().getValue());
 		dat["text"] = txt;
 		dat["file"] = name;
-		dat["log"] = this.REC.getMessage();
-		dat["result"] = this.REC.results;
-		dat["position"] = this.REC.positions;
-		dat["xml"] = this.REC.currXMLName;
+		dat["log"] = REC.getMessage();
+		dat["result"] = REC.results;
+		dat["position"] = REC.positions;
+		dat["xml"] = REC.currXMLName;
 		dat["typ"] = typ;
-		dat["error"] = this.REC.errors;
+		dat["error"] = REC.errors;
 		dat["container"] = container;
 		dat["notDeleteable"] = notDeleteable;
 		dat["alfContainer"] = alfContainer;
@@ -262,13 +276,13 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
 		var row = new Array();
 		row["id"] = uuid();
 		row["feld"] = name;
-		row["xml"] = this.REC.currXMLName.join(" : ");
-		row["error"] = this.REC.errors;
+		row["xml"] = REC.currXMLName.join(" : ");
+		row["error"] = REC.errors;
 		var ergebnis = new Array();
-		ergebnis["error"] = this.REC.errors.length > 0;
+		ergebnis["error"] = REC.errors.length > 0;
 		row["result"] = ergebnis;
 		tableData.push(row);
-		this.dtable.get("data").add(tableData, {
+		dtable.get("data").add(tableData, {
 			silent : false
 		});
 		manageControls();
@@ -295,23 +309,23 @@ function handleDragOver(evt) {
 }
 
 function readMultiFile(evt) {
-	this.multiMode = false;
-	this.currentPDF = false;
+	multiMode = false;
+	currentPDF = false;
 	var files = evt.target.files;
 	readFiles(files);
 }
 
 function readFiles(files) {
 	try {
-		if (!this.currentRules.endsWith("doc.xml")) {
+		if (!currentRules.endsWith("doc.xml")) {
 			var open = openFile("doc.xml");
-			this.currentRules = open[1];
-			this.rulesEditor.getSession().setValue(open[0]);
-			this.rulesEditor.getSession().foldAll(1);
+			currentRules = open[1];
+			rulesEditor.getSession().setValue(open[0]);
+			rulesEditor.getSession().foldAll(1);
 		}
-		this.textEditor.getSession().setValue("");
+		textEditor.getSession().setValue("");
 		fillMessageBox("", false);
-		this.dtable.get("data").reset(null, {
+		dtable.get("data").reset(null, {
 			silent : true
 		});
 		daten = new Array();
@@ -326,7 +340,7 @@ function readFiles(files) {
 			if (f) {
 
 				if (f.name.toLowerCase().endsWith(".pdf")) {
-					this.currentPDF = true;
+					currentPDF = true;
 					reader = new FileReader();
 					reader.onloadend = (function(theFile, clear) {
 						return function(evt) {
@@ -452,12 +466,12 @@ function readFiles(files) {
 					r.readAsText(f);
 				}
 			} else {
-				this.textEditor.getSession().setValue(this.textEditor.getSession().getValue() + " Failed to load file!\n");
+				textEditor.getSession().setValue(textEditor.getSession().getValue() + " Failed to load file!\n");
 			}
 			first = false;
 		}
 
-		this.dtable.render("#dtable");
+		dtable.render("#dtable");
 	} catch (e) {
 		var str = "FEHLER:\n";
 		str = str + e.toString() + "\n";
@@ -541,16 +555,16 @@ function imageFieldFormatter(o) {
 	image.style.marginRight = "5px";
 	image.onclick = function() {
 		return (function(name, rowNumber) {
-			currentDocument.setContent(this.daten[name]["text"]);
-			testRules(this.rulesEditor.getSession().getValue());
+			currentDocument.setContent(daten[name]["text"]);
+			testRules(rulesEditor.getSession().getValue());
 			daten[name].log = mess;
 			daten[name].result = results;
 			daten[name].position = positions;
 			daten[name].xml = currXMLName;
 			daten[name].error = errors;
 			var row = null;
-			for ( var i = 0; i < this.tableData.length; i++) {
-				var r = this.tableData[i];
+			for ( var i = 0; i < tableData.length; i++) {
+				var r = tableData[i];
 				if (r.feld == name) {
 					row = r;
 					break;
@@ -562,7 +576,7 @@ function imageFieldFormatter(o) {
 			ergebnis["error"] = errors.length > 0;
 			row["result"] = ergebnis;
 			tableData[rowNumber] = row;
-			this.dtable.modifyRow(rowNumber, row);
+			dtable.modifyRow(rowNumber, row);
 		})(o.data.feld, o.rowIndex);
 	};
 	o.cell.appendChild(image);
@@ -577,15 +591,16 @@ function imageFieldFormatter(o) {
 	image.style.marginRight = "5px";
 	image.onclick = function() {
 		return (function(name) {
-			this.multiMode = false;
-			this.showMulti = true;
-			this.currentFile = this.daten[name]["file"];
-			setXMLPosition(this.daten[name]["xml"]);
-			removeMarkers(markers, this.textEditor);
-			markers = setMarkers(this.daten[name]["position"], this.textEditor);
-			this.textEditor.getSession().setValue(this.daten[name]["text"]);
-			this.propsEditor.getSession().setValue(printResults(this.daten[name]["result"]));
-			fillMessageBox(this.daten[name]["log"], true);
+			multiMode = false;
+			showMulti = true;
+			currentFile = daten[name]["file"];
+            document.getElementById('headerWest').textContent = currentFile;
+			setXMLPosition(daten[name]["xml"]);
+			removeMarkers(markers, textEditor);
+			markers = setMarkers(daten[name]["position"], textEditor);
+			textEditor.getSession().setValue(daten[name]["text"]);
+			propsEditor.getSession().setValue(printResults(daten[name]["result"]));
+			fillMessageBox(daten[name]["log"], true);
 			manageControls();
 		})(o.data.feld);
 	};
@@ -614,18 +629,18 @@ function imageFieldFormatter(o) {
 				} catch (e) {
 					alert("Permission to delete file was denied.");
 				}
-				this.currentFile = daten[name]["file"];
-				this.textEditor.getSession().setValue("");
-				this.propsEditor.getSession().setValue("");
+				currentFile = daten[name]["file"];
+				textEditor.getSession().setValue("");
+				propsEditor.getSession().setValue("");
 				fillMessageBox("", false);
-				this.rulesEditor.getSession().foldAll(1);
-				if (this.currentFile.length > 0) {
+				rulesEditor.getSession().foldAll(1);
+				if (currentFile.length > 0) {
 					var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-					file.initWithPath(this.currentFile);
+					file.initWithPath(currentFile);
 					if (file.exists() == true)
 						file.remove(false);
 				}
-				this.dtable.removeRow(rowNumber);
+				dtable.removeRow(rowNumber);
 			}
 		})(o.data.feld, o.rowIndex);
 	};
@@ -668,9 +683,9 @@ function imageFieldFormatter(o) {
 	image.title = "Zur Inbox verschieben";
 	image.onclick = function() {
 		return (function(name) {
-			var docId = "workspace:/SpacesStore/" + this.daten[name]["container"];
+			var docId = "workspace:/SpacesStore/" + daten[name]["container"];
 			if (isLocal()) {
-				var json = jQuery.parseJSON(document.reader.moveDocument(docId, this.inboxID, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null));
+				var json = jQuery.parseJSON(document.reader.moveDocument(docId, inboxID, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null));
 				if (!json.success)
 					alert("Dokument nicht verschoben: " + json.result);
 			}
@@ -678,7 +693,7 @@ function imageFieldFormatter(o) {
 				var dataString = {
 					"function"			: "moveDocument",
 					"documentId"		: docId,
-					"destinationId"	    : this.inboxID,
+					"destinationId"	    : inboxID,
 					"server"			: getSettings("server"),
 					"username"			: getSettings("user"),
 					"password"			: getSettings("password"),
@@ -735,25 +750,25 @@ function uuid() {
 
 function doReRunAll() {
 	try {
-		this.textEditor.getSession().setValue("");
+		textEditor.getSession().setValue("");
 		fillMessageBox("", false);
 		for ( var i = 0; i < tableData.length; i++) {
-			var name = this.dtable.get("data").getByClientId(this.dtable.getRow(i).getData()["yui3-record"]).get("feld");
-			this.REC.currentDocument.setContent(this.daten[name].text);
-			this.REC.testRules(this.rulesEditor.getSession().getValue());
-			this.daten[name].log = this.REC.mess;
-			this.daten[name].result = this.REC.results;
-			this.daten[name].position = this.REC.positions;
-			this.daten[name].xml = this.REC.currXMLName;
-			this.daten[name].error = this.REC.errors;
+			var name = dtable.get("data").getByClientId(dtable.getRow(i).getData()["yui3-record"]).get("feld");
+			REC.currentDocument.setContent(daten[name].text);
+			REC.testRules(rulesEditor.getSession().getValue());
+			daten[name].log = REC.mess;
+			daten[name].result = REC.results;
+			daten[name].position = REC.positions;
+			daten[name].xml = REC.currXMLName;
+			daten[name].error = REC.errors;
 			var row = tableData[i];
-			row["xml"] = this.REC.currXMLName.join(" : ");
-			row["error"] = this.REC.errors;
+			row["xml"] = REC.currXMLName.join(" : ");
+			row["error"] = REC.errors;
 			var ergebnis = new Array();
-			ergebnis["error"] = this.REC.errors.length > 0;
+			ergebnis["error"] = REC.errors.length > 0;
 			row["result"] = ergebnis;
 			tableData[i] = row;
-			this.dtable.modifyRow(i, row);
+			dtable.modifyRow(i, row);
 		}
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -766,7 +781,7 @@ function doReRunAll() {
 
 function setMarkers(positions, editor) {
 	var markers = new Array();
-	if (this.REC.exist(positions)) {
+	if (REC.exist(positions)) {
 		/*
 		 * var cssText = ".ace-chrome .ace_marker-layer .ace_step1 {background:
 		 * rgb(252, 0, 0);}"; var cssClass = "ace-chrome"; var dom =
@@ -793,18 +808,18 @@ function removeMarkers(markers, editor) {
 }
 
 function setXMLPosition(position) {
-	this.rulesEditor.getSession().foldAll(1);
-	var text = this.rulesEditor.getSession().getValue();
+	rulesEditor.getSession().foldAll(1);
+	var text = rulesEditor.getSession().getValue();
 	var pos = 0;
 	for ( var i = 0; i < position.length; i++)
 		pos = text.indexOf("<archivTyp name=\"" + position[i] + "\"", pos);
 	if (pos != -1) {
 		pos1 = text.indexOf("</archivTyp>", pos);
 		if (pos1 != -1) {
-			var p = this.REC.convertPosition(text, pos, pos1 + 12, "");
-			this.rulesEditor.getSession().unfold(p.startRow + 1, true);
-			this.rulesEditor.gotoLine(p.startRow + 1);
-			this.rulesEditor.selection.setSelectionRange(new Range(p.startRow, p.startColumn, p.endRow, p.endColumn));
+			var p = REC.convertPosition(text, pos, pos1 + 12, "");
+			rulesEditor.getSession().unfold(p.startRow + 1, true);
+			rulesEditor.gotoLine(p.startRow + 1);
+			rulesEditor.selection.setSelectionRange(new Range(p.startRow, p.startColumn, p.endRow, p.endColumn));
 		}
 	}
 }
@@ -819,11 +834,11 @@ function printResults(results) {
 	}
 	maxLength++;
 	for (key in results) {
-		if (this.REC.exist(results[key])) {
+		if (REC.exist(results[key])) {
 			ret = ret + key + blanks.substr(0, maxLength - key.length) + ": " + results[key].getValue();
-			if (this.REC.exist(results[key].expected)) {
+			if (REC.exist(results[key].expected)) {
 				var tmp = eval(results[key].expected);
-				if (this.REC.exist(results[key].getValue()) && tmp.valueOf() == results[key].getValue().valueOf())
+				if (REC.exist(results[key].getValue()) && tmp.valueOf() == results[key].getValue().valueOf())
 					ret = ret + " [OK]";
 				else
 					ret = ret + " [FALSE] " + tmp;
@@ -840,19 +855,19 @@ function fillMessageBox(text, reverse) {
 		if (text.startsWith("\n"))
 			text = text.substr(1);
 	}
-	this.outputEditor.getSession().setValue(text);
+	outputEditor.getSession().setValue(text);
 }
 
 function doBack() {
-	this.multiMode = true;
-	this.showMulti = false;
+	multiMode = true;
+	showMulti = false;
 	document.getElementById('inTxt').style.display = 'none';
 	document.getElementById('dtable').style.display = 'block';
 	document.getElementById('back').style.display = 'none';
-	this.textEditor.getSession().setValue("");
+	textEditor.getSession().setValue("");
 	fillMessageBox("", false);
-	this.propsEditor.getSession().setValue("");
-	this.rulesEditor.getSession().foldAll(1);
+	propsEditor.getSession().setValue("");
+	rulesEditor.getSession().foldAll(1);
 	manageControls();
 }
 
@@ -861,21 +876,25 @@ function doTest() {
         if (isLocal()) {
             var open = openFile("test.txt");
             var content = open[0];
-            this.REC.currentDocument.setContent(content);
-            removeMarkers(markers, this.textEditor);
-            this.textEditor.getSession().setValue(content);
-            if (!this.currentRules.endsWith("test.xml")) {
+            REC.currentDocument.setContent(content);
+            REC.currentDocument.name = "TEST";
+            document.getElementById('headerWest').textContent = "TEST";
+            removeMarkers(markers, textEditor);
+            textEditor.getSession().setValue(content);
+            if (!currentRules.endsWith("test.xml")) {
                 open = openFile("test.xml");
-                this.currentRules = open[1];
-                this.rulesEditor.getSession().setValue(open[0]);
+                currentRules = open[1];
+                rulesEditor.getSession().setValue(open[0]);
+                document.getElementById('headerCenter').textContent = "Regeln (test.xml)";
             }
-            this.REC.testRules(this.rulesEditor.getSession().getValue());
-            setXMLPosition(this.REC.currXMLName);
-            markers = setMarkers(this.REC.positions, this.textEditor);
-            this.propsEditor.getSession().setValue(printResults(this.REC.results));
-            fillMessageBox(this.REC.getMessage(), true);
+            REC.testRules(rulesEditor.getSession().getValue());
+            setXMLPosition(REC.currXMLName);
+            markers = setMarkers(REC.positions, textEditor);
+            propsEditor.getSession().setValue(printResults(REC.results));
+            fillMessageBox(REC.getMessage(), true);
             document.getElementById('inTxt').style.display = 'block';
             document.getElementById('dtable').style.display = 'none';
+            testMode = true;
             manageControls();
         } else {
             var dataString = {
@@ -902,18 +921,20 @@ function doTest() {
                 },
                 success: function (data) {
                     if (data.success[0]) {
-                        this.REC.currentDocument.setContent(data.result[0].text.toString());
-                        removeMarkers(markers, this.textEditor);
-                        this.textEditor.getSession().setValue(data.result[0].text.toString());
-                        this.currentRules = "test.xml";
-                        this.rulesEditor.getSession().setValue(data.result[0].xml.toString());
-                        this.REC.testRules(this.rulesEditor.getSession().getValue());
-                        setXMLPosition(this.REC.currXMLName);
-                        markers = setMarkers(this.REC.positions, this.textEditor);
-                        this.propsEditor.getSession().setValue(printResults(this.REC.results));
-                        fillMessageBox(this.REC.getMessage(), true);
+                        REC.currentDocument.setContent(data.result[0].text.toString());
+                        removeMarkers(markers, textEditor);
+                        textEditor.getSession().setValue(data.result[0].text.toString());
+                        currentRules = "test.xml";
+                        document.getElementById('headerCenter').textContent = "Regeln (test.xml)";
+                        rulesEditor.getSession().setValue(data.result[0].xml.toString());
+                        REC.testRules(rulesEditor.getSession().getValue());
+                        setXMLPosition(REC.currXMLName);
+                        markers = setMarkers(REC.positions, textEditor);
+                        propsEditor.getSession().setValue(printResults(REC.results));
+                        fillMessageBox(REC.getMessage(), true);
                         document.getElementById('inTxt').style.display = 'block';
                         document.getElementById('dtable').style.display = 'none';
+                        testMode = true;
                         manageControls();
                     } else
                         alert("Fehler: " + data.result[0]);
@@ -929,16 +950,24 @@ function doTest() {
     }
 }
 
+function closeTest(){
+    testMode = false;
+    textEditor.getSession().setValue(currentContent);
+    document.getElementById('headerWest').textContent = currentFile;
+    openRules();
+    manageControls();
+}
+
 function work() {
 	var selectMode = false;
-	if (this.multiMode)
+	if (multiMode)
 		doReRunAll()
 	else {
-		var range = this.rulesEditor.getSelectionRange();
-		var sel = this.rulesEditor.getSession().getTextRange(range);
+		var range = rulesEditor.getSelectionRange();
+		var sel = rulesEditor.getSession().getTextRange(range);
 		if (sel.length > 0) {
 			if (!sel.startsWith("<")) {
-				var start = this.rulesEditor.find('<', {
+				var start = rulesEditor.find('<', {
 					backwards : true,
 					wrap : false,
 					caseSensitive : false,
@@ -949,7 +978,7 @@ function work() {
 				range.setStart(start.start);
 			}
 			if (!sel.endsWith("/>")) {
-				var end = this.rulesEditor.find('>', {
+				var end = rulesEditor.find('>', {
 					backwards : false,
 					wrap : false,
 					caseSensitive : false,
@@ -959,11 +988,11 @@ function work() {
 				});
 				range.setEnd(end.end);
 			}
-			sel = this.rulesEditor.getSession().getTextRange(range);
+			sel = rulesEditor.getSession().getTextRange(range);
 			if (!sel.endsWith("/>")) {
 				var tmp = sel.substring(1, sel.indexOf(" "));
 				tmp = "</" + tmp + ">";
-				end = this.rulesEditor.find(tmp, {
+				end = rulesEditor.find(tmp, {
 					backwards : false,
 					wrap : false,
 					caseSensitive : false,
@@ -973,12 +1002,12 @@ function work() {
 				});
 				range.setEnd(end.end);
 			}
-			this.rulesEditor.selection.setSelectionRange(range);
-			sel = this.rulesEditor.getSession().getTextRange(range);
+			rulesEditor.selection.setSelectionRange(range);
+			sel = rulesEditor.getSession().getTextRange(range);
 			if (!sel.startsWith("<tags") && !sel.startsWith("<category") && !sel.startsWith("<archivPosition")) {
 				selectMode = true;
 				if (!sel.startsWith("<searchItem ")) {
-					start = this.rulesEditor.find('<searchItem', {
+					start = rulesEditor.find('<searchItem', {
 						backwards : true,
 						wrap : false,
 						caseSensitive : false,
@@ -987,7 +1016,7 @@ function work() {
 						regExp : false
 					});
 					range.setStart(start.start);
-					end = this.rulesEditor.find('</searchItem>', {
+					end = rulesEditor.find('</searchItem>', {
 						backwards : false,
 						wrap : false,
 						caseSensitive : false,
@@ -996,8 +1025,8 @@ function work() {
 						regExp : false
 					});
 					range.setEnd(end.end);
-					this.rulesEditor.selection.setSelectionRange(range);
-					sel = this.rulesEditor.getSession().getTextRange(range);
+					rulesEditor.selection.setSelectionRange(range);
+					sel = rulesEditor.getSession().getTextRange(range);
 				}
 				if (!sel.startsWith("<archivTyp "))
 					sel = "<archivTyp name='' searchString=''>" + sel;
@@ -1008,17 +1037,18 @@ function work() {
 				if (!sel.endsWith("</documentTypes>"))
 					sel = sel + "</documentTypes>";
 			} else
-				sel = this.rulesEditor.getSession().getValue();
+				sel = rulesEditor.getSession().getValue();
 		} else
-			sel = this.rulesEditor.getSession().getValue();
-		this.REC.currentDocument.setContent(this.textEditor.getSession().getValue());
-		removeMarkers(markers, this.textEditor);
-		this.REC.testRules(sel);
+			sel = rulesEditor.getSession().getValue();
+		REC.currentDocument.setContent(textEditor.getSession().getValue());
+        REC.currentDocument.name = currentFile;
+		removeMarkers(markers, textEditor);
+		REC.testRules(sel);
 		if (!selectMode)
-			setXMLPosition(this.REC.currXMLName);
-		markers = setMarkers(this.REC.positions, this.textEditor);
-		fillMessageBox(this.REC.getMessage(), true);
-		this.propsEditor.getSession().setValue(printResults(this.REC.results));
+			setXMLPosition(REC.currXMLName);
+		markers = setMarkers(REC.positions, textEditor);
+		fillMessageBox(REC.getMessage(), true);
+		propsEditor.getSession().setValue(printResults(REC.results));
 		document.getElementById('inTxt').style.display = 'block';
 		document.getElementById('dtable').style.display = 'none';
 	}
@@ -1027,10 +1057,10 @@ function work() {
 function sendRules(dialog) {
 	try {
 		var erg = false;
-		if (this.currentRules.endsWith("doc.xml")) {
-			vkbeautify.xml(this.rulesEditor.getSession().getValue());
+		if (currentRules.endsWith("doc.xml")) {
+			vkbeautify.xml(rulesEditor.getSession().getValue());
 			if (isLocal()) {
-				var ret = document.reader.updateDocumentByFile(this.rulesID, this.currentRules,
+				var ret = document.reader.updateDocumentByFile(rulesID, currentRules,
 						"XML-Beschreibung der Dokumente", "application/xml", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
 				if (dialog) {
 					if (ret == 200) {
@@ -1042,9 +1072,9 @@ function sendRules(dialog) {
 			} else {
 			var dataString = {
 				"function"     : "updateDocument",
-				"documentText" : this.rulesEditor.getSession().getValue(),
+				"documentText" : rulesEditor.getSession().getValue(),
 				"description"  : "XML-Beschreibung der Dokumente",
-				"documentId"   : this.rulesID,
+				"documentId"   : rulesID,
 			  "mimeType"     : "application/xml",
 				"server"       : getSettings("server"),
 				"username"     : getSettings("user"),
@@ -1090,13 +1120,13 @@ function sendRules(dialog) {
 }
 
 function loadAlfresco(){
-    this.alfrescoMode = true;
+    alfrescoMode = true;
 
     manageControls();
 }
 
 function closeAlfresco(){
-    this.alfrescoMode = false;
+    alfrescoMode = false;
     manageControls();
 }
 
@@ -1111,13 +1141,13 @@ function openSettings(){
     proxyInput.value =getSettings("proxy");
     var portInput = document.getElementById('port');
     portInput.value = getSettings("port");
-    this.$( "#dialog-form" ).dialog( "open" );
+    $( "#dialog-form" ).dialog( "open" );
 }
 
 function loadAlfrescoFolder(folderName) {
 	try {
 		showProgress();
-	   this.dtable.get("data").reset(null, {
+	   dtable.get("data").reset(null, {
       silent : true
     });
     var ret;
@@ -1138,7 +1168,7 @@ function loadAlfrescoFolder(folderName) {
 				else
 					alert("Fehler beim Holen des Inhalts: " + json.result);
 			}
-			this.dtable.render("#dtable");
+			dtable.render("#dtable");
 		} else {
 			var dataString = {
 				"function"  : "listFolder",
@@ -1214,7 +1244,7 @@ function loadAlfrescoFolder(folderName) {
 							                           }
 						              });	          
 					             }	
-					             this.dtable.render("#dtable");
+					             dtable.render("#dtable");
 					           } else
 					          	 alert("Fehler beim Lesen des Verzeichnisses: " + data.result[0]);
 				}
@@ -1235,14 +1265,14 @@ function getRules(rDoc, loadLocal, dialog) {
 			var ret;
 			if (loadLocal) {
 				var open = openFile(rDoc);
-				this.rulesEditor.getSession().setValue(open[0]);
-				this.rulesEditor.getSession().foldAll(1);
+				rulesEditor.getSession().setValue(open[0]);
+				rulesEditor.getSession().foldAll(1);
 			} else {
 				ret = document.reader.getContent(rDoc, false, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
 				var json = jQuery.parseJSON(ret);
 				if (json.success) {
-					this.rulesEditor.getSession().setValue(json.result);
-					this.rulesEditor.getSession().foldAll(1);
+					rulesEditor.getSession().setValue(json.result);
+					rulesEditor.getSession().foldAll(1);
 					if (dialog)
 						alert("Regeln erfolgreich übertragen!");
 				} else
@@ -1268,8 +1298,8 @@ function getRules(rDoc, loadLocal, dialog) {
 											   if (data.success[0]) {
 					                 if (dialog)
 						                 alert("Regeln erfolgreich übertragen!");
-				                  	this.rulesEditor.getSession().setValue(data.result[0].toString());
-					                this.rulesEditor.getSession().foldAll(1);
+				                  	rulesEditor.getSession().setValue(data.result[0].toString());
+					                rulesEditor.getSession().foldAll(1);
 										  	 } else
 												   alert("Regeln konnten nicht übertragen werden: " + data.result[0]);
 				               },
@@ -1287,7 +1317,7 @@ function getRules(rDoc, loadLocal, dialog) {
                 }
 			});
 		}
-		this.currentRules = "doc.xml";
+		currentRules = "doc.xml";
 	} catch (e) {
 		var str = "FEHLER:\n";
 		str = str + e.toString() + "\n";
@@ -1297,15 +1327,39 @@ function getRules(rDoc, loadLocal, dialog) {
 	}
 }
 
+function openRules() {
+    var xml;
+    if (isLocal()) {
+        xml = "doc.xml";
+        getRules(xml, true, false);
+        document.getElementById('headerCenter').textContent = "Regeln (doc.xml)";
+    } else {
+        if (rulesID != null) {
+            xml = rulesID.substring(rulesID.lastIndexOf('/') + 1);
+            getRules(xml, true, false);
+            document.getElementById('headerCenter').textContent = "Regeln: doc.xml)";
+        } else {
+            $.get('doc.xml', function(msg)
+            {
+                rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
+                rulesEditor.getSession().foldAll(1);
+                currentRules = "doc.xml";
+                document.getElementById('headerCenter').textContent = "Regeln (Server: doc.xml)";
+            });
+        }
+        //	window.parent.frames.rules.rulesEditor.getSession().setValue("Regeln konnten nicht geladen werden!");
+    }
+}
+
 function format() {
 	try {
-		var xml = this.rulesEditor.getSession().getValue();
+		var xml = rulesEditor.getSession().getValue();
 		xml = vkbeautify.xml(xml);
-		this.rulesEditor.getSession().setValue(xml);
+		rulesEditor.getSession().setValue(xml);
 		// window.parent.frames.rules.rulesEditor.getSession().foldAll(1);
 		if (typeof currXMLName != "undefined" && currXMLName != null) {
 			setXMLPosition(currXMLName);
-			markers = setMarkers(positions, this.textEditor);
+			markers = setMarkers(positions, textEditor);
 		}
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -1318,9 +1372,9 @@ function format() {
 
 function formatScript() {
 	try {
-		var txt = this.textEditor.getSession().getValue();
+		var txt = textEditor.getSession().getValue();
 		txt = js_beautify(txt);
-		this.textEditor.getSession().setValue(txt);
+		textEditor.getSession().setValue(txt);
 	} catch (e) {
 		var str = "FEHLER:\n";
 		str = str + e.toString() + "\n";
@@ -1356,8 +1410,8 @@ function handleRulesSelect(evt) {
 			var r = new FileReader();
 			r.onload = function(e) {
 				var contents = e.target.result;
-				this.rulesEditor.getSession().setValue(contents);
-				this.rulesEditor.getSession().foldAll(1);
+				rulesEditor.getSession().setValue(contents);
+				rulesEditor.getSession().foldAll(1);
 			};
 			r.readAsText(f);
 		} else {
@@ -1385,29 +1439,29 @@ function loadScript() {
     try {
         layoutState = myLayout.state;
         myLayout.sizePane("west", "100%");
-        oldContent = this.textEditor.getSession().getValue();
+        oldContent = textEditor.getSession().getValue();
         var content;
-        if (this.REC.exist(modifiedScript) && modifiedScript - length > 0) {
+        if (REC.exist(modifiedScript) && modifiedScript - length > 0) {
             content = modifiedScript;
         } else {
             if (isLocal()) {
                 var open = openFile("recognition.js");
                 content = open[0];
-                this.workDocument = open[1];
+                workDocument = open[1];
                 eval(content);
-                this.REC = new Recognition();
-                this.REC.set(this.REC);
-                removeMarkers(markers, this.textEditor);
-                this.textEditor.getSession().setMode(new jsMode());
-                this.textEditor.getSession().setValue(content);
-                this.textEditor.setShowInvisibles(false);
-                this.scriptMode = true;
+                REC = new Recognition();
+                REC.set(REC);
+                removeMarkers(markers, textEditor);
+                textEditor.getSession().setMode(new jsMode());
+                textEditor.getSession().setValue(content);
+                textEditor.setShowInvisibles(false);
+                scriptMode = true;
                 manageControls();
             } else {
-                if (this.REC.exist(this.scriptID)) {
+                if (REC.exist(scriptID)) {
                     var dataString = {
                         "function": "getContent",
-                        "documentId": this.scriptID,
+                        "documentId": scriptID,
                         "extract": "false",
                         "server": getSettings("server"),
                         "username": getSettings("user"),
@@ -1435,15 +1489,15 @@ function loadScript() {
                         success: function (data) {
                             if (data.success[0]) {
                                 content = data.result[0].toString();
-                                this.workDocument = "recognition.js";
+                                workDocument = "recognition.js";
                                 eval(content);
-                                this.REC = new Recognition();
-                                this.REC.set(this.REC);
-                                removeMarkers(markers, this.textEditor);
-                                this.textEditor.getSession().setMode(new jsMode());
-                                this.textEditor.getSession().setValue(content);
-                                this.textEditor.setShowInvisibles(false);
-                                this.scriptMode = true;
+                                REC = new Recognition();
+                                REC.set(REC);
+                                removeMarkers(markers, textEditor);
+                                textEditor.getSession().setMode(new jsMode());
+                                textEditor.getSession().setValue(content);
+                                textEditor.setShowInvisibles(false);
+                                scriptMode = true;
                                 manageControls();
                             } else
                                 alert("Script konnte nicht gefunden werden: " + data.result[0]);
@@ -1452,10 +1506,10 @@ function loadScript() {
                 }
                 else {
                     $.get('recognition.js', function (msg) {
-                        this.textEditor.getSession().setMode(new jsMode());
-                        this.textEditor.getSession().setValue(msg);
-                        this.textEditor.setShowInvisibles(false);
-                        this.scriptMode = true;
+                        textEditor.getSession().setMode(new jsMode());
+                        textEditor.getSession().setValue(msg);
+                        textEditor.setShowInvisibles(false);
+                        scriptMode = true;
                         manageControls();
                     });
                 }
@@ -1473,10 +1527,10 @@ function loadScript() {
 
 function reloadScript(dialog) {
 	try {
-		modifiedScript = this.textEditor.getSession().getValue();
+		modifiedScript = textEditor.getSession().getValue();
 		eval(modifiedScript);
-		this.REC = new Recognition();
-		this.REC.set(this.REC);
+		REC = new Recognition();
+		REC.set(REC);
 		alert("Script erfolgreich aktualisiert");
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -1490,12 +1544,12 @@ function reloadScript(dialog) {
 function getScript(dialog) {
     try {
         if (isLocal()) {
-            var ret = document.reader.getContent(this.scriptID, false, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
+            var ret = document.reader.getContent(scriptID, false, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
                 getSettings("port"), null);
             var json = jQuery.parseJSON(ret);
             if (json.success) {
-                save(this.workDocument, this.textEditor.getSession().getValue(), false);
-                this.textEditor.getSession().setValue(json.result);
+                save(workDocument, textEditor.getSession().getValue(), false);
+                textEditor.getSession().setValue(json.result);
                 if (dialog)
                     alert("Script erfolgreich heruntergeladen!");
             } else
@@ -1503,7 +1557,7 @@ function getScript(dialog) {
         } else {
             var dataString = {
                 "function": "getContent",
-                "documentId": this.scriptID,
+                "documentId": scriptID,
                 "extract": "false",
                 "server": getSettings("server"),
                 "username": getSettings("user"),
@@ -1532,7 +1586,7 @@ function getScript(dialog) {
                     if (data.success[0]) {
                         if (dialog)
                             alert("Script erfolgreich heruntergeladen!");
-                        this.textEditor.getSession().setValue(data.result.toString());
+                        textEditor.getSession().setValue(data.result.toString());
                     } else
                         alert("Script konnte nicht geladen werden: " + data.result[0]);
                 }
@@ -1550,10 +1604,10 @@ function getScript(dialog) {
 function sendScript(dialog) {
 	try {
 		var erg = false;
-		if (this.workDocument.endsWith("recognition.js")) {
+		if (workDocument.endsWith("recognition.js")) {
 			if (isLocal()) {
-				document.reader.save(this.workDocument, this.textEditor.getSession().getValue());
-				var ret = document.reader.updateDocument(this.scriptID, this.textEditor.getSession().getValue(),
+				document.reader.save(workDocument, textEditor.getSession().getValue());
+				var ret = document.reader.updateDocument(scriptID, textEditor.getSession().getValue(),
 						"VerteilungsScript", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
 				if (dialog) {
 					if (ret == 200) {
@@ -1565,8 +1619,8 @@ function sendScript(dialog) {
 			} else {
 				var dataString = {
 					"function"     : "updateDocument",
-					"documentId"   : this.scriptID,
-					"documentText" : this.textEditor.getSession().getValue(),
+					"documentId"   : scriptID,
+					"documentText" : textEditor.getSession().getValue(),
 					"description"  : "VerteilungsScript",
 					"server"       : getSettings("server"),
 					"username"     : getSettings("user"),
@@ -1614,13 +1668,13 @@ function sendScript(dialog) {
 function closeScript() {
 	try {
         myLayout.sizePane("west", layoutState.west.size);
-		this.textEditor.getSession().setMode(new txtMode());
-		if (this.REC.exist(oldContent) && oldContent.length > 0)
-			this.textEditor.getSession().setValue(oldContent);
+		textEditor.getSession().setMode(new txtMode());
+		if (REC.exist(oldContent) && oldContent.length > 0)
+			textEditor.getSession().setValue(oldContent);
 		else
-			this.textEditor.getSession().setValue("");
-		this.textEditor.setShowInvisibles(true);
-		this.scriptMode = false;
+			textEditor.getSession().setValue("");
+		textEditor.setShowInvisibles(true);
+		scriptMode = false;
 		manageControls();
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -1660,13 +1714,13 @@ function stringToBytes(str) {
 
 function init() {
     var cookie = $.cookie("settings");
-    if (this.REC.exist(cookie)) {
+    if (REC.exist(cookie)) {
         settings = $.parseJSON(cookie);
     } else {
         settings = {};
         settings.settings = [];
     }
-    if (this.REC.exist(getSettings("server")))
+    if (REC.exist(getSettings("server")))
         alfrescoServerAvailable = checkServerStatus(getSettings("server"), getSettings("proxy"), getSettings("port"));
     if (alfrescoServerAvailable) {
         var txt = [];
@@ -1675,30 +1729,30 @@ function init() {
 
             var pattern = new RegExp("true", "ig");
             if (getUrlParam("local") == null || pattern.test(getUrlParam("local"))) {
-                this.runLocal = true;
+                runLocal = true;
             } else {
                 json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
                     getSettings("port"), null));
                 if (json.success)
-                    this.scriptID = json.result;
+                    scriptID = json.result;
                 else
                     txt.push("Script nicht gefunden! Fehler: " + json.result);
                 json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
                     null));
                 if (json.success)
-                    this.rulesID = json.result;
+                    rulesID = json.result;
                 else
                     txt.push("Regeln nicht gefunden! Fehler: " + json.result);
                 json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
                     null));
                 if (json.success)
-                    this.inboxID = json.result;
+                    inboxID = json.result;
                 else
                     txt.push("Inbox nicht gefunden! Fehler: " + json.result);
                 json = jQuery.parseJSON(document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
                     null));
                 if (json.success)
-                    this.rootID = json.result;
+                    rootID = json.result;
                 else
                     txt.push("Archiv nicht gefunden! Fehler: " + json.result);
 
@@ -1734,7 +1788,7 @@ function init() {
                 },
                 success: function (data) {
                     if (data.success[0])
-                        this.scriptID = data.result[0];
+                        scriptID = data.result[0];
                     else {
                         txt.push("Script nicht gefunden! " + data.result[0]);
                     }
@@ -1769,7 +1823,7 @@ function init() {
                 },
                 success: function (data) {
                     if (data.success[0])
-                        this.rulesID = data.result[0];
+                        rulesID = data.result[0];
                     else {
                         txt.push("Regeln nicht gefunden! " + data.result[0]);
                     }
@@ -1804,7 +1858,7 @@ function init() {
                 },
                 success: function (data) {
                     if (data.success[0])
-                        this.inboxID = data.result[0];
+                        inboxID = data.result[0];
                     else {
                         txt.push("Inbox nicht gefunden! " + data.result[0]);
                     }
@@ -1839,7 +1893,7 @@ function init() {
                 },
                 success: function (data) {
                     if (data.success[0])
-                        this.rootID = data.result[0];
+                        rootID = data.result[0];
                     else {
                         txt.push("Archiv nicht gefunden! " + data.result[0]);
                     }
@@ -1850,6 +1904,7 @@ function init() {
             alert(txt.join("\n"));
     }
 
+    openRules();
     manageControls();
 }
 

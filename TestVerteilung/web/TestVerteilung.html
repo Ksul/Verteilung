@@ -41,11 +41,11 @@
     .header {
         background: #80ade5 url(./resource/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
         border-bottom: 1px solid #777;
-        height: 8px;
+        height: 12px;
         font-weight: normal;
         font-size: 9pt;
         text-align: center;
-        padding: 2px 0 4px;
+        padding-bottom: 2px;
         position: relative;
         overflow: hidden;
     }
@@ -676,14 +676,17 @@ window.onload = function () {
                         cache: false,
                         datatype: "json",
                         url: "VerteilungServlet",
-                        success: function (data) {
-                            if (data.success[0]) {
-                                textEditor.getSession().setValue(data.result.toString());
+                        success: function (erg) {
+                            if (erg.success[0]) {
+                                textEditor.getSession().setValue(erg.result.toString());
+                                currentContent = erg.result.toString();
+                                currentFile = data.rslt.obj.text().trim();
+                                document.getElementById('headerWest').textContent = currentFile;
                                 alfrescoMode = false;
                                 manageControls();
 
                             } else
-                                alert("Daten konnten nicht übertragen werden: " + data.result[0]);
+                                alert("Daten konnten nicht übertragen werden: " + erg.result[0]);
                         },
                         error: function (response) {
                             try {
@@ -702,27 +705,7 @@ window.onload = function () {
             }).delegate("a", "click", function (event, data) {
                 event.preventDefault();
             });
-
-
     init();
-    var xml;
-    if (isLocal()) {
-        xml = "doc.xml";
-        getRules(xml, true, false);
-    } else {
-        if (rulesID != null) {
-            xml = rulesID.substring(rulesID.lastIndexOf('/') + 1);
-            getRules(xml, true, false);
-        } else {
-            $.get('doc.xml', function(msg)
-            {
-                rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
-                rulesEditor.getSession().foldAll(1);
-                currentRules = "doc.xml";
-            });
-        }
-        //	window.parent.frames.rules.rulesEditor.getSession().setValue("Regeln konnten nicht geladen werden!");
-    }
 };
 
 var rulesEditor;
@@ -736,6 +719,7 @@ var inboxID = null;
 var rootID = null;
 var currentRules = null;
 var scriptMode = false;
+var testMode = false;
 var runLocal = false;
 var REC;
 var treeObject;
@@ -745,6 +729,7 @@ var multiMode = false;
 var currentPDF = false;
 var showMulti = false;
 var currentFile = null;
+var currentContent = false;
 var currentContainer = null;
 var jsMode;
 var txtMode;
@@ -816,7 +801,11 @@ treeObject = jQuery.jstree._reference(tree);
                                                    style="display: none"/>
             </td>
             <td width="60px" align="center"><input onclick="closeScript();"
-                                                   name="close" id="close" type="submit" class="close" title="Close"
+                                                   name="closeScript" id="closeScript" type="submit" class="close" title="Close"
+                                                   value="" style="display: none"/>
+            </td>
+            <td width="60px" align="center"><input onclick="closeTest();"
+                                                   name="closeTest" id="closeTest" type="submit" class="close" title="Close"
                                                    value="" style="display: none"/>
             </td>
             <td width="60px" align="center"><input
@@ -893,7 +882,7 @@ treeObject = jQuery.jstree._reference(tree);
         </div>
     </div>
     <div class="inner-center">
-        <div class="header">Results</div>
+        <div class="header">Ergebnis</div>
         <div class="content">
             <div id="inProps" style="position:absolute; top:14px;bottom:0;left:0;right:0"></div>
         </div>
@@ -913,7 +902,7 @@ treeObject = jQuery.jstree._reference(tree);
 </div>
 
 <div class="ui-layout-center">
-    <div class="header">Rules</div>
+    <div id="headerCenter" class="header">Regeln</div>
     <div class="content">
         <div id="inRules" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
     </div>
