@@ -79,45 +79,38 @@ public class VerteilungApplet extends Applet {
 	}
 
     public  boolean isURLAvailable(String urlString, String proxyHost, String proxyPort)  {
-
         URL url = null;
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
             return false;
         }
-        if (url.getProtocol().equalsIgnoreCase("file")) {
-            File file = null;
-            try {
-                file = new File(url.toURI());
-            } catch (URISyntaxException e) {
-                return false;
-            }
-            return file.exists();
-        } else if (url.getProtocol().equalsIgnoreCase("http")) {
-            InputStream inputStream = null;
-            try {
-                if (proxyHost != null && proxyPort != null) {
-                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
-                    inputStream =  url.openConnection(proxy).getInputStream();
-                } else
-                    inputStream = url.openConnection().getInputStream();
 
-                inputStream = url.openStream();
-                return true;
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            } finally {
-                if (inputStream != null) {
-                    try {
-                        inputStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+        HttpURLConnection httpUrlConn;
+        try {
+            if (proxyHost != null && proxyPort != null) {
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+                httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
+            } else
+                httpUrlConn = (HttpURLConnection) url.openConnection();
+
+            httpUrlConn.setRequestMethod("HEAD");
+
+            // Set timeouts in milliseconds
+            httpUrlConn.setConnectTimeout(30000);
+            httpUrlConn.setReadTimeout(30000);
+
+            // Print HTTP status code/message for your information.
+            System.out.println("Response Code: "
+                    + httpUrlConn.getResponseCode());
+            System.out.println("Response Message: "
+                    + httpUrlConn.getResponseMessage());
+
+            return (httpUrlConn.getResponseCode() == HttpURLConnection.HTTP_OK);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
 	public String getTicket(final String server, final String username, final String password, final String proxyHost,

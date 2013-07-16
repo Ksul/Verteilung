@@ -1337,14 +1337,14 @@ function openRules() {
         if (rulesID != null) {
             xml = rulesID.substring(rulesID.lastIndexOf('/') + 1);
             getRules(xml, true, false);
-            document.getElementById('headerCenter').textContent = "Regeln: doc.xml)";
+            document.getElementById('headerCenter').textContent = "Regeln (Server: doc.xml)";
         } else {
             $.get('doc.xml', function(msg)
             {
                 rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
                 rulesEditor.getSession().foldAll(1);
                 currentRules = "doc.xml";
-                document.getElementById('headerCenter').textContent = "Regeln (Server: doc.xml)";
+                document.getElementById('headerCenter').textContent = "Regeln (doc.xml)";
             });
         }
         //	window.parent.frames.rules.rulesEditor.getSession().setValue("Regeln konnten nicht geladen werden!");
