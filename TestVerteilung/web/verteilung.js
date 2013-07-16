@@ -17,6 +17,14 @@ function getUrlParam(name) {
 		return results[1];
 }
 
+function errorHandler(e) {
+    var str = "FEHLER:\n";
+    str = str + e.toString() + "\n";
+    for (var prop in e)
+        str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+    alert(str);
+}
+
 function checkServerStatus(url, proxy, port) {
     var ret;
     if (isLocal()){
@@ -88,171 +96,167 @@ function showProgress() {
 }
 
 function manageControls() {
+    document.getElementById('tree').style.display = 'none';
+    document.getElementById('dtable').style.display = 'none';
+    document.getElementById('inTxt').style.display = 'block';
+    document.getElementById('filesinput').style.display = 'block';
+    document.getElementById('settings').style.display = 'block';
+    document.getElementById('docAlfresco').removeAttribute("disabled");
+    document.getElementById('closeAlfresco').style.display = 'none';
+    document.getElementById('play').style.display = 'block';
+    document.getElementById('play').removeAttribute("disabled");
+    document.getElementById('test').style.display = 'block';
+    document.getElementById('pdf').style.display = 'block';
+    document.getElementById('pdf').setAttribute("disabled", true);
+    document.getElementById('loadScript').style.display = 'block';
+    document.getElementById('loadScript').removeAttribute("disabled");
+    document.getElementById('searchCont').style.display = 'block';
+    document.getElementById('searchCont').removeAttribute("disabled");
+    document.getElementById('beautifyScript').style.display = 'none';
+    document.getElementById('back').style.display = 'none';
+    document.getElementById('closeScript').style.display = 'none';
+    document.getElementById('closeTest').style.display = 'none';
+    document.getElementById('reloadScript').style.display = 'none';
+    document.getElementById('saveScript').style.display = 'none';
+    document.getElementById('saveScript').setAttribute("disabled", true);
+    document.getElementById('getScript').style.display = 'none';
+    document.getElementById('sendScript').style.display = 'none';
+    document.getElementById('beautifyRules').style.display = 'block';
+    document.getElementById('searchRules').style.display = 'block';
+    document.getElementById('foldAll').style.display = 'block';
+    document.getElementById('unfoldAll').style.display = 'block';
+    document.getElementById('getRules').removeAttribute("disabled");
+    document.getElementById('sendRules').removeAttribute("disabled");
+    document.getElementById('saveRules').setAttribute("disabled", true);
 
-
-    if (multiMode && !scriptMode) {
+    if (testMode) {
+        document.getElementById('test').style.display = 'none';
+        document.getElementById('closeTest').style.display = 'block';
+        document.getElementById('docAlfresco').setAttribute("disabled", true);
+        document.getElementById('loadScript').setAttribute("disabled", true);
+        document.getElementById('pdf').setAttribute("disabled", true);
+    }
+    if (alfrescoMode) {
+        document.getElementById('tree').style.display = 'block';
+        document.getElementById('dtable').style.display = 'none';
+        document.getElementById('inTxt').style.display = 'none';
+        document.getElementById('closeAlfresco').style.display = 'block';
+        document.getElementById('docAlfresco').setAttribute("disabled", true);
+        document.getElementById('play').setAttribute("disabled", true);
+    }
+    if (!alfrescoServerAvailable)
+        document.getElementById('docAlfresco').setAttribute("disabled", true);
+    if (textEditor.getSession().getValue().length == 0)
+        document.getElementById('searchCont').setAttribute("disabled", true);
+    if (isLocal()) {
+        document.getElementById('saveRules').removeAttribute("disabled");
+        document.getElementById('saveScript').removeAttribute("disabled");
+    }
+    if (multiMode) {
         document.getElementById('inTxt').style.display = 'none';
         document.getElementById('dtable').style.display = 'block';
-    } else {
-
-        if (alfrescoMode) {
-            document.getElementById('tree').style.display = 'block';
-            document.getElementById('dtable').style.display = 'none';
-            document.getElementById('inTxt').style.display = 'none';
-            document.getElementById('closeAlfresco').style.display = 'block';
-            document.getElementById('docAlfresco').setAttribute("disabled", true);
-        }
-        else {
-            document.getElementById('tree').style.display = 'none';
-            document.getElementById('inTxt').style.display = 'block';
-            document.getElementById('dtable').style.display = 'none';
-            document.getElementById('closeAlfresco').style.display = 'none';
-            if (!alfrescoServerAvailable)
-                document.getElementById('docAlfresco').setAttribute("disabled", true);
-            else
-                document.getElementById('docAlfresco').removeAttribute("disabled");
-        }
-
-        document.getElementById('pdf').style.display = 'block';
-
     }
-
-    if (textEditor.getSession().getValue().length == 0) {
-        document.getElementById('searchCont').setAttribute("disabled", true);
-
-    } else {
-        document.getElementById('searchCont').removeAttribute("disabled");
+    if (showMulti) {
+        document.getElementById('back').style.display = 'block';
+        document.getElementById('dtable').style.display = 'none';
     }
-    if (textEditor.getSession().getValue().length == 0 && !multiMode) {
-        document.getElementById('play').setAttribute("disabled", true);
-    } else {
-        document.getElementById('play').removeAttribute("disabled");
-    }
-    if (isLocal()) {
-        document.getElementById('save').removeAttribute("disabled");
-        document.getElementById('saveScript').removeAttribute("disabled");
-    } else {
-        document.getElementById('save').setAttribute("disabled", true);
-        document.getElementById('saveScript').setAttribute("disabled", true);
-    }
-    if (!multiMode && currentPDF)
+    if (currentPDF)
         document.getElementById('pdf').removeAttribute("disabled");
-    else
-        document.getElementById('pdf').setAttribute("disabled", true);
-    if (scriptMode) {
-        document.getElementById('filesinput').style.display = 'none';
-        document.getElementById('play').style.display = 'none';
-        document.getElementById('test').style.display = 'none';
-        document.getElementById('back').style.display = 'none';
-        document.getElementById('pdf').style.display = 'none';
-        document.getElementById('script').style.display = 'none';
-        document.getElementById('closeScript').style.display = 'block';
-        document.getElementById('sendScript').style.display = 'block';
-        document.getElementById('getScript').style.display = 'block';
-        document.getElementById('saveScript').style.display = 'block';
-        document.getElementById('reloadScript').style.display = 'block';
-        document.getElementById('beautifyScript').style.display = 'block';
-    } else {
-        document.getElementById('filesinput').style.display = 'block';
-        document.getElementById('play').style.display = 'block';
-        document.getElementById('test').style.display = 'block';
-        if (showMulti)
-            document.getElementById('back').style.display = 'block';
-        document.getElementById('pdf').style.display = 'block';
-        document.getElementById('script').style.display = 'block';
-        document.getElementById('closeScript').style.display = 'none';
-        document.getElementById('sendScript').style.display = 'none';
-        document.getElementById('getScript').style.display = 'none';
-        document.getElementById('saveScript').style.display = 'none';
-        document.getElementById('reloadScript').style.display = 'none';
-        document.getElementById('beautifyScript').style.display = 'none';
-    }
+
     if (runLocal || (scriptID == null && rulesID == null)) {
         document.getElementById('sendScript').setAttribute("disabled", true);
         document.getElementById('getScript').setAttribute("disabled", true);
         document.getElementById('getRules').setAttribute("disabled", true);
         document.getElementById('sendRules').setAttribute("disabled", true);
     }
-    if (testMode) {
+    // Muss als letztes stehen
+    if (scriptMode) {
+        document.getElementById('tree').style.display = 'none';
+        document.getElementById('dtable').style.display = 'none';
+        document.getElementById('inTxt').style.display = 'block';
+        document.getElementById('docAlfresco').setAttribute("disabled", true);
+        document.getElementById('filesinput').style.display = 'none';
+        document.getElementById('play').style.display = 'none';
         document.getElementById('test').style.display = 'none';
-        document.getElementById('closeTest').style.display = 'block';
-        document.getElementById('docAlfresco').style.display = 'none';
-        document.getElementById('script').style.display = 'none';
+        document.getElementById('back').style.display = 'none';
         document.getElementById('pdf').style.display = 'none';
-    } else {
-        document.getElementById('test').style.display = 'block';
-        document.getElementById('closeTest').style.display = 'none';
-        document.getElementById('docAlfresco').style.display = 'block';
-        document.getElementById('script').style.display = 'block';
-        document.getElementById('pdf').style.display = 'block';
+        document.getElementById('loadScript').style.display = 'none';
+        document.getElementById('closeScript').style.display = 'block';
+        document.getElementById('sendScript').style.display = 'block';
+        document.getElementById('getScript').style.display = 'block';
+        document.getElementById('saveScript').style.display = 'block';
+        document.getElementById('reloadScript').style.display = 'block';
+        document.getElementById('beautifyScript').style.display = 'block';
+    }
+
+}
+
+
+function openPDF(name, fromServer) {
+    try {
+        if (fromServer) {
+            if (isLocal()) {
+                var ticket = document.reader.getTicket(getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
+                window.open(name + "?alf_ticket=" + ticket);
+            }
+            else {
+                var dataString = {
+                    "function": "getTicket",
+                    "server": getSettings("server"),
+                    "username": getSettings("user"),
+                    "password": getSettings("password"),
+                    "proxyHost": getSettings("proxy"),
+                    "proxyPort": getSettings("port")
+                };
+                $.ajax({
+                    type: "POST",
+                    data: dataString,
+                    datatype: "json",
+                    url: "/TestVerteilung/VerteilungServlet",
+                    error: function (response) {
+                        try {
+                            var r = jQuery.parseJSON(response.responseText);
+                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                        } catch (e) {
+                            var str = "FEHLER:\n";
+                            str = str + e.toString() + "\n";
+                            for (var prop in e)
+                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                            alert(str + "\n" + response.responseText);
+                        }
+                    },
+                    success: function (data) {
+                        window.open(name + "?alf_ticket=" + data.result.toString());
+                    }
+                });
+            }
+        }
+        else {
+            if (isLocal())
+                document.reader.openPDF(name);
+            else
+                window.open("/TestVerteilung/VerteilungServlet?function=openPDF&fileName=" + name, "_blank");
+        }
+    } catch (e) {
+        errorHandler(e);
     }
 }
 
-function openPDF(name, fromServer) {
-	try {
-  	if (fromServer) {
-  		if (isLocal()){
-  			var ticket = document.reader.getTicket(getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
-  			window.open(name + "?alf_ticket=" + ticket);
-  		}
-  		else {
-				var dataString = {
-						"function"  : "getTicket",
-						"server"    : getSettings("server"),
-						"username"  : getSettings("user"),
-						"password"  : getSettings("password"),
-						"proxyHost" : getSettings("proxy"),
-						"proxyPort" : getSettings("port")
-					};
-					$.ajax({
-						type        : "POST",
-						data        : dataString,
-						datatype    : "json",
-						url         : "/TestVerteilung/VerteilungServlet",
-                        error    : function (response) {
-                            try {
-                                var r = jQuery.parseJSON(response.responseText);
-                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                            } catch(e)  {
-                                var str = "FEHLER:\n";
-                                str = str + e.toString() + "\n";
-                                for ( var prop in e)
-                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                                alert(str + "\n" + response.responseText);
-                            }
-                        },
-						success     : function(data) {
-													   window.open(name + "?alf_ticket=" + data.result.toString());
-						              }
-					});			
-			}
-  	 }
-			else {
-				if (isLocal())
-	  			document.reader.openPDF(name);
-	  		else 
-			  window.open("/TestVerteilung/VerteilungServlet?function=openPDF&fileName=" + name, "_blank");
-		}
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
-}
-
 function loadText(txt, name, typ, container) {
-	multiMode = false;
-	currentFile = name;
-    currentContent = txt;
-	currentContainer = container;
-	removeMarkers(markers, textEditor);
-	textEditor.getSession().setValue(txt);
-    document.getElementById("headerWest").firstChild.nodeValue = name;
-	fillMessageBox("", false);
-	propsEditor.getSession().setValue("");
-	manageControls();
+    try {
+        multiMode = false;
+        currentFile = name;
+        currentContent = txt;
+        currentContainer = container;
+        removeMarkers(markers, textEditor);
+        textEditor.getSession().setValue(txt);
+        document.getElementById("headerWest").firstChild.nodeValue = name;
+        fillMessageBox("", false);
+        propsEditor.getSession().setValue("");
+        manageControls();
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) {
@@ -316,169 +320,165 @@ function readMultiFile(evt) {
 }
 
 function readFiles(files) {
-	try {
-		if (!currentRules.endsWith("doc.xml")) {
-			var open = openFile("doc.xml");
-			currentRules = open[1];
-			rulesEditor.getSession().setValue(open[0]);
-			rulesEditor.getSession().foldAll(1);
-		}
-		textEditor.getSession().setValue("");
-		fillMessageBox("", false);
-		dtable.get("data").reset(null, {
-			silent : true
-		});
-		daten = new Array();
-		tableData = new Array();
-		var count = files.length;
-		var maxLen = 1000000;
-		var first = true;
-    var reader;
-    var blob;
-		for ( var i = 0; i < count; i++) {
-			var f = files[i];
-			if (f) {
+    try {
+        if (!currentRules.endsWith("doc.xml")) {
+            var open = openFile("doc.xml");
+            currentRules = open[1];
+            rulesEditor.getSession().setValue(open[0]);
+            rulesEditor.getSession().foldAll(1);
+        }
+        textEditor.getSession().setValue("");
+        fillMessageBox("", false);
+        dtable.get("data").reset(null, {
+            silent: true
+        });
+        daten = new Array();
+        tableData = new Array();
+        var count = files.length;
+        var maxLen = 1000000;
+        var first = true;
+        var reader;
+        var blob;
+        for (var i = 0; i < count; i++) {
+            var f = files[i];
+            if (f) {
 
-				if (f.name.toLowerCase().endsWith(".pdf")) {
-					currentPDF = true;
-					reader = new FileReader();
-					reader.onloadend = (function(theFile, clear) {
-						return function(evt) {
-							if (evt.target.readyState == FileReader.DONE) {// DONE == 2
-								var str = btoa(evt.target.result);
-								if (isLocal()) {
-									for ( var k = 0; k < Math.ceil(str.length / maxLen); k++)
-										document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
-									document.reader.extract(theFile.name, files.length > 1, theFile.type);
-								} else {
-									var dataString = {
-										"function"     : "extract",
-										"documentText" : str,
-										"fileName"     : theFile.name,
-										"clear"        : clear
-									};
-									$.ajax({
-										type           : "POST",
-										data           : dataString,
-										datatype       : "json",
-										async          : false,
-										url            : "/TestVerteilung/VerteilungServlet",
-                                        error    : function (response) {
+                if (f.name.toLowerCase().endsWith(".pdf")) {
+                    currentPDF = true;
+                    reader = new FileReader();
+                    reader.onloadend = (function (theFile, clear) {
+                        return function (evt) {
+                            if (evt.target.readyState == FileReader.DONE) {// DONE == 2
+                                var str = btoa(evt.target.result);
+                                if (isLocal()) {
+                                    for (var k = 0; k < Math.ceil(str.length / maxLen); k++)
+                                        document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
+                                    document.reader.extract(theFile.name, files.length > 1, theFile.type);
+                                } else {
+                                    var dataString = {
+                                        "function": "extract",
+                                        "documentText": str,
+                                        "fileName": theFile.name,
+                                        "clear": clear
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        data: dataString,
+                                        datatype: "json",
+                                        async: false,
+                                        url: "/TestVerteilung/VerteilungServlet",
+                                        error: function (response) {
                                             try {
                                                 var r = jQuery.parseJSON(response.responseText);
                                                 alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                            } catch(e)  {
+                                            } catch (e) {
                                                 var str = "FEHLER:\n";
                                                 str = str + e.toString() + "\n";
-                                                for ( var prop in e)
+                                                for (var prop in e)
                                                     str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
                                                 alert(str + "\n" + response.responseText);
                                             }
                                         },
-										success        : function(data) {
-											                 if (data.success[0]) {
-											                	 if (count == 1)
-											                		 loadText(data.result[0].toString(), theFile.name, theFile.type, null);
-											                	 else {
-											                		 loadMultiText(data.result[0].toString(), theFile.name, theFile.type, "false", "false", null);
-											                	 }
-											                 } else
-											                		 alert ("Fehler beim Lesen des PDF: " + data.result[0]);
-											                 }
-									});
-								}
-							}
-						};
-					})(f, first);
-					blob = f.slice(0, f.size + 1);
-					reader.readAsBinaryString(blob);
-				}
+                                        success: function (data) {
+                                            if (data.success[0]) {
+                                                if (count == 1)
+                                                    loadText(data.result[0].toString(), theFile.name, theFile.type, null);
+                                                else {
+                                                    loadMultiText(data.result[0].toString(), theFile.name, theFile.type, "false", "false", null);
+                                                }
+                                            } else
+                                                alert("Fehler beim Lesen des PDF: " + data.result[0]);
+                                        }
+                                    });
+                                }
+                            }
+                        };
+                    })(f, first);
+                    blob = f.slice(0, f.size + 1);
+                    reader.readAsBinaryString(blob);
+                }
 
-				if (f.name.toLowerCase().endsWith(".zip")) {
-					reader = new FileReader();
-					reader.onloadend = (function(theFile) {
-						return function(evt) {
-							if (evt.target.readyState == FileReader.DONE) {// DONE == 2
-								var str = btoa(evt.target.result);
-								if (isLocal()) {
-									for ( var k = 0; k < Math.ceil(str.length / maxLen); k++)
-										document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
-									count = count + document.reader.extractZIP(theFile.name) - 1;
-								} else {
-									var dataString = {
-										"function"     : "extractZIP",
-										"documentText" : str
-									};
-									$.ajax({
-										type           : "POST",
-										data           : dataString,
-										datatype       : "json",
-										url            : "/TestVerteilung/VerteilungServlet",
-                                        error    : function (response) {
+                if (f.name.toLowerCase().endsWith(".zip")) {
+                    reader = new FileReader();
+                    reader.onloadend = (function (theFile) {
+                        return function (evt) {
+                            if (evt.target.readyState == FileReader.DONE) {// DONE == 2
+                                var str = btoa(evt.target.result);
+                                if (isLocal()) {
+                                    for (var k = 0; k < Math.ceil(str.length / maxLen); k++)
+                                        document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
+                                    count = count + document.reader.extractZIP(theFile.name) - 1;
+                                } else {
+                                    var dataString = {
+                                        "function": "extractZIP",
+                                        "documentText": str
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        data: dataString,
+                                        datatype: "json",
+                                        url: "/TestVerteilung/VerteilungServlet",
+                                        error: function (response) {
                                             try {
                                                 var r = jQuery.parseJSON(response.responseText);
                                                 alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                            } catch(e)  {
+                                            } catch (e) {
                                                 var str = "FEHLER:\n";
                                                 str = str + e.toString() + "\n";
-                                                for ( var prop in e)
+                                                for (var prop in e)
                                                     str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
                                                 alert(str + "\n" + response.responseText);
                                             }
                                         },
-										success        : function(data) {
-																			 if (data.success[0]) {
-											                   if (data.result[0].entry.length == 1)
-												                   loadText(data.result[0].entry[0].result.toString(), data.result[0].entry[0].entryFileName.toString(), "application/zip", null);
-											                   else {
-												                   for ( var index = 0; index < data.result[0].entry.length; index++) {
-												                     var array_element = data.result[0].entry[index];
-													                   loadMultiText(array_element.result.toString(), array_element.entryFileName.toString(), "application/zip", "true", "false", null);
-												                   }
-											                   }
-																			 } else
-																				 alert("ZIP Datei konnte nicht entpackt werden: " + data.result[0]);
-										                  }
-									});
-								}
-							}
-						};
-					})(f);
-					blob = f.slice(0, f.size + 1);
-					reader.readAsBinaryString(blob);
-				}
+                                        success: function (data) {
+                                            if (data.success[0]) {
+                                                if (data.result[0].entry.length == 1)
+                                                    loadText(data.result[0].entry[0].result.toString(), data.result[0].entry[0].entryFileName.toString(), "application/zip", null);
+                                                else {
+                                                    for (var index = 0; index < data.result[0].entry.length; index++) {
+                                                        var array_element = data.result[0].entry[index];
+                                                        loadMultiText(array_element.result.toString(), array_element.entryFileName.toString(), "application/zip", "true", "false", null);
+                                                    }
+                                                }
+                                            } else
+                                                alert("ZIP Datei konnte nicht entpackt werden: " + data.result[0]);
+                                        }
+                                    });
+                                }
+                            }
+                        };
+                    })(f);
+                    blob = f.slice(0, f.size + 1);
+                    reader.readAsBinaryString(blob);
+                }
 
-				if (f.type == "text/plain") {
-					var r = new FileReader();
-					if (files.length == 1) {
-						r.onload = (function(theFile) {
-							return function(e) {
-								loadText(e.target.result, theFile.name, theFile.mozFullPath, theFile.type);
-							};
-						})(f);
-					} else {
-						r.onload = (function(theFile) {
-							return function(e) {
-								loadMultiText(e.target.result, theFile.name, theFile.mozFullPath, theFile.type, "false", "false", null);
-							};
-						})(f);
-					}
-					r.readAsText(f);
-				}
-			} else {
-				textEditor.getSession().setValue(textEditor.getSession().getValue() + " Failed to load file!\n");
-			}
-			first = false;
-		}
+                if (f.type == "text/plain") {
+                    var r = new FileReader();
+                    if (files.length == 1) {
+                        r.onload = (function (theFile) {
+                            return function (e) {
+                                loadText(e.target.result, theFile.name, theFile.mozFullPath, theFile.type);
+                            };
+                        })(f);
+                    } else {
+                        r.onload = (function (theFile) {
+                            return function (e) {
+                                loadMultiText(e.target.result, theFile.name, theFile.mozFullPath, theFile.type, "false", "false", null);
+                            };
+                        })(f);
+                    }
+                    r.readAsText(f);
+                }
+            } else {
+                textEditor.getSession().setValue(textEditor.getSession().getValue() + " Failed to load file!\n");
+            }
+            first = false;
+        }
 
-		dtable.render("#dtable");
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+        dtable.render("#dtable");
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function callBack(Y) {
@@ -770,13 +770,9 @@ function doReRunAll() {
 			tableData[i] = row;
 			dtable.modifyRow(i, row);
 		}
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function setMarkers(positions, editor) {
@@ -859,16 +855,17 @@ function fillMessageBox(text, reverse) {
 }
 
 function doBack() {
-	multiMode = true;
-	showMulti = false;
-	document.getElementById('inTxt').style.display = 'none';
-	document.getElementById('dtable').style.display = 'block';
-	document.getElementById('back').style.display = 'none';
-	textEditor.getSession().setValue("");
-	fillMessageBox("", false);
-	propsEditor.getSession().setValue("");
-	rulesEditor.getSession().foldAll(1);
-	manageControls();
+    try {
+        multiMode = true;
+        showMulti = false;
+        textEditor.getSession().setValue("");
+        fillMessageBox("", false);
+        propsEditor.getSession().setValue("");
+        rulesEditor.getSession().foldAll(1);
+        manageControls();
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function doTest() {
@@ -892,8 +889,6 @@ function doTest() {
             markers = setMarkers(REC.positions, textEditor);
             propsEditor.getSession().setValue(printResults(REC.results));
             fillMessageBox(REC.getMessage(), true);
-            document.getElementById('inTxt').style.display = 'block';
-            document.getElementById('dtable').style.display = 'none';
             testMode = true;
             manageControls();
         } else {
@@ -932,8 +927,6 @@ function doTest() {
                         markers = setMarkers(REC.positions, textEditor);
                         propsEditor.getSession().setValue(printResults(REC.results));
                         fillMessageBox(REC.getMessage(), true);
-                        document.getElementById('inTxt').style.display = 'block';
-                        document.getElementById('dtable').style.display = 'none';
                         testMode = true;
                         manageControls();
                     } else
@@ -942,116 +935,120 @@ function doTest() {
             });
         }
     } catch (e) {
-        var str = "FEHLER:\n";
-        str = str + e.toString() + "\n";
-        for (var prop in e)
-            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-        alert(str);
+        errorHandler(e);
     }
 }
 
-function closeTest(){
-    testMode = false;
-    textEditor.getSession().setValue(currentContent);
-    document.getElementById('headerWest').textContent = currentFile;
-    openRules();
-    manageControls();
+function closeTest() {
+    try {
+        testMode = false;
+        textEditor.getSession().setValue(currentContent);
+        document.getElementById('headerWest').textContent = currentFile;
+        openRules();
+        manageControls();
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function work() {
-	var selectMode = false;
-	if (multiMode)
-		doReRunAll()
-	else {
-		var range = rulesEditor.getSelectionRange();
-		var sel = rulesEditor.getSession().getTextRange(range);
-		if (sel.length > 0) {
-			if (!sel.startsWith("<")) {
-				var start = rulesEditor.find('<', {
-					backwards : true,
-					wrap : false,
-					caseSensitive : false,
-					wholeWord : false,
-					start : range,
-					regExp : false
-				});
-				range.setStart(start.start);
-			}
-			if (!sel.endsWith("/>")) {
-				var end = rulesEditor.find('>', {
-					backwards : false,
-					wrap : false,
-					caseSensitive : false,
-					wholeWord : false,
-					start : new Range(range.end.row, range.end.column, range.end.row, range.end.column),
-					regExp : false
-				});
-				range.setEnd(end.end);
-			}
-			sel = rulesEditor.getSession().getTextRange(range);
-			if (!sel.endsWith("/>")) {
-				var tmp = sel.substring(1, sel.indexOf(" "));
-				tmp = "</" + tmp + ">";
-				end = rulesEditor.find(tmp, {
-					backwards : false,
-					wrap : false,
-					caseSensitive : false,
-					wholeWord : false,
-					start : new Range(range.end.row, range.end.column, range.end.row, range.end.column),
-					regExp : false
-				});
-				range.setEnd(end.end);
-			}
-			rulesEditor.selection.setSelectionRange(range);
-			sel = rulesEditor.getSession().getTextRange(range);
-			if (!sel.startsWith("<tags") && !sel.startsWith("<category") && !sel.startsWith("<archivPosition")) {
-				selectMode = true;
-				if (!sel.startsWith("<searchItem ")) {
-					start = rulesEditor.find('<searchItem', {
-						backwards : true,
-						wrap : false,
-						caseSensitive : false,
-						wholeWord : false,
-						start : range,
-						regExp : false
-					});
-					range.setStart(start.start);
-					end = rulesEditor.find('</searchItem>', {
-						backwards : false,
-						wrap : false,
-						caseSensitive : false,
-						wholeWord : false,
-						start : new Range(range.end.row, range.end.column, range.end.row, range.end.column),
-						regExp : false
-					});
-					range.setEnd(end.end);
-					rulesEditor.selection.setSelectionRange(range);
-					sel = rulesEditor.getSession().getTextRange(range);
-				}
-				if (!sel.startsWith("<archivTyp "))
-					sel = "<archivTyp name='' searchString=''>" + sel;
-				if (!sel.endsWith("</archivTyp>"))
-					sel = sel + "</archivTyp>";
-				if (!sel.startsWith("<documentTypes "))
-					sel = "<documentTypes>" + sel;
-				if (!sel.endsWith("</documentTypes>"))
-					sel = sel + "</documentTypes>";
-			} else
-				sel = rulesEditor.getSession().getValue();
-		} else
-			sel = rulesEditor.getSession().getValue();
-		REC.currentDocument.setContent(textEditor.getSession().getValue());
-        REC.currentDocument.name = currentFile;
-		removeMarkers(markers, textEditor);
-		REC.testRules(sel);
-		if (!selectMode)
-			setXMLPosition(REC.currXMLName);
-		markers = setMarkers(REC.positions, textEditor);
-		fillMessageBox(REC.getMessage(), true);
-		propsEditor.getSession().setValue(printResults(REC.results));
-		document.getElementById('inTxt').style.display = 'block';
-		document.getElementById('dtable').style.display = 'none';
-	}
+    try {
+        var selectMode = false;
+        if (multiMode)
+            doReRunAll()
+        else {
+            var range = rulesEditor.getSelectionRange();
+            var sel = rulesEditor.getSession().getTextRange(range);
+            if (sel.length > 0) {
+                if (!sel.startsWith("<")) {
+                    var start = rulesEditor.find('<', {
+                        backwards: true,
+                        wrap: false,
+                        caseSensitive: false,
+                        wholeWord: false,
+                        start: range,
+                        regExp: false
+                    });
+                    range.setStart(start.start);
+                }
+                if (!sel.endsWith("/>")) {
+                    var end = rulesEditor.find('>', {
+                        backwards: false,
+                        wrap: false,
+                        caseSensitive: false,
+                        wholeWord: false,
+                        start: new Range(range.end.row, range.end.column, range.end.row, range.end.column),
+                        regExp: false
+                    });
+                    range.setEnd(end.end);
+                }
+                sel = rulesEditor.getSession().getTextRange(range);
+                if (!sel.endsWith("/>")) {
+                    var tmp = sel.substring(1, sel.indexOf(" "));
+                    tmp = "</" + tmp + ">";
+                    end = rulesEditor.find(tmp, {
+                        backwards: false,
+                        wrap: false,
+                        caseSensitive: false,
+                        wholeWord: false,
+                        start: new Range(range.end.row, range.end.column, range.end.row, range.end.column),
+                        regExp: false
+                    });
+                    range.setEnd(end.end);
+                }
+                rulesEditor.selection.setSelectionRange(range);
+                sel = rulesEditor.getSession().getTextRange(range);
+                if (!sel.startsWith("<tags") && !sel.startsWith("<category") && !sel.startsWith("<archivPosition")) {
+                    selectMode = true;
+                    if (!sel.startsWith("<searchItem ")) {
+                        start = rulesEditor.find('<searchItem', {
+                            backwards: true,
+                            wrap: false,
+                            caseSensitive: false,
+                            wholeWord: false,
+                            start: range,
+                            regExp: false
+                        });
+                        range.setStart(start.start);
+                        end = rulesEditor.find('</searchItem>', {
+                            backwards: false,
+                            wrap: false,
+                            caseSensitive: false,
+                            wholeWord: false,
+                            start: new Range(range.end.row, range.end.column, range.end.row, range.end.column),
+                            regExp: false
+                        });
+                        range.setEnd(end.end);
+                        rulesEditor.selection.setSelectionRange(range);
+                        sel = rulesEditor.getSession().getTextRange(range);
+                    }
+                    if (!sel.startsWith("<archivTyp "))
+                        sel = "<archivTyp name='' searchString=''>" + sel;
+                    if (!sel.endsWith("</archivTyp>"))
+                        sel = sel + "</archivTyp>";
+                    if (!sel.startsWith("<documentTypes "))
+                        sel = "<documentTypes>" + sel;
+                    if (!sel.endsWith("</documentTypes>"))
+                        sel = sel + "</documentTypes>";
+                } else
+                    sel = rulesEditor.getSession().getValue();
+            } else
+                sel = rulesEditor.getSession().getValue();
+            REC.currentDocument.setContent(textEditor.getSession().getValue());
+            REC.currentDocument.name = currentFile;
+            removeMarkers(markers, textEditor);
+            REC.testRules(sel);
+            if (!selectMode)
+                setXMLPosition(REC.currXMLName);
+            markers = setMarkers(REC.positions, textEditor);
+            fillMessageBox(REC.getMessage(), true);
+            propsEditor.getSession().setValue(printResults(REC.results));
+            document.getElementById('inTxt').style.display = 'block';
+            document.getElementById('dtable').style.display = 'none';
+        }
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function sendRules(dialog) {
@@ -1110,38 +1107,45 @@ function sendRules(dialog) {
 		}
 		return erg;
 		}
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
-function loadAlfresco(){
-    alfrescoMode = true;
-
-    manageControls();
+function loadAlfresco() {
+    try {
+        alfrescoMode = true;
+        manageControls();
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
-function closeAlfresco(){
-    alfrescoMode = false;
-    manageControls();
+function closeAlfresco() {
+    try {
+        alfrescoMode = false;
+        manageControls();
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
-function openSettings(){
-    var serverInput = document.getElementById('server');
-    serverInput.value = getSettings("server");
-    var userInput = document.getElementById('user');
-    userInput.value = getSettings("user");
-    var passInput = document.getElementById('password');
-    passInput.value = getSettings("password");
-    var proxyInput = document.getElementById('proxy');
-    proxyInput.value =getSettings("proxy");
-    var portInput = document.getElementById('port');
-    portInput.value = getSettings("port");
-    $( "#dialog-form" ).dialog( "open" );
+function openSettings() {
+    try {
+        var serverInput = document.getElementById('server');
+        serverInput.value = getSettings("server");
+        var userInput = document.getElementById('user');
+        userInput.value = getSettings("user");
+        var passInput = document.getElementById('password');
+        passInput.value = getSettings("password");
+        var proxyInput = document.getElementById('proxy');
+        proxyInput.value = getSettings("proxy");
+        var portInput = document.getElementById('port');
+        portInput.value = getSettings("port");
+        $("#dialog-form").dialog("open");
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function loadAlfrescoFolder(folderName) {
@@ -1250,13 +1254,9 @@ function loadAlfrescoFolder(folderName) {
 				}
 			});
 		}
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function getRules(rDoc, loadLocal, dialog) {
@@ -1318,13 +1318,9 @@ function getRules(rDoc, loadLocal, dialog) {
 			});
 		}
 		currentRules = "doc.xml";
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function openRules() {
@@ -1361,13 +1357,9 @@ function format() {
 			setXMLPosition(currXMLName);
 			markers = setMarkers(positions, textEditor);
 		}
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function formatScript() {
@@ -1375,13 +1367,9 @@ function formatScript() {
 		var txt = textEditor.getSession().getValue();
 		txt = js_beautify(txt);
 		textEditor.getSession().setValue(txt);
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function save(file, text, dialog) {
@@ -1391,13 +1379,9 @@ function save(file, text, dialog) {
 		if (dialog)
 			alert(file + " erfolgreich gesichert!");
 		return ret;
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function handleRulesSelect(evt) {
@@ -1426,13 +1410,9 @@ function openFile(name) {
 		var datafile = "file://" + window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1) + name;
 		contents = document.reader.openFile(datafile);
 		return [ contents, datafile ];
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function loadScript() {
@@ -1532,13 +1512,9 @@ function reloadScript(dialog) {
 		REC = new Recognition();
 		REC.set(REC);
 		alert("Script erfolgreich aktualisiert");
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function getScript(dialog) {
@@ -1593,11 +1569,7 @@ function getScript(dialog) {
             });
         }
     } catch (e) {
-        var str = "FEHLER:\n";
-        str = str + e.toString() + "\n";
-        for (var prop in e)
-            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-        alert(str);
+        errorHandler(e);
     }
 }
 
@@ -1656,13 +1628,9 @@ function sendScript(dialog) {
 			}
 			return erg;
 		}
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function closeScript() {
@@ -1676,13 +1644,9 @@ function closeScript() {
 		textEditor.setShowInvisibles(true);
 		scriptMode = false;
 		manageControls();
-	} catch (e) {
-		var str = "FEHLER:\n";
-		str = str + e.toString() + "\n";
-		for ( var prop in e)
-			str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-		alert(str);
-	}
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 function stringToBytes(str) {

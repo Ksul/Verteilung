@@ -780,15 +780,15 @@ treeObject = jQuery.jstree._reference(tree);
                                                    value=""/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="openPDF(window.parent.frames.cont.currentFile);" id="pdf"
+                    onclick="openPDF(currentFile);" id="pdf"
                     type="submit" class="pdf" title="PDF" value="" style="display: none"/>
             </td>
             <td width="60px" align="center"><input onclick="loadScript();"
-                                                   name="loadScript" id="script" type="image"
+                                                   name="loadScript" id="loadScript" type="image"
                                                    src="./resource/file_edit.png" title="Script" value="Script"/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="var needle = prompt('Find:', this.textEditor.getCopyText());window.parent.frames.cont.textEditor.find(needle);"
+                    onclick="var needle = prompt('Find:', textEditor.getCopyText());textEditor.find(needle);"
                     name="searchCont" id="searchCont" type="submit" class="search"
                     title="Search" value=""/>
             </td>
@@ -814,7 +814,7 @@ treeObject = jQuery.jstree._reference(tree);
                     style="display: none"/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="save(this.workDocument, this.textEditor.getSession().getValue(), true);modifiedScript=null;"
+                    onclick="save(this.workDocument, textEditor.getSession().getValue(), true);modifiedScript=null;"
                     name="saveScript" id="saveScript" type="submit" class="save"
                     title="Save" value="" style="display: none"/>
             </td>
@@ -834,23 +834,23 @@ treeObject = jQuery.jstree._reference(tree);
                 </div>
             </td>
             <td width="60px" align="center"><input onclick="format();"
-                                                   name="beautify" id="beautify" type="submit" class="beautify"
+                                                   name="beautifyRules" id="beautifyRules" type="submit" class="beautify"
                                                    title="Format" value=""/>
             </td>
 
             <td width="60px" align="center"><input
-                    onclick="var needle = prompt('Find:', this.rulesEditor.getCopyText());this.rulesEditor.find(needle);"
+                    onclick="var needle = prompt('Find:', rulesEditor.getCopyText());rulesEditor.find(needle);"
                     name="searchRules" id="searchRules" type="submit" class="search"
                     title="Search" value=""/>
             </td>
             <td width="60px" align="center"><input
                     onclick="this.rulesEditor.getSession().foldAll(1);"
-                    name="foldall" id="foldall" type="submit" class="minimize"
+                    name="foldAll" id="foldAll" type="submit" class="minimize"
                     title="Fold All" value=""/>
             </td>
             <td width="60px" align="center"><input
                     onclick="this.rulesEditor.getSession().unfold();"
-                    name="unfoldall" id="unfoldall" type="submit" class="maximize"
+                    name="unfoldAll" id="unfoldAll" type="submit" class="maximize"
                     title="Unfold All" value=""/></td>
             <td width="60px" align="center"><input
                     onclick="getRules(window.parent.rulesID, false, true);" name="getRules"
@@ -861,8 +861,8 @@ treeObject = jQuery.jstree._reference(tree);
                                                    title="Sende Regeln" value=""/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="save(this.currentRules, vkbeautify.xml(this.rulesEditor.getSession().getValue()), true);"
-                    name="save" id="save" type="submit" class="save" title="Save"
+                    onclick="save(currentRules, vkbeautify.xml(rulesEditor.getSession().getValue()), true);"
+                    name="saveRules" id="saveRules" type="submit" class="save" title="Save"
                     value=""/>
             </td>
             <td id="appl" width="0px"></td>
