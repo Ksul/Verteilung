@@ -1417,7 +1417,7 @@ function openFile(name) {
 
 function loadScript() {
     try {
-        layoutState = myLayout.state;
+        panelSizeReminder = myLayout.state.west.size;
         myLayout.sizePane("west", "100%");
         oldContent = textEditor.getSession().getValue();
         var content;
@@ -1635,7 +1635,7 @@ function sendScript(dialog) {
 
 function closeScript() {
 	try {
-        myLayout.sizePane("west", layoutState.west.size);
+        myLayout.sizePane("west", panelSizeReminder);
 		textEditor.getSession().setMode(new txtMode());
 		if (REC.exist(oldContent) && oldContent.length > 0)
 			textEditor.getSession().setValue(oldContent);
