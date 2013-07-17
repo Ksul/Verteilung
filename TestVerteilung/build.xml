@@ -6,19 +6,19 @@
   <target name="create_jar">
     <buildnumber file="build.num" />
     <property name="version.num" value="1.${build.number}" />
-    <jar destfile="src/main/webapp/WEB-INF/lib/vt.jar" filesetmanifest="mergewithoutmain">
+    <jar destfile="web/WEB-INF/lib/vt.jar" filesetmanifest="mergewithoutmain">
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Main-Class" value="PDFTestParser" />
         <attribute name="Class-Path" value="." />
         <attribute name="Implementation-Version" value="${version.num}" />
       </manifest>
-      <fileset dir="src/main/webapp/WEB-INF/classes" />
+      <fileset dir="web/WEB-INF/classes" />
       <!-- <zipfileset excludes="META-INF/*.SF" src="pdfbox-app-1.6.0.jar" /> -->
     </jar>
-    <signjar destDir="src/main/webapp/WEB-INF/lib" alias="Signer" storepass="Rethymon" >
+    <signjar destDir="web/WEB-INF/lib" alias="Signer" storepass="Rethymon" >
       <path>
-        <fileset dir="src/main/webapp/WEB-INF/lib" includes="vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar" />
+        <fileset dir="web/WEB-INF/lib" includes="vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-io-2.4.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,slf4j-api-1.6.6.jar" />
       </path>
       <flattenmapper />
     </signjar>

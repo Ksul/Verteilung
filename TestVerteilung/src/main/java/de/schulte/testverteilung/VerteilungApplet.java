@@ -48,9 +48,7 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.Response.ResponseType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Credentials;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
-import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -70,8 +68,6 @@ public class VerteilungApplet extends Applet {
 		try {
 			System.out.println("Hier ist das Verteilungsapplet");
 			jsobject = JSObject.getWindow(this);
-			jsobject = (JSObject) jsobject.getMember("parent");
-			jsobject = (JSObject) jsobject.getMember("control");
 		} catch (JSException jse) {
 			System.out.println(jse.getMessage());
 			jse.printStackTrace();
@@ -79,7 +75,7 @@ public class VerteilungApplet extends Applet {
 	}
 
     public  boolean isURLAvailable(String urlString, String proxyHost, String proxyPort)  {
-        URL url = null;
+        URL url;
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
@@ -91,9 +87,9 @@ public class VerteilungApplet extends Applet {
             if (proxyHost != null && proxyPort != null) {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
                 httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
-            } else
+            } else {
                 httpUrlConn = (HttpURLConnection) url.openConnection();
-
+            }
             httpUrlConn.setRequestMethod("HEAD");
 
             // Set timeouts in milliseconds
@@ -116,8 +112,6 @@ public class VerteilungApplet extends Applet {
 	public String getTicket(final String server, final String username, final String password, final String proxyHost,
 			final String proxyPort, final Credentials credentials) {
 		String ret;
-		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
-		ret = connector.getTicket();
 
 		ret = AccessController.doPrivileged(new PrivilegedAction<String>() {
 
@@ -140,13 +134,13 @@ public class VerteilungApplet extends Applet {
 			obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
 				public JSONObject run() throws VerteilungException, JSONException {
-					JSONObject obj = new JSONObject();
+					JSONObject o;
 					AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
 							credentials);
-					obj = new JSONObject(connector.moveDocument(documentId, destinationId));
-					if (!obj.getBoolean("overallSuccess"))
-						throw new VerteilungException(obj.toString());
-					return obj;
+					o = new JSONObject(connector.moveDocument(documentId, destinationId));
+					if (!o.getBoolean("overallSuccess"))
+						throw new VerteilungException(o.toString());
+					return o;
 				}
 			});
 		} catch (PrivilegedActionException e) {
@@ -273,7 +267,7 @@ public class VerteilungApplet extends Applet {
                     Iterator<Element> it = root.getEntries().get(0).getElements().iterator();
                     while (it.hasNext()) {
 
-                        Element element = (Element) it.next();
+                        Element element = it.next();
                         if (element.getQName().equals(CMISConstants.ATOMOBJECT)) {
 
                             Iterator it1 = element.getElements().get(0).getElements().iterator();
@@ -335,7 +329,7 @@ public class VerteilungApplet extends Applet {
 	public static String getContent(final String docId, final boolean extract, final String server,
 			final String username, final String password, final String proxyHost, final String proxyPort,
 			final Credentials credentials) throws JSONException {
-		String ret = "";
+		String ret;
 		JSONObject obj = new JSONObject();
 		try {
 			ret = AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
@@ -380,7 +374,7 @@ public class VerteilungApplet extends Applet {
 	public static int updateDocument(final String documentId, final String documentText, final String description,
 			final String server, final String username, final String password, final String proxyHost,
 			final String proxyPort, final Credentials credentials) {
-		int ret = 0;
+		int ret;
 
 		final AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
 				credentials);
@@ -437,15 +431,15 @@ public class VerteilungApplet extends Applet {
 					}
 				});
 				if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-					System.err.println("Dokument konnte nicht eingecheckt werden: " + response.getStatusText());
+					System.err.println("Dokument konnte nicht eingecheckt werden: " + response != null ? response.getStatusText(): "");
 					System.err.println(response.getStackTrace());
 				}
 			} else {
-				System.err.println("Dokument konnte nicht aktualisiert werden: " + response.getStatusText());
+				System.err.println("Dokument konnte nicht aktualisiert werden: " + response != null ? response.getStatusText(): "");
 				System.err.println(response.getStackTrace());
 			}
 		} else {
-			System.err.println("Dokument konnte nicht ausgecheckt werden: " + response.getStatusText());
+			System.err.println("Dokument konnte nicht ausgecheckt werden: " + response != null ? response.getStatusText(): "");
 			System.err.println(response.getStackTrace());
 		}
 		ret = Integer.parseInt(response.getStatusCode());
@@ -456,7 +450,7 @@ public class VerteilungApplet extends Applet {
 	public static int updateDocumentByFile(final String documentId, final String uri, final String description,
 			final String mimeType, final String server, final String username, final String password, final String proxyHost,
 			final String proxyPort, final Credentials credentials) {
-		int ret = 0;
+		int ret;
 
 		final AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
 				credentials);
@@ -522,15 +516,15 @@ public class VerteilungApplet extends Applet {
 					}
 				});
 				if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-					System.err.println("Dokument konnte nicht eingecheckt werden: " + response.getStatusText());
+					System.err.println("Dokument konnte nicht eingecheckt werden: " + response != null ? response.getStatusText(): "");
 					System.err.println(response.getStackTrace());
 				}
 			} else {
-				System.err.println("Dokument konnte nicht aktualisiert werden: " + response.getStatusText());
+				System.err.println("Dokument konnte nicht aktualisiert werden: " + response != null ? response.getStatusText(): "");
 				System.err.println(response.getStackTrace());
 			}
 		} else {
-			System.err.println("Dokument konnte nicht ausgecheckt werden: " + response.getStatusText());
+			System.err.println("Dokument konnte nicht ausgecheckt werden: " + response != null ? response.getStatusText(): "");
 			System.err.println(response.getStackTrace());
 		}
 		ret = Integer.parseInt(response.getStatusCode());
@@ -595,7 +589,7 @@ public class VerteilungApplet extends Applet {
 							fos.write(ret);
 							fos.flush();
 							fos.close();
-							getAppletContext().showDocument(file.toURL(), "_blank");
+							getAppletContext().showDocument(file.toURI().toURL(), "_blank");
 						} catch (IOException e) {
 							System.out.println(e.getMessage());
 							e.printStackTrace();
@@ -627,7 +621,7 @@ public class VerteilungApplet extends Applet {
 					try {
 						InputStream bais = new ByteArrayInputStream(ret);
 						zipin = new ZipInputStream(bais);
-						ZipEntry entry = null;
+						ZipEntry entry;
 						int size;
 						entries.clear();
 						while ((entry = zipin.getNextEntry()) != null) {
@@ -683,7 +677,7 @@ public class VerteilungApplet extends Applet {
 		entries.clear();
 		final byte[] ret = bys.toByteArray();
 		entries.add(new FileEntry(fileName, ret));
-		String result = "";
+		String result;
 		try {
 			result = AccessController.doPrivileged(new PrivilegedAction<String>() {
 
@@ -707,7 +701,7 @@ public class VerteilungApplet extends Applet {
 		final byte[] ret = Base64.decodeBase64(str);
 		try {
 			if (init)
-				bys.reset();
+                bys.reset();
 			bos.write(ret, 0, ret.length);
 			bos.flush();
 		} catch (IOException e) {
@@ -717,41 +711,40 @@ public class VerteilungApplet extends Applet {
 
 	}
 
-	public String openFile(final String filePath) {
+    public String openFile(final String filePath) {
 
-		String ret = null;
-		ret = AccessController.doPrivileged(new PrivilegedAction<String>() {
+        String ret = AccessController.doPrivileged(new PrivilegedAction<String>() {
 
-			public String run() {
-				String ret = null;
-				StringBuffer fileData = new StringBuffer(1000);
-				try {
-					InputStream inp = new FileInputStream(new File(new URI(filePath)));
-					InputStreamReader isr = new InputStreamReader(inp, "UTF-8");
-					BufferedReader reader = new BufferedReader(isr);
-					char[] buf = new char[1024];
-					int numRead = 0;
-					while ((numRead = reader.read(buf)) != -1) {
-						String readData = String.valueOf(buf, 0, numRead);
-						fileData.append(readData);
-						buf = new char[1024];
-					}
-					reader.close();
-					ret = fileData.toString();
-				} catch (IOException e) {
-					ret = "Fehler beim Öffnen der Datei: " + e.getMessage();
-					e.printStackTrace();
-				} catch (URISyntaxException e1) {
-					ret = "Fehler beim Öffnen der Datei: " + e1.getMessage();
-					e1.printStackTrace();
-				}
-				return ret;
-			}
-		});
-		return ret;
-	}
+            public String run() {
+                String r;
+                StringBuilder fileData = new StringBuilder(1000);
+                try {
+                    InputStream inp = new FileInputStream(new File(new URI(filePath)));
+                    InputStreamReader isr = new InputStreamReader(inp, "UTF-8");
+                    BufferedReader reader = new BufferedReader(isr);
+                    char[] buf = new char[1024];
+                    int numRead;
+                    while ((numRead = reader.read(buf)) != -1) {
+                        String readData = String.valueOf(buf, 0, numRead);
+                        fileData.append(readData);
+                        buf = new char[1024];
+                    }
+                    reader.close();
+                    r = fileData.toString();
+                } catch (IOException e) {
+                    r = "Fehler beim Öffnen der Datei: " + e.getMessage();
+                    e.printStackTrace();
+                } catch (URISyntaxException e1) {
+                    r = "Fehler beim Öffnen der Datei: " + e1.getMessage();
+                    e1.printStackTrace();
+                }
+                return r;
+            }
+        });
+        return ret;
+    }
 
-	public String test() {
+    public String test() {
 		return "Hier ist das Verteilungs Applet!";
 	}
 
