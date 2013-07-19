@@ -68,7 +68,7 @@ public class VerteilungApplet extends Applet {
 		try {
 			System.out.println("Hier ist das Verteilungsapplet");
 			jsobject = JSObject.getWindow(this);
-		} catch (JSException jse) {
+		} catch (Exception jse) {
 			System.out.println(jse.getMessage());
 			jse.printStackTrace();
 		}
@@ -84,7 +84,7 @@ public class VerteilungApplet extends Applet {
 
         HttpURLConnection httpUrlConn;
         try {
-            if (proxyHost != null && proxyPort != null) {
+            if (proxyHost != null && proxyHost.length() >0 && proxyPort != null && proxyPort.length() > 0) {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
                 httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
             } else {
@@ -104,7 +104,7 @@ public class VerteilungApplet extends Applet {
 
             return (httpUrlConn.getResponseCode() == HttpURLConnection.HTTP_OK);
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Fehler beim Check der URL: " + e.getMessage());
             return false;
         }
     }
@@ -698,13 +698,14 @@ public class VerteilungApplet extends Applet {
 	}
 
 	public void getData(final String str, final boolean init) {
-		final byte[] ret = Base64.decodeBase64(str);
+
 		try {
+            final byte[] ret = Base64.decodeBase64(str);
 			if (init)
                 bys.reset();
 			bos.write(ret, 0, ret.length);
 			bos.flush();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
