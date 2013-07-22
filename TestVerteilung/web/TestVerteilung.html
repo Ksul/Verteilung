@@ -566,7 +566,7 @@ window.onload = function () {
                         'vt.jar, ' +
                         'pdfbox-1.6.0.jar, ' +
                         'plugin.jar, ' +
-                        'bcprov-jdk15on-147.jar' +
+                        'bcprov-jdk15on-147.jar, ' +
                         'commons-codec-1.6.jar, ' +
                         'commons-httpclient-3.0.1.jar, ' +
                         'abdera-1.1.2.jar, ' +
@@ -574,7 +574,7 @@ window.onload = function () {
                         'commons-logging-1.1.1.jar, ' +
                         'fontbox-1.6.0.jar, ' +
                         'jempbox-1.6.0.jar, ' +
-                        'slf4j-api-1.6.6.jar' +
+                        'slf4j-api-1.6.6.jar, ' +
                         'commons-io-2.4.jar');
         obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
         document.getElementById('appl').appendChild(obj);
@@ -643,6 +643,9 @@ window.onload = function () {
                 dataType: "json",
                 cache: false,
                 "data": function (n) {
+                    if (isLocal()) {
+                       return document.reader.listFolderAsJSON(n.attr ? n.attr("id") : "", getSettings("server"), getSettings("user"), getSettings("password"), "true", "true", getSettings("proxy"), getSettings("port"));
+                    }   else {
                     return {
                         "function": "listFolderAsJSON",
                         "filePath": n.attr ? n.attr("id") : "",
@@ -654,12 +657,27 @@ window.onload = function () {
                         "proxyHost": getSettings("proxy"),
                         "proxyPort": getSettings("port")
                     };
+                    }
                 }
             }
         },
         "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "types", "hotkeys", "contextmenu"]
     }).bind("select_node.jstree",function (event, data) {
                 if (data.rslt.obj.attr("rel") == "default") {
+                    if (isLocal()) {
+                       var  ret = document.reader.getContent(data.rslt.obj.attr("id"), true, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
+                        var json = jQuery.parseJSON(ret);
+                        if (json.success) {
+                            textEditor.getSession().getSession().setValue(json.result);
+                            currentContent = json.result;
+                            currentFile = data.rslt.obj.text().trim();
+                            document.getElementById('headerWest').textContent = currentFile;
+                            alfrescoMode = false;
+                            manageControls();
+
+                        } else
+                            alert("Daten konnten nicht übertragen werden: " + json.result)
+                        }  else {
                     var dataString = {
                         "function": "getContent",
                         "documentId": data.rslt.obj.attr("id"),
@@ -702,7 +720,8 @@ window.onload = function () {
                         }
                     });
                 }
-            }).delegate("a", "click", function (event, data) {
+                }
+                }).delegate("a", "click", function (event, data) {
                 event.preventDefault();
             });
     init();

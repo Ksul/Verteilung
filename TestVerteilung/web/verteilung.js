@@ -1148,116 +1148,6 @@ function openSettings() {
     }
 }
 
-function loadAlfrescoFolder(folderName) {
-	try {
-		showProgress();
-	   dtable.get("data").reset(null, {
-      silent : true
-    });
-    var ret;
-    daten = new Array();
-    tableData = new Array();
-		if (isLocal()) {
-			ret = document.reader.listFolder(folderName, "false", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
-			var json = jQuery.parseJSON(ret);
-			var ergebnis = json.result;
-			for ( var i = 0; i < ergebnis.length; i++) {
-				var erg = ergebnis[i];
-				ret = document.reader.getContent(erg.id, true, getSettings("server"), getSettings("user"), getSettings("password"),
-						getSettings("proxy"), getSettings("port"), null);
-				json = jQuery.parseJSON(ret);
-				if (json.success)
-				  loadMultiText(json.result, erg.name, erg.typ, "true", "true", getSettings("server") + "/alfresco/s/cmis/s/workspace:SpacesStore/i/" + erg.id
-						  + "/content.pdf");
-				else
-					alert("Fehler beim Holen des Inhalts: " + json.result);
-			}
-			dtable.render("#dtable");
-		} else {
-			var dataString = {
-				"function"  : "listFolder",
-				"filePath"  : folderName,
-                "withFolder": "false",
-				"server"    : getSettings("server"),
-				"username"  : getSettings("user"),
-				"password"  : getSettings("password"),
-				"proxyHost" : getSettings("proxy"),
-				"proxyPort" : getSettings("port")
-			};
-			$.ajax({
-				type     : "POST",
-				data     : dataString,
-				datatype : "json",
-				url      : "/TestVerteilung/VerteilungServlet",
-                error    : function (response) {
-                             try {
-                               var r = jQuery.parseJSON(response.responseText);
-                               alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                             } catch(e)  {
-                               var str = "FEHLER:\n";
-                               str = str + e.toString() + "\n";
-                               for ( var prop in e)
-                                 str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                               alert(str + "\n" + response.responseText);
-                             }
-                },
-				success  : function(data) {
-                    if(data.success[0]) {
-					            var ergebnis = data.result[0];
-					            var anzahl = ergebnis.length;
-					            var count = 1;
-					            for ( var i = 0; i < anzahl; i++) {
-					            	$('#progressbar').progressbar('value', (count++ / (anzahl *2)) * 100);
-					            	var erg = ergebnis[i];
-						            var dataString = {
-						          		"function"   : "getContent",
-						          		"documentId" : erg.id,
-						          		"extract"    : "true",
-						          		"server"     : getSettings("server"),
-						          		"username"   : getSettings("user"),
-						          		"password"   : getSettings("password"),
-						          		"proxyHost"  : getSettings("proxy"),
-						          		"proxyPort"  : getSettings("port")
-						            };
-						            $.ajax({
-						          	  type         : "POST",
-						          	  data         : dataString,
-						          	  datatype     : "json",
-						          	  url          : "/TestVerteilung/VerteilungServlet",
-                                      async        : false,
-                                        error    : function (response) {
-                                            try {
-                                                var r = jQuery.parseJSON(response.responseText);
-                                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                            } catch(e)  {
-                                                var str = "FEHLER:\n";
-                                                str = str + e.toString() + "\n";
-                                                for ( var prop in e)
-                                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                                                alert(str + "\n" + response.responseText);
-                                            }
-                                        },
-						          	  success      : function(data) {
-                                           if (data.success[0]) {
-                                          	 $('#progressbar').progressbar('value', (count++ / (anzahl *2)) * 100);
-                                             loadMultiText(data.result.toString(), erg.name, erg.typ, "true", "true", getSettings("server") + "/alfresco/s/cmis/s/workspace:SpacesStore/i/"
-									            	             + erg.id + "/content.pdf");
-                                           }
-                                          else
-                                             alert("Fehler beim Holen des Inhalts " + data.result[0]);
-							                           }
-						              });	          
-					             }	
-					             dtable.render("#dtable");
-					           } else
-					          	 alert("Fehler beim Lesen des Verzeichnisses: " + data.result[0]);
-				}
-			});
-		}
-    } catch (e) {
-        errorHandler(e);
-    }
-}
 
 function getRules(rDoc, loadLocal, dialog) {
 	try {
@@ -1703,25 +1593,25 @@ function init() {
                     runLocal = true;
                 } else {
                     json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
-                        getSettings("port"), null));
+                        getSettings("port")));
                     if (json.success)
                         scriptID = json.result;
                     else
                         txt.push("Script nicht gefunden! Fehler: " + json.result);
-                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
-                        null));
+                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port")
+                   ));
                     if (json.success)
                         rulesID = json.result;
                     else
                         txt.push("Regeln nicht gefunden! Fehler: " + json.result);
-                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
-                        null));
+                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port")
+                        ));
                     if (json.success)
                         inboxID = json.result;
                     else
                         txt.push("Inbox nicht gefunden! Fehler: " + json.result);
-                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"),
-                        null));
+                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port")
+                        ));
                     if (json.success)
                         rootID = json.result;
                     else
