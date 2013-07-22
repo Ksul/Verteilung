@@ -67,9 +67,9 @@ public class VerteilungServletTest {
     @Test
     public void testIsURLAvailable() throws Exception {
         when(request.getParameter("function")).thenReturn("isURLAvailable");
-        when(request.getParameter("server")).thenReturn("http://localhost:8080");
-        when(request.getParameter("proxyHost")).thenReturn("");
-        when(request.getParameter("proxyPort")).thenReturn("");
+        when(request.getParameter("server")).thenReturn("http://ksul.dyndns.org:9080");
+        when(request.getParameter("proxyHost")).thenReturn("www-proxy");
+        when(request.getParameter("proxyPort")).thenReturn("8080");
 
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
