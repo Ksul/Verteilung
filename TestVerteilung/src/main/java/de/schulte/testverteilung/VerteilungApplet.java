@@ -75,16 +75,22 @@ public class VerteilungApplet extends Applet {
 		}
 	}
 
-    public static  boolean isURLAvailable(String urlString, String proxyHost, String proxyPort)  {
-        URL url;
-        try {
-            url = new URL(urlString);
-        } catch (MalformedURLException e) {
-            return false;
-        }
+    public static  boolean isURLAvailable(final String urlString, final String proxyHost, final String proxyPort)  {
 
-        HttpURLConnection httpUrlConn;
+
+
+        Boolean ret = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+
+            public Boolean run() {
+
+                URL url;
+                try {
+                    url = new URL(urlString);
+                } catch (MalformedURLException e) {
+                    return false;
+                }
         try {
+            HttpURLConnection httpUrlConn;
             if (proxyHost != null && proxyHost.length() >0 && proxyPort != null && proxyPort.length() > 0) {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
                 httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
@@ -108,7 +114,12 @@ public class VerteilungApplet extends Applet {
             System.out.println("Fehler beim Check der URL: " + e.getMessage());
             return false;
         }
+
+            }} );
+
+        return ret;
     }
+
 
 	public String getTicket(final String server, final String username, final String password, final String proxyHost,
 			final String proxyPort, final Credentials credentials) {
