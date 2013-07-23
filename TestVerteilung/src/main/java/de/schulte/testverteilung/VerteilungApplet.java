@@ -75,8 +75,7 @@ public class VerteilungApplet extends Applet {
 		}
 	}
 
-    public static  boolean isURLAvailable(final String urlString, final String proxyHost, final String proxyPort)  {
-
+    public static String isURLAvailable(final String urlString, final String proxyHost, final String proxyPort) {
 
 
         Boolean ret = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
@@ -89,35 +88,31 @@ public class VerteilungApplet extends Applet {
                 } catch (MalformedURLException e) {
                     return false;
                 }
-        try {
-            HttpURLConnection httpUrlConn;
-            if (proxyHost != null && proxyHost.length() >0 && proxyPort != null && proxyPort.length() > 0) {
-                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
-                httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
-            } else {
-                httpUrlConn = (HttpURLConnection) url.openConnection();
+                try {
+                    HttpURLConnection httpUrlConn;
+                    if (proxyHost != null && proxyHost.length() > 0 && proxyPort != null && proxyPort.length() > 0) {
+                        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+                        httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
+                    } else {
+                        httpUrlConn = (HttpURLConnection) url.openConnection();
+                    }
+                    httpUrlConn.setRequestMethod("HEAD");
+
+                    // Set timeouts in milliseconds
+                    httpUrlConn.setConnectTimeout(30000);
+                    httpUrlConn.setReadTimeout(30000);
+
+
+                    return new Boolean(httpUrlConn.getResponseCode() == HttpURLConnection.HTTP_OK);
+                } catch (Exception e) {
+                    System.out.println("Fehler beim Check der URL: " + e.getMessage());
+                    return false;
+                }
+
             }
-            httpUrlConn.setRequestMethod("HEAD");
+        });
 
-            // Set timeouts in milliseconds
-            httpUrlConn.setConnectTimeout(30000);
-            httpUrlConn.setReadTimeout(30000);
-
-            // Print HTTP status code/message for your information.
-            System.out.println("Response Code: "
-                    + httpUrlConn.getResponseCode());
-            System.out.println("Response Message: "
-                    + httpUrlConn.getResponseMessage());
-
-            return (httpUrlConn.getResponseCode() == HttpURLConnection.HTTP_OK);
-        } catch (Exception e) {
-            System.out.println("Fehler beim Check der URL: " + e.getMessage());
-            return false;
-        }
-
-            }} );
-
-        return ret;
+        return ret.toString();
     }
 
 
@@ -165,13 +160,13 @@ public class VerteilungApplet extends Applet {
 		return ret.toString();
 	}
 
-    public JSONArray listFolderAsJSON(String filePath, String listFolder, String server, String username, String password,
+    public String listFolderAsJSON(String filePath, String listFolder, String server, String username, String password,
                                          String proxyHost, String proxyPort) throws IOException, VerteilungException, JSONException {
         JSONObject o;
         JSONObject o1;
         JSONArray list = new JSONArray();
         if (filePath == null || filePath.length() == 0) {
-            filePath = (String) getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort);
+            filePath = new JSONObject(getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort)).getString("result");
             o = new JSONObject();
             o1 = new JSONObject();
             o.put("id", filePath);
@@ -183,7 +178,7 @@ public class VerteilungApplet extends Applet {
             list.put(o1);
         } else {
             if (filePath.equals("-1"))
-                filePath = (String) getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort);
+                filePath = new JSONObject(getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort)).getString("result");
 
             ArrayList<Properties> liste = (ArrayList<Properties>) listFolder(filePath, listFolder, false, server, username, password, proxyHost, proxyPort);
 
@@ -208,13 +203,13 @@ public class VerteilungApplet extends Applet {
                 list.put(o1);
             }
         }
-        return list;
+        return list.toString();
     }
 
 
 
 
-    private Object listFolder(final String filePath, final String listFolder, final boolean byPath, final String server, final String username,
+    private ArrayList<Properties> listFolder(final String filePath, final String listFolder, final boolean byPath, final String server, final String username,
 			final String password, final String proxyHost, final String proxyPort) throws IOException {
 		ArrayList<Properties> liste = new ArrayList<Properties>();
 		boolean folder = false;
@@ -295,21 +290,7 @@ public class VerteilungApplet extends Applet {
                 }
             }
         }
-		final ArrayList<Properties> ergebnis = liste;
-		String ret = AccessController.doPrivileged(new PrivilegedAction<String>() {
-
-			public String run() {
-				JSONObject o = new JSONObject();
-				try {
-					o.put("result", ergebnis);
-
-				} catch (JSONException e) {
-					// Bitte kommentieren !!!
-				}
-				return o.toString();
-			}
-		});
-		return ret;
+		return liste;
 	}
 
 
@@ -339,8 +320,6 @@ public class VerteilungApplet extends Applet {
 				ret.put("result",
 						"Dokument konnte nicht gefunden werden." + response.getStatusText() + "\n" + response.getStackTrace());
 			} else {
-
-
                 Document<Feed> entryDoc = response.getDocument();
                 Feed root = entryDoc.getRoot();
                 List<Entry> entries = root.getEntries();
