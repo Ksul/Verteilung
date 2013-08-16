@@ -637,91 +637,101 @@ window.onload = function () {
             "icons": true
         },
         "json_data": {
-            "data" :{"state": "closed", "data": "Archiv", "attr": {"id": "-1", "state": "closed", "rel": "root"}},
+            "data": function(aNode, aFunction) {
+
+                if (isLocal()) {
+                   var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "true", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
+                    aFunction ($.parseJSON(ret));
+                } else
+                aFunction($.parseJSON('[ {"state": "closed", "data": "Archiv", "attr": {"id": "-1", "state": "closed", "rel": "root"}}]'));
+            },
             "ajax": {
                 "url": "/TestVerteilung/VerteilungServlet",
                 dataType: "json",
                 cache: false,
                 "data": function (n) {
-                    if (isLocal()) {
-                       return document.reader.listFolderAsJSON(n.attr ? n.attr("id") : "", getSettings("server"), getSettings("user"), getSettings("password"), "true", "true", getSettings("proxy"), getSettings("port"));
-                    }   else {
-                    return {
-                        "function": "listFolderAsJSON",
-                        "filePath": n.attr ? n.attr("id") : "",
-                        "server": getSettings("server"),
-                        "username": getSettings("user"),
-                        "password": getSettings("password"),
-                        "searchFolder": "true",
-                        "withFolder": "true",
-                        "proxyHost": getSettings("proxy"),
-                        "proxyPort": getSettings("port")
-                    };
+                    try {
+
+                        return {
+                            "function": "listFolderAsJSON",
+                            "filePath": n.attr ? n.attr("id") : "",
+                            "server": getSettings("server"),
+                            "username": getSettings("user"),
+                            "password": getSettings("password"),
+                            "searchFolder": "true",
+                            "withFolder": "true",
+                            "proxyHost": getSettings("proxy"),
+                            "proxyPort": getSettings("port")
+                        };
+
+                    } catch (e) {
+                        errorHandler(e);
                     }
                 }
             }
+
         },
         "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "types", "hotkeys", "contextmenu"]
     }).bind("select_node.jstree",function (event, data) {
                 if (data.rslt.obj.attr("rel") == "default") {
-                    if (isLocal()) {
-                       var  ret = document.reader.getContent(data.rslt.obj.attr("id"), true, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
-                        var json = jQuery.parseJSON(ret);
-                        if (json.success) {
-                            textEditor.getSession().getSession().setValue(json.result);
-                            currentContent = json.result;
-                            currentFile = data.rslt.obj.text().trim();
-                            document.getElementById('headerWest').textContent = currentFile;
-                            alfrescoMode = false;
-                            manageControls();
-
-                        } else
-                            alert("Daten konnten nicht übertragen werden: " + json.result)
-                        }  else {
-                    var dataString = {
-                        "function": "getContent",
-                        "documentId": data.rslt.obj.attr("id"),
-                        "extract": "true",
-                        "server": getSettings("server"),
-                        "username": getSettings("user"),
-                        "password": getSettings("password"),
-                        "proxyHost": getSettings("proxy"),
-                        "proxyPort": getSettings("port")
-                    };
-                    $.ajax({
-                        type: "POST",
-                        data: dataString,
-                        cache: false,
-                        datatype: "json",
-                        url: "VerteilungServlet",
-                        success: function (erg) {
-                            if (erg.success[0]) {
-                                textEditor.getSession().setValue(erg.result.toString());
-                                currentContent = erg.result.toString();
+                    try {
+                        if (isLocal()) {
+                            var ret = document.reader.getContent(data.rslt.obj.attr("id"), true, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
+                            var json = jQuery.parseJSON(ret);
+                            if (json.success) {
+                                textEditor.getSession().setValue(json.result);
+                                currentContent = json.result;
                                 currentFile = data.rslt.obj.text().trim();
                                 document.getElementById('headerWest').textContent = currentFile;
                                 alfrescoMode = false;
                                 manageControls();
 
                             } else
-                                alert("Daten konnten nicht übertragen werden: " + erg.result[0]);
-                        },
-                        error: function (response) {
-                            try {
-                                var r = jQuery.parseJSON(response.responseText);
-                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                            } catch (e) {
-                                var str = "FEHLER:\n";
-                                str = str + e.toString() + "\n";
-                                for (var prop in e)
-                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                                alert(str + "\n" + response.responseText);
-                            }
+                                alert("Daten konnten nicht übertragen werden: " + json.result)
+                        } else {
+                            var dataString = {
+                                "function": "getContent",
+                                "documentId": data.rslt.obj.attr("id"),
+                                "extract": "true",
+                                "server": getSettings("server"),
+                                "username": getSettings("user"),
+                                "password": getSettings("password"),
+                                "proxyHost": getSettings("proxy"),
+                                "proxyPort": getSettings("port")
+                            };
+                            $.ajax({
+                                type: "POST",
+                                data: dataString,
+                                cache: false,
+                                datatype: "json",
+                                url: "VerteilungServlet",
+                                success: function (erg) {
+                                    if (erg.success[0]) {
+                                        textEditor.getSession().setValue(erg.result.toString());
+                                        currentContent = erg.result.toString();
+                                        currentFile = data.rslt.obj.text().trim();
+                                        document.getElementById('headerWest').textContent = currentFile;
+                                        alfrescoMode = false;
+                                        manageControls();
+
+                                    } else
+                                        alert("Daten konnten nicht übertragen werden: " + erg.result[0]);
+                                },
+                                error: function (response) {
+                                    try {
+                                        var r = jQuery.parseJSON(response.responseText);
+                                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                                    } catch (e) {
+                                        errorHandler(e);
+                                    }
+                                }
+                            });
                         }
-                    });
+                    } catch (e) {
+                        errorHandler(e);
+                    }
                 }
-                }
-                }).delegate("a", "click", function (event, data) {
+            }).delegate("a", "click", function (event, data) {
                 event.preventDefault();
             });
     init();
