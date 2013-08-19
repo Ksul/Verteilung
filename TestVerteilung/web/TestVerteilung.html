@@ -637,39 +637,43 @@ window.onload = function () {
             "icons": true
         },
         "json_data": {
-            "data": function(aNode, aFunction) {
+            "data": function (aNode, aFunction) {
 
                 if (isLocal()) {
-                   var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "true", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
-                    aFunction ($.parseJSON(ret));
-                } else
-                aFunction($.parseJSON('[ {"state": "closed", "data": "Archiv", "attr": {"id": "-1", "state": "closed", "rel": "root"}}]'));
-            },
-            "ajax": {
-                "url": "/TestVerteilung/VerteilungServlet",
-                dataType: "json",
-                cache: false,
-                "data": function (n) {
-                    try {
-
-                        return {
-                            "function": "listFolderAsJSON",
-                            "filePath": n.attr ? n.attr("id") : "",
-                            "server": getSettings("server"),
-                            "username": getSettings("user"),
-                            "password": getSettings("password"),
-                            "searchFolder": "true",
-                            "withFolder": "true",
-                            "proxyHost": getSettings("proxy"),
-                            "proxyPort": getSettings("port")
-                        };
-
-                    } catch (e) {
-                        errorHandler(e);
-                    }
+                    var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "true", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
+                    aFunction($.parseJSON(ret));
+                } else {
+                    var dataString = {
+                        "function": "listFolderAsJSON",
+                        "filePath": aNode.attr ? aNode.attr("id") : "",
+                        "server": getSettings("server"),
+                        "username": getSettings("user"),
+                        "password": getSettings("password"),
+                        "searchFolder": "true",
+                        "withFolder": "true",
+                        "proxyHost": getSettings("proxy"),
+                        "proxyPort": getSettings("port")
+                    };
+                    $.ajax({
+                        type: "POST",
+                        data: dataString,
+                        cache: false,
+                        datatype: "json",
+                        url: "VerteilungServlet",
+                        success: function (erg) {
+                                aFunction(erg);
+                        },
+                        error: function (response) {
+                            try {
+                                var r = jQuery.parseJSON(response.responseText);
+                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                            } catch (e) {
+                                errorHandler(e);
+                            }
+                        }
+                    });
                 }
             }
-
         },
         "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "types", "hotkeys", "contextmenu"]
     }).bind("select_node.jstree",function (event, data) {
