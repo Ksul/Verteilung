@@ -1573,13 +1573,15 @@ function init() {
             settings = $.parseJSON(cookie);
         } else {
             settings = {};
-            settings.settings = [
-                {"key": "server", "value": "http://192.168.178.100:9080"},
-                {"key": "user", "value": "admin"},
-                {"key": "password", "value": "admin"},
-                {"key": "proxy", "value": ""},
-                {"key": "port", "value": ""}
-            ];
+            settings.settings = [];
+            if (!REC.exist(getSettings("server")) && !REC.exist(getSettings("user")) && !REC.exist(getSettings("password")) && !REC.exist(getSettings("proxy")) && !REC.exist(getSettings("port")))
+                settings.settings = [
+                    {"key": "server", "value": "http://192.168.178.100:9080"},
+                    {"key": "user", "value": "admin"},
+                    {"key": "password", "value": "admin"},
+                    {"key": "proxy", "value": ""},
+                    {"key": "port", "value": ""}
+                ];
         }
         if (REC.exist(getSettings("server")))
             alfrescoServerAvailable = checkServerStatus(getSettings("server"), getSettings("proxy"), getSettings("port"));

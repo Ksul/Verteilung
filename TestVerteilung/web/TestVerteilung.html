@@ -557,13 +557,13 @@ window.onload = function () {
 
     document.getElementById('filesinput').addEventListener('change', readMultiFile, false);
     if (isLocal()) {
-        var obj = document.createElement('object');
+        var obj = document.createElement('applet');
         obj.setAttribute('name', 'reader');
-        obj.setAttribute('width', '0');
-        obj.setAttribute('height', '0');
+        obj.setAttribute('width', '1');
+        obj.setAttribute('height', '1');
         obj.setAttribute('codebase', './WEB-INF/lib');
         obj.setAttribute('archive',
-                        'vt.jar, ' +
+                'vt.jar, ' +
                         'pdfbox-1.6.0.jar, ' +
                         'plugin.jar, ' +
                         'bcprov-jdk15on-147.jar, ' +
@@ -576,7 +576,7 @@ window.onload = function () {
                         'jempbox-1.6.0.jar, ' +
                         'slf4j-api-1.6.6.jar, ' +
                         'commons-io-2.4.jar');
-        obj.setAttribute('classid', 'java:de.schulte.testverteilung.VerteilungApplet.class');
+        obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
         document.getElementById('appl').appendChild(obj);
     }
 
@@ -638,10 +638,13 @@ window.onload = function () {
         },
         "json_data": {
             "data": function (aNode, aFunction) {
-
                 if (isLocal()) {
-                    var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "true", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
-                    aFunction($.parseJSON(ret));
+                    try {
+                        var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "true", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
+                        aFunction($.parseJSON(ret));
+                    } catch (e) {
+                        errorHandler(e);
+                    }
                 } else {
                     var dataString = {
                         "function": "listFolderAsJSON",
