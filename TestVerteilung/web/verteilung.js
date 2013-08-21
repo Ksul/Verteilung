@@ -17,6 +17,10 @@ function getUrlParam(name) {
 		return results[1];
 }
 
+function hasUrlParam(){
+    return this.location.href.search(/\?/) != -1;
+}
+
 function errorHandler(e) {
     var str = "FEHLER:\n";
     str = str + e.toString() + "\n";
@@ -1574,7 +1578,7 @@ function init() {
         } else {
             settings = {};
             settings.settings = [];
-            if (!REC.exist(getSettings("server")) && !REC.exist(getSettings("user")) && !REC.exist(getSettings("password")) && !REC.exist(getSettings("proxy")) && !REC.exist(getSettings("port")))
+            if (!hasUrlParam())
                 settings.settings = [
                     {"key": "server", "value": "http://192.168.178.100:9080"},
                     {"key": "user", "value": "admin"},
@@ -1589,7 +1593,6 @@ function init() {
             var txt = [];
             if (isLocal()) {
                 var json;
-
                 var pattern = new RegExp("true", "ig");
                 if (getUrlParam("local") == null || pattern.test(getUrlParam("local"))) {
                     runLocal = true;
@@ -1618,8 +1621,6 @@ function init() {
                         rootID = json.result;
                     else
                         txt.push("Archiv nicht gefunden! Fehler: " + json.result);
-
-
                 }
             } else {
                 var dataString = {
@@ -1766,7 +1767,6 @@ function init() {
             if (txt.length > 0)
                 alert(txt.join("\n"));
         }
-
         openRules();
         manageControls();
     } catch (e) {
