@@ -290,9 +290,11 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
 		ergebnis["error"] = REC.errors.length > 0;
 		row["result"] = ergebnis;
 		tableData.push(row);
-		dtable.get("data").add(tableData, {
+        tabelle.fnAddData(row);
+/*		dtable.get("data").add(tableData, {
 			silent : false
-		});
+		});*/
+
 		manageControls();
 	} catch (e) {
 		var str = "FEHLER:\n";
@@ -333,9 +335,7 @@ function readFiles(files) {
         }
         textEditor.getSession().setValue("");
         fillMessageBox("", false);
-        dtable.get("data").reset(null, {
-            silent: true
-        });
+        tabelle.fnClearTable();
         daten = new Array();
         tableData = new Array();
         var count = files.length;
@@ -479,7 +479,7 @@ function readFiles(files) {
             first = false;
         }
 
-        dtable.render("#dtable");
+       // dtable.render("#dtable");
     } catch (e) {
         errorHandler(e);
     }

@@ -20,6 +20,7 @@
 <script type="text/javascript" src="jquery.cookie.js" charset="utf-8"></script>
 <script type="text/javascript" src="jquery.hotkeys.js" charset="utf-8"></script>
 <script type="text/javascript" src="jquery.jstree.js" charset="utf-8"></script>
+<script type="text/javascript" src="jquery.dataTables.js" charset="utf-8"></script>
 
 <script src="vkbeautify.js" type="text/javascript" charset="utf-8"></script>
 <script src="jsbeautify.js" type="text/javascript" charset="utf-8"></script>
@@ -27,6 +28,7 @@
 <script src="yui-min.js" type="text/javascript" type="text/javascript" charset="utf-8"></script>
 
 <link rel="stylesheet" href="./themes/redmond/jquery-ui.css"/>
+<link rel="stylesheet" href="./themes/demo_table.css"/>
 <link type="text/css" rel="stylesheet" href="./themes/layout/layout-default.css"/>
 
 <style type="text/css">
@@ -627,9 +629,20 @@ window.onload = function () {
     var zone = document.getElementById('inTxt');
     zone.addEventListener('dragover', handleDragOver, false);
     zone.addEventListener('drop', handleFileSelect, false);
-    YUI({
+/*    YUI({
         gallery: 'gallery-2012.08.08-20-03'
-    }).use('datatable', 'gallery-datatable-row-expansion', callBack);
+    }).use('datatable', 'gallery-datatable-row-expansion', callBack);*/
+    $('#dtable').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="tabelle"></table>' );
+    tabelle = $('#tabelle').dataTable( {
+        "aaData": [],
+        "aoColumns": [
+            { "sTitle": "Name" },
+            { "sTitle": "Dokumenttyp" },
+            { "sTitle": "Ergebnis" },
+            { "sTitle": "Version", "sClass": "center" },
+            { "sTitle": "Grade", "sClass": "center" }
+        ]
+    } );
     tree = $("#tree").jstree({
         "themes": {
             "theme": "corral",
@@ -760,6 +773,7 @@ var runLocal = false;
 var REC;
 var treeObject;
 var tree;
+var tabelle;
 var workDocument = null;
 var multiMode = false;
 var currentPDF = false;
@@ -928,10 +942,11 @@ treeObject = jQuery.jstree._reference(tree);
 <div class="ui-layout-west">
     <div id="headerWest" class="header"> </div>
     <div class="content">
-        <div class="example yui3-skin-sam">
+     <!--   <div class="example yui3-skin-sam">
             <div id="dtable"></div>
             <div id="labels"></div>
         </div>
+     -->   <div id="dtable"></div>
         <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
         <div id="tree"></div>
     </div>
