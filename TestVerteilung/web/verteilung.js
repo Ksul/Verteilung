@@ -277,18 +277,21 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
 		dat["xml"] = REC.currXMLName;
 		dat["typ"] = typ;
 		dat["error"] = REC.errors;
-		dat["container"] = container;
+		dat["container"] = container; name,
 		dat["notDeleteable"] = notDeleteable;
 		dat["alfContainer"] = alfContainer;
 		daten[name] = dat;
-		var row = new Array();
+        var ergebnis = new Array();
+        ergebnis["error"] = REC.errors.length > 0;
+       // row["result"] = ergebnis;
+		var row = [, name,  REC.currXMLName.join(" : "), ergebnis ];
+/*
 		row["id"] = uuid();
 		row["feld"] = name;
 		row["xml"] = REC.currXMLName.join(" : ");
 		row["error"] = REC.errors;
-		var ergebnis = new Array();
-		ergebnis["error"] = REC.errors.length > 0;
-		row["result"] = ergebnis;
+*/
+
 		tableData.push(row);
         tabelle.fnAddData(row);
 /*		dtable.get("data").add(tableData, {
