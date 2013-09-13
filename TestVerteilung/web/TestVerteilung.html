@@ -636,9 +636,16 @@ window.onload = function () {
     tabelle = $('#tabelle').dataTable( {
         "aaData": [],
         "aoColumns": [
+            { "sTitle": "Id" },
             { "sTitle": "Name" },
             { "sTitle": "Dokumenttyp" },
             { "sTitle": "Ergebnis" }
+        ],
+        "aoColumnDefs": [
+            { "bVisible": false, "aTargets": [0]},
+            { "bVisible": true,  "aTargets": [1]},
+            { "bVisible": true,  "aTargets": [2]},
+            { "bVisible": true,  "aTargets": [3], "mRender": imageFieldFormatter}
         ]
     } );
     tree = $("#tree").jstree({

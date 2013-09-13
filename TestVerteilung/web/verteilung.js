@@ -284,7 +284,7 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
         var ergebnis = new Array();
         ergebnis["error"] = REC.errors.length > 0;
        // row["result"] = ergebnis;
-		var row = [, name,  REC.currXMLName.join(" : "), ergebnis ];
+		var row = [uuid(), name,  REC.currXMLName.join(" : "), ergebnis ];
 /*
 		row["id"] = uuid();
 		row["feld"] = name;
@@ -542,13 +542,13 @@ function callBack(Y) {
 	});
 }
 
-function imageFieldFormatter(o) {
+function imageFieldFormatter(o, type, row) {
 	if (o.rowIndex == 0) {
 		o.cell.setStyle('width', '102px');
 	}
 	var image = document.createElement("div");
 	image.href = "#";
-	if (o.value["error"]) {
+	if (o["error"]) {
 		image.style.backgroundImage = "url(resource/error.png)";
 		image.title = "Verteilung fehlerhaft";
 	} else {
