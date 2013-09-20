@@ -284,14 +284,7 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
         var ergebnis = new Array();
         ergebnis["error"] = REC.errors.length > 0;
        // row["result"] = ergebnis;
-		var row = [uuid(), name,  REC.currXMLName.join(" : "), ergebnis ];
-/*
-		row["id"] = uuid();
-		row["feld"] = name;
-		row["xml"] = REC.currXMLName.join(" : ");
-		row["error"] = REC.errors;
-*/
-
+        var row = [uuid(), name,  REC.currXMLName.join(" : "), ergebnis ];
 		tableData.push(row);
         tabelle.fnAddData(row);
 /*		dtable.get("data").add(tableData, {
@@ -542,13 +535,15 @@ function callBack(Y) {
 	});
 }
 
-function imageFieldFormatter(o, type, row) {
-	if (o.rowIndex == 0) {
-		o.cell.setStyle('width', '102px');
+function imageFieldFormatter(o) {
+	if (o.iDataRow == 0) {
+	//	o.cell.setStyle('width', '102px');
 	}
+    var container =  document.createElement("div");
 	var image = document.createElement("div");
 	image.href = "#";
-	if (o["error"]) {
+    image.className = "run";
+	if (o.aData[3].error) {
 		image.style.backgroundImage = "url(resource/error.png)";
 		image.title = "Verteilung fehlerhaft";
 	} else {
@@ -560,7 +555,7 @@ function imageFieldFormatter(o, type, row) {
 	image.style.height = "16px";
 	image.style.cssFloat = "left";
 	image.style.marginRight = "5px";
-	image.onclick = function() {
+    image.click(function() {
 		return (function(name, rowNumber) {
 			currentDocument.setContent(daten[name]["text"]);
 			testRules(rulesEditor.getSession().getValue());
@@ -584,9 +579,9 @@ function imageFieldFormatter(o, type, row) {
 			row["result"] = ergebnis;
 			tableData[rowNumber] = row;
 			dtable.modifyRow(rowNumber, row);
-		})(o.data.feld, o.rowIndex);
-	};
-	o.cell.appendChild(image);
+		})(o.aData[1], o.iDataRow);
+	});
+    container.appendChild(image);
 	image = document.createElement("div");
 	image.href = "#";
 	image.title = "Ergebnis anzeigen";
@@ -609,13 +604,13 @@ function imageFieldFormatter(o, type, row) {
 			propsEditor.getSession().setValue(printResults(daten[name]["result"]));
 			fillMessageBox(daten[name]["log"], true);
 			manageControls();
-		})(o.data.feld);
+		})(o.aData[1]);
 	};
-	o.cell.appendChild(image);
+    container.appendChild(image);
 	image = document.createElement("div");
 	image.href = "#";
 	image.title = "Ergebnis löschen";
-	if (daten[o.data.feld]["notDeleteable"] != "true") {
+	if (daten[o.aData[1]]["notDeleteable"] != "true") {
 	  image.style.backgroundImage = "url(resource/delete.png)";
 	  image.style.cursor = "pointer";
 	}
@@ -649,11 +644,11 @@ function imageFieldFormatter(o, type, row) {
 				}
 				dtable.removeRow(rowNumber);
 			}
-		})(o.data.feld, o.rowIndex);
+		})(o.aData[1], o.iDataRow);
 	};
-	o.cell.appendChild(image);
+    container.appendChild(image);
 	image = document.createElement("div");
-	if (o.data.feld.toLowerCase().endsWith(".pdf")) {
+	if (o.aData[1].toLowerCase().endsWith(".pdf")) {
 		image.style.backgroundImage = "url(resource/pdf.png)";
 		image.style.cursor = "pointer";
 	} else {
@@ -672,11 +667,11 @@ function imageFieldFormatter(o, type, row) {
 			} else {
 				openPDF(daten[name]["file"]);
 			}
-		})(o.data.feld);
+		})(o.aData[1]);
 	};
-	o.cell.appendChild(image);
-		image = document.createElement("div");
-	if (daten[o.data.feld]["alfContainer"] == "true") {
+    container.appendChild(image);
+	image = document.createElement("div");
+	if (daten[o.aData[1]]["alfContainer"] == "true") {
 		image.style.backgroundImage = "url(resource/move-file.png)";
 		image.style.cursor = "pointer";
 	} else {
@@ -733,10 +728,10 @@ function imageFieldFormatter(o, type, row) {
 														}
 				});
 			}
-		})(o.data.feld);
+		})(o.aData[1]);
 	};
-	o.cell.appendChild(image);
-	return false;
+    container.appendChild(image);
+	return container.outerHTML;
 }
 
 function uuid() {
