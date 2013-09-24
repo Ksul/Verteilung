@@ -490,7 +490,7 @@ function readFiles(files) {
                 if (tabelle.fnUpdate(row, aPos[0]) > 0)
                   alert("Tabelle konnte nicht aktualisiert werden!");
             });
-        $(".show").click(function() {
+        $(".glass").click(function() {
             var aPos = tabelle.fnGetPosition( this );
             var row = tabelle.fngetData(aPos[0]);
             var name = row[1];
@@ -506,7 +506,7 @@ function readFiles(files) {
             fillMessageBox(daten[name]["log"], true);
             manageControls();
         });
-        (".show").click(function() {
+        $(".loeschen").click(function() {
             var answer = confirm("Eintrag löschen?");
             if (answer) {
                 var aPos = tabelle.fnGetPosition( this );
@@ -531,7 +531,7 @@ function readFiles(files) {
                 tabelle.fnDeleteRow(aPos[0]);
             }
         });
-        (".pdf").click(function(name) {
+        $(".pdf").click(function(name) {
             var aPos = tabelle.fnGetPosition( this );
             var row = tabelle.fngetData(aPos[0]);
             var name = row[1];
@@ -541,7 +541,7 @@ function readFiles(files) {
                 openPDF(daten[name]["file"]);
             }
         });
-        (".moveToInbox").click(function() {
+        $(".moveToInbox").click(function() {
             var aPos = tabelle.fnGetPosition( this );
             var row = tabelle.fngetData(aPos[0]);
             var name = row[1];
@@ -697,7 +697,7 @@ function imageFieldFormatter(o) {
     container.appendChild(image);
 	image = document.createElement("div");
 	image.href = "#";
-    image.className = "show";
+    image.className = "glass";
 	image.title = "Ergebnis anzeigen";
 	image.style.backgroundImage = "url(resource/glass.png)";
 	image.style.width = "16px";
@@ -723,7 +723,7 @@ function imageFieldFormatter(o) {
     container.appendChild(image);
 	image = document.createElement("div");
 	image.href = "#";
-    image.className = "delete";
+    image.className = "loeschen";
 	image.title = "Ergebnis löschen";
 	if (daten[o.aData[1]]["notDeleteable"] != "true") {
 	  image.style.backgroundImage = "url(resource/delete.png)";
