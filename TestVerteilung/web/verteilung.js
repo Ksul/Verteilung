@@ -283,10 +283,8 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
 		daten[name] = dat;
         var ergebnis = new Array();
         ergebnis["error"] = REC.errors.length > 0;
-       // row["result"] = ergebnis;
         var row = [uuid(), name,  REC.currXMLName.join(" : "), ergebnis ];
-		tableData.push(row);
-        tabelle.fnAddData(row);
+		tabelle.fnAddData(row);
 /*		dtable.get("data").add(tableData, {
 			silent : false
 		});*/
@@ -333,7 +331,6 @@ function readFiles(files) {
         fillMessageBox("", false);
         tabelle.fnClearTable();
         daten = new Array();
-        tableData = new Array();
         var count = files.length;
         var maxLen = 1000000;
         var first = true;
@@ -474,8 +471,124 @@ function readFiles(files) {
             }
             first = false;
         }
-
-       // dtable.render("#dtable");
+        $(".run").click(function() {
+                var aPos = tabelle.fnGetPosition( this );
+                var row = tabelle.fngetData(aPos[0]);
+                var name = row[1];
+                currentDocument.setContent(daten[name]["text"]);
+                testRules(rulesEditor.getSession().getValue());
+                daten[name].log = mess;
+                daten[name].result = results;
+                daten[name].position = positions;
+                daten[name].xml = currXMLName;
+                daten[name].error = errors;
+                var ergebnis = new Array();
+                ergebnis["error"] = REC.errors.length > 0;
+                row[2] =  REC.currXMLName.join(" : ");
+                row[3] = ergebnis;
+                //TODO Fehler fehlen noch
+                if (tabelle.fnUpdate(row, aPos[0]) > 0)
+                  alert("Tabelle konnte nicht aktualisiert werden!");
+            });
+        $(".show").click(function() {
+            var aPos = tabelle.fnGetPosition( this );
+            var row = tabelle.fngetData(aPos[0]);
+            var name = row[1];
+            multiMode = false;
+            showMulti = true;
+            currentFile = daten[name]["file"];
+            document.getElementById('headerWest').textContent = currentFile;
+            setXMLPosition(daten[name]["xml"]);
+            removeMarkers(markers, textEditor);
+            markers = setMarkers(daten[name]["position"], textEditor);
+            textEditor.getSession().setValue(daten[name]["text"]);
+            propsEditor.getSession().setValue(printResults(daten[name]["result"]));
+            fillMessageBox(daten[name]["log"], true);
+            manageControls();
+        });
+        (".show").click(function() {
+            var answer = confirm("Eintrag löschen?");
+            if (answer) {
+                var aPos = tabelle.fnGetPosition( this );
+                var row = tabelle.fngetData(aPos[0]);
+                var name = row[1];
+                try {
+                    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+                } catch (e) {
+                    alert("Permission to delete file was denied.");
+                }
+                currentFile = daten[name]["file"];
+                textEditor.getSession().setValue("");
+                propsEditor.getSession().setValue("");
+                fillMessageBox("", false);
+                rulesEditor.getSession().foldAll(1);
+                if (currentFile.length > 0) {
+                    var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+                    file.initWithPath(currentFile);
+                    if (file.exists() == true)
+                        file.remove(false);
+                }
+                tabelle.fnDeleteRow(aPos[0]);
+            }
+        });
+        (".pdf").click(function(name) {
+            var aPos = tabelle.fnGetPosition( this );
+            var row = tabelle.fngetData(aPos[0]);
+            var name = row[1];
+            if (typeof daten[name]["container"] != "undefined" && daten[name]["container"] != null) {
+                openPDF(daten[name]["container"], true);
+            } else {
+                openPDF(daten[name]["file"]);
+            }
+        });
+        (".moveToInbox").click(function() {
+            var aPos = tabelle.fnGetPosition( this );
+            var row = tabelle.fngetData(aPos[0]);
+            var name = row[1];
+            var docId = "workspace:/SpacesStore/" + daten[name]["container"];
+            if (isLocal()) {
+                var json = jQuery.parseJSON(document.reader.moveDocument(docId, inboxID, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null));
+                if (!json.success)
+                    alert("Dokument nicht verschoben: " + json.result);
+            }
+            else {
+                var dataString = {
+                    "function"			: "moveDocument",
+                    "documentId"		: docId,
+                    "destinationId"	    : inboxID,
+                    "server"			: getSettings("server"),
+                    "username"			: getSettings("user"),
+                    "password"			: getSettings("password"),
+                    "proxyHost"			: getSettings("proxy"),
+                    "proxyPort"			: getSettings("port")
+                };
+                $.ajax({
+                    type						: "POST",
+                    data						: dataString,
+                    datatype				: "json",
+                    url							: "/TestVerteilung/VerteilungServlet",
+                    async						: false,
+                    error    : function (response) {
+                        try {
+                            var r = jQuery.parseJSON(response.responseText);
+                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                        } catch(e)  {
+                            var str = "FEHLER:\n";
+                            str = str + e.toString() + "\n";
+                            for ( var prop in e)
+                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                            alert(str + "\n" + response.responseText);
+                        }
+                    },
+                    success					: function(data) {
+                        if (data.success[0])
+                            alert("Dokument verschoben!")
+                        else
+                            alert("Dokument nicht verschoben: " + data.result[0]);
+                    }
+                });
+            }
+        });
     } catch (e) {
         errorHandler(e);
     }
@@ -584,6 +697,7 @@ function imageFieldFormatter(o) {
     container.appendChild(image);
 	image = document.createElement("div");
 	image.href = "#";
+    image.className = "show";
 	image.title = "Ergebnis anzeigen";
 	image.style.backgroundImage = "url(resource/glass.png)";
 	image.style.width = "16px";
@@ -609,6 +723,7 @@ function imageFieldFormatter(o) {
     container.appendChild(image);
 	image = document.createElement("div");
 	image.href = "#";
+    image.className = "delete";
 	image.title = "Ergebnis löschen";
 	if (daten[o.aData[1]]["notDeleteable"] != "true") {
 	  image.style.backgroundImage = "url(resource/delete.png)";
@@ -648,6 +763,7 @@ function imageFieldFormatter(o) {
 	};
     container.appendChild(image);
 	image = document.createElement("div");
+    image.className = "pdf";
 	if (o.aData[1].toLowerCase().endsWith(".pdf")) {
 		image.style.backgroundImage = "url(resource/pdf.png)";
 		image.style.cursor = "pointer";
@@ -671,6 +787,7 @@ function imageFieldFormatter(o) {
 	};
     container.appendChild(image);
 	image = document.createElement("div");
+    image.className = "moveToInbox";
 	if (daten[o.aData[1]]["alfContainer"] == "true") {
 		image.style.backgroundImage = "url(resource/move-file.png)";
 		image.style.cursor = "pointer";
