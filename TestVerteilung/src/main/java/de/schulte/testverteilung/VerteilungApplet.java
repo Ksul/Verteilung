@@ -663,7 +663,9 @@ public class VerteilungApplet extends Applet {
 				System.out.println("Unable to extract ZIP.");
 				System.out.println(e.getMessage());
 			}
-		}
+		} else {
+            System.out.println("Unable to find PDF in extracted ZIP.");
+        }
 		return;
 	}
 
