@@ -14,8 +14,8 @@
 
 <script src="./recognition.js" type="text/javascript" charset="utf-8"></script>
 <script src="./verteilung.js" type="text/javascript" charset="utf-8"></script>
-<script type="text/javascript" src="./jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-<script type="text/javascript" src="./jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+<script type="text/javascript" src="./jquery-1.9.1.js"></script>
+<script type="text/javascript" src="./jquery-ui-1.10.3.custom.js"></script>
 <script type="text/javascript" src="./jquery.layout.js"></script>
 <script type="text/javascript" src="jquery.cookie.js" charset="utf-8"></script>
 <script type="text/javascript" src="jquery.hotkeys.js" charset="utf-8"></script>
@@ -25,38 +25,107 @@
 <script src="vkbeautify.js" type="text/javascript" charset="utf-8"></script>
 <script src="jsbeautify.js" type="text/javascript" charset="utf-8"></script>
 
-<link rel="stylesheet" href="./themes/redmond/jquery-ui.css"/>
-<link rel="stylesheet" href="./themes/demo_table.css"/>
 <link type="text/css" rel="stylesheet" href="./themes/layout/layout-default.css"/>
 
-<style type="text/css">
+<style type="text/css" media="screen">
 
-     /* remove padding & scrolling from panes that are 'containers' for nested layouts */
-    .ui-layout-pane {
-        border: 0; /* cosmetic */
-        padding: 0;
-        overflow: hidden;
-    }
+    /* @import "/media/css/site_jui.ccss"; */
+@import "./themes/cupertino/jquery-ui-1.10.3.custom.css";
+@import "./themes/demo_table.css";
 
-    .header {
-        background: #80ade5 url(./resource/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
-        border-bottom: 1px solid #777;
-        height: 12px;
-        font-weight: normal;
-        font-size: 9pt;
-        text-align: center;
-        padding-bottom: 2px;
-        position: relative;
-        overflow: hidden;
-    }
+    /*
+     * Override styles needed due to the mix of three different CSS sources! For proper examples
+     * please see the themes example in the 'Examples' section of this site
+     */
+.dataTables_info {
+    padding-top: 0;
+}
 
-body { font-size: 62.5%; }
-label, input { display:block; }
-input.text { margin-bottom:12px; width:95%; padding: .4em; }
-fieldset { padding:0; border:0; margin-top:25px; }
-h1 { font-size: 1.2em; margin: .6em 0; }
-.ui-dialog .ui-state-error { padding: .3em; }
-.validateTips { border: 1px solid transparent; padding: 0.3em; }
+.dataTables_paginate {
+    padding-top: 0;
+}
+
+.css_right {
+    float: right;
+}
+
+#example_wrapper .fg-toolbar {
+    font-size: 0.8em
+}
+
+#theme_links span {
+    float: left;
+    padding: 2px 10px;
+}
+
+.alignRight {
+    text-align: right;
+}
+
+.alignLeft {
+    text-align: left;
+}
+
+td {
+    font-size: 1.2em;
+}
+
+th {
+    font-size: 1.2em;
+}
+
+    /* remove padding & scrolling from panes that are 'containers' for nested layouts */
+.ui-layout-pane {
+    border: 0; /* cosmetic */
+    padding: 0;
+    overflow: hidden;
+}
+
+.header {
+    background: #80ade5 url(./resource/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
+    border-bottom: 1px solid #777;
+    height: 12px;
+    font-weight: normal;
+    font-size: 9pt;
+    text-align: center;
+    padding-bottom: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+body {
+    font-size: 62.5%;
+}
+
+label, input {
+    display: block;
+}
+
+input.text {
+    margin-bottom: 12px;
+    width: 95%;
+    padding: .4em;
+}
+
+fieldset {
+    padding: 0;
+    border: 0;
+    margin-top: 25px;
+}
+
+h1 {
+    font-size: 1.2em;
+    margin: .6em 0;
+}
+
+.ui-dialog .ui-state-error {
+    padding: .3em;
+}
+
+.validateTips {
+    border: 1px solid transparent;
+    padding: 0.3em;
+}
 
 .ui-widget {
     font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
@@ -124,8 +193,6 @@ input.search {
     border: 0;
     cursor: pointer;
 }
-
-
 
 input.search:disabled {
     background-image: url('./resource/search-bw.png');
@@ -343,12 +410,12 @@ input.settings {
     cursor: pointer;
 }
 
-    .yui3-skin-sam .yui3-datatable-table {
-        border-collapse: separate;
-        border-spacing: 0;
-        font-family: arial, sans-serif;
-        font-size: 10px;
-    }
+.yui3-skin-sam .yui3-datatable-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: arial, sans-serif;
+    font-size: 10px;
+}
 </style>
 
 
@@ -627,23 +694,53 @@ window.onload = function () {
     var zone = document.getElementById('inTxt');
     zone.addEventListener('dragover', handleDragOver, false);
     zone.addEventListener('drop', handleFileSelect, false);
-
+    var anOpen = [];
     $('#dtable').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="tabelle"></table>' );
-    tabelle = $('#tabelle').dataTable( {
+    tabelle = $('#tabelle').dataTable({
+        "bJQueryUI": true,
+        "sPaginationType": "full_numbers",
         "aaData": [],
+        "sScrollX": "100%",
+        "sScrollXInner": "100%",
+        "bAutoWidth": true,
+        "bLengthChange": false,
+        "bFilter": false,
         "aoColumns": [
-            { "sTitle": "Id" },
-            { "sTitle": "Name", "sType": "string" ,"sClass": "left" },
-            { "sTitle": "Dokumenttyp", "sType": "string", "sClass": "left" },
-            { "sTitle": "Ergebnis", "sWidth": "102px" }
+            { "mDataProp": null,"sClass": "control center", "sDefaultContent": '<img src="./resource/expand-icon.png"/>', "sWidth": "12px"},
+            { "sTitle": "Name", "sType": "string", "sClass": "alignLeft"  },
+            { "sTitle": "Dokumenttyp", "sType": "string", "sClass": "alignLeft" },
+            { "sTitle": "Ergebnis", "sWidth": "102px" },
+            { "sTitle": "Id" }
+
         ],
         "aoColumnDefs": [
-            { "bVisible": false, "aTargets": [0]},
-            { "bVisible": true,  "aTargets": [1]},
-            { "bVisible": true,  "aTargets": [2]},
-            { "bVisible": true,  "aTargets": [3], "fnRender": imageFieldFormatter}
+            { "aTargets": [0,1,2,3], "bVisible": true},
+            { "aTargets": [3], "fnRender": imageFieldFormatter},
+            { "aTargets": [4], "bVisible": false}
+
+
+
         ]
-    } );
+    });
+    $('#coaches td.control').live('click', function () {
+        var nTr = this.parentNode;
+        var i = $.inArray(nTr, anOpen);
+        if (i === -1) {
+            $('img', this).attr('src', "./resource/minimize-icon.png");
+            var nDetailsRow = tabelle.fnOpen(nTr, formatDetails(tabelle, nTr, 1), 'details');
+            $('div.innerDetails', nDetailsRow).slideDown('fast', function () {
+                $("div.dataTables_scrollBody").scrollTop(nTr.offsetTop);
+            });
+            anOpen.push(nTr);
+        }
+        else {
+            $('img', this).attr('src', "./resource/expand-icon.png");
+            $('div.innerDetails', $(nTr).next()[0]).slideUp(function () {
+                tabelle.fnClose(nTr);
+                anOpen.splice(i, 1);
+            });
+        }
+    });
     // Eventhandler für die Image Clicks
     handleImageClicks();
     tree = $("#tree").jstree({
