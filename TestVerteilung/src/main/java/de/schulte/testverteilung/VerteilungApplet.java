@@ -807,7 +807,7 @@ public class VerteilungApplet extends Applet {
         return ret;
     }
 
-    public String test() {
+    public static String test() {
 		return "Hier ist das Verteilungs Applet!";
 	}
 

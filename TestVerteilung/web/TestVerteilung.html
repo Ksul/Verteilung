@@ -14,9 +14,9 @@
 
 <script src="./recognition.js" type="text/javascript" charset="utf-8"></script>
 <script src="./verteilung.js" type="text/javascript" charset="utf-8"></script>
-<script type="text/javascript" src="./jquery-1.9.1.js"></script>
-<script type="text/javascript" src="./jquery-ui-1.10.3.custom.js"></script>
-<script type="text/javascript" src="./jquery.layout.js"></script>
+<script type="text/javascript" src="jquery-1.9.1.js"></script>
+<script type="text/javascript" src="jquery-ui-1.10.3.custom.js"></script>
+<script type="text/javascript" src="jquery.layout.js"></script>
 <script type="text/javascript" src="jquery.cookie.js" charset="utf-8"></script>
 <script type="text/javascript" src="jquery.hotkeys.js" charset="utf-8"></script>
 <script type="text/javascript" src="jquery.jstree.js" charset="utf-8"></script>
@@ -710,19 +710,16 @@ window.onload = function () {
             { "sTitle": "Name", "sType": "string", "sClass": "alignLeft"  },
             { "sTitle": "Dokumenttyp", "sType": "string", "sClass": "alignLeft" },
             { "sTitle": "Ergebnis", "sWidth": "102px" },
-            { "sTitle": "Id" }
-
+            { "sTitle": "Id" },
+            { "sTitle": "Fehler" }
         ],
         "aoColumnDefs": [
             { "aTargets": [0,1,2,3], "bVisible": true},
             { "aTargets": [3], "fnRender": imageFieldFormatter},
-            { "aTargets": [4], "bVisible": false}
-
-
-
+            { "aTargets": [4,5], "bVisible": false}
         ]
     });
-    $('#coaches td.control').live('click', function () {
+    $(document).on('click', '#tabelle td.control', function () {
         var nTr = this.parentNode;
         var i = $.inArray(nTr, anOpen);
         if (i === -1) {

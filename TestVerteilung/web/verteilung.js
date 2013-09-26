@@ -283,7 +283,7 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
 		daten[name] = dat;
         var ergebnis = new Array();
         ergebnis["error"] = REC.errors.length > 0;
-        var row = [ null,name,  REC.currXMLName.join(" : "), ergebnis, uuid() ];
+        var row = [ null,name,  REC.currXMLName.join(" : "), ergebnis, uuid(), REC.errors ];
 		tabelle.fnAddData(row);
 		manageControls();
 	} catch (e) {
@@ -317,7 +317,7 @@ function readMultiFile(evt) {
 
 function readFiles(files) {
     try {
-        if (!currentRules.endsWith("doc.xml")) {
+        if (currentRules == null || !currentRules.endsWith("doc.xml")) {
             var open = openFile("doc.xml");
             currentRules = open[1];
             rulesEditor.getSession().setValue(open[0]);
@@ -488,7 +488,7 @@ function handleImageClicks() {
         ergebnis["error"] = REC.errors.length > 0;
         row[2] = REC.currXMLName.join(" : ");
         row[3] = ergebnis;
-        //TODO Fehler fehlen noch
+        row[5] = REC.errors;
         if (tabelle.fnUpdate(row, aPos[0]) > 0)
             alert("Tabelle konnte nicht aktualisiert werden!");
     });
@@ -681,11 +681,14 @@ function formatDetails(oTable, nTr, tableid) {
     var oData = oTable.fnGetData(nTr);
     var sOut = '<div class="innerDetails"><table>' +
         '<tr><td>';
-
-
-
+    var txt = "";
+    for ( var i = 0; i < oData[5].length; i++) {
+        if (txt.length > 0)
+            txt = txt + '<br>';
+        txt = txt + oData[5][i];
+    }
+    sOut = sOut + txt;
     sOut += '</td></tr></table></div>';
-
     return sOut;
 }
 
