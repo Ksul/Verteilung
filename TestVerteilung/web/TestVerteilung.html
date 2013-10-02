@@ -706,7 +706,7 @@ window.onload = function () {
         "bLengthChange": false,
         "bFilter": false,
         "aoColumns": [
-            { "mDataProp": null,"sClass": "control center", "sDefaultContent": '<img src="./resource/expand-icon.png"/>', "sWidth": "12px"},
+            { "mDataProp": null,"sClass": "control center", "sWidth": "12px"},
             { "sTitle": "Name", "sType": "string", "sClass": "alignLeft"  },
             { "sTitle": "Dokumenttyp", "sType": "string", "sClass": "alignLeft" },
             { "sTitle": "Ergebnis", "sWidth": "102px" },
@@ -714,7 +714,8 @@ window.onload = function () {
             { "sTitle": "Fehler" }
         ],
         "aoColumnDefs": [
-            { "aTargets": [0,1,2,3], "bVisible": true},
+            { "aTargets": [0], "fnRender": expandFieldFormatter},
+            { "aTargets": [1,2,3], "bVisible": true},
             { "aTargets": [3], "fnRender": imageFieldFormatter},
             { "aTargets": [4,5], "bVisible": false}
         ]

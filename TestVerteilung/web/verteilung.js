@@ -591,8 +591,15 @@ function handleImageClicks() {
             });
         }
     });
+
 }
 
+function expandFieldFormatter(o){
+    if (o.aData[3].error) {
+        return '<a class="control" href="#"><img src="./resource/expand-icon.png" title="Details anzeigen" width="16px" height="16px" /></a>';
+    }
+    return '<a class="nothing"/>';
+}
 
 
 function imageFieldFormatter(o) {
@@ -679,16 +686,19 @@ function imageFieldFormatter(o) {
 
 function formatDetails(oTable, nTr, tableid) {
     var oData = oTable.fnGetData(nTr);
-    var sOut = '<div class="innerDetails"><table>' +
-        '<tr><td>';
-    var txt = "";
+    var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%;" ><table>' +
+        '<tr><tr style="height: 0px;" role="row"> '+
+        '<th style="width: 100px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px;"' +
+        'colspan="1" rowspan="1" tabindex="0" class="control center ui-state-default">Fehler</th>' +
+        '<th style="width: 333px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px;"' +
+        'colspan="1" rowspan="1" tabindex="0" class="alignLeft ui-state-default">Beschreibung</th></tr><td>';
+    var txt = "<tr>";
     for ( var i = 0; i < oData[5].length; i++) {
-        if (txt.length > 0)
-            txt = txt + '<br>';
-        txt = txt + oData[5][i];
+        txt = txt + "<td>" + (i+1) + "</td><td>" + oData[5][i] + "</td>";
+        txt = txt + "</tr>";
     }
     sOut = sOut + txt;
-    sOut += '</td></tr></table></div>';
+    sOut += '</table></div>';
     return sOut;
 }
 
@@ -708,125 +718,6 @@ jQuery.fn.dataTableExt.oSort['formatted-num-desc'] = function (x, y) {
     if (y.indexOf('/') >= 0) y = eval(y);
     return y / 1 - x / 1;
 };
-
-function fnFormatAsstsDetails(oTable, nTr) {
-    var oData = oTable.fnGetData(nTr);
-    var sOut = '<div class="innerDetails"><table>' +
-        '<tr><td>' +
-        '<img src="http://i.usatoday.net/sports/graphics/2011/coaches-contracts/images/' + oData.PhotoUrl + '" alt="' + oData.Coach + '" />' +
-        '<p class="photo-credit coach-credit" style="margin-bottom: 10px;">Head coach ' + oData.Coach + '</p>' +
-        '<p class="photo-credit">' + oData.PhotoCredit + '</p></td>' +
-        '<td class="second-td-box"><p class="at-a-glance">Staff Stats:</p>' +
-        '<p><span class="subhead">Head Coach Career (2010): </span>' + oData.Record + '</p>' +
-        '<p><span class="subhead">Head Coach Total Pay: </span>' + oData.HCTotPay + '</p>' +
-        '<p><span class="subhead">Assts Total Pay (2011): </span>' + oData.AsstsTotPay1 + '</p>' +
-        '<p><span class="subhead">Assts Total Pay (2010): </span>' + oData.AsstsTotPay2 + '</p>' +
-        '<p><span class="subhead">Assts Total Pay (2009): </span>' + oData.AsstsTotPay3 + '</p>' +
-        '</td>' +
-        '<td class="assts-google-chart"><img src="http://i.usatoday.net/_common/_datatables/NCAA-chart-legend-assts.jpg" alt="Google chart legend" />';
-
-    // Create Google chart
-    sOut += '<img src="http://chart.apis.google.com/chart' +
-        '?cht=lxy' + // Chart type
-        '&chxt=y,x,x' + // Visible axes
-        '&chs=475x110' + // Chart dimensions
-        '&chco=b40000,00529B,3B7C25' + // Chart data line colors
-        '&chg=-1,25,1,1' + // Gridlines
-        '&chls=2';  // Data line thickness
-
-    // Determine maximum payroll amount in the data
-    // Copy NCAA and conference payrolls to arrays
-    // And build data points for chd and chm parameters
-    var minpayroll = 0;
-    var maxpayroll = parseInt(oData.AsstsTotPay1.replace("$", "").replace(",", "").replace("N/A", "0"));
-    var confpayroll = [];
-    var allpayroll = [];
-    var schooltotpay1 = parseInt(oData.AsstsTotPay3.replace("$", "").replace(/,/g, "").replace("N/A", "0"));
-    var schooltotpay2 = parseInt(oData.AsstsTotPay2.replace("$", "").replace(/,/g, "").replace("N/A", "0"));
-    var schooltotpay3 = parseInt(oData.AsstsTotPay1.replace("$", "").replace(/,/g, "").replace("N/A", "0"));
-    var chdall = "|-1";
-    // School payroll
-    if (schooltotpay2 > maxpayroll) { maxpayroll = schooltotpay2 };
-    if (schooltotpay3 > maxpayroll) { maxpayroll = schooltotpay3 };
-
-    // Create NCAA and conference payroll arrays
-    for (i = 0; i < AsstConfSals.length; i++) {
-        if (AsstConfSals[i][0] == "All") {
-            for (var x = 1; x < 4; x++) {
-                allpayroll.push(AsstConfSals[i][x]);
-            };
-        }
-        else if (AsstConfSals[i][0] == oData.Conf) {
-            for (x = 1; x < 4; x++) {
-                confpayroll.push(AsstConfSals[i][x]);
-            };
-        };
-    };
-
-    // See if conference or NCAA maximums > school maximum
-    for (x = 0; x < 3; x++) {
-        if (confpayroll[x] > maxpayroll) {maxpayroll = confpayroll[x]};
-        if (allpayroll[x] > maxpayroll) {maxpayroll = allpayroll[x]};
-    };
-
-    // Add chds parameter
-    sOut += '&chds=0,' + maxpayroll.toString();
-
-    // Add chd parameter
-    sOut += '&chd=t:-1|' + schooltotpay1.toString() + ',' + schooltotpay2.toString() + ',' + schooltotpay3.toString() +
-        '|-1|' + confpayroll [0] + ',' + confpayroll [1]+ ',' + confpayroll [2] +
-        '|-1|' + allpayroll [0] + ',' + allpayroll [1]+ ',' + allpayroll [2]
-
-    // Add chm parameter
-    sOut += '&chm=o,730000,0,0,7|o,730000,0,1,7|o,730000,0,2,7|s,00529B,1,0,7|s,00529B,1,1,7|s,00529B,1,2,7|d,3B7C25,2,0,9|d,3B7C25,2,1,9|d,3B7C25,2,2,9';
-
-    // Build chxl parameter
-    var salbit = 0;
-    var chxl = '&chxl=0:|$0|$';
-
-    if (maxpayroll > 999999) { chxl += Math.floor(maxpayroll / 1000000).toString() + ',' };
-    if (maxpayroll > 999) {
-        salbit = Math.floor((maxpayroll - (Math.floor(maxpayroll / 1000000) * 1000000)) / 1000);
-        if (salbit < 100) { chxl += '0' };
-        if (salbit < 10) { chxl += '0' };
-        chxl += salbit.toString() + ',';
-    };
-
-    salbit = maxpayroll - (Math.floor(maxpayroll / 1000) * 1000);
-    if (salbit < 100) { chxl += '0' };
-    if (salbit < 10) { chxl += '0' };
-    chxl += salbit.toString() + '|';
-
-    // Add blank headings and year headings to chxl paraemeter
-    chxl += '1:||||2:|2009|2010|2011';
-
-    // Add chxl parameter
-    sOut += chxl;
-
-    // Add coach name as image alt; close tag
-    sOut += '" alt="' + oData.Coach + '" /></td></tr>';
-
-    // Create contracts subtable
-
-    // Count number of assistants
-    var arraycount = oData.Assts.length;
-
-    if (arraycount > 0) {
-        sOut += '<tr><td /><td colspan="2"><table class="child-table asst-child-table"><tr>' +
-            '<th>Asst Coach</th><th>Total Pay (2011)</th><th>Max Bonus (2011)</th><th>Total Pay (2010) </th><th>Total Pay (2009)</th></tr>';
-        for (i = 0; i < arraycount; ++i) {
-            sOut += '<tr><td>' + oData.Assts[i][0] + '</td>' +
-                '<td class="number-align">' + oData.Assts[i][1] + '</td>' +
-                '<td class="number-align">' + oData.Assts[i][2] + '</td>' +
-                '<td class="number-align">' + oData.Assts[i][3] + '</td>' +
-                '<td class="number-align">' + oData.Assts[i][4] + '</td></tr>'
-        };
-
-        sOut += '</table></td></tr></table></div>';
-    };
-
-    return sOut;
-}
 
 function uuid() {
 	var chars = '0123456789abcdef'.split('');
