@@ -686,15 +686,15 @@ function imageFieldFormatter(o) {
 
 function formatDetails(oTable, nTr, tableid) {
     var oData = oTable.fnGetData(nTr);
-    var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%;" ><table>' +
+    var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%; margin-left: 32px" ><table>' +
         '<tr><tr style="height: 0px;" role="row"> '+
-        '<th style="width: 100px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px;"' +
+        '<th style="width: 100px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
         'colspan="1" rowspan="1" tabindex="0" class="control center ui-state-default">Fehler</th>' +
-        '<th style="width: 333px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px;"' +
+        '<th style="width: 333px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
         'colspan="1" rowspan="1" tabindex="0" class="alignLeft ui-state-default">Beschreibung</th></tr><td>';
     var txt = "<tr>";
     for ( var i = 0; i < oData[5].length; i++) {
-        txt = txt + "<td>" + (i+1) + "</td><td>" + oData[5][i] + "</td>";
+        txt = txt + "<td class='alignCenter'>" + (i+1) + "</td><td>" + oData[5][i] + "</td>";
         txt = txt + "</tr>";
     }
     sOut = sOut + txt;
