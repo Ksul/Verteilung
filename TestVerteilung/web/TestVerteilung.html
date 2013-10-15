@@ -728,7 +728,7 @@ window.onload = function () {
         var nTr = this.parentNode;
         var i = $.inArray(nTr, anOpen);
         if (i === -1) {
-            $('img', this).attr('src', "./resource/details-close.png");
+            $('img', this).attr('src', "./resource/Details_close.png");
             var nDetailsRow = tabelle.fnOpen(nTr, formatDetails(tabelle, nTr, 1), 'details');
             $('div.innerDetails', nDetailsRow).slideDown('fast', function () {
                 $("div.dataTables_scrollBody").scrollTop(nTr.offsetTop);
@@ -736,7 +736,7 @@ window.onload = function () {
             anOpen.push(nTr);
         }
         else {
-            $('img', this).attr('src', "./resource/details-open.png");
+            $('img', this).attr('src', "./resource/Details_open.png");
             $('div.innerDetails', $(nTr).next()[0]).slideUp(function () {
                 tabelle.fnClose(nTr);
                 anOpen.splice(i, 1);

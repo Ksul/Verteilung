@@ -596,7 +596,7 @@ function handleImageClicks() {
 
 function expandFieldFormatter(o){
     if (o.aData[3].error) {
-        return '<a class="control" href="#"><img src="./resource/details-open.png" title="Details anzeigen" width="16px" height="16px" /></a>';
+        return '<a class="control" href="#"><img src="./resource/Details_open.png" title="Details anzeigen" width="20px" height="20px" /></a>';
     }
     return '<a class="nothing"/>';
 }
