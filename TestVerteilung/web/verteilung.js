@@ -596,7 +596,7 @@ function handleImageClicks() {
 
 function expandFieldFormatter(o){
     if (o.aData[3].error) {
-        return '<a class="control" href="#"><img src="./resource/expand-icon.png" title="Details anzeigen" width="16px" height="16px" /></a>';
+        return '<a class="control" href="#"><img src="./resource/details-open.png" title="Details anzeigen" width="16px" height="16px" /></a>';
     }
     return '<a class="nothing"/>';
 }
@@ -686,15 +686,15 @@ function imageFieldFormatter(o) {
 
 function formatDetails(oTable, nTr, tableid) {
     var oData = oTable.fnGetData(nTr);
-    var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%; margin-left: 32px" ><table>' +
-        '<tr><tr style="height: 0px;" role="row"> '+
+    var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%; " ><table>' +
+        '<tr><tr style="height: 0px;" > '+
         '<th style="width: 100px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
-        'colspan="1" rowspan="1" tabindex="0" class="control center ui-state-default">Fehler</th>' +
-        '<th style="width: 333px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
-        'colspan="1" rowspan="1" tabindex="0" class="alignLeft ui-state-default">Beschreibung</th></tr><td>';
+        'colspan="1" rowspan="1" tabindex="0" class="control center">Fehler</th>' +
+        '<th style="width: auto; padding-left: 10px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
+        'colspan="1" rowspan="1" tabindex="0" class="alignLeft">Beschreibung</th></tr><td>';
     var txt = "<tr>";
     for ( var i = 0; i < oData[5].length; i++) {
-        txt = txt + "<td class='alignCenter'>" + (i+1) + "</td><td>" + oData[5][i] + "</td>";
+        txt = txt + "<td class='alignCenter' style='font-size: 11px; padding-top: 0px; padding-bottom: 0px'>" + (i+1) + "</td><td style='font-size: 11px; padding-top: 0px; padding-bottom: 0px'>" + oData[5][i] + "</td>";
         txt = txt + "</tr>";
     }
     sOut = sOut + txt;
