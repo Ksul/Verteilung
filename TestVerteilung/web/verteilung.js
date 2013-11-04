@@ -702,23 +702,6 @@ function formatDetails(oTable, nTr, tableid) {
     return sOut;
 }
 
-// formatted number sorts
-jQuery.fn.dataTableExt.oSort['formatted-num-asc'] = function (x, y) {
-    x = x.replace('N/A','-1').replace(/[^\d\-\.\/]/g, '');
-    y = y.replace('N/A', '-1').replace(/[^\d\-\.\/]/g, '');
-    if (x.indexOf('/') >= 0) x = eval(x);
-    if (y.indexOf('/') >= 0) y = eval(y);
-    return x / 1 - y / 1;
-};
-
-jQuery.fn.dataTableExt.oSort['formatted-num-desc'] = function (x, y) {
-    x = x.replace('N/A', '-1').replace(/[^\d\-\.\/]/g, '');
-    y = y.replace('N/A', '-1').replace(/[^\d\-\.\/]/g, '');
-    if (x.indexOf('/') >= 0) x = eval(x);
-    if (y.indexOf('/') >= 0) y = eval(y);
-    return y / 1 - x / 1;
-};
-
 function uuid() {
 	var chars = '0123456789abcdef'.split('');
 	var uuid = [], rnd = Math.random, r;
@@ -731,7 +714,6 @@ function uuid() {
 			uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
 		}
 	}
-
 	return uuid.join('');
 }
 
@@ -739,8 +721,10 @@ function doReRunAll() {
 	try {
 		textEditor.getSession().setValue("");
 		fillMessageBox("", false);
-		for ( var i = 0; i < tableData.length; i++) {
-			var name = dtable.get("data").getByClientId(dtable.getRow(i).getData()["yui3-record"]).get("feld");
+        var tabData =  tabelle.fnGetData();
+        tabelle._fnClearTable();
+		for ( var i = 0; i < tabData.length; i++) {
+			var name = tabData[i][1];
 			REC.currentDocument.setContent(daten[name].text);
 			REC.testRules(rulesEditor.getSession().getValue());
 			daten[name].log = REC.mess;
@@ -748,14 +732,10 @@ function doReRunAll() {
 			daten[name].position = REC.positions;
 			daten[name].xml = REC.currXMLName;
 			daten[name].error = REC.errors;
-			var row = tableData[i];
-			row["xml"] = REC.currXMLName.join(" : ");
-			row["error"] = REC.errors;
 			var ergebnis = new Array();
 			ergebnis["error"] = REC.errors.length > 0;
-			row["result"] = ergebnis;
-			tableData[i] = row;
-			dtable.modifyRow(i, row);
+            var row = [ null,name,  REC.currXMLName.join(" : "), ergebnis, uuid(), REC.errors ];
+            tabelle.fnAddData(row);
 		}
     } catch (e) {
         errorHandler(e);
@@ -831,6 +811,7 @@ function printResults(results) {
 	}
 	return ret;
 }
+
 
 function fillMessageBox(text, reverse) {
 	if (reverse) {
@@ -930,6 +911,8 @@ function closeTest() {
     try {
         testMode = false;
         textEditor.getSession().setValue(currentContent);
+        propsEditor.getSession().setValue("");
+        outputEditor.getSession().setValue("");
         document.getElementById('headerWest').textContent = currentFile;
         openRules();
         manageControls();

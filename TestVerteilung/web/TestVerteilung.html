@@ -718,9 +718,9 @@ window.onload = function () {
             { "sTitle": "Fehler" }
         ],
         "aoColumnDefs": [
-            { "aTargets": [0], "fnRender": expandFieldFormatter},
+            { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
             { "aTargets": [1,2,3], "bVisible": true},
-            { "aTargets": [3], "fnRender": imageFieldFormatter},
+            { "aTargets": [3], "fnRender": imageFieldFormatter, "bSortable": false},
             { "aTargets": [4,5], "bVisible": false}
         ]
     });
@@ -811,6 +811,7 @@ window.onload = function () {
                             } else
                                 alert("Daten konnten nicht übertragen werden: " + json.result)
                         } else {
+
                             var dataString = {
                                 "function": "getContent",
                                 "documentId": data.rslt.obj.attr("id"),
