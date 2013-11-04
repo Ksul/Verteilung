@@ -1743,7 +1743,6 @@ function init() {
 var Range = require("ace/range").Range;
 var markers = new Array();
 var results = new Array();
-var tableData = new Array();
 var oldContent = null;
 var modifiedScript = null;
 var searchCont = false;
