@@ -684,6 +684,12 @@ function imageFieldFormatter(o) {
 	return container.outerHTML;
 }
 
+function calcDataTableHeight()  {
+    var h = myLayout.state.west.innerHeight -68;
+    return h + 'px';
+};
+
+
 function formatDetails(oTable, nTr, tableid) {
     var oData = oTable.fnGetData(nTr);
     var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%; " ><table>' +
