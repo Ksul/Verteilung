@@ -508,7 +508,7 @@ $(document).ready(function () {
             ,   closable:				true	// pane can open & close
             ,	resizable:				true	// when open, pane can be resized
             ,	slidable:				true
-            ,   onresize:	            function () { textEditor.resize(); tabelle.fnAdjustColumnSizing(); }
+            ,   onresize:	            function () { textEditor.resize(); $('div.dataTables_scrollBody').css('height',calcDataTableHeight()); tabelle.fnSettings()._iDisplayLength = Math.max(Math.floor((myLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1); tabelle.fnDraw(); tabelle.fnAdjustColumnSizing(); }
         }
         , center: {
             initHidden:             false
@@ -524,7 +524,7 @@ $(document).ready(function () {
                 west:{
                     paneSelector:		".inner-west"
                     ,   size:            .74
-                    ,  onresize:	     function () { outputEditor.resize();  $('div.dataTables_scrollBody').css('height',calcDataTableHeight()); tabelle.fnSettings()._iDisplayLength = Math.max(Math.floor((myLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1); tabelle.fnDraw(); tabelle.fnAdjustColumnSizing();}
+                    ,  onresize:	     function () { outputEditor.resize();}
                 }
                 , center:{
                     size:                 "auto"
