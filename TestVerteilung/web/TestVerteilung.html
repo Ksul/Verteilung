@@ -12,31 +12,38 @@
 <script src="src/mode-javascript.js" type="text/javascript" charset="utf-8"></script>
 <script src="src/mode-text.js" type="text/javascript" charset="utf-8"></script>
 
-<script src="./recognition.js" type="text/javascript" charset="utf-8"></script>
-<script src="./verteilung.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="./recognition.js" charset="utf-8"></script>
+<script type="text/javascript" src="./verteilung.js"  charset="utf-8"></script>
 <script type="text/javascript" src="jquery-1.9.1.js"></script>
 <script type="text/javascript" src="jquery-ui-1.10.3.custom.js"></script>
 <script type="text/javascript" src="jquery.layout.js"></script>
+<script type="text/javascript" src="jquery.layout.resizeTabLayout-1.3.js"></script>
 <script type="text/javascript" src="jquery.cookie.js" charset="utf-8"></script>
 <script type="text/javascript" src="jquery.hotkeys.js" charset="utf-8"></script>
 <script type="text/javascript" src="jquery.jstree.js" charset="utf-8"></script>
+<script type="text/javascript" src="jquery.themeswitcher.js" charset="utf-8"></script>
 <script type="text/javascript" src="jquery.dataTables.js" charset="utf-8"></script>
 
 <script src="vkbeautify.js" type="text/javascript" charset="utf-8"></script>
 <script src="jsbeautify.js" type="text/javascript" charset="utf-8"></script>
 
 <link type="text/css" rel="stylesheet" href="./themes/layout/layout-default.css"/>
-
+<!--<link type="text/css" rel="stylesheet" href="./themes/cupertino/jquery-ui-1.10.3.custom.min.css" />-->
 <style type="text/css" media="screen">
 
     /* @import "/media/css/site_jui.ccss"; */
-@import "./themes/cupertino/jquery-ui-1.10.3.custom.css";
+/*@import "./themes/cupertino/jquery-ui-1.10.3.custom.css";*/
 @import "./themes/demo_table.css";
 
-    /*
-     * Override styles needed due to the mix of three different CSS sources! For proper examples
-     * please see the themes example in the 'Examples' section of this site
-     */
+
+.ace_scroller {
+    overflow-x: auto !important;
+}
+
+.ace_sb {
+    overflow-y: auto !important;
+}
+
 .dataTables_info {
     padding-top: 0;
 }
@@ -70,13 +77,17 @@
     text-align: center;
 }
 
-td {
-    font-size: 1.1em;
+.ui-widget .ui-widget {
+    font-size: 0.87em;
+}
+
+/*td {
+    font-size: 0.7em;
 }
 
 th {
-    font-size: 1.2em;
-}
+    font-size: 0.7em;
+}*/
 
     /* remove padding & scrolling from panes that are 'containers' for nested layouts */
 .ui-layout-pane {
@@ -86,20 +97,19 @@ th {
 }
 
 .header {
-    background: #80ade5 url(./resource/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
-    border-bottom: 1px solid #777;
     height: 12px;
-    font-weight: normal;
-    font-size: 9pt;
     text-align: center;
     padding-bottom: 2px;
+ /*   background: #80ade5 url(./resource/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
+    border-bottom: 1px solid #777;
+
+    font-weight: normal;
+    font-size: 9pt;
+
+
     position: relative;
     overflow: hidden;
-}
-
-body {
-    font-size: 62.5%;
-}
+*/}
 
 label, input {
     display: block;
@@ -129,41 +139,6 @@ h1 {
 .validateTips {
     border: 1px solid transparent;
     padding: 0.3em;
-}
-
-.ui-widget {
-    font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
-    font-size: 1.1em;
-}
-
-.ui-widget .ui-widget {
-    font-size: 1em;
-}
-
-.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
-    font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
-    font-size: 1em;
-}
-
-.ui-widget-content {
-    border: 1px solid #dddddd;
-    background: #eeeeee url(./resource/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x;
-    color: #333333;
-}
-
-.ui-widget-content a {
-    color: #333333;
-}
-
-.ui-widget-header {
-    border: 1px solid #e78f08;
-    background: #f6a828 url(./resource/ui-bg_gloss-wave_35_f6a828_500x100.png) 50% 50% repeat-x;
-    color: #ffffff;
-    font-weight: bold;
-}
-
-.ui-widget-header a {
-    color: #ffffff;
 }
 
 .ui-progressbar {
@@ -414,11 +389,103 @@ input.settings {
     cursor: pointer;
 }
 
-.yui3-skin-sam .yui3-datatable-table {
-    border-collapse: separate;
-    border-spacing: 0;
-    font-family: arial, sans-serif;
-    font-size: 10px;
+input.themes {
+    background-image: url('./resource/themes.png');
+    background-color: transparent;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
+    /* add padding and min/max sizes to BODY */
+html {
+    /* allow scrolling if layout hits min-width/height */
+    overflow:		auto !important; /* override Layout default of 'hidden' to allow scrollbars */
+}
+body {
+    padding:		0 0px !important; /* override Layout default of '0' */
+    /* set min dimensions for layout - window will scroll if smaller than this */
+    min-width:		950px;
+    min-height:		600px;
+    font-size: 62.5%;
+    /* max-width works for left-aligned layout - need a container-div to 'center' the layout */
+    /*max-width:		1000px;*/
+}
+p {
+    margin:	0 0 1ex;
+}
+    /*
+    *	HELPER CLASSES
+    */
+.container {
+    /* used for elements that should not have padding or scrollbars */
+    padding:	0;
+    overflow:	hidden;
+}
+.hidden {
+    /* used to HIDE layout-panes until Layout initializes */
+    display:	none;
+}
+
+.ace_gutter {
+    opacity: 0.3;
+}
+
+.ui-layout-resizer-open-hover, .ui-layout-resizer-dragging {
+    background: none !important;
+}
+
+.ui-layout-resizer {
+    background: none !important;
+}
+
+
+    /*
+     *	TAB CLASSES - STRUCTURAL, REQUIRED
+     */
+DIV#tabs { /* page-wrapper - used ONLY to 'wrap' tabButtons and tabPanels */
+    position:	relative	!important; /* overide UI Theme - prevent from becoming a positional wrapper */
+}
+UL#tabButtons ,
+DIV#tabPanels {
+    margin:		0 !important; /* layout-panes should never have margins */
+}
+DIV#tabPanels {}
+DIV#tab2.tabPanel { /* container for tabLayout */
+    height:		100%; /* need to 'fill' the tabPanels - layout container must have 'height' */
+    padding:	0;   // DO NOT set top- or bottom-padding because height=100%
+}
+
+
+DIV#innerSouth {
+    background: none !important;
+}
+
+
+
+    /*
+     *	DEBUG - add colored padding & borders to show what is possible
+     */
+
+.ui-layout-north  {
+    overflow: visible;
+}
+
+    /*
+     *	add some padding and set overflow
+     */
+    /*   .ui-widget-header {
+           padding:	2px 1em 3px;
+           overflow:	hidden;
+       }
+   */    .ui-widget-content {
+
+              overflow:	auto;
+          }
+
+#tabButtons {
+    padding: 0 0.2em 0;
 }
 </style>
 
@@ -453,97 +520,149 @@ function toggleStateManagement(skipAlert, mode) {
     }
     else if (!skipAlert)
         alert('This layout will save & restore its last state \nwhen the page is refreshed.');
-
-
 }
 ;
+
 
 var myLayout;
 
 $(document).ready(function () {
 
+    var clientPageLayoutSettings = {
+        name:                       "clientLayoutSettings",
+        center__paneSelector:       "#clientPage"
+    }
+
+    var pageLayoutSettings = {
+        name:                       "pageLayout",
+        fxName:					    "slide",		// none, slide, drop, scale
+        fxSpeed_open:		    	800,
+        fxSpeed_close:		    	1000,
+        fxSettings_open:	    	{ easing: "easeInQuint" },
+        fxSettings_close:  		    { easing: "easeOutQuint" },
+        spacing_open:		        8,
+        spacing_closed:	           	12,
+        north__paneSelector:		".ui-layout-north",
+        north__minSize:             33,
+        north__resizable:           false,
+        center__paneSelector:		"#tabs"
+    }
+    var contentLayoutSettings = {
+        name:						"contentLayout",
+        spacing_open:		        0,
+        spacing_closed:		        12,
+        resizable:			        false,
+        closable:		    		false,
+        north__paneSelector:		"#tabButtons",
+        center__paneSelector:		"#tabPanels",
+        //	center panel contains a Tabs widget, with a layout inside 1 or more tab-panels
+        center__onresize:			$.layout.callbacks.resizeTabLayout
+    };
 
 
+    var verteilungLayoutSettings = {
+         name: "tabLayout" ,
+         size:					    "auto",
+         minSize:				    13,
+         initClosed:				false,
+         resizerTip:				"Resize This Pane",
+         fxName:					"slide",		// none, slide, drop, scale
+         fxSpeed_open:		    	800,
+         fxSpeed_close:		    	1000,
+         fxSettings_open:	    	{ easing: "easeInQuint" },
+         fxSettings_close:  		{ easing: "easeOutQuint" },
+         closable:		    		true,	// pane can open & close
+         resizable:		    		true,	// when open, pane can be resized
+         //slidable:				true,	// when closed, pane can 'slide' open over other panes - closes on mouse-out
+         livePaneResizing:	    	true,
+         spacing_open:		    	8,
+         spacing_closed:			12,
+         initPanes:	    			false, // delay layout init until tab.show calls tabLayout.resizeAll()
+         resizeWithWindow:			false, // needed because 'nested' inside the tabLayout div
+         contentSelector:			".ui-widget-content",
 
-    // this layout could be created with NO OPTIONS - but showing some here just as a sample...
-    // myLayout = $('body').layout(); -- syntax with No Options
-
-    myLayout = $('body').layout({
-
-        defaults: {
-            size:					"auto"
-            ,	minSize:				13
-            ,	paneClass:				"pane" 		// default = 'ui-layout-pane'
-            ,	initClosed:				false
-            ,	contentSelector:		".content"	// inner div to auto-size so only it scrolls, not the entire pane!
-            ,	contentIgnoreSelector:	"span"		// 'paneSelector' for content to 'ignore' when measuring room for content
-            ,	resizerTip:				"Resize This Pane"
-            //	effect defaults - overridden on some panes
-            ,	fxName:					"slide"		// none, slide, drop, scale
-            ,	fxSpeed_open:			800
-            ,	fxSpeed_close:			1000
-            ,	fxSettings_open:		{ easing: "easeInQuint" }
-            ,	fxSettings_close:		{ easing: "easeOutQuint" }
-            ,   closable:				true	// pane can open & close
-            ,	resizable:				true	// when open, pane can be resized
-            ,	slidable:				true	// when closed, pane can 'slide' open over other panes - closes on mouse-out
-            ,	livePaneResizing:		true
-            ,	spacing_open:			8  // ALL panes
-            ,	spacing_closed:			12 // ALL panes
-        }
-
-        //	reference only - these options are NOT required because 'true' is the default
-
-
-        , north: {
-            slidable:			true	// OVERRIDE the pane-default of 'slidable=true'
-            ,   size:                33
-            ,   resizable:          false
-        }
+    //	reference only - these options are NOT required because 'true' is the default
 
         //	some pane-size settings
-        , west: {
-            size:					.6
-            ,	fxSettings_open:		{ easing: "easeOutBounce" }
-            ,   closable:				true	// pane can open & close
-            ,	resizable:				true	// when open, pane can be resized
-            ,	slidable:				true
-            ,   onresize:	            function () { textEditor.resize(); $('div.dataTables_scrollBody').css('height',calcDataTableHeight()); tabelle.fnSettings()._iDisplayLength = Math.max(Math.floor((myLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1); tabelle.fnDraw(); tabelle.fnAdjustColumnSizing(); }
-        }
-        , center: {
-            initHidden:             false
-            ,  minHeight:           80
-            ,  size:                .4
-            ,  initClosed:          false
-            ,  onresize:	        function () { rulesEditor.resize(); }
+        west: {
+            paneSelector:           ".ui-tab-layout-west",
+            size:				    .6,
+            fxSettings_open:	    { easing: "easeOutBounce" },
+            closable:			    true,	// pane can open & close
+            resizable:			    true,	// when open, pane can be resized
+            slidable:			    true,
+            onresize:	            function () { textEditor.resize(); $('div.dataTables_scrollBody').css('height',calcDataTableHeight()); tabelle.fnSettings()._iDisplayLength = Math.max(Math.floor((myLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1); tabelle.fnDraw(); tabelle.fnAdjustColumnSizing(); }
+        },
+        center: {
+            paneSelector:           ".ui-tab-layout-center",
+            initHidden:             false,
+            minHeight:              80,
+            size:                   .4,
+            initClosed:             false,
+            onresize:	            function () { rulesEditor.resize(); }
 
-        }
-        , south:{
-            size:                   0.17
-            ,   childOptions: {
+        },
+        south:{
+            paneSelector:           ".ui-tab-layout-south",
+            size:                   0.17,
+            contentSelector:	    ".ui-widget-content",
+            resizable:			    true,
+            slidable:			    true,
+            children: {
+                name:				"innerLayout",
+            	contentSelector:	".ui-widget-content",
+                spacing_open:		8,
+                spacing_closed:		12,
                 west:{
-                    paneSelector:		".inner-west"
-                    ,   size:            .74
-                    ,  onresize:	     function () { outputEditor.resize();}
-                }
-                , center:{
-                    size:                 "auto"
-                    ,   paneSelector:	  ".inner-center"
-                    ,  onresize:	        function () { propsEditor.resize();}
+                    paneSelector:	".inner-west",
+                    size:           .74,
+                    onresize:	    function () { outputEditor.resize();}
+                },
+                center:{
+                    size:           "auto",
+                    paneSelector:	".inner-center",
+                    onresize:	    function () { propsEditor.resize();}
                 }
             }
-        }
-
+        },
         //	enable state management
-        ,	stateManagement__enabled:	true // automatic cookie load & save enabled by default
+        stateManagement__enabled:	true, // automatic cookie load & save enabled by default
+        showDebugMessages:			true // log and/or display messages from debugging & testing code
+    };
 
-        ,	showDebugMessages:			true // log and/or display messages from debugging & testing code
+
+    // create the tabs before the page layout because tabs will change the height of the north-pane
+    $("#tabs").tabs({
+        // using callback addon
+        activate: $.layout.callbacks.resizeTabLayout
+
+        /* OR with a custom callback
+         activate: function (evt, ui) {
+         $.layout.callbacks.resizeTabLayout( evt, ui );
+         // other code...
+         }
+         */
     });
+    $('body').layout(clientPageLayoutSettings);
+
+    $('#clientPage').layout(pageLayoutSettings);
+
+    $('#tabs').layout( contentLayoutSettings);
+
+    myLayout = $('#tab2').layout(verteilungLayoutSettings);
 
     // if there is no state-cookie, then DISABLE state management initially
     var cookieExists = !$.isEmptyObject( myLayout.readCookie() );
     if (!cookieExists) toggleStateManagement( true, false );
 
+    $( document ).tooltip();
+
+    $("#switcher").themeswitcher({
+        imgpath: "./themes/images/",
+        loadTheme: "Cupertino" ,
+        additionalthemes: [{title:"Aristo",name:"aristo",icon:"Aristo.jpg",url:"./themes/Aristo/jquery-ui.css"}],
+        jqueryuiversion: "1.9.1"
+    });
 });
 
 
@@ -625,14 +744,7 @@ $(function() {
 
 
 $.fn.dataTableExt.oPagination.listbox = {
-    /*
-     * Function: oPagination.listbox.fnInit
-     * Purpose:  Initalise dom elements required for pagination with listbox input
-     * Returns:  -
-     * Inputs:   object:oSettings - dataTables settings object
-     *             node:nPaging - the DIV which contains this pagination control
-     *             function:fnCallbackDraw - draw function which must be called on update
-     */
+
     "fnInit": function (oSettings, nPaging, fnCallbackDraw) {
         var nInput = document.createElement('select');
         var nPage = document.createElement('span');
@@ -649,18 +761,18 @@ $.fn.dataTableExt.oPagination.listbox = {
         nPaging.appendChild(nOf);
         $(nInput).change(function (e) { // Set DataTables page property and redraw the grid on listbox change event.
             window.scroll(0,0); //scroll to top of page
-            if (this.value === "" || this.value.match(/[^0-9]/)) { /* Nothing entered or non-numeric character */
+            if (this.value === "" || this.value.match(/[^0-9]/)) {
                 return;
             }
             var iNewStart = oSettings._iDisplayLength * (this.value - 1);
-            if (iNewStart > oSettings.fnRecordsDisplay()) { /* Display overrun */
+            if (iNewStart > oSettings.fnRecordsDisplay()) {
                 oSettings._iDisplayStart = (Math.ceil((oSettings.fnRecordsDisplay() - 1) / oSettings._iDisplayLength) - 1) * oSettings._iDisplayLength;
                 fnCallbackDraw(oSettings);
                 return;
             }
             oSettings._iDisplayStart = iNewStart;
             fnCallbackDraw(oSettings);
-        }); /* Take the brutal approach to cancelling text selection */
+        }); // Take the brutal approach to cancelling text selection
         $('span', nPaging).bind('mousedown', function () {
             return false;
         });
@@ -669,19 +781,13 @@ $.fn.dataTableExt.oPagination.listbox = {
         });
     },
 
-    /*
-     * Function: oPagination.listbox.fnUpdate
-     * Purpose:  Update the listbox element
-     * Returns:  -
-     * Inputs:   object:oSettings - dataTables settings object
-     *             function:fnCallbackDraw - draw function which must be called on update
-     */
+
     "fnUpdate": function (oSettings, fnCallbackDraw) {
         if (!oSettings.aanFeatures.p) {
             return;
         }
         var iPages = Math.ceil((oSettings.fnRecordsDisplay()) / oSettings._iDisplayLength);
-        var iCurrentPage = Math.ceil(oSettings._iDisplayStart / oSettings._iDisplayLength) + 1; /* Loop over each instance of the pager */
+        var iCurrentPage = Math.ceil(oSettings._iDisplayStart / oSettings._iDisplayLength) + 1; // Loop over each instance of the pager
         var an = oSettings.aanFeatures.p;
         for (var i = 0, iLen = an.length; i < iLen; i++) {
             var spans = an[i].getElementsByTagName('span');
@@ -748,7 +854,7 @@ window.onload = function () {
     zoneRules.addEventListener('drop', handleRulesSelect, false);
 
     rulesEditor = ace.edit("inRules");
-    rulesEditor.setTheme("ace/theme/eclipse");
+    //rulesEditor.setTheme("ace/theme/eclipse");
     var xmlMode = require("ace/mode/xml").Mode;
     rulesEditor.getSession().setMode(new xmlMode());
     rulesEditor.setShowPrintMargin(false);
@@ -835,7 +941,7 @@ window.onload = function () {
     handleImageClicks();
     tree = $("#tree").jstree({
         "themes": {
-            "theme": "corral",
+        //    "theme": "corral",
             "dots": true,
             "icons": true
         },
@@ -881,7 +987,7 @@ window.onload = function () {
                 }
             }
         },
-        "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "types", "hotkeys", "contextmenu"]
+        "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "types", "hotkeys", "contextmenu", "themeroller"]
     }).bind("select_node.jstree",function (event, data) {
                 if (data.rslt.obj.attr("rel") == "default") {
                     try {
@@ -979,20 +1085,83 @@ var settings;
 var alfrescoServerAvailable = false;
 REC = new Recognition();
 REC.set(REC);
-
-
 treeObject = jQuery.jstree._reference(tree);
-
-
 
 </script>
 
-
 </head>
+
 <body>
 
-<!-- manually attach allowOverflow method to pane -->
-<div class="ui-layout-north" onmouseover="myLayout.allowOverflow('north')" onmouseout="myLayout.resetOverflow(this)">
+
+<div id="dialog-form" title="Server-Settings">
+    <p class="validateTips">Server Einstellungen festlegen</p>
+
+    <form>
+        <fieldset>
+            <label for="server">Server</label>
+            <input type="text" name="server" id="server" class="text ui-widget-content ui-corner-all"/>
+            <label for="user">User</label>
+            <input type="text" name="user" id="user" class="text ui-widget-content ui-corner-all"/>
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" class="text ui-widget-content ui-corner-all"/>
+            <label for="proxy">Proxy</label>
+            <input type="text" name="proxy" id="proxy" class="text ui-widget-content ui-corner-all"/>
+            <label for="port">Port</label>
+            <input type="text" name="port" id="port" class="text ui-widget-content ui-corner-all"/>
+        </fieldset>
+    </form>
+</div>
+
+<div id="clientPage" class="ui-state-active">
+
+<div id="tabs" class="container">
+    <ul id="tabButtons" class="container">
+        <li><a href="#tab1">Archiv</a></li>
+        <li><a href="#tab2">Verteilung</a></li>
+    </ul>
+    <div id="tabPanels" class="container ui-state-active">
+    <div id="tab1" class="tabPanel hidden">
+        <p>Archiv</p>
+    </div>
+    <div id="tab2" class="tabPanel ui-widget-content hidden">
+        <div id="innerSouth" class="ui-tab-layout-south container hidden">
+            <div class="inner-west container ui-widget-header hidden">
+                <div class="header">Console</div>
+                <div class="ui-widget-content">
+                    <div id="inOutput" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+                </div>
+            </div>
+            <div class="inner-center container ui-widget-header hidden">
+                <div class="header">Ergebnis</div>
+                <div class="ui-widget-content">
+                    <div id="inProps" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ui-tab-layout-west container ui-widget-header hidden">
+            <div id="headerWest" class="header"></div>
+            <div class="ui-widget-content" style="overflow:auto;">
+                <div id="dtable"></div>
+                <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
+                <div id="tree"></div>
+            </div>
+        </div>
+
+
+        <div class="ui-tab-layout-center container ui-widget-header hidden">
+            <div id="headerCenter" class="header">Regeln</div>
+            <div class="ui-widget-content">
+                <div id="inRules" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="ui-layout-north container ui-widget-content" onmouseover="myLayout.allowOverflow(this);"
+     >
     <table style="">
         <tr>
             <td width="30%"><input id="filesinput" name="filesinput"
@@ -1009,11 +1178,13 @@ treeObject = jQuery.jstree._reference(tree);
                     title="Load Alfresco" value=""/>
             </td>
             <td width="60px" align="center"><input onclick="closeAlfresco();"
-                                                   id="closeAlfresco" value="" type="submit" title="Close" class="close"
+                                                   id="closeAlfresco" value="" type="submit" title="Close"
+                                                   class="close"
                                                    style="display: none"/>
             </td>
             <td width="60px" align="center"><input onclick="work();"
-                                                   name="play" id="play" type="submit" class="play" title="Recognize"
+                                                   name="play" id="play" type="submit" class="play"
+                                                   title="Recognize"
                                                    value=""/>
             </td>
             <td width="60px" align="center"><input onclick="doTest();"
@@ -1026,7 +1197,8 @@ treeObject = jQuery.jstree._reference(tree);
             </td>
             <td width="60px" align="center"><input onclick="loadScript();"
                                                    name="loadScript" id="loadScript" type="image"
-                                                   src="./resource/file_edit.png" title="Script" value="Script"/>
+                                                   src="./resource/file_edit.png" title="Script"
+                                                   value="Script"/>
             </td>
             <td width="60px" align="center"><input
                     onclick="var needle = prompt('Find:', textEditor.getCopyText());textEditor.find(needle);"
@@ -1035,18 +1207,21 @@ treeObject = jQuery.jstree._reference(tree);
             </td>
             <td width="60px" align="center"><input onclick="formatScript();"
                                                    name="beautifyScript" id="beautifyScript" type="submit"
-                                                   class="beautify" title="Format" value="" style="display: none"/>
+                                                   class="beautify" title="Format" value=""
+                                                   style="display: none"/>
             </td>
             <td width="60px" align="center"><input onclick="doBack();"
                                                    id="back" value="" type="submit" title="Close" class="close"
                                                    style="display: none"/>
             </td>
             <td width="60px" align="center"><input onclick="closeScript();"
-                                                   name="closeScript" id="closeScript" type="submit" class="close" title="Close"
+                                                   name="closeScript" id="closeScript" type="submit"
+                                                   class="close" title="Close"
                                                    value="" style="display: none"/>
             </td>
             <td width="60px" align="center"><input onclick="closeTest();"
-                                                   name="closeTest" id="closeTest" type="submit" class="close" title="Close"
+                                                   name="closeTest" id="closeTest" type="submit" class="close"
+                                                   title="Close"
                                                    value="" style="display: none"/>
             </td>
             <td width="60px" align="center"><input
@@ -1060,12 +1235,14 @@ treeObject = jQuery.jstree._reference(tree);
                     title="Save" value="" style="display: none"/>
             </td>
             <td width="60px" align="center"><input onclick="getScript(true);"
-                                                   name="getScript" id="getScript" type="submit" class="download"
+                                                   name="getScript" id="getScript" type="submit"
+                                                   class="download"
                                                    title="Download"
                                                    value="" style="display: none"/>
             </td>
             <td width="60px" align="center"><input onclick="sendScript(true);"
-                                                   name="sendScript" id="sendScript" type="submit" class="upload"
+                                                   name="sendScript" id="sendScript" type="submit"
+                                                   class="upload"
                                                    title="Upload"
                                                    value="" style="display: none"/>
             </td>
@@ -1075,7 +1252,8 @@ treeObject = jQuery.jstree._reference(tree);
                 </div>
             </td>
             <td width="60px" align="center"><input onclick="format();"
-                                                   name="beautifyRules" id="beautifyRules" type="submit" class="beautify"
+                                                   name="beautifyRules" id="beautifyRules" type="submit"
+                                                   class="beautify"
                                                    title="Format" value=""/>
             </td>
 
@@ -1085,12 +1263,12 @@ treeObject = jQuery.jstree._reference(tree);
                     title="Search" value=""/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="this.rulesEditor.getSession().foldAll(1);"
+                    onclick="rulesEditor.getSession().foldAll(1);"
                     name="foldAll" id="foldAll" type="submit" class="minimize"
                     title="Fold All" value=""/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="this.rulesEditor.getSession().unfold();"
+                    onclick="rulesEditor.getSession().unfold();"
                     name="unfoldAll" id="unfoldAll" type="submit" class="maximize"
                     title="Unfold All" value=""/></td>
             <td width="60px" align="center"><input
@@ -1106,61 +1284,15 @@ treeObject = jQuery.jstree._reference(tree);
                     name="saveRules" id="saveRules" type="submit" class="save" title="Save"
                     value=""/>
             </td>
+            <td width="60px" align="center">
+                <div id="switcher" class="themes" title="Test"></div>
+            </td>
             <td id="appl" width="0px"></td>
         </tr>
     </table>
 
 </div>
-
-<!-- allowOverflow auto-attached by option: west__showOverflowOnHover = true -->
-
-
-<div class="ui-layout-south">
-    <div class="inner-west">
-        <div class="header">Console</div>
-        <div class="content">
-            <div id="inOutput"style="position:absolute; top:14px;bottom:0;left:0;right:0"></div>
-        </div>
-    </div>
-    <div class="inner-center">
-        <div class="header">Ergebnis</div>
-        <div class="content">
-            <div id="inProps" style="position:absolute; top:14px;bottom:0;left:0;right:0"></div>
-        </div>
-    </div>
-</div>
-
-<div class="ui-layout-west">
-    <div id="headerWest" class="header"> </div>
-    <div class="content" style="overflow:auto;">
-       <div id="dtable"></div>
-       <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
-       <div id="tree" ></div>
-    </div>
-</div>
-
-<div class="ui-layout-center">
-    <div id="headerCenter" class="header">Regeln</div>
-    <div class="content">
-        <div id="inRules" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
-    </div>
-</div>
-<div id="dialog-form" title="Server-Settings">
-    <p class="validateTips">Server Einstellungen festlegen</p>
-    <form>
-        <fieldset>
-            <label for="server">Server</label>
-            <input type="text" name="server" id="server" class="text ui-widget-content ui-corner-all" />
-            <label for="user">User</label>
-            <input type="text" name="user" id="user"  class="text ui-widget-content ui-corner-all" />
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password"  class="text ui-widget-content ui-corner-all" />
-            <label for="proxy">Proxy</label>
-            <input type="text" name="proxy" id="proxy"  class="text ui-widget-content ui-corner-all" />
-            <label for="port">Port</label>
-            <input type="text" name="port" id="port" class="text ui-widget-content ui-corner-all" />
-        </fieldset>
-    </form>
 </div>
 </body>
+
 </html>
