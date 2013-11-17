@@ -487,6 +487,49 @@ DIV#innerSouth {
 #tabButtons {
     padding: 0 0.2em 0;
 }
+
+
+.jstree-icon {
+    background:url("./resource/d.png") -90px 0px no-repeat !important;
+}
+
+.jstree-leaf > ins {
+    background:url("./resource/d.png") -36px 0px no-repeat !important;
+}
+
+.ui-icon-triangle-1-e {
+    background:url("./resource/d.png") -54px 0px no-repeat !important;
+}
+
+/*li[rel="root"] ins.ui-icon-triangle-1-se  {
+    background:url("./resource/d.png") -54px -54px no-repeat !important;
+}*/
+
+.ui-icon-triangle-1-se {
+     background:url("./resource/d.png") -72px 0px no-repeat !important;
+ }
+
+.ui-icon-folder-collapsed {
+    background:url("./resource/d.png") -54px -18px no-repeat !important;
+}
+
+.ui-icon-folder-open {
+    background:url("./resource/d.png") -54px -36px no-repeat !important;
+}
+
+.ui-icon-document {
+    background:url("./resource/file18x18.gif") no-repeat !important;
+}
+a.ui-state-default  {
+    background: none !important ;
+    color: inherit !important;
+    border: none !important;
+}
+
+
+/*li.jstree-open > a .jstree-icon {background:url("./resource/d.png") -72px 0px no-repeat !important;}
+li.jstree-closed > a .jstree-icon {background:url("./resource/d.png") -54px 0px no-repeat !important;}
+li.jstree-leaf > a .jstree-icon {background:url("./resource/d.png") -72px -18px no-repeat !important;}*/
 </style>
 
 
@@ -940,12 +983,12 @@ window.onload = function () {
     // Eventhandler für die Image Clicks
     handleImageClicks();
     tree = $("#tree").jstree({
-        "themes": {
-        //    "theme": "corral",
+ /*       "themes": {
+            "theme": "corral",
             "dots": true,
             "icons": true
         },
-        "json_data": {
+  */      "json_data": {
             "data": function (aNode, aFunction) {
                 if (isLocal()) {
                     try {
@@ -987,7 +1030,7 @@ window.onload = function () {
                 }
             }
         },
-        "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "types", "hotkeys", "contextmenu", "themeroller"]
+        "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "hotkeys", "themeroller"]
     }).bind("select_node.jstree",function (event, data) {
                 if (data.rslt.obj.attr("rel") == "default") {
                     try {

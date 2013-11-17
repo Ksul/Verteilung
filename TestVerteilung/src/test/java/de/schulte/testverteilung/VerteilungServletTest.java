@@ -35,8 +35,8 @@ public class VerteilungServletTest {
         when(request.getParameter("server")).thenReturn("http://ksul.dyndns.org:9080");
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("admin");
-        when(request.getParameter("proxyHost")).thenReturn("www-proxy");
-        when(request.getParameter("proxyPort")).thenReturn("8080");
+        //when(request.getParameter("proxyHost")).thenReturn("www-proxy");
+        //when(request.getParameter("proxyPort")).thenReturn("8080");
         writer = new PrintWriter("somefile.txt");
         when(response.getWriter()).thenReturn(writer);
     }
@@ -51,7 +51,10 @@ public class VerteilungServletTest {
         verify(request, atLeast(1)).getParameter("username"); // only if you want to verify username was called...
         writer.flush(); // it may not have been flushed yet...
         System.out.println(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8")) ;
-        assertTrue(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8").contains("data"));
+        assertTrue(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8").contains("{\"data\":\"Inbox\""));
+        assertTrue(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8").contains("{\"data\":\"Fehler\""));
+        assertTrue(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8").contains("{\"data\":\"Unbekannt\""));
+        assertTrue(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8").contains("{\"data\":\"Archiv\""));
     }
 
     @Test
