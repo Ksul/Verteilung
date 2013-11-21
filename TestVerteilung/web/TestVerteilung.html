@@ -452,13 +452,13 @@ DIV#tabPanels {
     margin:		0 !important; /* layout-panes should never have margins */
 }
 DIV#tabPanels {}
-DIV#tab2.tabPanel { /* container for tabLayout */
+.tabPanel { /* container for tabLayout */
     height:		100%; /* need to 'fill' the tabPanels - layout container must have 'height' */
     padding:	0;   // DO NOT set top- or bottom-padding because height=100%
 }
 
 
-DIV#innerSouth {
+DIV#verteilungSouth {
     background: none !important;
 }
 
@@ -527,9 +527,6 @@ a.ui-state-default  {
 }
 
 
-/*li.jstree-open > a .jstree-icon {background:url("./resource/d.png") -72px 0px no-repeat !important;}
-li.jstree-closed > a .jstree-icon {background:url("./resource/d.png") -54px 0px no-repeat !important;}
-li.jstree-leaf > a .jstree-icon {background:url("./resource/d.png") -72px -18px no-repeat !important;}*/
 </style>
 
 
@@ -585,7 +582,7 @@ $(document).ready(function () {
         fxSettings_close:  		    { easing: "easeOutQuint" },
         spacing_open:		        8,
         spacing_closed:	           	12,
-        north__paneSelector:		".ui-layout-north",
+        north__paneSelector:		"#contentNorth",
         north__minSize:             33,
         north__resizable:           false,
         center__paneSelector:		"#tabs"
@@ -600,11 +597,63 @@ $(document).ready(function () {
         center__paneSelector:		"#tabPanels",
         //	center panel contains a Tabs widget, with a layout inside 1 or more tab-panels
         center__onresize:			$.layout.callbacks.resizeTabLayout
+        //activate:                   $.layout.callbacks.resizeTabLayout
+    };
+
+    var alfrescoLayoutSettings = {
+        name:                      "alfrescoLayout" ,
+        size:					    "auto",
+        minSize:				    13,
+        initClosed:				    false,
+        resizerTip:				    "Resize This Pane",
+        fxName:					    "slide",		// none, slide, drop, scale
+        fxSpeed_open:		    	800,
+        fxSpeed_close:		    	1000,
+        fxSettings_open:	    	{ easing: "easeInQuint" },
+        fxSettings_close:  		    { easing: "easeOutQuint" },
+        closable:		    		true,	// pane can open & close
+        resizable:		    		true,	// when open, pane can be resized
+        //slidable:				true,	// when closed, pane can 'slide' open over other panes - closes on mouse-out
+        livePaneResizing:	    	true,
+        spacing_open:		    	8,
+        spacing_closed:			    12,
+        initPanes:	    			false, // delay layout init until tab.show calls tabLayout.resizeAll()
+        resizeWithWindow:			false, // needed because 'nested' inside the tabLayout div
+        contentSelector:			".ui-widget-content",
+
+        west: {
+            paneSelector:           "#alfrescoWest",
+            size:				    .6,
+            fxSettings_open:	    { easing: "easeOutBounce" },
+            closable:			    true,	// pane can open & close
+            resizable:			    true,	// when open, pane can be resized
+            slidable:			    true
+        },
+        center: {
+            paneSelector:           "#alfrescoCenter",
+            initHidden:             false,
+            minHeight:              80,
+            size:                   .4,
+            initClosed:             false
+
+        },
+        south:{
+            paneSelector:           "#alfrescoSouth",
+            size:                   0.17,
+            contentSelector:	    ".ui-widget-content",
+            resizable:			    true,
+            slidable:			    true,
+            spacing_open:		    8,
+            spacing_closed:		    12
+        },
+        //	enable state management
+        stateManagement__enabled:	true, // automatic cookie load & save enabled by default
+        showDebugMessages:			true // log and/or display messages from debugging & testing code
     };
 
 
     var verteilungLayoutSettings = {
-         name: "tabLayout" ,
+         name:                      "verteilungLayout" ,
          size:					    "auto",
          minSize:				    13,
          initClosed:				false,
@@ -628,7 +677,7 @@ $(document).ready(function () {
 
         //	some pane-size settings
         west: {
-            paneSelector:           ".ui-tab-layout-west",
+            paneSelector:           "#verteilungWest",
             size:				    .6,
             fxSettings_open:	    { easing: "easeOutBounce" },
             closable:			    true,	// pane can open & close
@@ -637,7 +686,7 @@ $(document).ready(function () {
             onresize:	            function () { textEditor.resize(); $('div.dataTables_scrollBody').css('height',calcDataTableHeight()); tabelle.fnSettings()._iDisplayLength = Math.max(Math.floor((myLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1); tabelle.fnDraw(); tabelle.fnAdjustColumnSizing(); }
         },
         center: {
-            paneSelector:           ".ui-tab-layout-center",
+            paneSelector:           "#verteilungCenter",
             initHidden:             false,
             minHeight:              80,
             size:                   .4,
@@ -646,7 +695,7 @@ $(document).ready(function () {
 
         },
         south:{
-            paneSelector:           ".ui-tab-layout-south",
+            paneSelector:           "#verteilungSouth",
             size:                   0.17,
             contentSelector:	    ".ui-widget-content",
             resizable:			    true,
@@ -657,13 +706,13 @@ $(document).ready(function () {
                 spacing_open:		8,
                 spacing_closed:		12,
                 west:{
-                    paneSelector:	".inner-west",
+                    paneSelector:	"#verteilungSouthInnerWest",
                     size:           .74,
                     onresize:	    function () { outputEditor.resize();}
                 },
                 center:{
                     size:           "auto",
-                    paneSelector:	".inner-center",
+                    paneSelector:	"#verteilungSouthInnerCenter",
                     onresize:	    function () { propsEditor.resize();}
                 }
             }
@@ -686,13 +735,18 @@ $(document).ready(function () {
          }
          */
     });
+
+    $('#tabs').layout( contentLayoutSettings);
+
     $('body').layout(clientPageLayoutSettings);
 
     $('#clientPage').layout(pageLayoutSettings);
 
-    $('#tabs').layout( contentLayoutSettings);
+
 
     myLayout = $('#tab2').layout(verteilungLayoutSettings);
+
+    myAlfrescoLayout = $('#tab1').layout(alfrescoLayoutSettings);
 
     // if there is no state-cookie, then DISABLE state management initially
     var cookieExists = !$.isEmptyObject( myLayout.readCookie() );
@@ -1158,53 +1212,74 @@ treeObject = jQuery.jstree._reference(tree);
 
 <div id="clientPage" class="ui-state-active">
 
-<div id="tabs" class="container">
-    <ul id="tabButtons" class="container">
-        <li><a href="#tab1">Archiv</a></li>
-        <li><a href="#tab2">Verteilung</a></li>
-    </ul>
-    <div id="tabPanels" class="container ui-state-active">
-    <div id="tab1" class="tabPanel hidden">
-        <p>Archiv</p>
-    </div>
-    <div id="tab2" class="tabPanel ui-widget-content hidden">
-        <div id="innerSouth" class="ui-tab-layout-south container hidden">
-            <div class="inner-west container ui-widget-header hidden">
-                <div class="header">Console</div>
-                <div class="ui-widget-content">
-                    <div id="inOutput" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+    <div id="tabs" class="container">
+        <ul id="tabButtons" class="container">
+            <li><a href="#tab1">Archiv</a></li>
+            <li><a href="#tab2">Verteilung</a></li>
+        </ul>
+        <div id="tabPanels" class="container ui-state-active">
+            <div id="tab1" class="tabPanel ui-widget-content hidden">
+
+                <div id="alfrescoSouth" class="ui-tab-layout-south container ui-widget-header hidden">
+                    <div id="alfrescoHeaderSouth" class="header">Konsole</div>
+                    <div class="ui-widget-content">
+                        Konsole?
+                    </div>
                 </div>
-            </div>
-            <div class="inner-center container ui-widget-header hidden">
-                <div class="header">Ergebnis</div>
-                <div class="ui-widget-content">
-                    <div id="inProps" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+                <div id="alfrescoWest" class="ui-tab-layout-west container ui-widget-header hidden">
+                    <div id="alfrescoHeaderWest" class="header">Archiv</div>
+                    <div class="ui-widget-content">
+                        Archiv
+                    </div>
+                </div>
+
+
+                <div id="alfrescoCenter" class="ui-tab-layout-center container ui-widget-header hidden">
+                    <div id="alfrescoHeaderCenter" class="header">Inhalt</div>
+                    <div class="ui-widget-content">
+                        Inhalt
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="ui-tab-layout-west container ui-widget-header hidden">
-            <div id="headerWest" class="header"></div>
-            <div class="ui-widget-content" style="overflow:auto;">
-                <div id="dtable"></div>
-                <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
-                <div id="tree"></div>
+        <div id="tab2" class="tabPanel ui-widget-content hidden">
+            <div id="verteilungSouth" class="ui-tab-layout-south container hidden">
+                <div id="verteilungSouthInnerWest" class="inner-west container ui-widget-header hidden">
+                    <div class="header">Konsole</div>
+                    <div class="ui-widget-content">
+                        <div id="inOutput" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+                    </div>
+                </div>
+                <div id="verteilungSouthInnerCenter" class="inner-center container ui-widget-header hidden">
+                    <div class="header">Ergebnis</div>
+                    <div class="ui-widget-content">
+                        <div id="inProps" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <div id="verteilungWest" class="ui-tab-layout-west container ui-widget-header hidden">
+                <div id="headerWest" class="header"></div>
+                <div class="ui-widget-content" style="overflow:auto;">
+                    <div id="dtable"></div>
+                    <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
+                    <div id="tree"></div>
+                </div>
+            </div>
 
 
-        <div class="ui-tab-layout-center container ui-widget-header hidden">
-            <div id="headerCenter" class="header">Regeln</div>
-            <div class="ui-widget-content">
-                <div id="inRules" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
+            <div id="verteilungCenter" class="ui-tab-layout-center container ui-widget-header hidden">
+                <div id="headerCenter" class="header">Regeln</div>
+                <div class="ui-widget-content">
+                    <div id="inRules" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-</div>
 
-<div class="ui-layout-north container ui-widget-content" onmouseover="myLayout.allowOverflow(this);"
-     >
+<div id="contentNorth" class="ui-layout-north container ui-widget-content" onmouseover="myLayout.allowOverflow(this);"
+        >
     <table style="">
         <tr>
             <td width="30%"><input id="filesinput" name="filesinput"

@@ -351,9 +351,6 @@
             if (settings.onselect !== null)
                 settings.onselect();
 
-            $("#switcher").attr("title", data.title);
-
-
             var currentStyle = [];
             var url = data.url;
 
@@ -378,10 +375,13 @@
                 { expires: settings.cookieexpires, path: settings.cookiepath }
             );
 
-            $("#switcher").attr("title", data.title);
+
 
             if (settings.closeonselect)
                 closeSwitcher();
+
+            // muss nach dem Close stehen, denn das enablen von Tooltip ändert den Title
+            $("#switcher").attr("title", data.title);
         }
 
         // Finds a theme[] based on a valid name or title
