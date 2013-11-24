@@ -292,8 +292,10 @@
                 .bind({
                     click: function (e) {
                         updateTheme($(this).data());
-                        $('#switcher').tooltip( 'option', 'content', data.text);
                         e.preventDefault();
+                        $(document).tooltip('destroy');
+                        $('#switcher').attr('title', data.title);
+                        $(document).tooltip();
                     }
                 })
                 .attr("href", "#")
@@ -380,6 +382,9 @@
 
             if (settings.closeonselect)
                 closeSwitcher();
+            $(document).tooltip('destroy');
+            $('#switcher').attr('title', data.title);
+            $(document).tooltip();
 
         }
 
