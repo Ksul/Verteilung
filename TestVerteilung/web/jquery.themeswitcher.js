@@ -292,6 +292,7 @@
                 .bind({
                     click: function (e) {
                         updateTheme($(this).data());
+                        $('#switcher').tooltip( 'option', 'content', data.text);
                         e.preventDefault();
                     }
                 })
@@ -380,8 +381,6 @@
             if (settings.closeonselect)
                 closeSwitcher();
 
-            // muss nach dem Close stehen, denn das enablen von Tooltip ändert den Title
-            $("#switcher").attr("title", data.title);
         }
 
         // Finds a theme[] based on a valid name or title

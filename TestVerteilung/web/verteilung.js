@@ -685,7 +685,7 @@ function imageFieldFormatter(o) {
 }
 
 function calcDataTableHeight()  {
-    var h = myLayout.state.west.innerHeight -68;
+    var h = verteilungLayout.state.west.innerHeight -68;
     return h + 'px';
 };
 
@@ -1283,8 +1283,8 @@ function openFile(name) {
 
 function loadScript() {
     try {
-        panelSizeReminder = myLayout.state.west.size;
-        myLayout.sizePane("west", "100%");
+        panelSizeReminder = verteilungLayout.state.west.size;
+        verteilungLayout.sizePane("west", "100%");
         oldContent = textEditor.getSession().getValue();
         var content;
         if (REC.exist(modifiedScript) && modifiedScript - length > 0) {
@@ -1367,7 +1367,7 @@ function loadScript() {
         for (var prop in e)
             str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
         alert(str);
-        myLayout.sizePane("west", layoutState.west.size);
+        verteilungLayout.sizePane("west", layoutState.west.size);
     }
 }
 
@@ -1501,7 +1501,7 @@ function sendScript(dialog) {
 
 function closeScript() {
 	try {
-        myLayout.sizePane("west", panelSizeReminder);
+        verteilungLayout.sizePane("west", panelSizeReminder);
 		textEditor.getSession().setMode(new txtMode());
 		if (REC.exist(oldContent) && oldContent.length > 0)
 			textEditor.getSession().setValue(oldContent);
