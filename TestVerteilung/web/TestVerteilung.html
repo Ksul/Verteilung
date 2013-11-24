@@ -451,10 +451,10 @@ UL#tabButtons ,
 DIV#tabPanels {
     margin:		0 !important; /* layout-panes should never have margins */
 }
-DIV#tabPanels {}
+
 .tabPanel { /* container for tabLayout */
     height:		100%; /* need to 'fill' the tabPanels - layout container must have 'height' */
-    padding:	0;   // DO NOT set top- or bottom-padding because height=100%
+    padding:	0 !important;  // DO NOT set top- or bottom-padding because height=100%
 }
 
 
@@ -1241,37 +1241,37 @@ treeObject = jQuery.jstree._reference(tree);
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="tab2" class="tabPanel ui-widget-content hidden">
-            <div id="verteilungSouth" class="ui-tab-layout-south container hidden">
-                <div id="verteilungSouthInnerWest" class="inner-west container ui-widget-header hidden">
-                    <div class="header">Konsole</div>
-                    <div class="ui-widget-content">
-                        <div id="inOutput" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+            <div id="tab2" class="tabPanel ui-widget-content hidden">
+                <div id="verteilungSouth" class="ui-tab-layout-south container hidden">
+                    <div id="verteilungSouthInnerWest" class="inner-west container ui-widget-header hidden">
+                        <div class="header">Konsole</div>
+                        <div class="ui-widget-content">
+                            <div id="inOutput" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+                        </div>
+                    </div>
+                    <div id="verteilungSouthInnerCenter" class="inner-center container ui-widget-header hidden">
+                        <div class="header">Ergebnis</div>
+                        <div class="ui-widget-content">
+                            <div id="inProps" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+                        </div>
                     </div>
                 </div>
-                <div id="verteilungSouthInnerCenter" class="inner-center container ui-widget-header hidden">
-                    <div class="header">Ergebnis</div>
-                    <div class="ui-widget-content">
-                        <div id="inProps" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
+
+                <div id="verteilungWest" class="ui-tab-layout-west container ui-widget-header hidden">
+                    <div id="headerWest" class="header"></div>
+                    <div class="ui-widget-content" style="overflow:auto;">
+                        <div id="dtable"></div>
+                        <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
+                        <div id="tree"></div>
                     </div>
                 </div>
-            </div>
-
-            <div id="verteilungWest" class="ui-tab-layout-west container ui-widget-header hidden">
-                <div id="headerWest" class="header"></div>
-                <div class="ui-widget-content" style="overflow:auto;">
-                    <div id="dtable"></div>
-                    <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
-                    <div id="tree"></div>
-                </div>
-            </div>
 
 
-            <div id="verteilungCenter" class="ui-tab-layout-center container ui-widget-header hidden">
-                <div id="headerCenter" class="header">Regeln</div>
-                <div class="ui-widget-content">
-                    <div id="inRules" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
+                <div id="verteilungCenter" class="ui-tab-layout-center container ui-widget-header hidden">
+                    <div id="headerCenter" class="header">Regeln</div>
+                    <div class="ui-widget-content">
+                        <div id="inRules" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
+                    </div>
                 </div>
             </div>
         </div>
