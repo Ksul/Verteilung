@@ -292,10 +292,8 @@
                 .bind({
                     click: function (e) {
                         updateTheme($(this).data());
-                        e.preventDefault();
-                        $(document).tooltip('destroy');
-                        $('#switcher').attr('title', data.title);
-                        $(document).tooltip();
+                        $('#switcher').data("ui-tooltip-title", $(this).data().title);
+                        return false;
                     }
                 })
                 .attr("href", "#")
@@ -382,10 +380,7 @@
 
             if (settings.closeonselect)
                 closeSwitcher();
-            $(document).tooltip('destroy');
             $('#switcher').attr('title', data.title);
-            $(document).tooltip();
-
         }
 
         // Finds a theme[] based on a valid name or title
