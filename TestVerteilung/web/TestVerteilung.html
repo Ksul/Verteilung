@@ -1054,7 +1054,7 @@ window.onload = function () {
             "data": function (aNode, aFunction) {
                 if (isLocal()) {
                     try {
-                        var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "true", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
+                        var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "0", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
                         aFunction($.parseJSON(ret));
                     } catch (e) {
                         errorHandler(e);
@@ -1067,7 +1067,7 @@ window.onload = function () {
                         "username": getSettings("user"),
                         "password": getSettings("password"),
                         "searchFolder": "true",
-                        "withFolder": "true",
+                        "withFolder": "0",
                         "proxyHost": getSettings("proxy"),
                         "proxyPort": getSettings("port")
                     };

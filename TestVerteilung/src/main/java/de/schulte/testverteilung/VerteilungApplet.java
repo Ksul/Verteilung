@@ -188,10 +188,11 @@ public class VerteilungApplet extends Applet {
                 o = new JSONObject();
                 o1 = new JSONObject();
                 o.put("id", p.getProperty("id"));
-                if (((Boolean) p.get("folder")).booleanValue()) {
+                if (((Integer) p.get("folder")).intValue() < 1) {
                     o.put("rel", "folder");
                     o1.put("state", "closed");
-                } else {
+                }
+                if (((Integer) p.get("folder")).intValue() > -1) {
                     o.put("rel", "default");
                     o1.put("state", "");
                 }

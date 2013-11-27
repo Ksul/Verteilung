@@ -1275,9 +1275,9 @@ function openSettings() {
 }
 
 /**
- * lädt die Regeln
- * @param rDoc       die DokumentenId der Regeln auf dem Server
- * @param loadLocal legt fest, ob lokal gelesen werden soll
+ * liest die Regeln entweder vom Server oder lokal von der Platte
+ * @param rDoc      die DokumentenId der Regeln auf dem Server
+ * @param loadLocal legt fest, ob lokal oder vom Server gelesen werden soll
  * @param dialog    legt fest, ob ein Hinweisdialog angezeigt werden soll
  */
 function getRules(rDoc, loadLocal, dialog) {
@@ -1705,7 +1705,7 @@ function sendScript(dialog) {
 }
 
 /**
- * schliesst den Scrioteditor
+ * schliesst den Scripteditor
  */
 function closeScript() {
     try {
