@@ -407,6 +407,20 @@ public class VerteilungServlet extends HttpServlet {
 		return ret;
 	}
 
+    /**
+     * liefert die Dokumente eines Alfresco Folders als JSON Objekte
+     * @param filePath     der Pfad, der geliefert werden soll
+     * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
+     * @param server       der Alfresco-Servername
+     * @param username     der Alfresco-Username
+     * @param password     das Alfresco-Passwort
+     * @param proxyHost    der Proxy-Host, falls verwendet
+     * @param proxyPort    der Proxyport, falls verwendet
+     * @return             der Inhalt des Verzeichnisses als JSON Objekte
+     * @throws IOException
+     * @throws VerteilungException
+     * @throws JSONException
+     */
 	protected Object listFolder(String filePath, String listFolder, boolean byPath, String server, String username, String password,
 			String proxyHost, String proxyPort) throws IOException, VerteilungException {
 		ArrayList<Properties> liste = new ArrayList<Properties>();
@@ -461,7 +475,7 @@ public class VerteilungServlet extends HttpServlet {
 									&& el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:contentStreamMimeType"))
 								p.put("typ", el.getFirstChild(CMISConstants.VALUE).getText());
 						}
-						if (p.containsKey("name") && p.containsKey("id") && (listFolder.equalsIgnoreCase("true") || !folder)) {
+						if (p.containsKey("name") && p.containsKey("id") && (Integer.getInteger(listFolder).intValue() > -1|| !folder)) {
 							liste.add(p);
 							break;
 						}
@@ -472,6 +486,20 @@ public class VerteilungServlet extends HttpServlet {
 		return liste;
 	}
 
+    /**
+     * liefert die Dokumente eines Alfresco Folders als JSON Objekte
+     * @param filePath     der Pfad, der geliefert werden soll
+     * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
+     * @param server       der Alfresco-Servername
+     * @param username     der Alfresco-Username
+     * @param password     das Alfresco-Passwort
+     * @param proxyHost    der Proxy-Host, falls verwendet
+     * @param proxyPort    der Proxyport, falls verwendet
+     * @return             der Inhalt des Verzeichnisses als JSON Objekte
+     * @throws IOException
+     * @throws VerteilungException
+     * @throws JSONException
+     */
     protected JSONArray listFolderAsJSON(String filePath, String listFolder, String server, String username, String password,
                                          String proxyHost, String proxyPort) throws IOException, VerteilungException, JSONException {
         JSONObject o;
@@ -500,11 +528,10 @@ public class VerteilungServlet extends HttpServlet {
                 o = new JSONObject();
                 o1 = new JSONObject();
                 o.put("id", p.getProperty("id"));
-                if (((Integer) p.get("folder")).intValue() < 1) {
+                if (((Boolean) p.get("folder")).booleanValue()) {
                     o.put("rel", "folder");
                     o1.put("state", "closed");
-                }
-                if (((Integer) p.get("folder")).intValue() > -1) {
+                } else {
                     o.put("rel", "default");
                     o1.put("state", "");
                 }

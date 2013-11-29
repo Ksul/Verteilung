@@ -75,6 +75,13 @@ public class VerteilungApplet extends Applet {
 		}
 	}
 
+    /**
+     * prüft, ob eine Url verfügbar ist
+     * @param urlString    die Url
+     * @param proxyHost    der Proxyhost, falls benutzt
+     * @param proxyPort    der Proxyport falls benutzt
+     * @return             true, wenn die Url verfügbar ist
+     */
     public static String isURLAvailable(final String urlString, final String proxyHost, final String proxyPort) {
 
 
@@ -115,23 +122,49 @@ public class VerteilungApplet extends Applet {
         return ret.toString();
     }
 
+    /**
+     * liefert dein Alfreco Ticket
+     * @param server          der Alfresco Server
+     * @param username        der verwendete Username
+     * @param password        das Passwort
+     * @param proxyHost       der Proxyhost, falls verwendet
+     * @param proxyPort       der Proxyport, falls verwendet
+     * @param credentials
+     * @return                das Ticket als String
+     */
+    public String getTicket(final String server, final String username, final String password, final String proxyHost,
+                            final String proxyPort, final Credentials credentials) {
+        String ret;
+        try {
+            ret = AccessController.doPrivileged(new PrivilegedAction<String>() {
 
-	public String getTicket(final String server, final String username, final String password, final String proxyHost,
-			final String proxyPort, final Credentials credentials) {
-		String ret;
+                public String run() {
+                    AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
+                            credentials);
+                    return connector.getTicket();
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return ret;
+    }
 
-		ret = AccessController.doPrivileged(new PrivilegedAction<String>() {
-
-			public String run() {
-				AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
-						credentials);
-				return connector.getTicket();
-			}
-		});
-
-		return ret;
-	}
-
+    /**
+     * verschiebt ein Dokument
+     * @param documentId         die Id des zu verschiebenden Dokumentes
+     * @param destinationId      die Id des Folders, wo das Dokument hin verschoben werden soll
+     * @param server             der Alfresco Server
+     * @param username           der verwendete Username
+     * @param password           das Passwort
+     * @param proxyHost          der Proxyhost, falls verwendet
+     * @param proxyPort          der Proxyport, falls verwendet
+     * @param credentials
+     * @return                   das Ergebnis als JSON STring
+     * @throws JSONException
+     */
 	public String moveDocument(final String documentId, final String destinationId, final String server,
 			final String username, final String password, final String proxyHost, final String proxyPort,
 			final Credentials credentials) throws JSONException {
@@ -175,49 +208,55 @@ public class VerteilungApplet extends Applet {
      * @throws JSONException
      */
     public String listFolderAsJSON(String filePath, String listFolder, String server, String username, String password,
-                                         String proxyHost, String proxyPort) throws IOException, VerteilungException, JSONException {
+                                   String proxyHost, String proxyPort) throws IOException, VerteilungException, JSONException {
         JSONObject o;
         JSONObject o1;
         JSONArray list = new JSONArray();
-        if (filePath == null || filePath.length() == 0) {
-            filePath = new JSONObject(getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort)).getString("result");
-            o = new JSONObject();
-            o1 = new JSONObject();
-            o.put("id", filePath);
-            o.put("rel", "root");
-            o.put("state", "closed");
-            o1.put("attr", o);
-            o1.put("data", "Archiv");
-            o1.put("state", "closed");
-            list.put(o1);
-        } else {
-            if (filePath.equals("-1"))
+        try {
+            if (filePath == null || filePath.length() == 0) {
                 filePath = new JSONObject(getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort)).getString("result");
-
-            ArrayList<Properties> liste = (ArrayList<Properties>) listFolder(filePath, listFolder, false, server, username, password, proxyHost, proxyPort);
-
-
-            for (int i = 0; i < liste.size(); i++) {
-                Properties p = (Properties) liste.get(i);
                 o = new JSONObject();
                 o1 = new JSONObject();
-                o.put("id", p.getProperty("id"));
-                if (((Integer) p.get("folder")).intValue() < 1) {
-                    o.put("rel", "folder");
-                    o1.put("state", "closed");
-                }
-                if (((Integer) p.get("folder")).intValue() > -1) {
-                    o.put("rel", "default");
-                    o1.put("state", "");
-                }
-                if (p.containsKey("title") &&  p.getProperty("title").length() > 0)
-                    o1.put("data", p.getProperty("title"));
-                else
-                    o1.put("data", p.getProperty("name"));
+                o.put("id", filePath);
+                o.put("rel", "root");
+                o.put("state", "closed");
                 o1.put("attr", o);
+                o1.put("data", "Archiv");
+                o1.put("state", "closed");
                 list.put(o1);
+            } else {
+                if (filePath.equals("-1"))
+                    filePath = new JSONObject(getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort)).getString("result");
+
+                ArrayList<Properties> liste = (ArrayList<Properties>) listFolder(filePath, listFolder, false, server, username, password, proxyHost, proxyPort);
+
+
+                for (int i = 0; i < liste.size(); i++) {
+                    Properties p = (Properties) liste.get(i);
+                    o = new JSONObject();
+                    o1 = new JSONObject();
+                    o.put("id", p.getProperty("id"));
+                    if (((Boolean) p.get("folder")).booleanValue()) {
+                        o.put("rel", "folder");
+                        o1.put("state", "closed");
+                    } else {
+                        o.put("rel", "default");
+                        o1.put("state", "");
+                    }
+                    if (p.containsKey("title") && p.getProperty("title").length() > 0)
+                        o1.put("data", p.getProperty("title"));
+                    else
+                        o1.put("data", p.getProperty("name"));
+                    o1.put("attr", o);
+                    list.put(o1);
+                }
             }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+
         return list.toString();
     }
 
