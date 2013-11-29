@@ -48,10 +48,10 @@ function errorHandler(e) {
 
 /**
  * Prüft, ob ein Alfresco Server antwortet
- * @param url    URL des Servers
- * @param proxy  Proxy Server
- * @param port   Port des Proxy Servers
- * @returns {boolean}
+ * @param url         URL des Servers
+ * @param proxy       Proxy Server
+ * @param port        Port des Proxy Servers
+ * @returns {boolean} true, wenn der Server verfügbar ist
  */
 function checkServerStatus(url, proxy, port) {
     var ret;
@@ -1276,20 +1276,20 @@ function openSettings() {
 
 /**
  * liest die Regeln entweder vom Server oder lokal von der Platte
- * @param rDoc      die DokumentenId der Regeln auf dem Server
+ * @param rulesId   die DokumentenId der Regeln auf dem Server
  * @param loadLocal legt fest, ob lokal oder vom Server gelesen werden soll
  * @param dialog    legt fest, ob ein Hinweisdialog angezeigt werden soll
  */
-function getRules(rDoc, loadLocal, dialog) {
+function getRules(rulesId, loadLocal, dialog) {
     try {
         if (isLocal()) {
             var ret;
             if (loadLocal) {
-                var open = openFile(rDoc);
+                var open = openFile("doc.xml");
                 rulesEditor.getSession().setValue(open[0]);
                 rulesEditor.getSession().foldAll(1);
             } else {
-                ret = document.reader.getContent(rDoc, false, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
+                ret = document.reader.getContent(rulesId, false, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
                 var json = jQuery.parseJSON(ret);
                 if (json.success) {
                     rulesEditor.getSession().setValue(json.result);
@@ -1302,7 +1302,7 @@ function getRules(rDoc, loadLocal, dialog) {
         } else {
             var dataString = {
                 "function"   : "getContent",
-                "documentId" : rDoc,
+                "documentId" : rulesId,
                 "extract"    : "false",
                 "server"     : getSettings("server"),
                 "username"   : getSettings("user"),
@@ -1348,25 +1348,19 @@ function getRules(rDoc, loadLocal, dialog) {
  * öffnet die Regeln
  */
 function openRules() {
-    var xml;
+    var id;
     try {
-        if (isLocal()) {
-            xml = "doc.xml";
-            getRules(xml, true, false);
-            document.getElementById('headerCenter').textContent = "Regeln (doc.xml)";
+        if (rulesID != null) {
+            id = rulesID.substring(rulesID.lastIndexOf('/') + 1);
+            getRules(id, !alfrescoServerAvailable, false);
+            document.getElementById('headerCenter').textContent = "Regeln (Server: doc.xml)";
         } else {
-            if (rulesID != null) {
-                xml = rulesID.substring(rulesID.lastIndexOf('/') + 1);
-                getRules(xml, true, false);
-                document.getElementById('headerCenter').textContent = "Regeln (Server: doc.xml)";
-            } else {
-                $.get('doc.xml', function (msg) {
-                    rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
-                    rulesEditor.getSession().foldAll(1);
-                    currentRules = "doc.xml";
-                    document.getElementById('headerCenter').textContent = "Regeln (doc.xml)";
-                });
-            }
+            $.get('doc.xml', function (msg) {
+                rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
+                rulesEditor.getSession().foldAll(1);
+                currentRules = "doc.xml";
+                document.getElementById('headerCenter').textContent = "Regeln (doc.xml)";
+            });
 
             //	window.parent.frames.rules.rulesEditor.getSession().setValue("Regeln konnten nicht geladen werden!");
         }
@@ -1781,7 +1775,7 @@ function init() {
             if (isLocal()) {
                 var json;
                 var pattern = new RegExp("true", "ig");
-                if (getUrlParam("local") == null || pattern.test(getUrlParam("local"))) {
+                if (getUrlParam("runLocal") != null || pattern.test(getUrlParam("runLocal"))) {
                     runLocal = true;
                 } else {
                     json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
