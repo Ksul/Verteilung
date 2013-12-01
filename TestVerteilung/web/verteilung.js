@@ -1952,6 +1952,9 @@ function init() {
             }
             if (txt.length > 0)
                 alert(txt.join("\n"));
+            $( "#tabs" ).tabs( "option", "active", 0 );
+        } else {
+            $( "#tabs" ).tabs({ disabled: [ 0 ] });
         }
         openRules();
         manageControls();

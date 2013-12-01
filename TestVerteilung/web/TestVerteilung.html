@@ -734,7 +734,8 @@ $(document).ready(function () {
     // create the tabs before the page layout because tabs will change the height of the north-pane
     $("#tabs").tabs({
         // using callback addon
-        activate: $.layout.callbacks.resizeTabLayout
+        activate: $.layout.callbacks.resizeTabLayout,
+        active: 1
 
         /* OR with a custom callback
          activate: function (evt, ui) {
@@ -1042,121 +1043,124 @@ window.onload = function () {
             });
         }
     });
+    init();
     // Eventhandler für die Image Clicks
     handleImageClicks();
     tree = $("#tree").jstree({
- /*       "themes": {
-            "theme": "corral",
-            "dots": true,
-            "icons": true
-        },
-  */      "json_data": {
+        /*       "themes": {
+         "theme": "corral",
+         "dots": true,
+         "icons": true
+         },
+         */      "json_data": {
             "data": function (aNode, aFunction) {
-                if (isLocal()) {
-                    try {
-                        var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "0", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
-                        aFunction($.parseJSON(ret));
-                    } catch (e) {
-                        errorHandler(e);
-                    }
-                } else {
-                    var dataString = {
-                        "function": "listFolderAsJSON",
-                        "filePath": aNode.attr ? aNode.attr("id") : "",
-                        "server": getSettings("server"),
-                        "username": getSettings("user"),
-                        "password": getSettings("password"),
-                        "searchFolder": "true",
-                        "withFolder": "0",
-                        "proxyHost": getSettings("proxy"),
-                        "proxyPort": getSettings("port")
-                    };
-                    $.ajax({
-                        type: "POST",
-                        data: dataString,
-                        cache: false,
-                        datatype: "json",
-                        url: "VerteilungServlet",
-                        success: function (erg) {
-                                aFunction(erg);
-                        },
-                        error: function (response) {
-                            try {
-                                var r = jQuery.parseJSON(response.responseText);
-                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                            } catch (e) {
-                                errorHandler(e);
-                            }
+                if (alfrescoServerAvailable) {
+                    if (isLocal()) {
+                        try {
+                            var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "0", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
+                            aFunction($.parseJSON(ret));
+                        } catch (e) {
+                            errorHandler(e);
                         }
-                    });
+                    } else {
+                        var dataString = {
+                            "function": "listFolderAsJSON",
+                            "filePath": aNode.attr ? aNode.attr("id") : "",
+                            "server": getSettings("server"),
+                            "username": getSettings("user"),
+                            "password": getSettings("password"),
+                            "searchFolder": "true",
+                            "withFolder": "0",
+                            "proxyHost": getSettings("proxy"),
+                            "proxyPort": getSettings("port")
+                        };
+                        $.ajax({
+                            type: "POST",
+                            data: dataString,
+                            cache: false,
+                            datatype: "json",
+                            url: "VerteilungServlet",
+                            success: function (erg) {
+                                aFunction(erg);
+                            },
+                            error: function (response) {
+                                try {
+                                    var r = jQuery.parseJSON(response.responseText);
+                                    alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                                } catch (e) {
+                                    errorHandler(e);
+                                }
+                            }
+                        });
+                    }
                 }
             }
         },
         "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "hotkeys", "themeroller"]
     }).bind("select_node.jstree",function (event, data) {
                 if (data.rslt.obj.attr("rel") == "default") {
-                    try {
-                        if (isLocal()) {
-                            var ret = document.reader.getContent(data.rslt.obj.attr("id"), true, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
-                            var json = jQuery.parseJSON(ret);
-                            if (json.success) {
-                                textEditor.getSession().setValue(json.result);
-                                currentContent = json.result;
-                                currentFile = data.rslt.obj.text().trim();
-                                document.getElementById('headerWest').textContent = currentFile;
-                                alfrescoMode = false;
-                                manageControls();
+                    if (alfrescoServerAvailable) {
+                        try {
+                            if (isLocal()) {
+                                var ret = document.reader.getContent(data.rslt.obj.attr("id"), true, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
+                                var json = jQuery.parseJSON(ret);
+                                if (json.success) {
+                                    textEditor.getSession().setValue(json.result);
+                                    currentContent = json.result;
+                                    currentFile = data.rslt.obj.text().trim();
+                                    document.getElementById('headerWest').textContent = currentFile;
+                                    alfrescoMode = false;
+                                    manageControls();
 
-                            } else
-                                alert("Daten konnten nicht übertragen werden: " + json.result)
-                        } else {
+                                } else
+                                    alert("Daten konnten nicht übertragen werden: " + json.result)
+                            } else {
+                                var dataString = {
+                                    "function": "getContent",
+                                    "documentId": data.rslt.obj.attr("id"),
+                                    "extract": "true",
+                                    "server": getSettings("server"),
+                                    "username": getSettings("user"),
+                                    "password": getSettings("password"),
+                                    "proxyHost": getSettings("proxy"),
+                                    "proxyPort": getSettings("port")
+                                };
+                                $.ajax({
+                                    type: "POST",
+                                    data: dataString,
+                                    cache: false,
+                                    datatype: "json",
+                                    url: "VerteilungServlet",
+                                    success: function (erg) {
+                                        if (erg.success[0]) {
+                                            textEditor.getSession().setValue(erg.result.toString());
+                                            currentContent = erg.result.toString();
+                                            currentFile = data.rslt.obj.text().trim();
+                                            document.getElementById('headerWest').textContent = currentFile;
+                                            alfrescoMode = false;
+                                            manageControls();
 
-                            var dataString = {
-                                "function": "getContent",
-                                "documentId": data.rslt.obj.attr("id"),
-                                "extract": "true",
-                                "server": getSettings("server"),
-                                "username": getSettings("user"),
-                                "password": getSettings("password"),
-                                "proxyHost": getSettings("proxy"),
-                                "proxyPort": getSettings("port")
-                            };
-                            $.ajax({
-                                type: "POST",
-                                data: dataString,
-                                cache: false,
-                                datatype: "json",
-                                url: "VerteilungServlet",
-                                success: function (erg) {
-                                    if (erg.success[0]) {
-                                        textEditor.getSession().setValue(erg.result.toString());
-                                        currentContent = erg.result.toString();
-                                        currentFile = data.rslt.obj.text().trim();
-                                        document.getElementById('headerWest').textContent = currentFile;
-                                        alfrescoMode = false;
-                                        manageControls();
-
-                                    } else
-                                        alert("Daten konnten nicht übertragen werden: " + erg.result[0]);
-                                },
-                                error: function (response) {
-                                    try {
-                                        var r = jQuery.parseJSON(response.responseText);
-                                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                    } catch (e) {
-                                        errorHandler(e);
+                                        } else
+                                            alert("Daten konnten nicht übertragen werden: " + erg.result[0]);
+                                    },
+                                    error: function (response) {
+                                        try {
+                                            var r = jQuery.parseJSON(response.responseText);
+                                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                                        } catch (e) {
+                                            errorHandler(e);
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
+                        } catch (e) {
+                            errorHandler(e);
                         }
-                    } catch (e) {
-                        errorHandler(e);
                     }
                 }
             }).delegate("a", "click", function (event, data) {
                 event.preventDefault();
             });
-    init();
 };
 
 var rulesEditor;
@@ -1239,7 +1243,7 @@ treeObject = jQuery.jstree._reference(tree);
                 <div id="alfrescoWest" class="ui-tab-layout-west container ui-widget-header hidden">
                     <div id="alfrescoHeaderWest" class="header">Archiv</div>
                     <div class="ui-widget-content">
-                        Archiv
+                        <div id="tree"></div>
                     </div>
                 </div>
 
@@ -1272,7 +1276,6 @@ treeObject = jQuery.jstree._reference(tree);
                     <div class="ui-widget-content" style="overflow:auto;">
                         <div id="dtable"></div>
                         <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
-                        <div id="tree"></div>
                     </div>
                 </div>
 
