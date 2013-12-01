@@ -1163,6 +1163,53 @@ function work() {
     }
 }
 
+
+
+/**
+ * zeigt den Alfresco Baum
+ */
+function loadAlfresco() {
+    try {
+        alfrescoMode = true;
+        manageControls();
+    } catch (e) {
+        errorHandler(e);
+    }
+}
+
+/**
+ * schliesst den Alfresco Baum
+ */
+function closeAlfresco() {
+    try {
+        alfrescoMode = false;
+        manageControls();
+    } catch (e) {
+        errorHandler(e);
+    }
+}
+
+/**
+ * öffnet den Einstellungsdialog
+ */
+function openSettings() {
+    try {
+        var serverInput = document.getElementById('server');
+        serverInput.value = getSettings("server");
+        var userInput = document.getElementById('user');
+        userInput.value = getSettings("user");
+        var passInput = document.getElementById('password');
+        passInput.value = getSettings("password");
+        var proxyInput = document.getElementById('proxy');
+        proxyInput.value = getSettings("proxy");
+        var portInput = document.getElementById('port');
+        portInput.value = getSettings("port");
+        $("#dialog-form").dialog("open");
+    } catch (e) {
+        errorHandler(e);
+    }
+}
+
 /**
  * aktualisiert die geänderten Regeln auf dem Server
  * @param dialog       Merker ob ein Hinweisfenster angezeigt werden soll
@@ -1224,51 +1271,6 @@ function sendRules(dialog) {
             }
             return erg;
         }
-    } catch (e) {
-        errorHandler(e);
-    }
-}
-
-/**
- * zeigt den Alfresco Baum
- */
-function loadAlfresco() {
-    try {
-        alfrescoMode = true;
-        manageControls();
-    } catch (e) {
-        errorHandler(e);
-    }
-}
-
-/**
- * schliesst den Alfresco Baum
- */
-function closeAlfresco() {
-    try {
-        alfrescoMode = false;
-        manageControls();
-    } catch (e) {
-        errorHandler(e);
-    }
-}
-
-/**
- * öffnet den Einstellungsdialog
- */
-function openSettings() {
-    try {
-        var serverInput = document.getElementById('server');
-        serverInput.value = getSettings("server");
-        var userInput = document.getElementById('user');
-        userInput.value = getSettings("user");
-        var passInput = document.getElementById('password');
-        passInput.value = getSettings("password");
-        var proxyInput = document.getElementById('proxy');
-        proxyInput.value = getSettings("proxy");
-        var portInput = document.getElementById('port');
-        portInput.value = getSettings("port");
-        $("#dialog-form").dialog("open");
     } catch (e) {
         errorHandler(e);
     }
@@ -1355,13 +1357,16 @@ function openRules() {
             getRules(id, !alfrescoServerAvailable, false);
             document.getElementById('headerCenter').textContent = "Regeln (Server: doc.xml)";
         } else {
-            $.get('doc.xml', function (msg) {
-                rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
-                rulesEditor.getSession().foldAll(1);
-                currentRules = "doc.xml";
-                document.getElementById('headerCenter').textContent = "Regeln (doc.xml)";
-            });
-
+            if (isLocal()) {
+                getRules("doc.xml", true, false);
+            } else {
+                $.get('doc.xml', function (msg) {
+                    rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
+                    rulesEditor.getSession().foldAll(1);
+                    currentRules = "doc.xml";
+                });
+            }
+            document.getElementById('headerCenter').textContent = "Regeln (doc.xml)";
             //	window.parent.frames.rules.rulesEditor.getSession().setValue("Regeln konnten nicht geladen werden!");
         }
     } catch (e) {
