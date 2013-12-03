@@ -992,6 +992,38 @@ window.onload = function () {
     var zone = document.getElementById('inTxt');
     zone.addEventListener('dragover', handleDragOver, false);
     zone.addEventListener('drop', handleFileSelect, false);
+
+    alfrescoTabelle = $('#alfrescoTabelle').dataTable({
+        "bJQueryUI": true,
+        "sPaginationType": "full_numbers",
+        "aaData": [],
+        "sScrollX": "100%",
+        "sScrollXInner": "100%",
+        "sPaginationType": "listbox",
+       // "sScrollY" : calcDataTableHeight(),
+        "bAutoWidth": true,
+        "bLengthChange": false,
+        "bFilter": false,
+       // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
+        "aoColumns": [
+            { "mDataProp": null,"sClass": "control center", "sWidth": "12px"},
+            { "sTitle": "Name", "sType": "string", "sClass": "alignLeft"  },
+            { "sTitle": "Datum", "sType": "date", "sClass": "alignLeft" },
+            { "sTitle": "Person", "sType": "string", "sClass": "alignLeft" },
+            { "sTitle": "Betrag", "sType": "numeric", "sClass": "alignLeft" },
+            { "sTitle": "Id" },
+            { "sTitle": "Fehler" }
+        ],
+        "aoColumnDefs": [
+           // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
+            { "aTargets": [1,2,3, 4], "bVisible": true},
+             { "aTargets": [5,6], "bVisible": false}
+        ],
+        "oLanguage": {
+            "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
+        }
+    });
+
     var anOpen = [];
     $('#dtable').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="tabelle"></table>' );
     tabelle = $('#tabelle').dataTable({
@@ -1057,7 +1089,7 @@ window.onload = function () {
                 if (alfrescoServerAvailable) {
                     if (isLocal()) {
                         try {
-                            var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "0", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
+                            var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "-1", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
                             aFunction($.parseJSON(ret));
                         } catch (e) {
                             errorHandler(e);
@@ -1070,7 +1102,7 @@ window.onload = function () {
                             "username": getSettings("user"),
                             "password": getSettings("password"),
                             "searchFolder": "true",
-                            "withFolder": "0",
+                            "withFolder": "-1",
                             "proxyHost": getSettings("proxy"),
                             "proxyPort": getSettings("port")
                         };
@@ -1102,7 +1134,7 @@ window.onload = function () {
                     if (alfrescoServerAvailable) {
                         try {
                             if (isLocal()) {
-                                var ret = document.reader.getContent(data.rslt.obj.attr("id"), true, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
+                                var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "1", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
                                 var json = jQuery.parseJSON(ret);
                                 if (json.success) {
                                     textEditor.getSession().setValue(json.result);
@@ -1180,6 +1212,7 @@ var REC;
 var treeObject;
 var tree;
 var tabelle;
+var alfrescoTabelle;
 var workDocument = null;
 var multiMode = false;
 var currentPDF = false;
@@ -1246,12 +1279,13 @@ treeObject = jQuery.jstree._reference(tree);
                         <div id="tree"></div>
                     </div>
                 </div>
-
-
                 <div id="alfrescoCenter" class="ui-tab-layout-center container ui-widget-header hidden">
                     <div id="alfrescoHeaderCenter" class="header">Inhalt</div>
                     <div class="ui-widget-content">
-                        Inhalt
+                        <div id="dtable2">
+                            <table cellpadding="0" cellspacing="0" border="0" class="display"
+                                   id="alfrescoTabelle"></table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1302,16 +1336,6 @@ treeObject = jQuery.jstree._reference(tree);
                     onclick="openSettings();"
                     name="settings" id="settings" type="submit" class="settings"
                     title="Open Settings" value=""/>
-            </td>
-            <td width="60px" align="center"><input
-                    onclick="loadAlfresco();"
-                    name="docAlfresco" id="docAlfresco" type="submit" class="docAlfresco"
-                    title="Load Alfresco" value=""/>
-            </td>
-            <td width="60px" align="center"><input onclick="closeAlfresco();"
-                                                   id="closeAlfresco" value="" type="submit" title="Close"
-                                                   class="close"
-                                                   style="display: none"/>
             </td>
             <td width="60px" align="center"><input onclick="work();"
                                                    name="play" id="play" type="submit" class="play"

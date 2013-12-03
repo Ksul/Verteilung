@@ -475,7 +475,7 @@ public class VerteilungServlet extends HttpServlet {
 									&& el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:contentStreamMimeType"))
 								p.put("typ", el.getFirstChild(CMISConstants.VALUE).getText());
 						}
-						if (p.containsKey("name") && p.containsKey("id") && (Integer.getInteger(listFolder).intValue() > -1|| !folder)) {
+						if (p.containsKey("name") && p.containsKey("id") && (Integer.parseInt(listFolder) > -1|| !folder)) {
 							liste.add(p);
 							break;
 						}
@@ -488,7 +488,7 @@ public class VerteilungServlet extends HttpServlet {
 
     /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
-     * @param filePath     der Pfad, der geliefert werden soll
+     * @param filePath     der Pfad, der geliefert werden soll (als NodeId)
      * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
      * @param server       der Alfresco-Servername
      * @param username     der Alfresco-Username

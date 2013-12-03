@@ -127,6 +127,12 @@ public class AlfrescoConnector {
         }
     }
 
+    /**
+     * liefert einen Knoten
+     * @param   cmisQuery die Query
+     * @return            der Knoten
+     * @throws VerteilungException
+     */
     public AlfrescoResponse getNode(final String cmisQuery) throws VerteilungException {
 
         try {

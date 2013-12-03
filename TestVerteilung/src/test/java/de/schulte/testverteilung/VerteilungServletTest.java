@@ -32,7 +32,7 @@ public class VerteilungServletTest {
         servlet = new VerteilungServlet();
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
-        when(request.getParameter("server")).thenReturn("http://ksul.dyndns.org:9080");
+        when(request.getParameter("server")).thenReturn("http://localhost:8080");
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("admin");
         //when(request.getParameter("proxyHost")).thenReturn("www-proxy");
@@ -44,8 +44,8 @@ public class VerteilungServletTest {
     @Test
     public void testListFolderAsJSON() throws Exception {
         when(request.getParameter("function")).thenReturn("listFolderAsJSON");
-        when(request.getParameter("filePath")).thenReturn("8c0021ee-beea-4506-b10e-9ef2de262ad2");
-        when(request.getParameter("withFolder")).thenReturn("true");
+        when(request.getParameter("filePath")).thenReturn("-1");
+        when(request.getParameter("withFolder")).thenReturn("0");
         when(request.getParameter("searchFolder")).thenReturn("true");
         servlet.doPost(request, response);
         verify(request, atLeast(1)).getParameter("username"); // only if you want to verify username was called...
@@ -60,7 +60,7 @@ public class VerteilungServletTest {
     @Test
      public void testGetNodeId() throws Exception {
         when(request.getParameter("function")).thenReturn("getNodeId");
-        when(request.getParameter("cmisQuery")).thenReturn("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')");
+        when(request.getParameter("cmisQuery")).thenReturn("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv/cm:Fehler\"')");
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
         System.out.println(FileUtils.readFileToString(new File("somefile.txt"), "UTF-8")) ;

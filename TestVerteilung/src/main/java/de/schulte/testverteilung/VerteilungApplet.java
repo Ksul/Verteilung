@@ -123,7 +123,7 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
-     * liefert dein Alfreco Ticket
+     * liefert ein Alfreco Ticket
      * @param server          der Alfresco Server
      * @param username        der verwendete Username
      * @param password        das Passwort
@@ -263,7 +263,7 @@ public class VerteilungApplet extends Applet {
 
     /**
      * liefert den Inhalt (Dokumente und Folder) eines Folders
-     * @param filePath     der Pfad zum Folder
+     * @param filePath     der Pfad zum Folder (als NodeId)
      * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
      * @param byPath
      * @param server       der Alfresco-Servername
@@ -277,11 +277,6 @@ public class VerteilungApplet extends Applet {
                                              final String password, final String proxyHost, final String proxyPort) {
         ArrayList<Properties> liste = new ArrayList<Properties>();
         boolean folder = false;
-        Integer lf = AccessController.doPrivileged(new PrivilegedAction<Integer>() {
-            public Integer run() {
-                return new Integer(listFolder);
-            }
-        } );
         AlfrescoResponse response = AccessController.doPrivileged(new PrivilegedAction<AlfrescoResponse>() {
 
             public AlfrescoResponse run() {
@@ -338,6 +333,12 @@ public class VerteilungApplet extends Applet {
                                                 Element el2 = it4.next();
                                                 if (el2.getAttributeValue("propertyDefinitionId") != null && el2.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cm:title"))
                                                     p.put("title", el2.getFirstChild(CMISConstants.VALUE).getText());
+                                                if (el2.getAttributeValue("propertyDefinitionId") != null && el2.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("my:documentDate"))
+                                                    p.put("date", el2.getFirstChild(CMISConstants.VALUE).getText());
+                                                if (el2.getAttributeValue("propertyDefinitionId") != null && el2.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("my:person"))
+                                                    p.put("person", el2.getFirstChild(CMISConstants.VALUE).getText());
+                                                if (el2.getAttributeValue("propertyDefinitionId") != null && el2.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cm:title"))
+                                                    p.put("title", el2.getFirstChild(CMISConstants.VALUE).getText());
                                             }
                                         }
                                     }
@@ -351,7 +352,7 @@ public class VerteilungApplet extends Applet {
                                         && el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:contentStreamMimeType"))
                                     p.put("typ", el.getFirstChild(CMISConstants.VALUE).getText());
                             }
-                            if (p.containsKey("name") && p.containsKey("id") && (lf.intValue() > -1 || !folder)) {
+                            if (p.containsKey("name") && p.containsKey("id") && (Integer.parseInt(listFolder) > -1 || !folder)) {
                                 liste.add(p);
                                 break;
                             }

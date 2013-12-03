@@ -131,12 +131,12 @@ function showProgress() {
  * verwaltet die Controls
  */
 function manageControls() {
-    document.getElementById('tree').style.display = 'none';
+    //document.getElementById('tree').style.display = 'none';
     document.getElementById('dtable').style.display = 'none';
     document.getElementById('inTxt').style.display = 'block';
     document.getElementById('filesinput').style.display = 'block';
     document.getElementById('settings').style.display = 'block';
-    document.getElementById('docAlfresco').removeAttribute("disabled");
+    //document.getElementById('docAlfresco').removeAttribute("disabled");
     document.getElementById('closeAlfresco').style.display = 'none';
     document.getElementById('play').style.display = 'block';
     document.getElementById('play').removeAttribute("disabled");
@@ -167,10 +167,11 @@ function manageControls() {
     if (testMode) {
         document.getElementById('test').style.display = 'none';
         document.getElementById('closeTest').style.display = 'block';
-        document.getElementById('docAlfresco').setAttribute("disabled", true);
+        //document.getElementById('docAlfresco').setAttribute("disabled", true);
         document.getElementById('loadScript').setAttribute("disabled", true);
         document.getElementById('pdf').setAttribute("disabled", true);
     }
+/*
     if (alfrescoMode) {
         document.getElementById('tree').style.display = 'block';
         document.getElementById('dtable').style.display = 'none';
@@ -179,8 +180,7 @@ function manageControls() {
         document.getElementById('docAlfresco').setAttribute("disabled", true);
         document.getElementById('play').setAttribute("disabled", true);
     }
-    if (!alfrescoServerAvailable)
-        document.getElementById('docAlfresco').setAttribute("disabled", true);
+*/
     if (textEditor.getSession().getValue().length == 0)
         document.getElementById('searchCont').setAttribute("disabled", true);
     if (isLocal()) {
@@ -206,10 +206,10 @@ function manageControls() {
     }
     // Muss als letztes stehen
     if (scriptMode) {
-        document.getElementById('tree').style.display = 'none';
+        //document.getElementById('tree').style.display = 'none';
         document.getElementById('dtable').style.display = 'none';
         document.getElementById('inTxt').style.display = 'block';
-        document.getElementById('docAlfresco').setAttribute("disabled", true);
+        //document.getElementById('docAlfresco').setAttribute("disabled", true);
         document.getElementById('filesinput').style.display = 'none';
         document.getElementById('play').style.display = 'none';
         document.getElementById('test').style.display = 'none';
@@ -1163,31 +1163,6 @@ function work() {
     }
 }
 
-
-
-/**
- * zeigt den Alfresco Baum
- */
-function loadAlfresco() {
-    try {
-        alfrescoMode = true;
-        manageControls();
-    } catch (e) {
-        errorHandler(e);
-    }
-}
-
-/**
- * schliesst den Alfresco Baum
- */
-function closeAlfresco() {
-    try {
-        alfrescoMode = false;
-        manageControls();
-    } catch (e) {
-        errorHandler(e);
-    }
-}
 
 /**
  * öffnet den Einstellungsdialog
