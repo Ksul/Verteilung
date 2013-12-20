@@ -207,181 +207,51 @@ public class VerteilungApplet extends Applet {
      * @throws VerteilungException
      * @throws JSONException
      */
-    public String listFolderAsJSON(String filePath, String listFolder, String server, String username, String password,
-                                   String proxyHost, String proxyPort) throws IOException, VerteilungException, JSONException {
-        JSONObject o;
-        JSONObject o1;
-        JSONArray list = new JSONArray();
+    public String listFolderAsJSON(final String filePath, final String listFolder, final String server, final String username, final String password,
+                                   final String proxyHost, final String proxyPort) throws IOException, VerteilungException, JSONException {
+        Object obj = null;
+
         try {
-            if (filePath == null || filePath.length() == 0) {
-                filePath = new JSONObject(getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort)).getString("result");
-                o = new JSONObject();
-                o1 = new JSONObject();
-                o.put("id", filePath);
-                o.put("rel", "root");
-                o.put("state", "closed");
-                o1.put("attr", o);
-                o1.put("data", "Archiv");
-                o1.put("state", "closed");
-                list.put(o1);
-            } else {
-                if (filePath.equals("-1"))
-                    filePath = new JSONObject(getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", server, username, password, proxyHost, proxyPort)).getString("result");
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
-                ArrayList<Properties> liste = (ArrayList<Properties>) listFolder(filePath, listFolder, false, server, username, password, proxyHost, proxyPort);
-
-
-                for (int i = 0; i < liste.size(); i++) {
-                    Properties p = (Properties) liste.get(i);
-                    o = new JSONObject();
-                    o1 = new JSONObject();
-                    o.put("id", p.getProperty("id"));
-                    if (((Boolean) p.get("folder")).booleanValue()) {
-                        o.put("rel", "folder");
-                        o1.put("state", "closed");
-                    } else {
-                        o.put("rel", "default");
-                        o1.put("state", "");
-                    }
-                    if (p.containsKey("title") && p.getProperty("title").length() > 0)
-                        o1.put("data", p.getProperty("title"));
-                    else
-                        o1.put("data", p.getProperty("name"));
-                    o1.put("attr", o);
-                    list.put(o1);
+                public Object run() throws VerteilungException, IOException, JSONException {
+                    AlfrescoServices services = new AlfrescoServices(server, username, password, proxyHost, proxyPort);
+                    return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
                 }
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            });
+        } catch (PrivilegedActionException e) {
+            JSONObject ret = new JSONObject();
+            ret.put("success", false);
+            ret.put("result", e.getMessage());
+            return ret.toString();
         }
 
-        return list.toString();
+        return obj.toString();
     }
 
 
     /**
-     * liefert den Inhalt (Dokumente und Folder) eines Folders
-     * @param filePath     der Pfad zum Folder (als NodeId)
-     * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @param byPath
+     * liefert eine NodeID als String zurück
+     * @param cmisQuery   die CMIS Query, mit der der Knoten gesucht werden soll
      * @param server       der Alfresco-Servername
      * @param username     der Alfresco-Username
      * @param password     das Alfresco-Passwort
      * @param proxyHost    der Proxy-Host, falls verwendet
      * @param proxyPort    der Proxyport, falls verwendet
-     * @return             die Ergebnisse als Properties
+     * @return die NodeId als String
      */
-    private ArrayList<Properties> listFolder(final String filePath, final String listFolder, final boolean byPath, final String server, final String username,
-                                             final String password, final String proxyHost, final String proxyPort) {
-        ArrayList<Properties> liste = new ArrayList<Properties>();
-        boolean folder = false;
-        AlfrescoResponse response = AccessController.doPrivileged(new PrivilegedAction<AlfrescoResponse>() {
-
-            public AlfrescoResponse run() {
-                AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
-                try {
-                    return connector.listFolder(filePath, byPath);
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                    AlfrescoResponse response = new AlfrescoResponse();
-                    response.setStatusCode(ResponseType.SERVER_ERROR.toString());
-                    response.setStatusText(e.getMessage());
-                    return response;
-                }
-            }
-        });
-        try {
-            if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-                String name = "Verzeichnis konnte nicht gelesen werden: " + response.getStatusText();
-                name = name + "\n" + response.getStackTrace();
-                Properties p = new Properties();
-                p.put("fehler", name);
-                liste.add(p);
-            } else {
-                Document<Feed> entryDoc = response.getDocument();
-
-                Feed root = entryDoc.getRoot();
-                Iterator<Entry> it = root.getEntries().iterator();
-                while (it.hasNext()) {
-                    Entry ent = it.next();
-                    Iterator<Element> it1 = ent.getElements().iterator();
-                    while (it1.hasNext()) {
-                        Element element = it1.next();
-                        if (element.getQName().equals(CMISConstants.ATOMOBJECT)) {
-                            Iterator<Element> it2 = element.getElements().get(0).getElements().iterator();
-                            Properties p = new Properties();
-                            while (it2.hasNext()) {
-                                Element el = it2.next();
-                                if (el.getAttributeValue("propertyDefinitionId") != null
-                                        && el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:objectId")) {
-                                    String id = el.getFirstChild(CMISConstants.VALUE).getText();
-                                    p.put("id", id.substring(id.lastIndexOf('/') + 1));
-                                }
-                                if (el.getAttributeValue("propertyDefinitionId") != null
-                                        && el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:name"))
-                                    p.put("name", el.getFirstChild(CMISConstants.VALUE).getText());
-                                if (el.getElements().size() > 0) {
-                                    Iterator<Element> it3 = el.getElements().iterator();
-                                    while (it3.hasNext()) {
-                                        Element el1 = it3.next();
-                                        if (el1.getElements().size() > 0) {
-                                            Iterator<Element> it4 = el1.getElements().iterator();
-                                            while (it4.hasNext()) {
-                                                Element el2 = it4.next();
-                                                if (el2.getAttributeValue("propertyDefinitionId") != null && el2.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cm:title"))
-                                                    p.put("title", el2.getFirstChild(CMISConstants.VALUE).getText());
-                                                if (el2.getAttributeValue("propertyDefinitionId") != null && el2.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("my:documentDate"))
-                                                    p.put("date", el2.getFirstChild(CMISConstants.VALUE).getText());
-                                                if (el2.getAttributeValue("propertyDefinitionId") != null && el2.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("my:person"))
-                                                    p.put("person", el2.getFirstChild(CMISConstants.VALUE).getText());
-                                                if (el2.getAttributeValue("propertyDefinitionId") != null && el2.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cm:title"))
-                                                    p.put("title", el2.getFirstChild(CMISConstants.VALUE).getText());
-                                            }
-                                        }
-                                    }
-                                }
-                                if (el.getAttributeValue("propertyDefinitionId") != null
-                                        && el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:objectTypeId")) {
-                                    folder = el.getFirstChild(CMISConstants.VALUE).getText().equals("cmis:folder") || el.getFirstChild(CMISConstants.VALUE).getText().equals("F:my:archivFolder");
-                                    p.put("folder", folder);
-                                }
-                                if (el.getAttributeValue("propertyDefinitionId") != null
-                                        && el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:contentStreamMimeType"))
-                                    p.put("typ", el.getFirstChild(CMISConstants.VALUE).getText());
-                            }
-                            if (p.containsKey("name") && p.containsKey("id") && (Integer.parseInt(listFolder) > -1 || !folder)) {
-                                liste.add(p);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        return liste;
-    }
-
-
 	public static String getNodeId(final String cmisQuery, final String server, final String username,
 			final String password, final String proxyHost, final String proxyPort) {
 
 		JSONObject ret = new JSONObject();
-		AlfrescoResponse response;
+		Object obj = null;
 		try {
 			try {
-				response = AccessController.doPrivileged(new PrivilegedExceptionAction<AlfrescoResponse>() {
+				obj = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
-					public AlfrescoResponse run() throws VerteilungException {
-						AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
-								null);
-						return connector.getNode(cmisQuery);
+					public Object run() throws VerteilungException {
+						AlfrescoServices services = new AlfrescoServices(server, username, password, proxyHost, proxyPort);
+						return services.getNodeId(cmisQuery);
 					}
 				});
 			} catch (PrivilegedActionException e) {
@@ -390,47 +260,14 @@ public class VerteilungApplet extends Applet {
 				return ret.toString();
 			}
 
-			if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-				ret.put("success", false);
-				ret.put("result",
-						"Dokument konnte nicht gefunden werden." + response.getStatusText() + "\n" + response.getStackTrace());
-			} else {
-                Document<Feed> entryDoc = response.getDocument();
-                Feed root = entryDoc.getRoot();
-                List<Entry> entries = root.getEntries();
-                if (entries.size() > 0) {
-                    Iterator<Element> it = root.getEntries().get(0).getElements().iterator();
-                    while (it.hasNext()) {
 
-                        Element element = it.next();
-                        if (element.getQName().equals(CMISConstants.ATOMOBJECT)) {
-
-                            Iterator it1 = element.getElements().get(0).getElements().iterator();
-                            while (it1.hasNext()) {
-                                Element el = (Element) it1.next();
-                                if (el.getAttributeValue("propertyDefinitionId") != null
-                                        && el.getAttributeValue("propertyDefinitionId").equalsIgnoreCase("cmis:objectId")) {
-                                    String erg = el.getFirstChild(CMISConstants.VALUE).getText();
-                                    erg = erg.substring(erg.lastIndexOf('/') + 1);
-                                    ret.put("success", true);
-                                    ret.put("result", erg);
-                                    break;
-                                }
-                            }
-
-                        }
-                    }
-                } else {
-                    ret.put("success", false);
-                    ret.put("result", "Kein Knoten zu Kriterium " + cmisQuery + " gefunden!");
-                }
-			}
-		} catch (JSONException e) {
-			System.out.println(e.getLocalizedMessage());
-			e.printStackTrace();
-		}
-
-		return ret.toString();
+        ret.put("success", true);
+        ret.put("result", obj);
+        } catch (JSONException e) {
+            System.out.println(e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+        return ret.toString();
 	}
 
 	public static void uploadFile(final String filePath, final String fileName, final String description,

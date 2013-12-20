@@ -18,6 +18,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -129,7 +134,7 @@ public class AlfrescoConnector {
 
     /**
      * liefert einen Knoten
-     * @param   cmisQuery die Query
+     * @param   cmisQuery die Query als CMIS String
      * @return            der Knoten
      * @throws VerteilungException
      */
@@ -166,7 +171,7 @@ public class AlfrescoConnector {
                     alfResponse.setDocument((Document<Feed>) document.clone());
                 }
             } else {
-                throw new VerteilungException(clientResponse.getStatusText());
+                throw new VerteilungException(alfResponse.getStackTrace());
             }
 
             clientResponse.release();
@@ -757,5 +762,7 @@ public class AlfrescoConnector {
         is.close();
         return bytes;
     }
+
+
 
 }

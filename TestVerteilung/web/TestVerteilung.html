@@ -1079,17 +1079,12 @@ window.onload = function () {
     // Eventhandler für die Image Clicks
     handleImageClicks();
     tree = $("#tree").jstree({
-        /*       "themes": {
-         "theme": "corral",
-         "dots": true,
-         "icons": true
-         },
-         */      "json_data": {
+       "json_data": {
             "data": function (aNode, aFunction) {
                 if (alfrescoServerAvailable) {
                     if (isLocal()) {
                         try {
-                            var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "-1", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
+                            var ret = document.reader.listFolderAsJSON(aNode != -1 ? aNode[0].attributes["id"].value : "", "-1", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
                             aFunction($.parseJSON(ret));
                         } catch (e) {
                             errorHandler(e);
@@ -1113,7 +1108,9 @@ window.onload = function () {
                             datatype: "json",
                             url: "VerteilungServlet",
                             success: function (erg) {
-                                aFunction(erg);
+                                if (erg.success[0]) {
+                                    aFunction(erg.result);
+                                }
                             },
                             error: function (response) {
                                 try {
