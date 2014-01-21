@@ -35,6 +35,8 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
+import java.util.logging.Handler;
+import java.util.logging.LogManager;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -49,9 +51,12 @@ import org.apache.abdera.protocol.Response.ResponseType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Credentials;
 
-import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class VerteilungApplet extends Applet {
 
@@ -65,60 +70,104 @@ public class VerteilungApplet extends Applet {
 
 	Collection<FileEntry> entries = new ArrayList<FileEntry>();
 
+    private static Logger logger = Logger.getLogger(VerteilungApplet.class.getName());
+
+    private static String level = "WARNING";
+
+
 	public void init() {
 		try {
-			System.out.println("Hier ist das Verteilungsapplet");
+			logger.info("Hier ist das Verteilungsapplet");
+            level = getParameter ("debug");
+            Logger log = LogManager.getLogManager().getLogger("");
+            for (Handler h : log.getHandlers()) {
+                h.setLevel(Level.parse(level));
+            }
 			jsobject = JSObject.getWindow(this);
 		} catch (Exception jse) {
-			System.out.println(jse.getMessage());
+			logger.severe(jse.getMessage());
 			jse.printStackTrace();
 		}
 	}
 
+
     /**
      * prüft, ob eine Url verfügbar ist
      * @param urlString    die Url
-     * @param proxyHost    der Proxyhost, falls benutzt
-     * @param proxyPort    der Proxyport falls benutzt
-     * @return             true, wenn die Url verfügbar ist
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               true, wenn die URL verfügbar ist
      */
-    public static String isURLAvailable(final String urlString, final String proxyHost, final String proxyPort) {
+    public static String isURLAvailable(final String urlString) {
 
+        JSONObject ret = new JSONObject();
 
-        Boolean ret = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+        try {
+        logger.info("Aufruf Methode isURLAvailabel with " + urlString);
+        ret = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 
-            public Boolean run() {
+            public JSONObject run() {
 
-                URL url;
+                JSONObject obj = new JSONObject();
+                URL url = null;
                 try {
                     url = new URL(urlString);
+                    logger.info("Umwandlung in URL " + url);
                 } catch (MalformedURLException e) {
-                    return false;
+                    String error = "Fehler beim Check der URL: " + e.getMessage();
+                    logger.severe(error);
+                    e.printStackTrace();
+                    try {
+                        obj.put("success", false);
+                        obj.put("result", error);
+                    } catch(JSONException jse){
+                        logger.severe(jse.getMessage());
+                        jse.printStackTrace();
+                    }
                 }
                 try {
                     HttpURLConnection httpUrlConn;
-                    if (proxyHost != null && proxyHost.length() > 0 && proxyPort != null && proxyPort.length() > 0) {
-                        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
-                        httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
-                    } else {
-                        httpUrlConn = (HttpURLConnection) url.openConnection();
-                    }
+                    httpUrlConn = (HttpURLConnection) url.openConnection();
+                    logger.info("Open Connection " + httpUrlConn);
                     httpUrlConn.setRequestMethod("HEAD");
-
+                    logger.info("Set Request ");
                     // Set timeouts in milliseconds
                     httpUrlConn.setConnectTimeout(30000);
                     httpUrlConn.setReadTimeout(30000);
 
+                    int erg = httpUrlConn.getResponseCode();
+                    logger.info("ResponseCode " + erg);
+                    logger.info(httpUrlConn.getResponseMessage());
+                    obj.put("success", true);
+                    obj.put("result", erg == HttpURLConnection.HTTP_OK);
 
-                    return new Boolean(httpUrlConn.getResponseCode() == HttpURLConnection.HTTP_OK);
-                } catch (Exception e) {
-                    System.out.println("Fehler beim Check der URL: " + e.getMessage());
-                    return false;
+                } catch (Throwable t) {
+                    String error = "Fehler beim Check der URL: " + t.getMessage();
+                    logger.severe(error);
+                    t.printStackTrace();
+                    try {
+                    obj.put("success", false);
+                    obj.put("result", error);
+                    } catch(JSONException jse){
+                        logger.severe(jse.getMessage());
+                        jse.printStackTrace();
+                    }
                 }
-
+                return obj;
             }
         });
-
+        } catch (Exception e) {
+            String error = "Fehler beim Check der URL: " + e.getMessage();
+            logger.severe(error);
+            e.printStackTrace();
+            try {
+                ret.put("success", false);
+                ret.put("result", error);
+            } catch(JSONException jse){
+                logger.severe(jse.getMessage());
+                jse.printStackTrace();
+            }
+        }
         return ret.toString();
     }
 
@@ -145,7 +194,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+           logger.severe(e.getMessage());
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -162,7 +211,7 @@ public class VerteilungApplet extends Applet {
      * @param proxyHost          der Proxyhost, falls verwendet
      * @param proxyPort          der Proxyport, falls verwendet
      * @param credentials
-     * @return                   das Ergebnis als JSON STring
+     * @return                   das Ergebnis als JSON String
      * @throws JSONException
      */
 	public String moveDocument(final String documentId, final String destinationId, final String server,
@@ -200,33 +249,30 @@ public class VerteilungApplet extends Applet {
      * @param server       der Alfresco-Servername
      * @param username     der Alfresco-Username
      * @param password     das Alfresco-Passwort
-     * @param proxyHost    der Proxy-Host, falls verwendet
-     * @param proxyPort    der Proxyport, falls verwendet
-     * @return             der Inhalt des Verzeichnisses als JSON Objekte
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               der Inhalt des Verzeichnisses als JSON Objekte
      * @throws IOException
      * @throws VerteilungException
      * @throws JSONException
      */
-    public String listFolderAsJSON(final String filePath, final String listFolder, final String server, final String username, final String password,
-                                   final String proxyHost, final String proxyPort) throws IOException, VerteilungException, JSONException {
-        Object obj = null;
+    public String listFolderAsJSON(final String filePath, final String listFolder, final String server, final String username, final String password) throws IOException, VerteilungException, JSONException {
+        JSONObject ret = null;
 
         try {
-            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+            ret = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
-                public Object run() throws VerteilungException, IOException, JSONException {
-                    AlfrescoServices services = new AlfrescoServices(server, username, password, proxyHost, proxyPort);
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    AlfrescoServices services = new AlfrescoServices(server, username, password);
                     return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
                 }
             });
         } catch (PrivilegedActionException e) {
-            JSONObject ret = new JSONObject();
             ret.put("success", false);
             ret.put("result", e.getMessage());
-            return ret.toString();
         }
 
-        return obj.toString();
+        return ret.toString();
     }
 
 
@@ -236,22 +282,26 @@ public class VerteilungApplet extends Applet {
      * @param server       der Alfresco-Servername
      * @param username     der Alfresco-Username
      * @param password     das Alfresco-Passwort
-     * @param proxyHost    der Proxy-Host, falls verwendet
-     * @param proxyPort    der Proxyport, falls verwendet
      * @return die NodeId als String
      */
 	public static String getNodeId(final String cmisQuery, final String server, final String username,
-			final String password, final String proxyHost, final String proxyPort) {
+			final String password) {
 
 		JSONObject ret = new JSONObject();
-		Object obj = null;
 		try {
 			try {
-				obj = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+				ret = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
-					public Object run() throws VerteilungException {
-						AlfrescoServices services = new AlfrescoServices(server, username, password, proxyHost, proxyPort);
+					public JSONObject run() throws JSONException {
+                        try {
+						AlfrescoServices services = new AlfrescoServices(server, username, password);
 						return services.getNodeId(cmisQuery);
+                        } catch (Throwable t) {
+                            JSONObject obj = new JSONObject();
+                            obj.put("success", false);
+                            obj.put("result", t.getMessage());
+                            return obj;
+                        }
 					}
 				});
 			} catch (PrivilegedActionException e) {
@@ -260,11 +310,8 @@ public class VerteilungApplet extends Applet {
 				return ret.toString();
 			}
 
-
-        ret.put("success", true);
-        ret.put("result", obj);
         } catch (JSONException e) {
-            System.out.println(e.getLocalizedMessage());
+            logger.severe(e.getLocalizedMessage());
             e.printStackTrace();
         }
         return ret.toString();
@@ -282,7 +329,7 @@ public class VerteilungApplet extends Applet {
 							credentials);
 					return connector.uploadFileByPath(filePath, fileName, description, mimeType, destinationFolder);
 				} catch (IOException e) {
-					System.out.println(e.getMessage());
+					logger.severe(e.getMessage());
 					e.printStackTrace();
 					AlfrescoResponse response = new AlfrescoResponse();
 					response.setStatusCode(ResponseType.SERVER_ERROR.toString());
@@ -292,8 +339,8 @@ public class VerteilungApplet extends Applet {
 			}
 		});
 		if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-			System.err.println("Dokument konnte nicht hochgeladen werden." + response.getStatusText());
-			System.err.println(response.getStackTrace());
+			logger.warning("Dokument konnte nicht hochgeladen werden." + response.getStatusText());
+			logger.warning(response.getStackTrace());
 		}
 
 	}
@@ -324,7 +371,7 @@ public class VerteilungApplet extends Applet {
 							try {
 								ret = new String(response.getContent(), "UTF-8");
 							} catch (UnsupportedEncodingException e) {
-								System.out.println(e.getMessage());
+								logger.severe(e.getMessage());
 								e.printStackTrace();
 								ret = e.getMessage();
 							}
@@ -356,7 +403,7 @@ public class VerteilungApplet extends Applet {
 				try {
 					return connector.checkout(documentId);
 				} catch (IOException e) {
-					System.out.println(e.getMessage());
+					logger.severe(e.getMessage());
 					e.printStackTrace();
 					AlfrescoResponse response = new AlfrescoResponse();
 					response.setStatusCode(ResponseType.SERVER_ERROR.toString());
@@ -377,7 +424,7 @@ public class VerteilungApplet extends Applet {
 
 						return connector.updateContent(documentText, description, id);
 					} catch (IOException e) {
-						System.out.println(e.getMessage());
+						logger.severe(e.getMessage());
 						e.printStackTrace();
 						AlfrescoResponse response = new AlfrescoResponse();
 						response.setStatusCode(ResponseType.SERVER_ERROR.toString());
@@ -393,7 +440,7 @@ public class VerteilungApplet extends Applet {
 						try {
 							return connector.checkin(id, false, "");
 						} catch (IOException e) {
-							System.out.println(e.getMessage());
+							logger.severe(e.getMessage());
 							e.printStackTrace();
 							AlfrescoResponse response = new AlfrescoResponse();
 							response.setStatusCode(ResponseType.SERVER_ERROR.toString());
@@ -403,16 +450,16 @@ public class VerteilungApplet extends Applet {
 					}
 				});
 				if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-					System.err.println("Dokument konnte nicht eingecheckt werden: " + response != null ? response.getStatusText(): "");
-					System.err.println(response.getStackTrace());
+					logger.warning("Dokument konnte nicht eingecheckt werden: " + response != null ? response.getStatusText(): "");
+					logger.warning(response.getStackTrace());
 				}
 			} else {
-				System.err.println("Dokument konnte nicht aktualisiert werden: " + response != null ? response.getStatusText(): "");
-				System.err.println(response.getStackTrace());
+				logger.warning("Dokument konnte nicht aktualisiert werden: " + response != null ? response.getStatusText(): "");
+				logger.warning(response.getStackTrace());
 			}
 		} else {
-			System.err.println("Dokument konnte nicht ausgecheckt werden: " + response != null ? response.getStatusText(): "");
-			System.err.println(response.getStackTrace());
+			logger.warning("Dokument konnte nicht ausgecheckt werden: " + response != null ? response.getStatusText(): "");
+			logger.warning(response.getStackTrace());
 		}
 		ret = Integer.parseInt(response.getStatusCode());
 
@@ -432,7 +479,7 @@ public class VerteilungApplet extends Applet {
 				try {
 					return connector.checkout(documentId);
 				} catch (IOException e) {
-					System.out.println(e.getMessage());
+					logger.severe(e.getMessage());
 					e.printStackTrace();
 					AlfrescoResponse response = new AlfrescoResponse();
 					response.setStatusCode(ResponseType.SERVER_ERROR.toString());
@@ -454,7 +501,7 @@ public class VerteilungApplet extends Applet {
 						try {
 							return connector.updateCheckedOutFile(uri, description, mimeType, id);
 						} catch (URISyntaxException e) {
-							System.out.println(e.getMessage());
+							logger.severe(e.getMessage());
 							e.printStackTrace();
 							AlfrescoResponse response = new AlfrescoResponse();
 							response.setStatusCode(ResponseType.SERVER_ERROR.toString());
@@ -462,7 +509,7 @@ public class VerteilungApplet extends Applet {
 							return response;
 						}
 					} catch (IOException e) {
-						System.out.println(e.getMessage());
+						logger.severe(e.getMessage());
 						e.printStackTrace();
 						AlfrescoResponse response = new AlfrescoResponse();
 						response.setStatusCode(ResponseType.SERVER_ERROR.toString());
@@ -478,7 +525,7 @@ public class VerteilungApplet extends Applet {
 						try {
 							return connector.checkin(id, false, "");
 						} catch (IOException e) {
-							System.out.println(e.getMessage());
+							logger.severe(e.getMessage());
 							e.printStackTrace();
 							AlfrescoResponse response = new AlfrescoResponse();
 							response.setStatusCode(ResponseType.SERVER_ERROR.toString());
@@ -488,16 +535,16 @@ public class VerteilungApplet extends Applet {
 					}
 				});
 				if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-					System.err.println("Dokument konnte nicht eingecheckt werden: " + response != null ? response.getStatusText(): "");
-					System.err.println(response.getStackTrace());
+					logger.warning("Dokument konnte nicht eingecheckt werden: " + response != null ? response.getStatusText(): "");
+					logger.warning(response.getStackTrace());
 				}
 			} else {
-				System.err.println("Dokument konnte nicht aktualisiert werden: " + response != null ? response.getStatusText(): "");
-				System.err.println(response.getStackTrace());
+				logger.warning("Dokument konnte nicht aktualisiert werden: " + response != null ? response.getStatusText(): "");
+				logger.warning(response.getStackTrace());
 			}
 		} else {
-			System.err.println("Dokument konnte nicht ausgecheckt werden: " + response != null ? response.getStatusText(): "");
-			System.err.println(response.getStackTrace());
+			logger.warning("Dokument konnte nicht ausgecheckt werden: " + response != null ? response.getStatusText(): "");
+			logger.warning(response.getStackTrace());
 		}
 		ret = Integer.parseInt(response.getStatusCode());
 
@@ -521,10 +568,10 @@ public class VerteilungApplet extends Applet {
 					bufferedReader.close();
 					bufferedWriter.close();
 				} catch (IOException e1) {
-					System.err.println(e1.getMessage());
+					logger.severe(e1.getMessage());
 					e1.printStackTrace();
 				} catch (URISyntaxException e) {
-					System.err.println(e.getMessage());
+					logger.severe(e.getMessage());
 					e.printStackTrace();
 				}
 				return null;
@@ -563,7 +610,7 @@ public class VerteilungApplet extends Applet {
 							fos.close();
 							getAppletContext().showDocument(file.toURI().toURL(), "_blank");
 						} catch (IOException e) {
-							System.out.println(e.getMessage());
+							logger.severe(e.getMessage());
 							e.printStackTrace();
 
 						}
@@ -572,11 +619,12 @@ public class VerteilungApplet extends Applet {
 
 				});
 			} catch (Exception e) {
-				System.out.println("Unable to extract ZIP.");
-				System.out.println(e.getMessage());
+				logger.severe("Unable to extract ZIP.");
+				logger.severe(e.getMessage());
+                e.printStackTrace();
 			}
 		} else {
-            System.out.println("Unable to find PDF in extracted ZIP.");
+            logger.warning("Unable to find PDF in extracted ZIP.");
         }
 		return;
 	}
@@ -626,13 +674,13 @@ public class VerteilungApplet extends Applet {
 								jsobject.call("loadText", new String[] { result, entryFileName, "application/zip", name });
 						}
 					} catch (Exception e) {
-						System.err.println(e.getMessage());
+						logger.severe(e.getMessage());
 						e.printStackTrace();
 					} finally {
 						try {
 							zipin.close();
 						} catch (IOException e) {
-							System.err.println(e.getMessage());
+							logger.severe(e.getMessage());
 							e.printStackTrace();
 						}
 					}
@@ -640,8 +688,9 @@ public class VerteilungApplet extends Applet {
 				}
 			});
 		} catch (Exception e) {
-			System.out.println("Unable to extract ZIP.");
-			System.out.println(e.getMessage());
+			logger.severe("Unable to extract ZIP.");
+			logger.severe(e.getMessage());
+            e.printStackTrace();
 		}
 		return counter;
 	}
@@ -666,7 +715,7 @@ public class VerteilungApplet extends Applet {
 			else
 				jsobject.call("loadMultiText", new String[] { result, fileName, typ, "false", "false", null });
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			logger.severe(e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -680,7 +729,7 @@ public class VerteilungApplet extends Applet {
 			bos.write(ret, 0, ret.length);
 			bos.flush();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			logger.severe(e.getMessage());
 			e.printStackTrace();
 		}
 
@@ -719,6 +768,10 @@ public class VerteilungApplet extends Applet {
         return ret;
     }
 
+    /**
+     * Testmethode
+     * @return
+     */
     public static String test() {
 		return "Hier ist das Verteilungs Applet!";
 	}

@@ -18,9 +18,10 @@
     </jar>
     <signjar destDir="web/WEB-INF/lib" alias="Signer" storepass="Rethymon" >
       <path>
-        <fileset dir="web/WEB-INF/lib" includes="vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-io-2.4.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,slf4j-api-1.6.6.jar" />
-      </path>
-      <flattenmapper />
-    </signjar>
-  </target>
-</project>
+           <fileset dir="web/WEB-INF/lib" includes="vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-io-2.4.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,slf4j-api-1.7.5.jar,alfresco-opencmis-extension-0.7.jar,chemistry-opencmis-client-api-0.10.0.jar,chemistry-opencmis-client-bindings-0.10.0.jar,chemistry-opencmis-client-impl-0.10.0.jar,chemistry-opencmis-commons-api-0.10.0.jar,chemistry-opencmis-commons-impl-0.10.0.jar,bcprov-jdk15on-150.jar" />
+           <!--<fileset dir="web/WEB-INF/lib" includes="vt.jar" /> -->
+    </path>
+       <flattenmapper />
+     </signjar>
+   </target>
+ </project>

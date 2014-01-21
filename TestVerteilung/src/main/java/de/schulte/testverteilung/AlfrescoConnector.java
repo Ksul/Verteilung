@@ -610,10 +610,11 @@ public class AlfrescoConnector {
     }
 
     /**
-     * STATUS 200: SUCCESS
+     * listet einen Folder
      *
      * @param folderPath
-     * @param byPath
+     * @param byPath      true      der Folder wird mit Pfad qualifiziert
+     *                    false     der Folder wird über eine ID qualifiziert
      * @return AlfrescoResponse
      * @throws IOException
      */

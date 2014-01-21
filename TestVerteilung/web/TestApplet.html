@@ -2,13 +2,58 @@
 <html>
 <head>
     <title></title>
-
+    <script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="./verteilung.js" charset="utf-8"></script>
+    <script type="text/javascript" src="jquery-1.9.1.js"></script>
 </head>
 <body>
-<applet width="100" height="100" name="reader"  codebase="./WEB-INF/lib" archive="vt.jar, pdfbox-1.6.0.jar, plugin.jar, bcprov-jdk15on-147.jar, commons-codec-1.6.jar, commons-httpclient-3.0.1.jar, abdera-1.1.2.jar, axiom.jar, commons-logging-1.1.1.jar, fontbox-1.6.0.jar, jempbox-1.6.0.jar, slf4j-api-1.6.6.jar, commons-io-2.4.jar" code="de.schulte.testverteilung.VerteilungApplet.class"/>
-<script type="text/javascript">
-alert(document.reader.test());
-</script>
+<div id="appl" width="0px"></div>
+<TABLE BORDER=1 width="100%" id="t1">
+    <TR>
+    <TH width="20%">Test</TH>
+    <TH width="20%">Call</TH>
+    <TH>Ergebnis</TH>
+    </TR>
+    <script type="text/javascript">
+    try {
+        doTest("Lade Applet", 'loadApplet("INFO");');
+        doTest("Test Applet", 'document.reader.test()');
+        var hostName = doTest("Ermittlung Hostname", 'openFile("../host")[0];');
+        var password = doTest("Ermittlung Password", 'openFile("../passwd")[0];');
+        doTest("Host erreichbar",'document.reader.isURLAvailable(hostName + "/alfresco/cmis");');
+        doTest("Function getNodeId", "document.reader.getNodeId(\"company_home/dictionary/scripts/recognition.js\", hostName + \"/alfresco/cmis\", \"admin\", password);");
+    } catch (e) {
+        errorHandler(e);
+    }
 
+    function doTest(testName, testEvaluate) {
+        var erg;
+
+        try {
+            erg = eval(testEvaluate);
+            addRow(testName, testEvaluate, erg);
+        } catch (e) {
+            addRow(testName, testEvaluate, e);
+        }
+        return erg;
+    }
+
+    function addRow(test, call, result)
+    {
+        var nummer = -1;
+        var tabellen_id = "t1";
+        var trhtml = document.getElementById( tabellen_id ).insertRow( nummer );
+        var tdhtml1 = document.createElement( "td" );
+        var tdhtml2 = document.createElement( "td" );
+        var tdhtml3 = document.createElement( "td" );
+        tdhtml1.innerHTML = test; // content
+        tdhtml2.innerHTML = call;
+        tdhtml3.innerHTML = result;
+        trhtml.appendChild( tdhtml1 );
+        trhtml.appendChild( tdhtml2 );
+        trhtml.appendChild( tdhtml3 );
+    }
+</script>
+    </TABLE>
 </body>
 </html>

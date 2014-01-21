@@ -4,9 +4,7 @@ import org.apache.commons.io.FileUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -21,7 +19,7 @@ import org.junit.Test;
  * Time: 16:38
  * To change this template use File | Settings | File Templates.
  */
-public class VerteilungServletTest {
+public class VerteilungServletTest extends AlfrescoTest {
 
     HttpServletRequest request;
     HttpServletResponse response;
@@ -32,12 +30,13 @@ public class VerteilungServletTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         servlet = new VerteilungServlet();
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
-        when(request.getParameter("server")).thenReturn("https://ksul.spdns.org");
+        when(request.getParameter("server")).thenReturn(host);
         when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn(password);
         when(request.getParameter("proxyHost")).thenReturn("www-proxy");
         when(request.getParameter("proxyPort")).thenReturn("8080");
         sr = new StringWriter();

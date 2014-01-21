@@ -48,7 +48,6 @@ public class VerteilungServlet extends HttpServlet {
 	public VerteilungServlet() {
 		super();
 
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -143,11 +142,10 @@ public class VerteilungServlet extends HttpServlet {
 							proxyHost, proxyPort);
 				}
 				if (value.equalsIgnoreCase("getNodeId")) {
-					ret = getNodeId(cmisQuery, server, username, password, proxyHost,
-							proxyPort);
+					ret = getNodeId(cmisQuery, server, username, password);
 				}
                 if (value.equalsIgnoreCase("listFolderAsJSON")) {
-                    ret = listFolderAsJSON(filePath, withFolder, server, username, password, proxyHost, proxyPort);
+                    ret = listFolderAsJSON(filePath, withFolder, server, username, password);
                 }
 				if (value.equalsIgnoreCase("extract")) {
 					ret = extract(documentText, fileName, clear);
@@ -351,15 +349,13 @@ public class VerteilungServlet extends HttpServlet {
      * @param server       der Alfresco-Servername
      * @param username     der Alfresco-Username
      * @param password     das Alfresco-Passwort
-     * @param proxyHost    der Proxy-Host, falls verwendet
-     * @param proxyPort    der Proxyport, falls verwendet
      * @return die Id als Object
      * @throws VerteilungException
      */
-    protected Object getNodeId(String cmisQuery, String server, String username, String password,
-                               String proxyHost, String proxyPort) throws VerteilungException {
+    protected Object getNodeId(String cmisQuery, String server, String username, String password
+                               ) throws VerteilungException {
 
-        AlfrescoServices services = new AlfrescoServices(server, username, password, proxyHost, proxyPort);
+        AlfrescoServices services = new AlfrescoServices(server, username, password);
         return services.getNodeId(cmisQuery);
     }
 
@@ -385,17 +381,17 @@ public class VerteilungServlet extends HttpServlet {
      * @param server       der Alfresco-Servername
      * @param username     der Alfresco-Username
      * @param password     das Alfresco-Passwort
-     * @param proxyHost    der Proxy-Host, falls verwendet
-     * @param proxyPort    der Proxyport, falls verwendet
-     * @return             der Inhalt des Verzeichnisses als JSON Objekte
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               der Inhalt des Verzeichnisses als JSON Objekte
      * @throws IOException
      * @throws VerteilungException
      * @throws JSONException
      */
-    protected JSONArray listFolderAsJSON(String filePath, String listFolder, String server, String username, String password,
-                                         String proxyHost, String proxyPort) throws IOException, VerteilungException, JSONException {
+    protected JSONObject listFolderAsJSON(String filePath, String listFolder, String server, String username, String password
+                                        ) throws IOException, VerteilungException, JSONException {
 
-        AlfrescoServices services = new AlfrescoServices(server, username, password, proxyHost, proxyPort);
+        AlfrescoServices services = new AlfrescoServices(server, username, password);
         return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
     }
 

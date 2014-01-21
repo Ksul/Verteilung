@@ -920,30 +920,10 @@ $.fn.dataTableExt.oPagination.listbox = {
 
 window.onload = function () {
 
+
+    loadApplet();
     document.getElementById('filesinput').addEventListener('change', readMultiFile, false);
-    if (isLocal()) {
-        var obj = document.createElement('applet');
-        obj.setAttribute('name', 'reader');
-        obj.setAttribute('width', '1');
-        obj.setAttribute('height', '1');
-        obj.setAttribute('codebase', './WEB-INF/lib');
-        obj.setAttribute('archive',
-                'vt.jar, ' +
-                        'pdfbox-1.6.0.jar, ' +
-                        'plugin.jar, ' +
-                        'bcprov-jdk15on-147.jar, ' +
-                        'commons-codec-1.6.jar, ' +
-                        'commons-httpclient-3.0.1.jar, ' +
-                        'abdera-1.1.2.jar, ' +
-                        'axiom.jar, ' +
-                        'commons-logging-1.1.1.jar, ' +
-                        'fontbox-1.6.0.jar, ' +
-                        'jempbox-1.6.0.jar, ' +
-                        'slf4j-api-1.6.6.jar, ' +
-                        'commons-io-2.4.jar');
-        obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
-        document.getElementById('appl').appendChild(obj);
-    }
+
 
 
     propsEditor = ace.edit("inProps");
@@ -1085,7 +1065,11 @@ window.onload = function () {
                     if (isLocal()) {
                         try {
                             var ret = document.reader.listFolderAsJSON(aNode != -1 ? aNode[0].attributes["id"].value : "", "-1", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
-                            aFunction($.parseJSON(ret));
+                            var json = jQuery.parseJSON(ret);
+                            if (json.success)
+                              aFunction(json.result);
+                            else
+                              alert("Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
                         } catch (e) {
                             errorHandler(e);
                         }
