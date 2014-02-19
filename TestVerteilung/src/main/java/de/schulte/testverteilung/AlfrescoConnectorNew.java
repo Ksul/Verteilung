@@ -1,11 +1,21 @@
 package de.schulte.testverteilung;
 
+import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
+import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
+import org.apache.chemistry.opencmis.commons.enums.VersioningState;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
+import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.commons.io.IOUtils;
-import java.io.IOException;
 
+import java.io.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 
 /**
@@ -17,9 +27,13 @@ import java.io.IOException;
  */
 public class AlfrescoConnectorNew {
 
+    private static Logger logger = Logger.getLogger(AlfrescoConnectorNew.class.getName());
+
     private String user = null;
     private String password = null;
     private String bindingUrl = null;
+
+
     private Session session = null;
 
     /**
@@ -32,7 +46,27 @@ public class AlfrescoConnectorNew {
         this.user = user;
         this.password = password;
         this.bindingUrl = bindingUrl;
-        this.session = initSession();
+        logger.info("URL: " + this.bindingUrl);
+        logger.info("User: " + this.user);
+        logger.info("Password: " + this.password);
+    }
+
+    /**
+     * liefert die CMIS Session
+     * @return  die CMIS Session
+     */
+    private Session getSession() throws VerteilungException {
+        if (this.session != null)
+          return this.session;
+        else {
+            try {
+            this.session = initSession();
+            } catch (Exception e) {
+                String error = " Mit den Parametern Server: " + this.bindingUrl + " User: " + this.user + " Password: " + this.password + " konnte keine Cmis Session etabliert werden!";
+                throw new VerteilungException(error, e);
+            }
+            return this.session;
+        }
     }
 
     /**
@@ -54,10 +88,10 @@ public class AlfrescoConnectorNew {
      * @return
      */
 
-    public ItemIterable<CmisObject> listFolder(String folderId, int maxItemsPerPage, int pagesToSkip){
-        CmisObject object = session.getObject(session.createObjectId(folderId));
+    public ItemIterable<CmisObject> listFolder(String folderId, int maxItemsPerPage, int pagesToSkip) throws VerteilungException{
+        CmisObject object = getSession().getObject(getSession().createObjectId(folderId));
         Folder folder = (Folder) object;
-        OperationContext operationContext = session.createOperationContext();
+        OperationContext operationContext = getSession().createOperationContext();
         operationContext.setMaxItemsPerPage(maxItemsPerPage);
 
         ItemIterable<CmisObject> children = folder.getChildren(operationContext);
@@ -69,34 +103,38 @@ public class AlfrescoConnectorNew {
     /**
      * listet den Inhalt eines Folders
      * @param folderId              die Id des Folders
-     * @return
+     * @return                      eine Liste mit CmisObjekten
      */
-    public ItemIterable<CmisObject> listFolder( String folderId){
+    public ItemIterable<CmisObject> listFolder( String folderId) throws VerteilungException{
         return listFolder(folderId, 99999, 0);
     }
 
     /**
-     * liefert die ID eines Knotens
+     * liefert einen Knotens
      * @param path      der Pfad zum Knoten
-     * @return
+     * @return          der Knoten als CMISObject
      */
-    public String getNodeId(String path){
-        CmisObject object = session.getObjectByPath(path);
-        return object.getId();
+    public CmisObject getNode(String path) throws VerteilungException {
+        try {
+            CmisObject object = getSession().getObjectByPath(path);
+            return object;
+        } catch (CmisObjectNotFoundException e) {
+            return null;
+        }
     }
 
     /**
      * liefert ein Dokument
      * @param queryString           die Abfragequery
-     * @return
+     * @return                      ein AlfrescoDocument
      */
-    public Document findDocument(String queryString){
+    public AlfrescoDocument findDocument(String queryString) throws VerteilungException {
 
-        ItemIterable<QueryResult> results = session.query(queryString, false);
+        ItemIterable<QueryResult> results = getSession().query(queryString, false);
 
         for (QueryResult qResult : results) {
                  String objectId = qResult.getPropertyValueByQueryName("cmis:objectId");
-            return (Document) session.getObject(session.createObjectId(objectId));
+            return (AlfrescoDocument) getSession().getObject(getSession().createObjectId(objectId));
 
         }
         return null;
@@ -105,21 +143,21 @@ public class AlfrescoConnectorNew {
     /**
      * liefert den Inhalt eines Dokumentes
      * @param documentId            die Id des Dokumentes
-     * @return
+     * @return                      der Inhalt als Bytearray
      */
-    public byte[] getDocumentContents( String documentId){
-        CmisObject object = session.getObject(session.createObjectId(documentId));
+    public byte[] getDocumentContent( String documentId) throws VerteilungException {
+        CmisObject object = getSession().getObject(getSession().createObjectId(documentId));
         Document document = (Document) object;
 
-        return getDocumentContents(document);
+        return getDocumentContent(document);
     }
 
     /**
      * liefert den Inhalt eines Dokumentes
      * @param document              das Dokument
-     * @return
+     * @return                      der Inhalt als Bytearray
      */
-    public byte[] getDocumentContents(Document document){
+    public byte[] getDocumentContent(Document document) {
         byte fileBytes[] = null;
 
         try{
@@ -131,4 +169,34 @@ public class AlfrescoConnectorNew {
 
         return fileBytes;
     }
+
+    /**
+     * lädt eine Document hoch
+     * @param folder                Der Folder, in den das Dokument geladen werden soll
+     * @param file                  Die Datei, die hochgeladen werden soll
+     * @param typ                   Der Typ der Datei
+     * @return                      die Id des neuen Documentes als String
+     * @throws IOException
+     */
+    public String uploadDocument(Folder folder, File file, String typ) throws IOException, VerteilungException {
+
+        FileInputStream fis = new FileInputStream(file);
+        DataInputStream dis = new DataInputStream(fis);
+        byte[] bytes = new byte[(int) file.length()];
+        dis.readFully(bytes);
+
+        Map newDocProps = new HashMap();
+        newDocProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+        newDocProps.put(PropertyIds.NAME, file.getName());
+
+        List addAces = new LinkedList();
+        List removeAces = new LinkedList();
+        List policies = new LinkedList();
+        ContentStream contentStream = new ContentStreamImpl(file.getAbsolutePath(), null, "application/pdf",
+                new ByteArrayInputStream(bytes));
+        Document doc = folder.createDocument(newDocProps, contentStream,
+                VersioningState.NONE, policies, removeAces, addAces, getSession().getDefaultContext());
+        return doc.getId();
+    }
+
 }

@@ -1,6 +1,5 @@
 package de.schulte.testverteilung;
 
-import java.io.File;
 import java.net.*;
 
 import java.io.BufferedOutputStream;
@@ -11,9 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -26,11 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.Entry;
-import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.Response.ResponseType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Credentials;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,6 +39,16 @@ public class VerteilungServlet extends HttpServlet {
 
 	Collection<FileEntry> entries = new ArrayList<FileEntry>();
 
+    private VerteilungServices services;
+
+    private String bindingUrl;
+
+    private String user;
+
+    private String password;
+
+    private Logger logger = Logger.getLogger(VerteilungApplet.class.getName());
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -49,6 +56,46 @@ public class VerteilungServlet extends HttpServlet {
 		super();
 
 	}
+
+
+    /**
+     * setzt die Parameter
+     * @param url          die Binding Url
+     * @param userName     der Username
+     * @param pass         das Password
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               die Parameter als String
+     */
+    public JSONObject setParameter(String url, String userName, String pass) {
+        bindingUrl = url;
+        user = userName;
+        password = pass;
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("success", true);
+            obj.put("result", bindingUrl + " " + user + " " + password);
+        } catch (JSONException jse) {
+            logger.severe(jse.getMessage());
+            jse.printStackTrace();
+        }
+        return obj;
+    }
+
+    /**
+     * liefert die Alfresco Services
+     * @param url               Binding URL des Servers
+     * @param user              User Name
+     * @param password          Passwort
+     * @return
+     */
+    public VerteilungServices getServices(String url, String user, String password) throws VerteilungException {
+        if (url == null || user == null || password == null)
+            throw new VerteilungException("Parameter fehlen!");
+        if (services == null)
+            services = new VerteilungServices(url, user, password);
+        return services;
+    }
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
@@ -115,14 +162,26 @@ public class VerteilungServlet extends HttpServlet {
 					openPDF(resp, fileName);
 					return;
 				}
-
-                if (value.equalsIgnoreCase("isURLAvailable")) {
-                    ret = isURLAvailable(server, proxyHost, proxyPort);
+                if (value.equalsIgnoreCase("setParameter")) {
+                    obj = setParameter(server, username, password);
                 }
-			
-				if (value.equalsIgnoreCase("getContent")) {
-					ret = getContent(documentId, extract.equalsIgnoreCase("true"), server, username, password, proxyHost,
-							proxyPort);
+                if (value.equalsIgnoreCase("isURLAvailable")) {
+                    obj = isURLAvailable(server);
+                }
+                if (value.equalsIgnoreCase("getNodeId")) {
+                    obj = getNodeId(filePath);
+                }
+                if (value.equalsIgnoreCase("findDocument")) {
+                    obj = findDocument(cmisQuery);
+                }
+                if (value.equalsIgnoreCase("uploadDocument")) {
+                    obj = uploadDocument(destinationFolder, fileName);
+                }
+                if (value.equalsIgnoreCase("deleteDocument")) {
+                    obj = deleteDocument(destinationFolder, fileName);
+                }
+				if (value.equalsIgnoreCase("getDocumentContent")) {
+					obj = getDocumentContent(documentId, extract.equalsIgnoreCase("true"));
 				}
 				if (value.equalsIgnoreCase("updateDocument")) {
 					ret = updateDocument(documentId, documentText, description, server, username, password, proxyHost, proxyPort);
@@ -137,15 +196,10 @@ public class VerteilungServlet extends HttpServlet {
 					ret = updateDocumentByFile(documentId, fileName, description, mimeType, server, username, password,
 							proxyHost, proxyPort);
 				}
-				if (value.equalsIgnoreCase("uploadFile")) {
-					ret = uploadFile(filePath, fileName, destinationFolder, description, mimeType, server, username, password,
-							proxyHost, proxyPort);
-				}
-				if (value.equalsIgnoreCase("getNodeId")) {
-					ret = getNodeId(cmisQuery, server, username, password);
-				}
+
+
                 if (value.equalsIgnoreCase("listFolderAsJSON")) {
-                    ret = listFolderAsJSON(filePath, withFolder, server, username, password);
+                    obj = listFolderAsJSON(filePath, withFolder, server, username, password);
                 }
 				if (value.equalsIgnoreCase("extract")) {
 					ret = extract(documentText, fileName, clear);
@@ -157,8 +211,6 @@ public class VerteilungServlet extends HttpServlet {
 				if (value.equalsIgnoreCase("doTest")) {
 					ret = doTest(fileName, filePath);
 				}
-				obj.append("success", true);
-				obj.append("result", ret);
 			}
 		} catch (VerteilungException e) {
 			obj.append("success", false);
@@ -171,43 +223,89 @@ public class VerteilungServlet extends HttpServlet {
 		out.write(obj.toString());
 	}
 
-    protected  boolean isURLAvailable(String urlString, String proxyHost, String proxyPort)  {
+    /**
+     * prüft, ob eine Url verfügbar ist
+     * @param urlString    URL des Servers
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               true, wenn die URL verfügbar ist
+     */
+    protected JSONObject isURLAvailable(String urlString) {
 
+        JSONObject obj = new JSONObject();
         URL url = null;
         try {
             url = new URL(urlString);
+            logger.info("Umwandlung in URL " + url);
         } catch (MalformedURLException e) {
-           return false;
+            String error = "Fehler beim Check der URL: " + e.getMessage();
+            logger.severe(error);
+            e.printStackTrace();
+            try {
+                obj.put("success", false);
+                obj.put("result", error);
+            } catch (JSONException jse) {
+                logger.severe(jse.getMessage());
+                jse.printStackTrace();
+            }
         }
-
-        HttpURLConnection httpUrlConn;
         try {
-            if (proxyHost != null && proxyPort != null) {
-                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
-                httpUrlConn = (HttpURLConnection) url.openConnection(proxy);
-            } else
-                httpUrlConn = (HttpURLConnection) url.openConnection();
-
+            HttpURLConnection httpUrlConn;
+            httpUrlConn = (HttpURLConnection) url.openConnection();
+            logger.info("Open Connection " + httpUrlConn);
             httpUrlConn.setRequestMethod("HEAD");
-
+            logger.info("Set Request ");
             // Set timeouts in milliseconds
             httpUrlConn.setConnectTimeout(30000);
             httpUrlConn.setReadTimeout(30000);
 
-            // Print HTTP status code/message for your information.
-            System.out.println("Response Code: "
-                    + httpUrlConn.getResponseCode());
-            System.out.println("Response Message: "
-                    + httpUrlConn.getResponseMessage());
+            int erg = httpUrlConn.getResponseCode();
+            logger.info("ResponseCode " + erg);
+            logger.info(httpUrlConn.getResponseMessage());
+            obj.put("success", true);
+            obj.put("result", erg == HttpURLConnection.HTTP_OK);
 
-            return (httpUrlConn.getResponseCode() == HttpURLConnection.HTTP_OK);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-            return false;
+        } catch (Throwable t) {
+            String error = "Fehler beim Check der URL: " + t.getMessage();
+            logger.severe(error);
+            t.printStackTrace();
+            try {
+                obj.put("success", false);
+                obj.put("result", error);
+            } catch (JSONException jse) {
+                logger.severe(jse.getMessage());
+                jse.printStackTrace();
+            }
         }
+        return obj;
     }
 
+    /**
+     * liefert eine NodeID als String zurück
+     * @param path         der Pfad zum Knoten, der der Knoten gesucht werden soll
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               die NodeId als String
+     */
+    protected JSONObject getNodeId(String path)  {
 
+        VerteilungServices services = new VerteilungServices(bindingUrl, user, password);
+        return services.getNodeId(path);
+    }
+
+    /**
+     * liefert den Inhalt eines Dokumentes. Wenn es sich um eine PDF Dokument handelt, dann wird
+     * der Text extrahiert.
+     * @param documentId   die Id des Documentes
+     * @param extract      legt fest,ob einPDF Document umgewandelt werden soll
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               das Document als JSONObject
+     */
+    protected JSONObject getDocumentContent(String documentId, boolean extract) {
+        VerteilungServices services = new VerteilungServices(bindingUrl, user, password);
+        return services.getDocumentContent(documentId, extract);
+    }
 
     protected void openPDF(HttpServletResponse resp, String fileName) throws IOException {
 		boolean found = false;
@@ -236,30 +334,7 @@ public class VerteilungServlet extends HttpServlet {
 		}
 	}
 
-	protected Object getContent(String documentId, boolean extract, String server, String username, String password,
-			String proxyHost, String proxyPort) throws VerteilungException {
-		Object ret;
-		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
-		AlfrescoResponse response = connector.getContent(documentId);
-		if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-			throw new VerteilungException("Dokument konnte nicht gelesen werden." + response.getStatusText());
-		} else {
-			if (extract) {
-				PDFConnector con = new PDFConnector();
-				byte[] bytes = response.getContent();
-				InputStream is = new ByteArrayInputStream(bytes);
-				ret = con.pdftoText(is);
-			} else
-				try {
-					ret = new String(response.getContent(), "utf-8");
-				} catch (UnsupportedEncodingException e) {
-					System.out.println(e.getLocalizedMessage());
-					e.printStackTrace();
-					throw new VerteilungException(e.getLocalizedMessage());
-				}
-		}
-		return ret;
-	}
+
 
 	protected Object getTicket(String server, String username, String password, String proxyHost, String proxyPort,
 			Credentials credentials) {
@@ -343,34 +418,46 @@ public class VerteilungServlet extends HttpServlet {
 		return ret;
 	}
 
+
     /**
-     * liefert eine NodeId  mit Hilfe einer CMIS Query
-     * @param cmisQuery
-     * @param server       der Alfresco-Servername
-     * @param username     der Alfresco-Username
-     * @param password     das Alfresco-Passwort
-     * @return die Id als Object
+     * lädt ein Document in den Server
+     * @param filePath       der Folder als String, in das Document geladen werden soll
+     * @param fileName       der Dateiname ( mit Pfad) als String, die hochgeladen werden soll
+     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                               false    ein Fehler ist aufgetreten
+     *                                                      ret               Dokument als JSONObject
      * @throws VerteilungException
      */
-    protected Object getNodeId(String cmisQuery, String server, String username, String password
-                               ) throws VerteilungException {
+    protected JSONObject uploadDocument(String filePath, String fileName) throws  VerteilungException {
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.uploadDocument(filePath, fileName);
+	}
 
-        AlfrescoServices services = new AlfrescoServices(server, username, password);
-        return services.getNodeId(cmisQuery);
+    /**
+     * löscht ein Document
+     * @param filePath       der Folder als String, in das Documentliegt
+     * @param fileName       der Name des Documentes
+     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                               false    ein Fehler ist aufgetreten
+     *                                                      ret               Dokument als JSONObject
+     * @throws VerteilungException
+     */
+    protected JSONObject deleteDocument(String filePath, String fileName) throws  VerteilungException {
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.deleteDocument(filePath, fileName);
     }
 
-    protected Object uploadFile(String filePath, String fileName, String destinationFolder, String description,
-			String mimeType, String server, String username, String password, String proxyHost, String proxyPort)
-			throws IOException, VerteilungException {
-		String ret = null;
-		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
-		AlfrescoResponse response = connector
-				.uploadFileByPath(filePath, fileName, description, mimeType, destinationFolder);
-		if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-			throw new VerteilungException("Dokument konnte nicht hochgeladen werden." + response.getStatusText() + "\n" + response.getStackTrace());
-		}
-		return ret;
-	}
+    /**
+     * findet ein Document
+     * @param cmisQuery    die CMIS Query, mit der der Knoten gesucht werden soll
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               Dokument als JSONObject
+     */
+    protected JSONObject findDocument(String cmisQuery) throws VerteilungException {
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.findDocument(cmisQuery);
+    }
 
 
 
@@ -384,14 +471,10 @@ public class VerteilungServlet extends HttpServlet {
      * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    ret               der Inhalt des Verzeichnisses als JSON Objekte
-     * @throws IOException
-     * @throws VerteilungException
-     * @throws JSONException
      */
-    protected JSONObject listFolderAsJSON(String filePath, String listFolder, String server, String username, String password
-                                        ) throws IOException, VerteilungException, JSONException {
+    protected JSONObject listFolderAsJSON(String filePath, String listFolder, String server, String username, String password)  {
 
-        AlfrescoServices services = new AlfrescoServices(server, username, password);
+        VerteilungServices services = new VerteilungServices(server, username, password);
         return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
     }
 

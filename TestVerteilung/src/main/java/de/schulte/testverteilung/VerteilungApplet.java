@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -40,13 +39,11 @@ import java.util.logging.LogManager;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.Entry;
-import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.Response.ResponseType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Credentials;
@@ -64,21 +61,38 @@ public class VerteilungApplet extends Applet {
 
 	JSObject jsobject;
 
-	ByteArrayOutputStream bys = new ByteArrayOutputStream();
+
+
+
+
+    ByteArrayOutputStream bys = new ByteArrayOutputStream();
 
 	BufferedOutputStream bos = new BufferedOutputStream(bys);
 
 	Collection<FileEntry> entries = new ArrayList<FileEntry>();
 
+    private static VerteilungServices services;
+
+    private static String bindingUrl;
+
+    private static String user;
+
+    private static String password;
+
     private static Logger logger = Logger.getLogger(VerteilungApplet.class.getName());
 
     private static String level = "WARNING";
 
-
+    /**
+     * Initialisierung
+     */
 	public void init() {
 		try {
 			logger.info("Hier ist das Verteilungsapplet");
             level = getParameter ("debug");
+            bindingUrl = getParameter("url");
+            user = getParameter("user");
+            password = getParameter("password");
             Logger log = LogManager.getLogManager().getLogger("");
             for (Handler h : log.getHandlers()) {
                 h.setLevel(Level.parse(level));
@@ -90,10 +104,47 @@ public class VerteilungApplet extends Applet {
 		}
 	}
 
+    /**
+     * setzt die Parameter
+     * @param url          die Binding Url
+     * @param userName     der Username
+     * @param pass         das Password
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               die Parameter als String
+     */
+    public static String setParameter(String url, String userName, String pass) {
+        bindingUrl = url;
+        user = userName;
+        password = pass;
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("success", true);
+            obj.put("result", bindingUrl + " " + user + " " + password);
+        } catch (JSONException jse) {
+            logger.severe(jse.getMessage());
+            jse.printStackTrace();
+        }
+        return obj.toString();
+    }
+
+    /**
+     * liefert die Alfresco Services
+     * @param url               Binding URL des Servers
+     * @param user              User Name
+     * @param password          Passwort
+     * @return
+     */
+    public static VerteilungServices getServices(String url, String user, String password) {
+        if (services == null)
+            services = new VerteilungServices(url, user, password);
+        return services;
+    }
+
 
     /**
      * prüft, ob eine Url verfügbar ist
-     * @param urlString    die Url
+     * @param urlString    URL des Servers
      * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    ret               true, wenn die URL verfügbar ist
@@ -103,59 +154,59 @@ public class VerteilungApplet extends Applet {
         JSONObject ret = new JSONObject();
 
         try {
-        logger.info("Aufruf Methode isURLAvailabel with " + urlString);
-        ret = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
+            logger.info("Aufruf Methode isURLAvailabel with " + urlString);
+            ret = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 
-            public JSONObject run() {
+                public JSONObject run() {
 
-                JSONObject obj = new JSONObject();
-                URL url = null;
-                try {
-                    url = new URL(urlString);
-                    logger.info("Umwandlung in URL " + url);
-                } catch (MalformedURLException e) {
-                    String error = "Fehler beim Check der URL: " + e.getMessage();
-                    logger.severe(error);
-                    e.printStackTrace();
+                    JSONObject obj = new JSONObject();
+                    URL url = null;
                     try {
-                        obj.put("success", false);
-                        obj.put("result", error);
-                    } catch(JSONException jse){
-                        logger.severe(jse.getMessage());
-                        jse.printStackTrace();
+                        url = new URL(urlString);
+                        logger.info("Umwandlung in URL " + url);
+                    } catch (MalformedURLException e) {
+                        String error = "Fehler beim Check der URL: " + e.getMessage();
+                        logger.severe(error);
+                        e.printStackTrace();
+                        try {
+                            obj.put("success", false);
+                            obj.put("result", error);
+                        } catch (JSONException jse) {
+                            logger.severe(jse.getMessage());
+                            jse.printStackTrace();
+                        }
                     }
-                }
-                try {
-                    HttpURLConnection httpUrlConn;
-                    httpUrlConn = (HttpURLConnection) url.openConnection();
-                    logger.info("Open Connection " + httpUrlConn);
-                    httpUrlConn.setRequestMethod("HEAD");
-                    logger.info("Set Request ");
-                    // Set timeouts in milliseconds
-                    httpUrlConn.setConnectTimeout(30000);
-                    httpUrlConn.setReadTimeout(30000);
-
-                    int erg = httpUrlConn.getResponseCode();
-                    logger.info("ResponseCode " + erg);
-                    logger.info(httpUrlConn.getResponseMessage());
-                    obj.put("success", true);
-                    obj.put("result", erg == HttpURLConnection.HTTP_OK);
-
-                } catch (Throwable t) {
-                    String error = "Fehler beim Check der URL: " + t.getMessage();
-                    logger.severe(error);
-                    t.printStackTrace();
                     try {
-                    obj.put("success", false);
-                    obj.put("result", error);
-                    } catch(JSONException jse){
-                        logger.severe(jse.getMessage());
-                        jse.printStackTrace();
+                        HttpURLConnection httpUrlConn;
+                        httpUrlConn = (HttpURLConnection) url.openConnection();
+                        logger.info("Open Connection " + httpUrlConn);
+                        httpUrlConn.setRequestMethod("HEAD");
+                        logger.info("Set Request ");
+                        // Set timeouts in milliseconds
+                        httpUrlConn.setConnectTimeout(30000);
+                        httpUrlConn.setReadTimeout(30000);
+
+                        int erg = httpUrlConn.getResponseCode();
+                        logger.info("ResponseCode " + erg);
+                        logger.info(httpUrlConn.getResponseMessage());
+                        obj.put("success", true);
+                        obj.put("result", erg == HttpURLConnection.HTTP_OK);
+
+                    } catch (Throwable t) {
+                        String error = "Fehler beim Check der URL: " + t.getMessage();
+                        logger.severe(error);
+                        t.printStackTrace();
+                        try {
+                            obj.put("success", false);
+                            obj.put("result", error);
+                        } catch (JSONException jse) {
+                            logger.severe(jse.getMessage());
+                            jse.printStackTrace();
+                        }
                     }
+                    return obj;
                 }
-                return obj;
-            }
-        });
+            });
         } catch (Exception e) {
             String error = "Fehler beim Check der URL: " + e.getMessage();
             logger.severe(error);
@@ -163,7 +214,7 @@ public class VerteilungApplet extends Applet {
             try {
                 ret.put("success", false);
                 ret.put("result", error);
-            } catch(JSONException jse){
+            } catch (JSONException jse) {
                 logger.severe(jse.getMessage());
                 jse.printStackTrace();
             }
@@ -242,13 +293,12 @@ public class VerteilungApplet extends Applet {
 		return ret.toString();
 	}
 
+
+
     /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
      * @param filePath     der Pfad, der geliefert werden soll
      * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @param server       der Alfresco-Servername
-     * @param username     der Alfresco-Username
-     * @param password     das Alfresco-Passwort
      * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    ret               der Inhalt des Verzeichnisses als JSON Objekte
@@ -256,14 +306,14 @@ public class VerteilungApplet extends Applet {
      * @throws VerteilungException
      * @throws JSONException
      */
-    public String listFolderAsJSON(final String filePath, final String listFolder, final String server, final String username, final String password) throws IOException, VerteilungException, JSONException {
+    public String listFolderAsJSON(final String filePath, final String listFolder) throws IOException, VerteilungException, JSONException {
         JSONObject ret = null;
 
         try {
             ret = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws VerteilungException, IOException, JSONException {
-                    AlfrescoServices services = new AlfrescoServices(server, username, password);
+                    VerteilungServices services = new VerteilungServices(bindingUrl, user, password);
                     return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
                 }
             });
@@ -278,14 +328,12 @@ public class VerteilungApplet extends Applet {
 
     /**
      * liefert eine NodeID als String zurück
-     * @param cmisQuery   die CMIS Query, mit der der Knoten gesucht werden soll
-     * @param server       der Alfresco-Servername
-     * @param username     der Alfresco-Username
-     * @param password     das Alfresco-Passwort
-     * @return die NodeId als String
+     * @param path         der Pfad zum Knoten, der der Knoten gesucht werden soll
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               die NodeId als String
      */
-	public static String getNodeId(final String cmisQuery, final String server, final String username,
-			final String password) {
+	public static String getNodeId(final String path) {
 
 		JSONObject ret = new JSONObject();
 		try {
@@ -294,8 +342,8 @@ public class VerteilungApplet extends Applet {
 
 					public JSONObject run() throws JSONException {
                         try {
-						AlfrescoServices services = new AlfrescoServices(server, username, password);
-						return services.getNodeId(cmisQuery);
+						VerteilungServices services = getServices(bindingUrl, user, password);
+						return services.getNodeId(path);
                         } catch (Throwable t) {
                             JSONObject obj = new JSONObject();
                             obj.put("success", false);
@@ -317,78 +365,147 @@ public class VerteilungApplet extends Applet {
         return ret.toString();
 	}
 
-	public static void uploadFile(final String filePath, final String fileName, final String description,
-			final String mimeType, final String destinationFolder, final String server, final String username,
-			final String password, final String proxyHost, final String proxyPort, final Credentials credentials) {
 
-		AlfrescoResponse response = AccessController.doPrivileged(new PrivilegedAction<AlfrescoResponse>() {
+    /**
+     * findet ein Document
+     * @param cmisQuery    die CMIS Query, mit der der Knoten gesucht werden soll
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    ret               Dokument als JSONObject
+     */
+    public static String findDocument(final String cmisQuery) {
 
-			public AlfrescoResponse run() {
-				try {
-					AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
-							credentials);
-					return connector.uploadFileByPath(filePath, fileName, description, mimeType, destinationFolder);
-				} catch (IOException e) {
-					logger.severe(e.getMessage());
-					e.printStackTrace();
-					AlfrescoResponse response = new AlfrescoResponse();
-					response.setStatusCode(ResponseType.SERVER_ERROR.toString());
-					response.setStatusText(e.getMessage());
-					return response;
-				}
-			}
-		});
-		if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-			logger.warning("Dokument konnte nicht hochgeladen werden." + response.getStatusText());
-			logger.warning(response.getStackTrace());
-		}
+        JSONObject ret = new JSONObject();
+        try {
+            try {
+                ret = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                    public JSONObject run() throws JSONException {
+                        try {
+                            VerteilungServices services = getServices(bindingUrl, user, password);
+                            return services.findDocument(cmisQuery);
+                        } catch (Throwable t) {
+                            JSONObject obj = new JSONObject();
+                            obj.put("success", false);
+                            obj.put("result", t.getMessage());
+                            return obj;
+                        }
+                    }
+                });
+            } catch (PrivilegedActionException e) {
+                ret.put("success", false);
+                ret.put("result", e.getMessage());
+                return ret.toString();
+            }
+
+        } catch (JSONException e) {
+            logger.severe(e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+        return ret.toString();
+    }
+
+    /**
+     * liefert den Inhalt eines Dokumentes. Wenn es sich um eine PDF Dokument handelt, dann wird
+     * der Text extrahiert.
+     * @param docId                 die Id des Documentes
+     * @param extract               legt fest,ob einPDF Document umgewandelt werden soll
+     * @return                      JSONObject als String
+     */
+    public static String getDocumentContent(final String docId, final boolean extract) {
+
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    JSONObject obj = null;
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.getDocumentContent(docId, extract);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+    }
+
+    /**
+     * lädt ein Document in den Server
+     * @param filePath       der Folder als String, in das Document geladen werden soll
+     * @param fileName       der Dateiname ( mit Pfad) als String, die hochgeladen werden soll
+     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                               false    ein Fehler ist aufgetreten
+     *                                                      ret               Dokument als JSONObject
+     * @throws VerteilungException
+     */
+    public static String uploadDocument(final String filePath, final String fileName) {
+
+
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    JSONObject obj = null;
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.uploadDocument(filePath, fileName);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
 
 	}
 
-	public static String getContent(final String docId, final boolean extract, final String server,
-			final String username, final String password, final String proxyHost, final String proxyPort,
-			final Credentials credentials) throws JSONException {
-		String ret;
-		JSONObject obj = new JSONObject();
-		try {
-			ret = AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
+    /**
+     * löscht ein Document
+     * @param filePath       der Folder als String, in das Documentliegt
+     * @param fileName       der Name des Documentes
+     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                               false    ein Fehler ist aufgetreten
+     *                                                      ret               Dokument als JSONObject
+     * @throws VerteilungException
+     */
+    public static String deleteDocument(final String filePath, final String fileName) {
 
-				public String run() throws VerteilungException {
-					String ret = null;
-					AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
-							credentials);
-					AlfrescoResponse response = connector.getContent(docId);
-					if (!ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-						System.err.println("Dokument konnte nicht gelesen werden." + response.getStatusText());
-						System.err.println(response.getStackTrace());
-					} else {
-						if (extract) {
-							PDFConnector con = new PDFConnector();
-							byte[] bytes = response.getContent();
-							InputStream is = new ByteArrayInputStream(bytes);
-							ret = con.pdftoText(is);
-						} else
-							try {
-								ret = new String(response.getContent(), "UTF-8");
-							} catch (UnsupportedEncodingException e) {
-								logger.severe(e.getMessage());
-								e.printStackTrace();
-								ret = e.getMessage();
-							}
 
-					}
-					return ret;
-				}
-			});
-			obj.put("success", true);
-			obj.put("result", ret.toString());
-		} catch (PrivilegedActionException e) {
-			obj.put("success", false);
-			obj.put("result", e.getMessage());
-		}
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
-		return obj.toString();
-	}
+                public JSONObject run() throws JSONException {
+                    JSONObject obj = null;
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.deleteDocument(filePath, fileName);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+
+    }
+
 
 	public static int updateDocument(final String documentId, final String documentText, final String description,
 			final String server, final String username, final String password, final String proxyHost,

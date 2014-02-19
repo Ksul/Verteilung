@@ -13,32 +13,57 @@
     <TH width="20%">Test</TH>
     <TH width="20%">Call</TH>
     <TH>Ergebnis</TH>
+    <TH width="3%">Status</TH>
     </TR>
     <script type="text/javascript">
     try {
-        doTest("Lade Applet", 'loadApplet("INFO");');
-        doTest("Test Applet", 'document.reader.test()');
-        var hostName = doTest("Ermittlung Hostname", 'openFile("../host")[0];');
-        var password = doTest("Ermittlung Password", 'openFile("../passwd")[0];');
-        doTest("Host erreichbar",'document.reader.isURLAvailable(hostName + "/alfresco/cmis");');
-        doTest("Function getNodeId", "document.reader.getNodeId(\"company_home/dictionary/scripts/recognition.js\", hostName + \"/alfresco/cmis\", \"admin\", password);");
+        doTest("Lade Applet", 'loadApplet("INFO");', "typeof(erg) == 'undefined';");
+        doTest("Test Applet", 'document.reader.test()', "erg == 'Hier ist das Verteilungs Applet!'");
+        var hostName = doTest("Ermittlung Hostname", 'openFile("../host")[0];', "erg.startsWith('http://') || erg.startsWith('https://');");
+        var password = doTest("Ermittlung Password", 'openFile("../passwd")[0];', "erg.length>0;");
+        doTest("Host erreichbar",'document.reader.isURLAvailable(hostName  + "/alfresco/cmis");', " var result = $.parseJSON(erg.toString()); if (result.success) result.result;");
+        hostName = hostName + "/alfresco/service/cmis";
+        doTest("Setze Parameter", 'document.reader.setParameter(hostName, "admin", password);', "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Check Archiv vorhanden Function getNodeId", "document.reader.getNodeId(\"/Archiv\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
+        doTest("Check Dokumenddefinition vorhanden Function getNodeId", "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
+        doTest("Check Verteilungsskript vorhanden Function getNodeId", "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/recognition.js\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
+        doTest("Check Dokument finden Function findDocument", "document.reader.findDocument(\"SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'\");", "var result = $.parseJSON(erg.toString()); if (result.success){ var obj = $.parseJSON(result.result); (obj.name == 'doc.xml') };");
+        doTest("Inhalt lesen Function getDocumentContent", "document.reader.getDocumentContent($.parseJSON(document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\")).result, false);", "var result = $.parseJSON(erg.toString()); if (result.success){ result.result.indexOf('xmlns:my=\"http://www.schulte.local/archiv\"'); };");
+        doTest("Upload Document Function uploadDocument", "document.reader.uploadDocument(\"/Archiv\", \"Test.pdf\");", "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Delete Document Function deleteDocument", "document.reader.deleteDocument(\"/Archiv\", \"Test.pdf\");", "var result = $.parseJSON(erg.toString()); result.success;");
+
+
+
     } catch (e) {
         errorHandler(e);
     }
 
-    function doTest(testName, testEvaluate) {
+    function doTest(testName, testEvaluate, testExpected) {
         var erg;
-
+        var test;
+        var testError = "";
+        var success = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/ok.png" style="display: block; margin: 0px auto;"  /></a>';
+        var error = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/error.png" style="display: block; margin: 0px auto;"  /></a>';
         try {
             erg = eval(testEvaluate);
-            addRow(testName, testEvaluate, erg);
+            try {
+                test = eval(testExpected);
+            } catch (t) {
+                testError = t.toString();
+            }
+            if (test)
+                addRow(testName, testEvaluate, erg, success);
+            else
+                addRow(testName, testEvaluate, erg, error);
+            if (testError.length > 0)
+                alert(testError);
         } catch (e) {
-            addRow(testName, testEvaluate, e);
+            addRow(testName, testEvaluate, e, error);
         }
         return erg;
     }
 
-    function addRow(test, call, result)
+    function addRow(test, call, result, status)
     {
         var nummer = -1;
         var tabellen_id = "t1";
@@ -46,12 +71,15 @@
         var tdhtml1 = document.createElement( "td" );
         var tdhtml2 = document.createElement( "td" );
         var tdhtml3 = document.createElement( "td" );
+        var tdhtml4 = document.createElement( "td" );
         tdhtml1.innerHTML = test; // content
         tdhtml2.innerHTML = call;
         tdhtml3.innerHTML = result;
+        tdhtml4.innerHTML = status;
         trhtml.appendChild( tdhtml1 );
         trhtml.appendChild( tdhtml2 );
         trhtml.appendChild( tdhtml3 );
+        trhtml.appendChild( tdhtml4 );
     }
 </script>
     </TABLE>

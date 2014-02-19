@@ -65,7 +65,7 @@ function errorHandler(e) {
 /**
  * lädt das Applet
  */
-function loadApplet(level) {
+function loadApplet(level, bindingUrl, user, password) {
     if (isLocal()) {
         var obj = document.createElement('applet');
         obj.setAttribute('name', 'reader');
@@ -78,7 +78,24 @@ function loadApplet(level) {
             param.setAttribute('value', level);
             obj.appendChild(param);
         }
-
+        if (typeof bindingUrl != "undefined" && bindingUrl != null ){
+            var param = document.createElement( "param" );
+            param.setAttribute('name', 'url');
+            param.setAttribute('value', bindingUrl);
+            obj.appendChild(param);
+        }
+        if (typeof user != "undefined" && user != null ){
+            var param = document.createElement( "param" );
+            param.setAttribute('name', 'user');
+            param.setAttribute('value', user);
+            obj.appendChild(param);
+        }
+        if (typeof password != "undefined" && password != null ){
+            var param = document.createElement( "param" );
+            param.setAttribute('name', 'password');
+            param.setAttribute('value', password);
+            obj.appendChild(param);
+        }
         obj.setAttribute('archive',
             'vt.jar, ' +
                 'pdfbox-1.6.0.jar, ' +

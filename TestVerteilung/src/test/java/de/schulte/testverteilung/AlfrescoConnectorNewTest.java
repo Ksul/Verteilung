@@ -9,11 +9,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,9 +42,9 @@ public class AlfrescoConnectorNewTest extends AlfrescoTest{
     @Test
     public void testListFolder() throws Exception {
 
-        ItemIterable<CmisObject> list = con.listFolder(con.getNodeId("company_home/Archiv"));
+        ItemIterable<CmisObject> list = con.listFolder(con.getNode("company_home/Archiv").getId());
         Assert.assertEquals(4, list.getTotalNumItems());
-        list = con.listFolder(con.getNodeId("company_home/Archiv/Fehler"));
+        list = con.listFolder(con.getNode("company_home/Archiv/Fehler").getId());
         int count = 0;
         Iterator<CmisObject> it = list.iterator();
         while (it.hasNext()){
@@ -46,40 +52,60 @@ public class AlfrescoConnectorNewTest extends AlfrescoTest{
             if (obj instanceof Folder)
               count++;
         }
-        Assert.assertEquals(1, count);
+        assertEquals(1, count);
     }
 
 
     @Test
-    public void testGetNodeId() throws Exception {
-        String id = null;
-        id = con.getNodeId("company_home/Archiv");
-        Assert.assertNotNull(id);
-        id = null;
-        id = con.getNodeId("company_home/Archiv/Fehler");
-        Assert.assertNotNull(id);
-        id = null;
-        id = con.getNodeId("company_home/Archiv/Unbekannt");
-        Assert.assertNotNull(id);
-        id = con.getNodeId("company_home/dictionary/scripts/recognition.js");
-        Assert.assertNotNull(id);
+    public void testGetNode() throws Exception {
+        CmisObject cmisObject = null;
+        cmisObject = con.getNode("/Archiv");
+        assertNotNull(cmisObject);
+        assertTrue(cmisObject instanceof Folder);
+        cmisObject = con.getNode("/Archiv/Fehler");
+        assertNotNull(cmisObject);
+        assertTrue(cmisObject instanceof Folder);
+        cmisObject = con.getNode("/Archiv/Unbekannt");
+        assertNotNull(cmisObject);
+        assertTrue(cmisObject instanceof Folder);
+        cmisObject = con.getNode("/Datenverzeichnis/Skripte/recognition.js");
+        assertNotNull(cmisObject);
+        assertTrue(cmisObject instanceof Document);
     }
 
     @Test
     public void testFindDocument() throws Exception{
         Document doc = con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'");
-        Assert.assertNotNull(doc);
-        Assert.assertEquals("doc.xml", doc.getName());
+        assertNotNull(doc);
+        assertEquals("doc.xml", doc.getName());
     }
 
     @Test
     public void testGetDocumentContent() throws Exception{
-        byte[] content = con.getDocumentContents(con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'").getId());
-        Assert.assertNotNull(content);
-        Assert.assertTrue(content.length > 0);
+        byte[] content = con.getDocumentContent(con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'").getId());
+        assertNotNull(content);
+        assertTrue(content.length > 0);
         String document =  new String(content, Charset.forName("UTF-8"));
-        Assert.assertTrue(document.startsWith("<documentTypes"));
-        Assert.assertTrue(document.indexOf("xmlns:my=\"http://www.schulte.local/archiv\"") != -1);
+        assertTrue(document.startsWith("<documentTypes"));
+        assertTrue(document.indexOf("xmlns:my=\"http://www.schulte.local/archiv\"") != -1);
+    }
+
+    @Test
+    public void testUploadDocument() throws Exception {
+        CmisObject folder = con.getNode("/Archiv");
+        assertNotNull(folder);
+        assertTrue(folder instanceof Folder);
+        CmisObject document = con.getNode("/Archiv/Test.pdf");
+        if (document != null && document instanceof Document)
+            document.delete(true);
+        URL url =  AlfrescoConnectorNewTest.class.getClassLoader().getResource("Test.pdf");
+        assertNotNull(url);
+        String id = con.uploadDocument(((Folder) folder), new File(url.toURI()), "application/pdf");
+        assertNotNull(id);
+        document = con.getNode("/Archiv/Test.pdf");
+        assertNotNull(document);
+        assertTrue(document instanceof Document);
+        document.delete(true);
     }
 
 }
