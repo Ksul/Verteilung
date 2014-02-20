@@ -1,10 +1,9 @@
 package de.schulte.testverteilung;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.net.URI;
 import java.net.URL;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.alfresco.cmis.client.AlfrescoDocument;
@@ -28,6 +27,19 @@ public class VerteilungServices {
 
     private static Logger logger = Logger.getLogger(VerteilungServices.class.getName());
 
+    /**
+     * Konstruktor
+     */
+    public VerteilungServices() {
+        super();
+    }
+
+    /**
+     * Konstruktor
+     * @param server
+     * @param username
+     * @param password
+     */
     public VerteilungServices(String server, String username, String password)  {
         super();
         this.con = new AlfrescoConnectorNew(username, password, server);
@@ -37,17 +49,17 @@ public class VerteilungServices {
     /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
      *
-     * @param filePath   der Pfad, der geliefert werden soll
-     * @param listFolder was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @return ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
-     *                                                 false    ein Fehler ist aufgetreten
-     *                                        ret               der Inhalt des Verzeichnisses als JSON Objekte
+     * @param  filePath          der Pfad, der geliefert werden soll
+     * @param  listFolder        was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
      */
     public JSONObject listFolderAsJSON(String filePath, int listFolder) {
         JSONObject o;
         JSONObject o1;
         JSONArray list = new JSONArray();
-        JSONObject ret = new JSONObject();
+        JSONObject obj = new JSONObject();
         try {
             // keine Parameter mit gegeben, also den Rooteintrag erzeugen
             if (filePath == null || filePath.length() == 0) {
@@ -63,52 +75,52 @@ public class VerteilungServices {
             } else {
                 // das Root Object übergeben?
                 if (filePath.equals("-1"))
-                    filePath = con.getNode("company_home/Archiv").getId();
+                    filePath = con.getNode("/Archiv").getId();
 
                 Iterator<CmisObject> it = con.listFolder(filePath).iterator();
 
                 while (it.hasNext()) {
-                    CmisObject obj = it.next();
+                    CmisObject cmisObject = it.next();
                     o = new JSONObject();
                     o1 = new JSONObject();
-                    o.put("id", obj.getId());
-                    if (obj instanceof Folder) {
+                    o.put("id", cmisObject.getId());
+                    if (cmisObject instanceof Folder) {
                         o.put("rel", "folder");
                         o1.put("state", "closed");
                     } else {
                         o.put("rel", "default");
                         o1.put("state", "");
                     }
-                    if (obj instanceof AlfrescoDocument && ((AlfrescoDocument) obj).hasAspect("P:cm:titled") && obj.getPropertyValue("cm:title").toString().length() > 0)
-                        o1.put("data", obj.getPropertyValue("cm:title"));
+                    if (cmisObject instanceof AlfrescoDocument && ((AlfrescoDocument) cmisObject).hasAspect("P:cm:titled") && cmisObject.getPropertyValue("cm:title").toString().length() > 0)
+                        o1.put("data", cmisObject.getPropertyValue("cm:title"));
                     else
-                        o1.put("data", obj.getName());
+                        o1.put("data", cmisObject.getName());
                     o1.put("attr", o);
                     list.put(o1);
                 }
             }
-            ret.put("success", true);
-            ret.put("result", list);
+            obj.put("success", true);
+            obj.put("result", list);
         } catch (Throwable t) {
             try {
-                ret.put("success", false);
-                ret.put("result", t.getMessage());
+                obj.put("success", false);
+                obj.put("result", t.getMessage());
             } catch (JSONException jse) {
                 logger.severe(jse.getMessage());
                 jse.printStackTrace();
             }
         }
-        return ret;
+        return obj;
     }
 
     /**
      * liefert eine NodeId
      * reine Wrapper Methode, die hier nichts zusätzliches mehr machen muss.
      *
-     * @param path der Pfad zum Dokument
-     * @return ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
-     *                                                 false   ein Fehler ist aufgetreten
-     *                                        ret      die Id des Knotens
+     * @param  path         der Pfad zum Dokument
+     * @return obj          ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                              false   ein Fehler ist aufgetreten
+     *                                                     result   die Id des Knotens
      */
     public JSONObject getNodeId(String path) {
 
@@ -132,10 +144,10 @@ public class VerteilungServices {
      * liefert eine NodeId  mit Hilfe einer CMIS Query
      * reine Wrapper Methode, die hier nichts zusätzliches mehr machen muss.
      *
-     * @param cmisQuery die CMIS Query zum suchen
-     * @return ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
-     *                                                 false   ein Fehler ist aufgetreten
-     *                                        ret      das Document als JSON Object
+     * @param  cmisQuery        die CMIS Query zum suchen
+     * @return obj              ein JSONObject mit den Feldern success: true    die Opertation war erfolgreich
+     *                                                                  false   ein Fehler ist aufgetreten
+     *                                                         result           das Document als JSON Object
      */
     public JSONObject findDocument(String cmisQuery)  {
 
@@ -166,11 +178,11 @@ public class VerteilungServices {
 
     /**
      * liefert den Inhalt eines Dokumentes
-     * @param documentId            die Document Id als String
-     * @param extract               wenn gesetzt, wird der Inhalt als lesbarer String zuürckgegeben
-     * @return ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
-     *                                                 false   ein Fehler ist aufgetreten
-     *                                        ret      der Inhalt als String
+     * @param  documentId            die Document Id als String
+     * @param  extract               wenn gesetzt, wird der Inhalt als lesbarer String zuürckgegeben
+     * @return obj                   ein JSONObject mit den Feldern success: true    die Opertation war erfolgreich
+     *                                                                       false   ein Fehler ist aufgetreten
+     *                                                              result           der Inhalt als String
      */
     public JSONObject getDocumentContent(String documentId, boolean extract) {
         JSONObject obj = new JSONObject();
@@ -204,11 +216,11 @@ public class VerteilungServices {
 
     /**
      * lädt ein Dokument hoch
-     * @param folderPath         der Pfad des Zielfolders als String
-     * @param fileName          der Name der Datei als String
-     * @return ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
-     *                                                 false   ein Fehler ist aufgetreten
-     *                                        ret      bei Erfolg die Id als String, ansonsten der Fehler
+     * @param  folderPath       der Pfad des Zielfolders als String
+     * @param  fileName         der Name der Datei als String
+     * @return obj              ein JSONObject mit den Feldern success: true    die Opertation war erfolgreich
+     *                                                                  false   ein Fehler ist aufgetreten
+     *                                                         result           bei Erfolg die Id als String, ansonsten der Fehler
      */
     public JSONObject uploadDocument(String folderPath, String fileName) {
         JSONObject obj = new JSONObject();
@@ -240,11 +252,11 @@ public class VerteilungServices {
 
     /**
      * löscht ein Dokument
-     * @param folderName        der Name des Folders in dem sich das Dokument befindet als String
-     * @param documentName      der Name des Dokumentes als String
-     * @return ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
-     *                                                 false   ein Fehler ist aufgetreten
-     *                                        ret      bei Erfolg nichts, ansonsten der Fehler
+     * @param  folderName        der Name des Folders in dem sich das Dokument befindet als String
+     * @param  documentName      der Name des Dokumentes als String
+     * @return obj               ein JSONObject mit den Feldern success: true    die Opertation war erfolgreich
+     *                                                                   false   ein Fehler ist aufgetreten
+     *                                                          result           bei Erfolg nichts, ansonsten der Fehler
      */
     public JSONObject deleteDocument(String folderName, String documentName) {
         JSONObject obj = new JSONObject();
@@ -277,4 +289,32 @@ public class VerteilungServices {
         }
         return obj;
     }
-}
+
+    /**
+     * liest die Testproperties
+     * nur für Testzwecke
+     * @param propFile       der Name der Properties Datei
+     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                               false    ein Fehler ist aufgetreten
+     *                                                      result            die Properties als JSON Objekte
+     */
+    public JSONObject loadProperties(String propFile) {
+        JSONObject obj = new JSONObject();
+        try {
+            Properties properties = new Properties();
+            InputStream inp = new FileInputStream(new File(new URI(propFile)));
+            properties.load(inp);
+            obj.put("success", true);
+            obj.put("result", new JSONObject(properties));
+        } catch (Throwable t) {
+            try {
+                obj.put("success", false);
+                obj.put("result", t.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj;
+    }
+ }

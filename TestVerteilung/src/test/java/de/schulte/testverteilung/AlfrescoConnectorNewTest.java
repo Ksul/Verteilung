@@ -35,7 +35,7 @@ public class AlfrescoConnectorNewTest extends AlfrescoTest{
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        con = new AlfrescoConnectorNew("admin", password, host );
+        con = new AlfrescoConnectorNew("admin", properties.getProperty("password"), properties.getProperty("bindingUrl") );
     }
 
 
@@ -98,9 +98,7 @@ public class AlfrescoConnectorNewTest extends AlfrescoTest{
         CmisObject document = con.getNode("/Archiv/Test.pdf");
         if (document != null && document instanceof Document)
             document.delete(true);
-        URL url =  AlfrescoConnectorNewTest.class.getClassLoader().getResource("Test.pdf");
-        assertNotNull(url);
-        String id = con.uploadDocument(((Folder) folder), new File(url.toURI()), "application/pdf");
+        String id = con.uploadDocument(((Folder) folder), new File(properties.getProperty("testFile")), "application/pdf");
         assertNotNull(id);
         document = con.getNode("/Archiv/Test.pdf");
         assertNotNull(document);

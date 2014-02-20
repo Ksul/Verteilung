@@ -1457,19 +1457,27 @@ function formatScript() {
 }
 
 /**
- * Ã–ffnet eine lokale Datei
+ * öffnet eine lokale Datei
  * @param name  der Name der Datei
  * @returns {Array} Inhalt und URL Notation der Datei
  */
 function openFile(name) {
     try {
         var contents = "";
-        var datafile = "file://" + window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1) + name;
-        contents = document.reader.openFile(datafile);
+        contents = document.reader.openFile(convertPath(name));
         return [ contents, datafile ];
     } catch (e) {
         errorHandler(e);
     }
+}
+
+/**
+ * konvertiert den Pfad in einen absoluten Pfad
+ * @param name
+ * @returns {string}
+ */
+function convertPath(name) {
+    return "file://" + window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1) + name;
 }
 
 /**

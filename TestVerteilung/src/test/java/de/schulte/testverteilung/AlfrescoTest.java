@@ -4,7 +4,9 @@ import junit.framework.Assert;
 import org.junit.Before;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.util.Properties;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,24 +17,18 @@ import java.io.FileReader;
  */
 public class AlfrescoTest {
 
-    String host;
-    String password;
+    Properties properties;
 
     @Before
     public void setUp() throws Exception {
-        FileReader fr = new FileReader("passwd");
-        Assert.assertNotNull(fr);
-        BufferedReader br = new BufferedReader(fr);
-        password = br.readLine();
-        Assert.assertNotNull(password);
-        Assert.assertTrue(password.length() > 0);
-        FileReader fr1 = new FileReader("host");
-        Assert.assertNotNull(fr1);
-        br = new BufferedReader(fr1);
-        String hostname = br.readLine();
-        Assert.assertNotNull(hostname);
-        Assert.assertTrue(hostname.length() > 0);
-        host = hostname + "/alfresco/service/cmis";
+        properties = new Properties();
+        FileInputStream fileInputStream = new FileInputStream("test.properties");
+        Assert.assertNotNull(fileInputStream);
+        properties.load(fileInputStream);
+        Assert.assertNotNull(properties.getProperty("host"));
+        Assert.assertNotNull(properties.getProperty("bindingUrl"));
+        Assert.assertNotNull(properties.getProperty("password"));
+        Assert.assertNotNull(properties.getProperty("testFile"));
     }
 
 

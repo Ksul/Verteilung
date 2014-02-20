@@ -17,22 +17,18 @@
     </TR>
     <script type="text/javascript">
     try {
-        doTest("Lade Applet", 'loadApplet("INFO");', "typeof(erg) == 'undefined';");
+        doTest("Lade Applet", 'loadApplet("FINE");', "typeof(erg) == 'undefined';");
         doTest("Test Applet", 'document.reader.test()', "erg == 'Hier ist das Verteilungs Applet!'");
-        var hostName = doTest("Ermittlung Hostname", 'openFile("../host")[0];', "erg.startsWith('http://') || erg.startsWith('https://');");
-        var password = doTest("Ermittlung Password", 'openFile("../passwd")[0];', "erg.length>0;");
-        doTest("Host erreichbar",'document.reader.isURLAvailable(hostName  + "/alfresco/cmis");', " var result = $.parseJSON(erg.toString()); if (result.success) result.result;");
-        hostName = hostName + "/alfresco/service/cmis";
-        doTest("Setze Parameter", 'document.reader.setParameter(hostName, "admin", password);', "var result = $.parseJSON(erg.toString()); result.success;");
+        var properties = doTest("Ermittlung Properties", '$.parseJSON(document.reader.loadProperties(convertPath("../test.properties"))).result', "typeof erg == 'object' &&  typeof erg.host == 'string' && typeof erg.bindingUrl == 'string' && typeof erg.password == 'string' ;");
+        doTest("Host erreichbar",'document.reader.isURLAvailable(properties.host);', " var result = $.parseJSON(erg.toString()); if (result.success) result.result;");
+        doTest("Setze Parameter", 'document.reader.setParameter(properties.bindingUrl, "admin", properties.password);', "var result = $.parseJSON(erg.toString()); result.success;");
         doTest("Check Archiv vorhanden Function getNodeId", "document.reader.getNodeId(\"/Archiv\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
         doTest("Check Dokumenddefinition vorhanden Function getNodeId", "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
         doTest("Check Verteilungsskript vorhanden Function getNodeId", "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/recognition.js\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
         doTest("Check Dokument finden Function findDocument", "document.reader.findDocument(\"SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'\");", "var result = $.parseJSON(erg.toString()); if (result.success){ var obj = $.parseJSON(result.result); (obj.name == 'doc.xml') };");
-        doTest("Inhalt lesen Function getDocumentContent", "document.reader.getDocumentContent($.parseJSON(document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\")).result, false);", "var result = $.parseJSON(erg.toString()); if (result.success){ result.result.indexOf('xmlns:my=\"http://www.schulte.local/archiv\"'); };");
-        doTest("Upload Document Function uploadDocument", "document.reader.uploadDocument(\"/Archiv\", \"Test.pdf\");", "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Inhalt lesen Function getDocumentContent", "$.parseJSON(document.reader.getDocumentContent($.parseJSON(document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\")).result, false));", " if (erg.success){ erg.result.indexOf('xmlns:my=\"http://www.schulte.local/archiv\"'); };");
+        doTest("Upload Document Function uploadDocument", "document.reader.uploadDocument(\"/Archiv\", properties.testFile);", "var result = $.parseJSON(erg.toString()); result.success;");
         doTest("Delete Document Function deleteDocument", "document.reader.deleteDocument(\"/Archiv\", \"Test.pdf\");", "var result = $.parseJSON(erg.toString()); result.success;");
-
-
 
     } catch (e) {
         errorHandler(e);

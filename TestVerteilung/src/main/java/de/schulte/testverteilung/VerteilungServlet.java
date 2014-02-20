@@ -125,7 +125,14 @@ public class VerteilungServlet extends HttpServlet {
 		}
 	}
 
-	// This method handles both GET and POST requests.
+    /**
+     * diese Methode handelt get und post Requests
+     * @param req
+     * @param resp
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws JSONException
+     */
 	private void doGetOrPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException,
 			JSONException {
 		// Get the value of a request parameter; the name is case-sensitive
@@ -228,7 +235,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param urlString    URL des Servers
      * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
-     *                                                    ret               true, wenn die URL verfügbar ist
+     *                                                    result            true, wenn die URL verfügbar ist
      */
     protected JSONObject isURLAvailable(String urlString) {
 
@@ -285,7 +292,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param path         der Pfad zum Knoten, der der Knoten gesucht werden soll
      * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
-     *                                                    ret               die NodeId als String
+     *                                                    result            die NodeId als String
      */
     protected JSONObject getNodeId(String path)  {
 
@@ -300,7 +307,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param extract      legt fest,ob einPDF Document umgewandelt werden soll
      * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
-     *                                                    ret               das Document als JSONObject
+     *                                                    result            das Document als JSONObject
      */
     protected JSONObject getDocumentContent(String documentId, boolean extract) {
         VerteilungServices services = new VerteilungServices(bindingUrl, user, password);
@@ -425,7 +432,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param fileName       der Dateiname ( mit Pfad) als String, die hochgeladen werden soll
      * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
-     *                                                      ret               Dokument als JSONObject
+     *                                                      result            Dokument als JSONObject
      * @throws VerteilungException
      */
     protected JSONObject uploadDocument(String filePath, String fileName) throws  VerteilungException {
@@ -439,7 +446,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param fileName       der Name des Documentes
      * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
-     *                                                      ret               Dokument als JSONObject
+     *                                                      result            Dokument als JSONObject
      * @throws VerteilungException
      */
     protected JSONObject deleteDocument(String filePath, String fileName) throws  VerteilungException {
@@ -452,7 +459,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param cmisQuery    die CMIS Query, mit der der Knoten gesucht werden soll
      * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
-     *                                                    ret               Dokument als JSONObject
+     *                                                    result            Dokument als JSONObject
      */
     protected JSONObject findDocument(String cmisQuery) throws VerteilungException {
         VerteilungServices services = getServices(bindingUrl, user, password);
@@ -470,7 +477,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param password     das Alfresco-Passwort
      * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
-     *                                                    ret               der Inhalt des Verzeichnisses als JSON Objekte
+     *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
      */
     protected JSONObject listFolderAsJSON(String filePath, String listFolder, String server, String username, String password)  {
 

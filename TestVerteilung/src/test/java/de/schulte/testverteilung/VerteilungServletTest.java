@@ -36,9 +36,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         servlet = new VerteilungServlet();
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
-        when(request.getParameter("server")).thenReturn(host);
+        when(request.getParameter("server")).thenReturn(properties.getProperty("bindingUrl"));
         when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn(password);
+        when(request.getParameter("password")).thenReturn(properties.getProperty("password"));
         when(request.getParameter("function")).thenReturn("setParameter");
         sr = new StringWriter();
         writer = new PrintWriter(sr);
@@ -53,7 +53,7 @@ public class VerteilungServletTest extends AlfrescoTest {
 
     public void testIsURLAvailable() throws Exception {
         when(request.getParameter("function")).thenReturn("isURLAvailable");
-        when(request.getParameter("server")).thenReturn(host + "/alfresco/cmis");
+        when(request.getParameter("server")).thenReturn(properties.getProperty("host"));
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
@@ -162,9 +162,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter("function")).thenReturn("uploadDocument");
         when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
-        URL url =  AlfrescoConnectorNewTest.class.getClassLoader().getResource("Test.pdf");
-        File file = new File(url.toURI());
-        when(request.getParameter("fileName")).thenReturn(file.getPath());
+        when(request.getParameter("fileName")).thenReturn(properties.getProperty("testFile"));
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);

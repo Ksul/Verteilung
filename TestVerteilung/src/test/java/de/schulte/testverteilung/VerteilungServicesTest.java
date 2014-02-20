@@ -31,7 +31,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        services = new VerteilungServices(host, "admin", password);
+        services = new VerteilungServices(properties.getProperty("bindingUrl"), "admin", properties.getProperty("password"));
     }
 
     @Test
@@ -107,9 +107,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     @Test
     public void testUploadDocument() throws Exception {
         services.deleteDocument("/Archiv", "Test.pdf");
-        URL url =  AlfrescoConnectorNewTest.class.getClassLoader().getResource("Test.pdf");
-        File file = new File(url.toURI());
-        JSONObject obj = services.uploadDocument("/Archiv", file.getPath());
+        JSONObject obj = services.uploadDocument("/Archiv", properties.getProperty("testFile"));
         assertNotNull(obj);
         assertTrue(obj.length() == 2);
         assertNotNull(obj.get("result"));
@@ -119,5 +117,19 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(obj.length() == 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+    }
+
+    @Test
+    public void testLoadProperties() throws Exception {
+        String file =  "TestVerteilung/test.properties";
+        String fullPath = "file://"+System.getProperty("user.dir").substring(0, System.getProperty("user.dir").lastIndexOf('/') +1)  + file;
+        JSONObject obj = services.loadProperties(fullPath);
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject props = new JSONObject(obj.get("result").toString());
+        assertNotNull(props);
+        assertTrue(props.length() > 0);
     }
 }
