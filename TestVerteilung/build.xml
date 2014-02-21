@@ -9,11 +9,13 @@
     <jar destfile="web/WEB-INF/lib/vt.jar" filesetmanifest="mergewithoutmain">
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
-        <attribute name="Main-Class" value="PDFTestParser" />
+        <attribute name="Main-Class" value="VerteilungApplet" />
+          <attribute name="Permissions" value="all-permissions" />
+          <attribute name="Application-Name" value="Archiv" />
         <attribute name="Class-Path" value="." />
         <attribute name="Implementation-Version" value="${version.num}" />
       </manifest>
-      <fileset dir="web/WEB-INF/classes" />
+      <fileset dir="web/WEB-INF/classes/production/TestVerteilung" />
       <!-- <zipfileset excludes="META-INF/*.SF" src="pdfbox-app-1.6.0.jar" /> -->
     </jar>
     <signjar destDir="web/WEB-INF/lib" alias="Signer" storepass="Rethymon" >

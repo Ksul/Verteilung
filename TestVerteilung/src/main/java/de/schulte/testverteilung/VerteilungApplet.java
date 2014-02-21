@@ -471,9 +471,8 @@ public class VerteilungApplet extends Applet {
      * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            Dokument als JSONObject
-     * @throws VerteilungException
      */
-    protected String createDocument(final String filePath,
+    public String createDocument(final String filePath,
                                         final String fileName,
                                         final String documentContent,
                                         final String documentType,
