@@ -11,6 +11,7 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -126,15 +127,15 @@ public class AlfrescoConnectorNew {
     /**
      * liefert ein Dokument
      * @param queryString           die Abfragequery
-     * @return                      ein AlfrescoDocument
+     * @return                      ein Document
      */
-    public AlfrescoDocument findDocument(String queryString) throws VerteilungException {
+    public Document findDocument(String queryString) throws VerteilungException {
 
         ItemIterable<QueryResult> results = getSession().query(queryString, false);
 
         for (QueryResult qResult : results) {
                  String objectId = qResult.getPropertyValueByQueryName("cmis:objectId");
-            return (AlfrescoDocument) getSession().getObject(getSession().createObjectId(objectId));
+            return  (Document) getSession().getObject(getSession().createObjectId(objectId));
 
         }
         return null;
@@ -199,4 +200,37 @@ public class AlfrescoConnectorNew {
         return doc.getId();
     }
 
+    /**
+     * erzeugt ein neues Dokument
+     * @param parentFolder              der Folder, in dem das Dokument angelegt werden soll
+     * @param documentName              der Name des neuen Dokumentes
+     * @param documentContent           der Inhalt des Dokumentes
+     * @param documentType              der Typ des Dokumentes
+     * @param extraCMSProperties        zusätzliche Properties
+     * @return newDocument              das neue Dokument
+     */
+    public Document createDocument(Folder parentFolder,
+                                   String documentName,
+                                   byte documentContent[],
+                                   String documentType,
+                                   Map<String, Object> extraCMSProperties) {
+
+        Document newDocument = null;
+
+        Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+        properties.put(PropertyIds.NAME, documentName);
+
+        if (extraCMSProperties != null) {
+            for (String key : extraCMSProperties.keySet())
+                properties.put(key, extraCMSProperties.get(key));
+        }
+        InputStream stream = new ByteArrayInputStream(documentContent);
+        ContentStream contentStream = new ContentStreamImpl(documentName, BigInteger.valueOf(documentContent.length), documentType, stream);
+
+        // create a major version
+        newDocument = parentFolder.createDocument(properties, contentStream, VersioningState.MAJOR);
+
+        return newDocument;
+    }
 }

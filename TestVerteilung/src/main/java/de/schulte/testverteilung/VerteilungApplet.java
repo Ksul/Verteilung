@@ -462,6 +462,48 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
+     * erzeugt ein Document
+     * @param  filePath             der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  fileName             der Name des Dokumentes als String
+     * @param  documentContent      der Inhalt als String
+     * @param  documentType         der Typ des Dokumentes
+     * @param  extraCMSProperties   zusätzliche Properties
+     * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                               false    ein Fehler ist aufgetreten
+     *                                                      result            Dokument als JSONObject
+     * @throws VerteilungException
+     */
+    protected String createDocument(final String filePath,
+                                        final String fileName,
+                                        final String documentContent,
+                                        final String documentType,
+                                        final String extraCMSProperties)  {
+
+
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    JSONObject obj = null;
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+
+    }
+
+    /**
      * liest die Testproperties
      * nur für Testzwecke
      * @param  propFile      der Name der Properties Datei

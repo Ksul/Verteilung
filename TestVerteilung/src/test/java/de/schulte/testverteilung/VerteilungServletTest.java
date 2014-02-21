@@ -184,4 +184,53 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
     }
+
+    @Test
+    public void testCreateDocument() throws Exception {
+
+        // Dokument vorsichtshalber löschen
+        when(request.getParameter("function")).thenReturn("deleteDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
+        // Dokument erstellen
+        when(request.getParameter("function")).thenReturn("createDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        when(request.getParameter("documentText")).thenReturn(content);
+        when(request.getParameter("mimeType")).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject doc = new JSONObject(obj.getString("result"));
+        assertNotNull(doc);
+        assertTrue(doc.getString("name").equalsIgnoreCase("TestDocument.txt"));
+        sr.getBuffer().delete(0, 9999);
+        // Inhalt lesen
+        when(request.getParameter("function")).thenReturn("getDocumentContent");
+        when(request.getParameter("documentId")).thenReturn(doc.getString("objectId"));
+        when(request.getParameter("extract")).thenReturn("false");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertTrue(obj.getBoolean("success"));
+        assertEquals(content, obj.getString("result"));
+        // und das Dokument wieder löschen
+        when(request.getParameter("function")).thenReturn("deleteDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
+
+    }
 }

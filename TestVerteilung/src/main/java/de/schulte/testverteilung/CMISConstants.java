@@ -167,4 +167,9 @@ public class CMISConstants {
 	public static final String LINK_POLICIES = "policies";
 	
 	public static final QName ATOMOBJECT = CMISAtomName("object");
+
+    // Document Types
+    public static final String DOCUMENT_TYPE_TEXT = "text/plain";
+
+    public static final String DOCUMENT_TYPE_PDF ="application/pdf";
 }

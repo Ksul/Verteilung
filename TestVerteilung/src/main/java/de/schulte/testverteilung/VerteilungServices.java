@@ -1,14 +1,19 @@
 package de.schulte.testverteilung;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
+import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
+import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +56,7 @@ public class VerteilungServices {
      *
      * @param  filePath          der Pfad, der geliefert werden soll
      * @param  listFolder        was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
      */
@@ -102,13 +107,7 @@ public class VerteilungServices {
             obj.put("success", true);
             obj.put("result", list);
         } catch (Throwable t) {
-            try {
-                obj.put("success", false);
-                obj.put("result", t.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
     }
@@ -118,7 +117,7 @@ public class VerteilungServices {
      * reine Wrapper Methode, die hier nichts zusätzliches mehr machen muss.
      *
      * @param  path         der Pfad zum Dokument
-     * @return obj          ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                              false   ein Fehler ist aufgetreten
      *                                                     result   die Id des Knotens
      */
@@ -129,13 +128,7 @@ public class VerteilungServices {
             obj.put("success", true);
             obj.put("result", con.getNode(path).getId());
         } catch (Throwable t) {
-            try {
-                obj.put("success", false);
-                obj.put("result", t.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
     }
@@ -145,7 +138,7 @@ public class VerteilungServices {
      * reine Wrapper Methode, die hier nichts zusätzliches mehr machen muss.
      *
      * @param  cmisQuery        die CMIS Query zum suchen
-     * @return obj              ein JSONObject mit den Feldern success: true    die Opertation war erfolgreich
+     * @return obj              ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                  false   ein Fehler ist aufgetreten
      *                                                         result           das Document als JSON Object
      */
@@ -156,31 +149,36 @@ public class VerteilungServices {
             obj.put("success", true);
             JSONObject obj1 = new JSONObject();
 
-            AlfrescoDocument doc = con.findDocument(cmisQuery);
+            Document doc = con.findDocument(cmisQuery);
 
-            Iterator<Property<?>> iter = doc.getProperties().iterator();
-            while (iter.hasNext()){
-                Property prop = iter.next();
-                obj1.put(prop.getLocalName(), prop.getValueAsString());
-            }
-           obj.put("result", obj1.toString());
+            obj.put("result", convertDocumentToJSON(doc).toString());
         } catch (Throwable t) {
-            try {
-                obj.put("success", false);
-                obj.put("result", t.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
+    }
+
+    /**
+     * konvertiert ein Document in ein JSON Objekt
+     * @param  doc           das Dokument
+     * @return obj1          das Dokument als JSON Objekt
+     * @throws JSONException
+     */
+    private JSONObject convertDocumentToJSON(Document doc) throws JSONException {
+        JSONObject obj1 = new JSONObject();
+        Iterator<Property<?>> iter = doc.getProperties().iterator();
+        while (iter.hasNext()){
+            Property prop = iter.next();
+            obj1.put(prop.getLocalName(), prop.getValueAsString());
+        }
+        return obj1;
     }
 
     /**
      * liefert den Inhalt eines Dokumentes
      * @param  documentId            die Document Id als String
      * @param  extract               wenn gesetzt, wird der Inhalt als lesbarer String zuürckgegeben
-     * @return obj                   ein JSONObject mit den Feldern success: true    die Opertation war erfolgreich
+     * @return obj                   ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                       false   ein Fehler ist aufgetreten
      *                                                              result           der Inhalt als String
      */
@@ -203,13 +201,7 @@ public class VerteilungServices {
                     }
             }
         } catch (Throwable t) {
-            try {
-                obj.put("success", false);
-                obj.put("result", t.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
     }
@@ -218,7 +210,7 @@ public class VerteilungServices {
      * lädt ein Dokument hoch
      * @param  folderPath       der Pfad des Zielfolders als String
      * @param  fileName         der Name der Datei als String
-     * @return obj              ein JSONObject mit den Feldern success: true    die Opertation war erfolgreich
+     * @return obj              ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                  false   ein Fehler ist aufgetreten
      *                                                         result           bei Erfolg die Id als String, ansonsten der Fehler
      */
@@ -239,13 +231,7 @@ public class VerteilungServices {
                 obj.put("result", "Der verwendete Pfad " + folderPath + " ist kein Folder!");
             }
         } catch (Throwable t) {
-            try {
-                obj.put("success", false);
-                obj.put("result", t.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
     }
@@ -254,7 +240,7 @@ public class VerteilungServices {
      * löscht ein Dokument
      * @param  folderName        der Name des Folders in dem sich das Dokument befindet als String
      * @param  documentName      der Name des Dokumentes als String
-     * @return obj               ein JSONObject mit den Feldern success: true    die Opertation war erfolgreich
+     * @return obj               ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                   false   ein Fehler ist aufgetreten
      *                                                          result           bei Erfolg nichts, ansonsten der Fehler
      */
@@ -279,22 +265,89 @@ public class VerteilungServices {
                 obj.put("result", folder == null ? "Der Pfad " + folderName + "  ist nicht vorhanden!" : "Der verwendete Pfad " + folderName + " ist kein Folder!");
             }
         } catch (Throwable t) {
-            try {
-                obj.put("success", false);
-                obj.put("result", t.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
     }
 
     /**
+     * erstellt ein Dokument
+     * @param  folderName           der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  documentName         der Name des Dokumentes als String
+     * @param  documentContent      der Inhalt als String
+     * @param  documentType         der Typ des Dokumentes
+     * @param  extraCMSProperties   zusätzliche Properties
+     * @return obj                  ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                      false   ein Fehler ist aufgetreten
+     *                                                             result           das Document als JSON Object
+     */
+    public JSONObject createDocument(String folderName, String documentName,
+                                     String documentContent,
+                                     String documentType,
+                                     String extraCMSProperties) {
+        JSONObject obj = new JSONObject();
+        try {
+            CmisObject document;
+            CmisObject folder;
+            folder = con.getNode(folderName);
+            if (folder != null && folder instanceof Folder) {
+                Map<String, Object> outMap = null;
+                if (extraCMSProperties != null && extraCMSProperties.length() > 0) {
+                    JSONObject props = new JSONObject(extraCMSProperties);
+                    Iterator<String> nameItr = props.keys();
+                    outMap = new HashMap<String, Object>();
+                    while (nameItr.hasNext()) {
+                        String name = nameItr.next();
+                        outMap.put(name, props.get(name));
+                    }
+                }
+                document = con.createDocument((Folder) folder, documentName, documentContent.getBytes(), documentType, outMap);
+                if (document != null && document instanceof Document) {
+                    obj.put("success", true);
+                    obj.put("result", convertDocumentToJSON((Document) document).toString());
+                } else {
+                    obj.put("success", false);
+                    obj.put("result", document == null ? "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!" : "Das verwendete Document " + documentName + " ist nicht vom Typ Document!");
+                }
+            } else {
+                obj.put("success", false);
+                obj.put("result", folder == null ? "Der Pfad " + folderName + "  ist nicht vorhanden!" : "Der verwendete Pfad " + folderName + " ist kein Folder!");
+            }
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * aktualisiert den Inhalt eines Documentes
+     * @param documentName          der Pfad des Dokumentes
+     * @param documentContent       der neue Inhalt als Bytearray
+     * @return obj                  ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                      false   ein Fehler ist aufgetreten
+     *                                                             result           bei Erfolg die ObjectId
+     */
+    public JSONObject updateDocument(String documentName, byte documentContent[]) {
+        JSONObject obj = new JSONObject();
+        try {
+            Document document = (Document) con.getNode(documentName);
+            InputStream stream = new ByteArrayInputStream(documentContent);
+            ContentStream contentStream = new ContentStreamImpl(document.getName(), BigInteger.valueOf(documentContent.length), "text/plain", stream);
+            ObjectId objectId = document.setContentStream(contentStream, true, true);
+            obj.put("success", true);
+            obj.put("result", objectId);
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+
+    /**
      * liest die Testproperties
      * nur für Testzwecke
      * @param propFile       der Name der Properties Datei
-     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            die Properties als JSON Objekte
      */
@@ -307,13 +360,7 @@ public class VerteilungServices {
             obj.put("success", true);
             obj.put("result", new JSONObject(properties));
         } catch (Throwable t) {
-            try {
-                obj.put("success", false);
-                obj.put("result", t.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
     }

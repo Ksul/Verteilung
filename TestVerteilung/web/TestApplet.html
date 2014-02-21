@@ -29,7 +29,7 @@
         doTest("Inhalt lesen Function getDocumentContent", "$.parseJSON(document.reader.getDocumentContent($.parseJSON(document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\")).result, false));", " if (erg.success){ erg.result.indexOf('xmlns:my=\"http://www.schulte.local/archiv\"'); };");
         doTest("Upload Document Function uploadDocument", "document.reader.uploadDocument(\"/Archiv\", properties.testFile);", "var result = $.parseJSON(erg.toString()); result.success;");
         doTest("Delete Document Function deleteDocument", "document.reader.deleteDocument(\"/Archiv\", \"Test.pdf\");", "var result = $.parseJSON(erg.toString()); result.success;");
-
+        doTest("Create Document Function createDocument", "document.reader.createDocument(\"/Archiv\", \"TestDocument.txt\", \"äöüßÄÖÜ/\", \"plain/text\", \"\");", "var result = $.parseJSON(erg.toString()); result.success;");
     } catch (e) {
         errorHandler(e);
     }

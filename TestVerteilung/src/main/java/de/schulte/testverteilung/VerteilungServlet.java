@@ -155,6 +155,7 @@ public class VerteilungServlet extends HttpServlet {
         String withFolder = req.getParameter("withFolder");
 		String extract = req.getParameter("extract");
 		String searchFolder = req.getParameter("searchFolder");
+        String extraProperties = req.getParameter("extraProperties");
 		String proxyHost = "".equals(req.getParameter("proxyHost")) ? null : req.getParameter("proxyHost");
 		String proxyPort = "".equals(req.getParameter("proxyPort")) ? null : req.getParameter("proxyPort");
         resp.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -186,6 +187,9 @@ public class VerteilungServlet extends HttpServlet {
                 }
                 if (value.equalsIgnoreCase("deleteDocument")) {
                     obj = deleteDocument(destinationFolder, fileName);
+                }
+                if (value.equalsIgnoreCase("createDocument")) {
+                    obj = createDocument(destinationFolder, fileName, documentText, mimeType, extraProperties);
                 }
 				if (value.equalsIgnoreCase("getDocumentContent")) {
 					obj = getDocumentContent(documentId, extract.equalsIgnoreCase("true"));
@@ -452,6 +456,27 @@ public class VerteilungServlet extends HttpServlet {
     protected JSONObject deleteDocument(String filePath, String fileName) throws  VerteilungException {
         VerteilungServices services = getServices(bindingUrl, user, password);
         return services.deleteDocument(filePath, fileName);
+    }
+
+    /**
+     * erzeugt ein Document
+     * @param  filePath             der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  fileName             der Name des Dokumentes als String
+     * @param  documentContent      der Inhalt als String
+     * @param  documentType         der Typ des Dokumentes
+     * @param  extraCMSProperties   zusätzliche Properties
+     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                               false    ein Fehler ist aufgetreten
+     *                                                      result            Dokument als JSONObject
+     * @throws VerteilungException
+     */
+    protected JSONObject createDocument(String filePath,
+                                        String fileName,
+                                        String documentContent,
+                                        String documentType,
+                                        String extraCMSProperties) throws  VerteilungException {
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties);
     }
 
     /**

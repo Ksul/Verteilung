@@ -9,6 +9,7 @@ import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 
 import junit.framework.Assert;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -113,6 +114,36 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         obj = services.deleteDocument("/Archiv", "Test.pdf");
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+    }
+
+    @Test
+    public void testCreateDocument() throws Exception {
+        services.deleteDocument("/Archiv", "TestDocument.txt");
+        JSONObject obj = services.uploadDocument("/Archiv", properties.getProperty("testFile"));
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        obj = services.createDocument("/Archiv",  "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null);
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject result = new JSONObject(obj.get("result").toString());
+        assertNotNull(result);
+        assertTrue(result.getString("name").equalsIgnoreCase("TestDocument.txt"));
+        obj = services.getDocumentContent(result.getString("objectId"), false);
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        String document =  obj.getString("result");
+        assertEquals("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", document);
+        obj = services.deleteDocument("/Archiv", "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() == 2);
         assertNotNull(obj.get("result"));
