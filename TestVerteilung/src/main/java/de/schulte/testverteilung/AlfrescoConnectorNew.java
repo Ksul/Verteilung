@@ -233,4 +233,19 @@ public class AlfrescoConnectorNew {
 
         return newDocument;
     }
+
+    /**
+     * erstellt einen Folder
+     *
+     * @param targetFolder              der Folder, in dem der neue Folder angelegt werden soll.
+     * @param newFolderName             der Name des neuen Folder
+     * @return                          der neue Folder
+     */
+    public Folder createFolder(Folder targetFolder, String newFolderName) {
+        Map<String, String> props = new HashMap<String, String>();
+        props.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
+        props.put(PropertyIds.NAME, newFolderName);
+        Folder newFolder = targetFolder.createFolder(props);
+        return newFolder;
+    }
 }

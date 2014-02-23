@@ -2,6 +2,7 @@ package de.schulte.testverteilung;
 
 import junit.framework.Assert;
 import org.apache.chemistry.opencmis.client.api.*;
+import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -115,6 +116,21 @@ public class AlfrescoConnectorNewTest extends AlfrescoTest{
         assertEquals("TestDocument.txt", document.getName());
         assertEquals("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", IOUtils.toString(document.getContentStream().getStream(), "UTF-8"));
         document.delete(true);
+    }
+
+    @Test
+    public void testCreateFolder() throws Exception {
+        CmisObject folder = con.getNode("/Archiv/TestFolder");
+        if (folder != null && folder instanceof Folder)
+            ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
+        folder = con.getNode("/Archiv");
+        assertNotNull(folder);
+        assertTrue(folder instanceof Folder);
+        folder = con.createFolder((Folder) folder, "TestFolder");
+        assertNotNull(folder);
+        assertTrue(folder instanceof Folder);
+        assertEquals("TestFolder", ((Folder) folder).getName());
+        ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
     }
 
 }

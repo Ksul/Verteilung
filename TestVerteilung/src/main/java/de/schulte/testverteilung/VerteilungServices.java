@@ -4,21 +4,18 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
 
 import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Iterator;
 
 /**
  * Created with IntelliJ IDEA.
@@ -146,12 +143,10 @@ public class VerteilungServices {
 
         JSONObject obj = new JSONObject();
         try {
-            obj.put("success", true);
             JSONObject obj1 = new JSONObject();
-
-            Document doc = con.findDocument(cmisQuery);
-
-            obj.put("result", convertDocumentToJSON(doc).toString());
+            Document document = con.findDocument(cmisQuery);
+            obj.put("success", true);
+            obj.put("result", convertCMISObjectToJSON(document).toString());
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -164,7 +159,7 @@ public class VerteilungServices {
      * @return obj1          das Dokument als JSON Objekt
      * @throws JSONException
      */
-    private JSONObject convertDocumentToJSON(Document doc) throws JSONException {
+    private JSONObject convertCMISObjectToJSON(CmisObject doc) throws JSONException {
         JSONObject obj1 = new JSONObject();
         Iterator<Property<?>> iter = doc.getProperties().iterator();
         while (iter.hasNext()){
@@ -285,6 +280,7 @@ public class VerteilungServices {
                                      String documentContent,
                                      String documentType,
                                      String extraCMSProperties) {
+        //TODO Content als String oder als Stream?
         JSONObject obj = new JSONObject();
         try {
             CmisObject document;
@@ -304,11 +300,71 @@ public class VerteilungServices {
                 document = con.createDocument((Folder) folder, documentName, documentContent.getBytes(), documentType, outMap);
                 if (document != null && document instanceof Document) {
                     obj.put("success", true);
-                    obj.put("result", convertDocumentToJSON((Document) document).toString());
+                    obj.put("result", convertCMISObjectToJSON(document).toString());
                 } else {
                     obj.put("success", false);
                     obj.put("result", document == null ? "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!" : "Das verwendete Document " + documentName + " ist nicht vom Typ Document!");
                 }
+            } else {
+                obj.put("success", false);
+                obj.put("result", folder == null ? "Der Pfad " + folderName + "  ist nicht vorhanden!" : "Der verwendete Pfad " + folderName + " ist kein Folder!");
+            }
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * erstellt ein Dokument
+     * @param  targetFolder           der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  folderName             der Name des Folders als String
+     * @return obj                     ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                         false   ein Fehler ist aufgetreten
+     *                                                                result           der Folder als JSON Object
+     */
+    public JSONObject createFolder(String targetFolder,
+                                       String folderName) {
+        JSONObject obj = new JSONObject();
+        try {
+            Folder folder;
+            CmisObject target;
+            target = con.getNode(targetFolder);
+            if (target != null && target instanceof Folder) {
+                folder = con.createFolder((Folder) target, folderName);
+                if (folder != null && folder instanceof Folder) {
+                    obj.put("success", true);
+                    obj.put("result", convertCMISObjectToJSON(folder).toString());
+                } else {
+                    obj.put("success", false);
+                    obj.put("result", folder == null ? "Ein Folder mit dem Namen " + folderName + " ist nicht vorhanden!" : "Der verwendete Folder " + folderName + " ist nicht vom Typ Folder!");
+                }
+            } else {
+                obj.put("success", false);
+                obj.put("result", target == null ? "Der Pfad " + targetFolder + "  ist nicht vorhanden!" : "Der verwendete Pfad " + targetFolder + " ist kein Folder!");
+            }
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * löscht einen Folder
+     * @param  folderName        der Name des Folders
+     * @return obj               ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                   false   ein Fehler ist aufgetreten
+     *                                                          result           bei Erfolg nichts, ansonsten der Fehler
+     */
+    public JSONObject deleteFolder(String folderName) {
+        JSONObject obj = new JSONObject();
+        try {
+            CmisObject folder;
+            folder = con.getNode(folderName);
+            if (folder != null && folder instanceof Folder) {
+                List<String> list = ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
+                    obj.put("success", true);
+                    obj.put("result", new JSONObject(list).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result", folder == null ? "Der Pfad " + folderName + "  ist nicht vorhanden!" : "Der verwendete Pfad " + folderName + " ist kein Folder!");

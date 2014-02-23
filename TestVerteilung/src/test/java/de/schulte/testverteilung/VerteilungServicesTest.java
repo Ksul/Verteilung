@@ -9,6 +9,8 @@ import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 
 import junit.framework.Assert;
+import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -144,6 +146,31 @@ public class VerteilungServicesTest extends AlfrescoTest{
         String document =  obj.getString("result");
         assertEquals("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", document);
         obj = services.deleteDocument("/Archiv", "TestDocument.txt");
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+    }
+
+    @Test
+    public void testCreateFolder() throws Exception {
+        JSONObject obj = services.getNodeId("/Archiv/TestFolder");
+        if (obj != null && obj instanceof Folder)
+            ((Folder) obj).deleteTree(true, UnfileObject.DELETE, true);
+        obj = services.getNodeId("/Archiv");
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        obj = services.createFolder("/Archiv", "TestFolder");
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject result = new JSONObject(obj.get("result").toString());
+        assertNotNull(result);
+        assertTrue(result.getString("name").equalsIgnoreCase("TestFolder"));
+        obj = services.deleteFolder("/Archiv/TestFolder");
         assertNotNull(obj);
         assertTrue(obj.length() == 2);
         assertNotNull(obj.get("result"));
