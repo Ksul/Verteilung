@@ -178,6 +178,40 @@ public class VerteilungServicesTest extends AlfrescoTest{
     }
 
     @Test
+    public void testUpdateDocument() throws Exception {
+        JSONObject obj = services.getNodeId("/Archiv");
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith(("workspace")));
+        services.deleteDocument("/Archiv", "TestDocument.txt");
+        String content = "";
+        obj = services.createDocument("/Archiv",  "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null);
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject result = new JSONObject(obj.get("result").toString());
+        assertNotNull(result);
+        assertTrue(result.getString("name").equalsIgnoreCase("TestDocument.txt"));
+        assertNotNull(result.getString("objectId"));
+        content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        services.updateDocument(result.getString("objectId"), content, CMISConstants.DOCUMENT_TYPE_TEXT);
+        obj = services.getDocumentContent(result.getString("objectId"), false);
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertEquals(content, obj.getString("result"));
+        obj = services.deleteDocument("/Archiv", "TestDocument.txt");
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+    }
+
+    @Test
     public void testLoadProperties() throws Exception {
         String file =  "TestVerteilung/test.properties";
         String fullPath = "file://"+System.getProperty("user.dir").substring(0, System.getProperty("user.dir").lastIndexOf('/') +1)  + file;

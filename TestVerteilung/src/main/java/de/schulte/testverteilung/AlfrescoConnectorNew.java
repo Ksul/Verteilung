@@ -125,6 +125,16 @@ public class AlfrescoConnectorNew {
     }
 
     /**
+     * sucht ein Objekt nach seiner ObjektId
+     * @param  nodeId                die Id des Objektes
+     * @return das CmisObject
+     * @throws VerteilungException
+     */
+    public CmisObject getNodeById(String nodeId) throws VerteilungException {
+        return getSession().getObject(getSession().createObjectId(nodeId));
+    }
+
+    /**
      * liefert ein Dokument
      * @param queryString           die Abfragequery
      * @return                      ein Document
@@ -146,7 +156,7 @@ public class AlfrescoConnectorNew {
      * @param documentId            die Id des Dokumentes
      * @return                      der Inhalt als Bytearray
      */
-    public byte[] getDocumentContent( String documentId) throws VerteilungException {
+    public byte[] getDocumentContent(String documentId) throws VerteilungException {
         CmisObject object = getSession().getObject(getSession().createObjectId(documentId));
         Document document = (Document) object;
 
@@ -247,5 +257,22 @@ public class AlfrescoConnectorNew {
         props.put(PropertyIds.NAME, newFolderName);
         Folder newFolder = targetFolder.createFolder(props);
         return newFolder;
+    }
+
+    /**
+     * aktualisiert den Inhalt eines Dokumentes
+     * @param  document                  das zu aktualisierende Dokument
+     * @param  documentContent           der neue Inhalt
+     * @param  documentType              der Typ des Dokumentes
+     * @return                           ObjectId des Dokumentes
+     */
+    public void updateDocument(Document document,
+                               byte documentContent[],
+                               String documentType){
+
+        InputStream stream = new ByteArrayInputStream(documentContent);
+        ContentStream contentStream = new ContentStreamImpl(document.getName(), BigInteger.valueOf(documentContent.length), documentType, stream);
+
+        document.setContentStream(contentStream, true, true);
     }
 }

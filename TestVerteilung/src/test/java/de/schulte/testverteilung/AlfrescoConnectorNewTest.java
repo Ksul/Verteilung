@@ -104,6 +104,7 @@ public class AlfrescoConnectorNewTest extends AlfrescoTest{
         assertTrue(document instanceof Document);
         document.delete(true);
     }
+
     @Test
     public void testCreateDocument() throws Exception {
         CmisObject folder = con.getNode("/Archiv");
@@ -115,6 +116,28 @@ public class AlfrescoConnectorNewTest extends AlfrescoTest{
         assertTrue(document instanceof Document);
         assertEquals("TestDocument.txt", document.getName());
         assertEquals("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", IOUtils.toString(document.getContentStream().getStream(), "UTF-8"));
+        document.delete(true);
+    }
+
+    @Test
+    public void testUpdateDocument() throws Exception {
+        CmisObject folder = con.getNode("/Archiv");
+        assertNotNull(folder);
+        assertTrue(folder instanceof Folder);
+        CmisObject cmisObject = con.getNode("/Archiv/TestDocument.txt");
+        if (cmisObject != null && cmisObject instanceof Document)
+            cmisObject.delete(true);
+        String content = "";
+        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null);
+        assertNotNull(document);
+        assertTrue(document instanceof Document);
+        assertEquals("TestDocument.txt", document.getName());
+        content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        con.updateDocument(document, content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT);
+        byte[] cont = con.getDocumentContent(document );
+        assertNotNull(cont);
+        assertTrue(cont instanceof byte[]);
+        assertEquals(content, new String(cont));
         document.delete(true);
     }
 
@@ -132,5 +155,7 @@ public class AlfrescoConnectorNewTest extends AlfrescoTest{
         assertEquals("TestFolder", ((Folder) folder).getName());
         ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
     }
+
+
 
 }

@@ -187,7 +187,6 @@ public class VerteilungServletTest extends AlfrescoTest {
 
     @Test
     public void testCreateDocument() throws Exception {
-
         // Dokument vorsichtshalber löschen
         when(request.getParameter("function")).thenReturn("deleteDocument");
         when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
@@ -222,7 +221,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         assertEquals(content, obj.getString("result"));
         // und das Dokument wieder löschen
         when(request.getParameter("function")).thenReturn("deleteDocument");
@@ -231,6 +230,51 @@ public class VerteilungServletTest extends AlfrescoTest {
         servlet.doPost(request, response);
         writer.flush();
         sr.getBuffer().delete(0, 9999);
+    }
 
+    @Test
+    public void testCreateFolder() throws Exception {
+        when(request.getParameter("function")).thenReturn("getNodeId");
+        when(request.getParameter("filePath")).thenReturn("/Archiv");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith(("workspace")));
+        sr.getBuffer().delete(0, 9999);
+        // Folder vorsichtshalber löschen
+        when(request.getParameter("function")).thenReturn("deleteFolder");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv/TestFolder");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
+        // Folder erstellen
+        when(request.getParameter("function")).thenReturn("createFolder");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestFolder");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject folder = new JSONObject(obj.getString("result"));
+        assertNotNull(folder);
+        assertTrue(folder.getString("name").equalsIgnoreCase("TestFolder"));
+        // und den Folder wieder löschen
+        when(request.getParameter("function")).thenReturn("deleteFolder");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv/TestFolder");
+        servlet.doPost(request, response);
+        writer.flush();
+        obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject result = new JSONObject(obj.getString("result"));
+        assertNotNull(result);
     }
 }

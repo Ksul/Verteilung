@@ -316,6 +316,33 @@ public class VerteilungServices {
     }
 
     /**
+     * aktualisiert den Inhalt eines Dokumentes
+     * @param  documentId                Die Id des zu aktualisierenden Dokumentes
+     * @param  documentContent           der neue Inhalt
+     * @param  documentType              der Typ des Dokumentes
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     */
+    public JSONObject updateDocument(String documentId,
+                               String documentContent,
+                               String documentType){
+        //TODO Content als String oder als Stream?
+        JSONObject obj = new JSONObject();
+        try {
+             CmisObject cmisObject = con.getNodeById(documentId);
+            if (cmisObject != null && cmisObject instanceof Document) {
+                con.updateDocument((Document) cmisObject, documentContent.getBytes(), documentType);
+                obj.put("success", true);
+                obj.put("result", "");
+            }
+    } catch (Throwable t) {
+        obj = VerteilungHelper.convertErrorToJSON(t);
+    }
+    return obj;
+    }
+
+    /**
      * erstellt ein Dokument
      * @param  targetFolder           der Name des Folders in dem das Dokument erstellt werden soll als String
      * @param  folderName             der Name des Folders als String
@@ -374,30 +401,6 @@ public class VerteilungServices {
         }
         return obj;
     }
-
-    /**
-     * aktualisiert den Inhalt eines Documentes
-     * @param documentName          der Pfad des Dokumentes
-     * @param documentContent       der neue Inhalt als Bytearray
-     * @return obj                  ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
-     *                                                                      false   ein Fehler ist aufgetreten
-     *                                                             result           bei Erfolg die ObjectId
-     */
-    public JSONObject updateDocument(String documentName, byte documentContent[]) {
-        JSONObject obj = new JSONObject();
-        try {
-            Document document = (Document) con.getNode(documentName);
-            InputStream stream = new ByteArrayInputStream(documentContent);
-            ContentStream contentStream = new ContentStreamImpl(document.getName(), BigInteger.valueOf(documentContent.length), "text/plain", stream);
-            ObjectId objectId = document.setContentStream(contentStream, true, true);
-            obj.put("success", true);
-            obj.put("result", objectId);
-        } catch (Throwable t) {
-            obj = VerteilungHelper.convertErrorToJSON(t);
-        }
-        return obj;
-    }
-
 
     /**
      * liest die Testproperties

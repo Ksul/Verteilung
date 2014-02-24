@@ -191,11 +191,17 @@ public class VerteilungServlet extends HttpServlet {
                 if (value.equalsIgnoreCase("createDocument")) {
                     obj = createDocument(destinationFolder, fileName, documentText, mimeType, extraProperties);
                 }
+                if (value.equalsIgnoreCase("createFolder")) {
+                    obj = createFolder(destinationFolder, fileName);
+                }
+                if (value.equalsIgnoreCase("deleteFolder")) {
+                    obj = deleteFolder(destinationFolder);
+                }
 				if (value.equalsIgnoreCase("getDocumentContent")) {
 					obj = getDocumentContent(documentId, extract.equalsIgnoreCase("true"));
 				}
 				if (value.equalsIgnoreCase("updateDocument")) {
-					ret = updateDocument(documentId, documentText, description, server, username, password, proxyHost, proxyPort);
+					obj = updateDocument(documentId, documentText, mimeType);
 				}
 				if (value.equalsIgnoreCase("getTicket")) {
 					ret = getTicket(server, username, password, proxyHost, proxyPort, null);
@@ -203,12 +209,6 @@ public class VerteilungServlet extends HttpServlet {
 				if (value.equalsIgnoreCase("moveDocument")) {
 					ret = moveDocument(documentId, destinationId, server, username, password, proxyHost, proxyPort, null);
 				}
-				if (value.equalsIgnoreCase("updateDocumentByFile")) {
-					ret = updateDocumentByFile(documentId, fileName, description, mimeType, server, username, password,
-							proxyHost, proxyPort);
-				}
-
-
                 if (value.equalsIgnoreCase("listFolderAsJSON")) {
                     obj = listFolderAsJSON(filePath, withFolder, server, username, password);
                 }
@@ -318,117 +318,6 @@ public class VerteilungServlet extends HttpServlet {
         return services.getDocumentContent(documentId, extract);
     }
 
-    protected void openPDF(HttpServletResponse resp, String fileName) throws IOException {
-		boolean found = false;
-		FileEntry entry = null;
-		Iterator<FileEntry> it = entries.iterator();
-		while (it.hasNext()) {
-			entry = it.next();
-			if (entry.getName().equalsIgnoreCase(fileName)) {
-				found = true;
-				break;
-			}
-		}
-		if (found) {
-			final byte[] bytes = entry.getData();
-			final String name = entry.getName();
-			resp.reset();
-			resp.resetBuffer();
-			resp.setContentType("application/pdf");
-			resp.setHeader("Content-Disposition", "inline; filename=" + name + "\"");
-			resp.setHeader("Cache-Control", "max-age=0");
-			resp.setContentLength(bytes.length);
-			ServletOutputStream sout = resp.getOutputStream();
-			sout.write(bytes, 0, bytes.length);
-			sout.flush();
-			sout.close();
-		}
-	}
-
-
-
-	protected Object getTicket(String server, String username, String password, String proxyHost, String proxyPort,
-			Credentials credentials) {
-		String ret;
-		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, credentials);
-		ret = connector.getTicket();
-
-		return ret;
-	}
-
-	protected Object moveDocument(String documentId, String destinationId, String server, String username,
-			String password, String proxyHost, String proxyPort, Credentials credentials) throws VerteilungException,
-			JSONException {
-		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, credentials);
-		JSONObject obj = new JSONObject(connector.moveDocument(documentId, destinationId));
-		if (!obj.getBoolean("overallSuccess"))
-			throw new VerteilungException(obj.toString());
-		return obj.toString();
-	}
-
-	protected Object updateDocument(String documentId, String documentText, String description, String server,
-			String username, String password, String proxyHost, String proxyPort) throws IOException, VerteilungException {
-		String ret = null;
-		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
-		AlfrescoResponse response = connector.checkout(documentId);
-		if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-			Document<Element> doc = response.getDocument();
-			Entry responseEntry = (Entry) doc.getRoot();
-			String tmp = responseEntry.getId().getPath();
-            final String id = tmp.substring(tmp.lastIndexOf(":") + 1);
-			response = connector.updateContent(documentText, description, id);
-			if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-				response = connector.checkin(id, false, "");
-				if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-					ret = "Dokument konnte nicht eingecheckt werden: " + response.getStatusText();
-					ret = ret + "\n" + response.getStackTrace();
-					throw new VerteilungException(ret);
-				}
-			} else {
-				ret = "Dokument konnte nicht aktualisiert werden: " + response.getStatusText();
-				ret = ret + "\n" + response.getStackTrace();
-				throw new VerteilungException(ret);
-			}
-		} else {
-			ret = "Dokument konnte nicht ausgecheckt werden: " + response.getStatusText();
-			ret = ret + "\n" + response.getStackTrace();
-			throw new VerteilungException(ret);
-		}
-		return ret;
-	}
-
-	protected Object updateDocumentByFile(String documentId, String uri, String description, String mimeType,
-			String server, String username, String password, String proxyHost, String proxyPort) throws IOException,
-			URISyntaxException, VerteilungException {
-		String ret = null;
-		AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
-		AlfrescoResponse response = connector.checkout(documentId);
-		if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-			Document<Element> doc = response.getDocument();
-			Entry responseEntry = (Entry) doc.getRoot();
-			String tmp = responseEntry.getId().getPath();
-			final String id = tmp.substring(tmp.lastIndexOf(":") + 1);
-			response = connector.updateCheckedOutFile(uri, description, mimeType, id);
-			if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-				response = connector.checkin(id, false, "");
-				if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-					ret = "Dokument konnte nicht eingecheckt werden: " + response.getStatusText();
-					ret = ret + "\n" + response.getStackTrace();
-					throw new VerteilungException(ret);
-				}
-			} else {
-				ret = "Dokument konnte nicht aktualisiert werden: " + response.getStatusText();
-				ret = ret + "\n" + response.getStackTrace();
-				throw new VerteilungException(ret);
-			}
-		} else {
-			ret = "Dokument konnte nicht ausgecheckt werden: " + response.getStatusText();
-			ret = ret + "\n" + response.getStackTrace();
-			throw new VerteilungException(ret);
-		}
-		return ret;
-	}
-
 
     /**
      * lädt ein Document in den Server
@@ -465,9 +354,9 @@ public class VerteilungServlet extends HttpServlet {
      * @param  documentContent      der Inhalt als String
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
-     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
-     *                                                               false    ein Fehler ist aufgetreten
-     *                                                      result            Dokument als JSONObject
+     * @return                      ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                      false    ein Fehler ist aufgetreten
+     *                                                             result            Dokument als JSONObject
      * @throws VerteilungException
      */
     protected JSONObject createDocument(String filePath,
@@ -477,6 +366,51 @@ public class VerteilungServlet extends HttpServlet {
                                         String extraCMSProperties) throws  VerteilungException {
         VerteilungServices services = getServices(bindingUrl, user, password);
         return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties);
+    }
+
+    /**
+     * aktualisiert den Inhalt eines Dokumentes
+     * @param  documentId                Die Id des zu aktualisierenden Dokumentes
+     * @param  documentContent           der neue Inhalt
+     * @param  documentType              der Typ des Dokumentes
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     * @throws VerteilungException
+     */
+    public JSONObject updateDocument(String documentId,
+                                     String documentContent,
+                                     String documentType) throws VerteilungException {
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.updateDocument(documentId, documentContent, documentType);
+    }
+
+    /**
+     * erzeugt einen Pfad
+     * @param  targetPath             der Name des Folders in dem der Folder erstellt werden soll als String
+     * @param  folderName           der Name des neuen Pfades als String
+     * @return                      ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                      false    ein Fehler ist aufgetreten
+     *                                                             result            Folder als JSONObject
+     * @throws VerteilungException
+     */
+    protected JSONObject createFolder(String targetPath,
+                                        String folderName) throws  VerteilungException {
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.createFolder(targetPath, folderName);
+    }
+
+    /**
+     * löscht einen Pfad
+     * @param  folderPath           der Name des zu löschenden Pfades als String
+     * @return                      ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                      false    ein Fehler ist aufgetreten
+     *                                                             result
+     * @throws VerteilungException
+     */
+    protected JSONObject deleteFolder(String folderPath) throws  VerteilungException {
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.deleteFolder(folderPath);
     }
 
     /**
@@ -490,7 +424,6 @@ public class VerteilungServlet extends HttpServlet {
         VerteilungServices services = getServices(bindingUrl, user, password);
         return services.findDocument(cmisQuery);
     }
-
 
 
     /**
@@ -610,6 +543,88 @@ public class VerteilungServlet extends HttpServlet {
 		}
 		return ret;
 	}
+
+    protected void openPDF(HttpServletResponse resp, String fileName) throws IOException {
+        boolean found = false;
+        FileEntry entry = null;
+        Iterator<FileEntry> it = entries.iterator();
+        while (it.hasNext()) {
+            entry = it.next();
+            if (entry.getName().equalsIgnoreCase(fileName)) {
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            final byte[] bytes = entry.getData();
+            final String name = entry.getName();
+            resp.reset();
+            resp.resetBuffer();
+            resp.setContentType("application/pdf");
+            resp.setHeader("Content-Disposition", "inline; filename=" + name + "\"");
+            resp.setHeader("Cache-Control", "max-age=0");
+            resp.setContentLength(bytes.length);
+            ServletOutputStream sout = resp.getOutputStream();
+            sout.write(bytes, 0, bytes.length);
+            sout.flush();
+            sout.close();
+        }
+    }
+
+
+
+    protected Object getTicket(String server, String username, String password, String proxyHost, String proxyPort,
+                               Credentials credentials) {
+        String ret;
+        AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, credentials);
+        ret = connector.getTicket();
+
+        return ret;
+    }
+
+    protected Object moveDocument(String documentId, String destinationId, String server, String username,
+                                  String password, String proxyHost, String proxyPort, Credentials credentials) throws VerteilungException,
+            JSONException {
+        AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, credentials);
+        JSONObject obj = new JSONObject(connector.moveDocument(documentId, destinationId));
+        if (!obj.getBoolean("overallSuccess"))
+            throw new VerteilungException(obj.toString());
+        return obj.toString();
+    }
+
+    protected Object updateDocument(String documentId, String documentText, String description, String server,
+                                    String username, String password, String proxyHost, String proxyPort) throws IOException, VerteilungException {
+        String ret = null;
+        AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
+        AlfrescoResponse response = connector.checkout(documentId);
+        if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
+            Document<Element> doc = response.getDocument();
+            Entry responseEntry = (Entry) doc.getRoot();
+            String tmp = responseEntry.getId().getPath();
+            final String id = tmp.substring(tmp.lastIndexOf(":") + 1);
+            response = connector.updateContent(documentText, description, id);
+            if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
+                response = connector.checkin(id, false, "");
+                if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
+                    ret = "Dokument konnte nicht eingecheckt werden: " + response.getStatusText();
+                    ret = ret + "\n" + response.getStackTrace();
+                    throw new VerteilungException(ret);
+                }
+            } else {
+                ret = "Dokument konnte nicht aktualisiert werden: " + response.getStatusText();
+                ret = ret + "\n" + response.getStackTrace();
+                throw new VerteilungException(ret);
+            }
+        } else {
+            ret = "Dokument konnte nicht ausgecheckt werden: " + response.getStatusText();
+            ret = ret + "\n" + response.getStackTrace();
+            throw new VerteilungException(ret);
+        }
+        return ret;
+    }
+
+
+
 
 
 }

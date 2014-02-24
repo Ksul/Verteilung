@@ -208,62 +208,15 @@ public class VerteilungApplet extends Applet {
         return obj.toString();
     }
 
-
-    /**
-     * verschiebt ein Dokument
-     * @param documentId         die Id des zu verschiebenden Dokumentes
-     * @param destinationId      die Id des Folders, wo das Dokument hin verschoben werden soll
-     * @param server             der Alfresco Server
-     * @param username           der verwendete Username
-     * @param password           das Passwort
-     * @param proxyHost          der Proxyhost, falls verwendet
-     * @param proxyPort          der Proxyport, falls verwendet
-     * @param credentials
-     * @return                   das Ergebnis als JSON String
-     * @throws JSONException
-     */
-	public String moveDocument(final String documentId, final String destinationId, final String server,
-			final String username, final String password, final String proxyHost, final String proxyPort,
-			final Credentials credentials) throws JSONException {
-		JSONObject ret = new JSONObject();
-		JSONObject obj;
-		try {
-			obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
-
-				public JSONObject run() throws VerteilungException, JSONException {
-					JSONObject o;
-					AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
-							credentials);
-					o = new JSONObject(connector.moveDocument(documentId, destinationId));
-					if (!o.getBoolean("overallSuccess"))
-						throw new VerteilungException(o.toString());
-					return o;
-				}
-			});
-		} catch (PrivilegedActionException e) {
-			ret.put("success", false);
-			ret.put("result", e.getMessage());
-			return ret.toString();
-		}
-		ret.put("success", true);
-		ret.put("result", obj.toString());
-		return ret.toString();
-	}
-
-
-
     /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
      * @param filePath     der Pfad, der geliefert werden soll
      * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @return obj         ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj         ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
-     * @throws IOException
-     * @throws VerteilungException
-     * @throws JSONException
      */
-    public String listFolderAsJSON(final String filePath, final String listFolder) throws IOException, VerteilungException, JSONException {
+    public String listFolderAsJSON(final String filePath, final String listFolder)  {
         logger.fine("Aufruf listFolderAsJSON mit filePath: " + filePath + " listFolder: " + listFolder);
         JSONObject obj = new JSONObject();
         try {
@@ -275,8 +228,13 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            obj.put("success", false);
-            obj.put("result", e.getMessage());
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
         }
         return obj.toString();
     }
@@ -285,47 +243,38 @@ public class VerteilungApplet extends Applet {
     /**
      * liefert eine NodeID als String zurück
      * @param path         der Pfad zum Knoten, der der Knoten gesucht werden soll
-     * @return obj         ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj         ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            die NodeId als String
      */
-	public String getNodeId(final String path) {
+    public String getNodeId(final String path) {
         logger.fine("Aufruf getNodeId mit path: " + path);
-		JSONObject obj = new JSONObject();
-		try {
-			try {
-				obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
-					public JSONObject run() throws JSONException {
-                        try {
-						VerteilungServices services = getServices(bindingUrl, user, password);
-						return services.getNodeId(path);
-                        } catch (Throwable t) {
-                            JSONObject obj = new JSONObject();
-                            obj.put("success", false);
-                            obj.put("result", t.getMessage());
-                            return obj;
-                        }
-					}
-				});
-			} catch (PrivilegedActionException e) {
-				obj.put("success", false);
-				obj.put("result", e.getMessage());
-				return obj.toString();
-			}
-
-        } catch (JSONException e) {
-            logger.severe(e.getLocalizedMessage());
-            e.printStackTrace();
+                public JSONObject run() throws JSONException {
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.getNodeId(path);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
         }
         return obj.toString();
-	}
+    }
 
 
     /**
      * findet ein Document
      * @param cmisQuery    die CMIS Query, mit der der Knoten gesucht werden soll
-     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            Dokument als JSONObject
      */
@@ -333,30 +282,21 @@ public class VerteilungApplet extends Applet {
         logger.fine("Aufruf findDocument mit cmisQuery: " + cmisQuery);
         JSONObject obj = new JSONObject();
         try {
-            try {
-                obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
-                    public JSONObject run() throws JSONException {
-                        try {
-                            VerteilungServices services = getServices(bindingUrl, user, password);
-                            return services.findDocument(cmisQuery);
-                        } catch (Throwable t) {
-                            JSONObject obj = new JSONObject();
-                            obj.put("success", false);
-                            obj.put("result", t.getMessage());
-                            return obj;
-                        }
-                    }
-                });
-            } catch (PrivilegedActionException e) {
+                public JSONObject run() throws JSONException {
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.findDocument(cmisQuery);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
                 obj.put("success", false);
                 obj.put("result", e.getMessage());
-                return obj.toString();
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
             }
-
-        } catch (JSONException e) {
-            logger.severe(e.getLocalizedMessage());
-            e.printStackTrace();
         }
         return obj.toString();
     }
@@ -366,7 +306,9 @@ public class VerteilungApplet extends Applet {
      * der Text extrahiert.
      * @param docId                 die Id des Documentes
      * @param extract               legt fest,ob einPDF Document umgewandelt werden soll
-     * @return                      JSONObject als String
+     * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                      false    ein Fehler ist aufgetreten
+     *                                                             result            der Inhalt als String
      */
     public String getDocumentContent(final String docId, final boolean extract) {
 
@@ -375,7 +317,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    JSONObject obj = null;
                     VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.getDocumentContent(docId, extract);
                 }
@@ -399,17 +340,14 @@ public class VerteilungApplet extends Applet {
      * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            Dokument als JSONObject
-     * @throws VerteilungException
      */
     public String uploadDocument(final String filePath, final String fileName) {
-
 
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    JSONObject obj = null;
                     VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.uploadDocument(filePath, fileName);
                 }
@@ -443,7 +381,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    JSONObject obj = null;
                     VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.deleteDocument(filePath, fileName);
                 }
@@ -468,9 +405,9 @@ public class VerteilungApplet extends Applet {
      * @param  documentContent      der Inhalt als String
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
-     * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
-     *                                                               false    ein Fehler ist aufgetreten
-     *                                                      result            Dokument als JSONObject
+     * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                      false    ein Fehler ist aufgetreten
+     *                                                                      result            Dokument als JSONObject
      */
     public String createDocument(final String filePath,
                                         final String fileName,
@@ -484,7 +421,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    JSONObject obj = null;
                     VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties);
                 }
@@ -503,6 +439,67 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
+     * erzeugt einen Pfad
+     * @param  targetPath           der Name des Folders in dem der Folder erstellt werden soll als String
+     * @param  folderName           der Name des neuen Pfades als String
+     * @return                      ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                      false    ein Fehler ist aufgetreten
+     *                                                             result            Folder als JSONObject
+     */
+    public String createFolder(final String targetPath,
+                                final String folderName) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.createFolder(targetPath, folderName);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+    }
+
+    /**
+     * löscht einen Pfad
+     * @param  folderPath           der Name des zu löschenden Pfades als String
+     * @return                      ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                      false    ein Fehler ist aufgetreten
+     *                                                             result
+     */
+    public String deleteFolder(final String folderPath) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.deleteFolder(folderPath);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+    }
+
+
+    /**
      * liest die Testproperties
      * nur für Testzwecke
      * @param  propFile      der Name der Properties Datei
@@ -517,7 +514,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    JSONObject obj = null;
                     VerteilungServices services = new VerteilungServices();
                     return services.loadProperties(propFile);
                 }
@@ -534,6 +530,11 @@ public class VerteilungApplet extends Applet {
         return obj.toString();
     }
 
+
+
+
+
+    // Alte Methoden
 
     public int updateDocument(final String documentId, final String documentText, final String description,
 			final String server, final String username, final String password, final String proxyHost,
@@ -913,6 +914,47 @@ public class VerteilungApplet extends Applet {
         return ret;
     }
 
+
+    /**
+     * verschiebt ein Dokument
+     * @param documentId         die Id des zu verschiebenden Dokumentes
+     * @param destinationId      die Id des Folders, wo das Dokument hin verschoben werden soll
+     * @param server             der Alfresco Server
+     * @param username           der verwendete Username
+     * @param password           das Passwort
+     * @param proxyHost          der Proxyhost, falls verwendet
+     * @param proxyPort          der Proxyport, falls verwendet
+     * @param credentials
+     * @return                   das Ergebnis als JSON String
+     * @throws JSONException
+     */
+    public String moveDocument(final String documentId, final String destinationId, final String server,
+                               final String username, final String password, final String proxyHost, final String proxyPort,
+                               final Credentials credentials) throws JSONException {
+        JSONObject ret = new JSONObject();
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, JSONException {
+                    JSONObject o;
+                    AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
+                            credentials);
+                    o = new JSONObject(connector.moveDocument(documentId, destinationId));
+                    if (!o.getBoolean("overallSuccess"))
+                        throw new VerteilungException(o.toString());
+                    return o;
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            ret.put("success", false);
+            ret.put("result", e.getMessage());
+            return ret.toString();
+        }
+        ret.put("success", true);
+        ret.put("result", obj.toString());
+        return ret.toString();
+    }
 
     /**
      * Testmethode
