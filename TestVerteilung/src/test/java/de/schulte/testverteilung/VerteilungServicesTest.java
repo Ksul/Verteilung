@@ -212,6 +212,51 @@ public class VerteilungServicesTest extends AlfrescoTest{
     }
 
     @Test
+    public void testMoveDocument() throws Exception {
+        JSONObject oldFolder = services.getNodeId("/Archiv");
+        assertNotNull(oldFolder);
+        assertTrue(oldFolder.length() == 2);
+        assertNotNull(oldFolder.get("result"));
+        assertTrue(oldFolder.get("result").toString(), oldFolder.getBoolean("success"));
+        JSONObject oldFolderResult = new JSONObject(oldFolder.get("result").toString());
+        assertNotNull(oldFolderResult);
+        assertNotNull(oldFolderResult.getString("objectId"));
+        JSONObject newFolder = services.getNodeId("/Archiv/Fehler");
+        assertNotNull(newFolder);
+        assertTrue(newFolder.length() == 2);
+        assertNotNull(newFolder.get("result"));
+        JSONObject newFolderResult = new JSONObject(newFolder.get("result").toString());
+        assertNotNull(newFolderResult);
+        assertNotNull(newFolderResult.getString("objectId"));
+        assertTrue(newFolder.get("result").toString(), newFolder.getBoolean("success"));
+        services.deleteDocument("/Archiv", "TestDocument.txt");
+        String content = "";
+        JSONObject document = services.createDocument("/Archiv",  "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null);
+        assertNotNull(document);
+        assertTrue(document.length() == 2);
+        assertNotNull(document.get("result"));
+        assertTrue(document.get("result").toString(), document.getBoolean("success"));
+        JSONObject documentResult = new JSONObject(document.get("result").toString());
+        assertNotNull(documentResult);
+        assertNotNull(documentResult.getString("objectId"));
+        JSONObject obj = services.moveDocument(documentResult.getString("objectId"), oldFolderResult.getString("objectId"), newFolderResult.getString("objectId"));
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        obj = services.getNodeId("/Archiv/Fehler/TestDocument.txt");
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        obj = services.deleteDocument("/Archiv/Fehler", "TestDocument.txt");
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+    }
+
+    @Test
     public void testLoadProperties() throws Exception {
         String file =  "TestVerteilung/test.properties";
         String fullPath = "file://"+System.getProperty("user.dir").substring(0, System.getProperty("user.dir").lastIndexOf('/') +1)  + file;

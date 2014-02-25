@@ -325,21 +325,67 @@ public class VerteilungServices {
      *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
      */
     public JSONObject updateDocument(String documentId,
-                               String documentContent,
-                               String documentType){
+                                     String documentContent,
+                                     String documentType) {
         //TODO Content als String oder als Stream?
         JSONObject obj = new JSONObject();
         try {
-             CmisObject cmisObject = con.getNodeById(documentId);
+            CmisObject cmisObject = con.getNodeById(documentId);
             if (cmisObject != null && cmisObject instanceof Document) {
                 con.updateDocument((Document) cmisObject, documentContent.getBytes(), documentType);
                 obj.put("success", true);
                 obj.put("result", "");
+            } else {
+                obj.put("success", false);
+                obj.put("result", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
             }
-    } catch (Throwable t) {
-        obj = VerteilungHelper.convertErrorToJSON(t);
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
     }
-    return obj;
+
+    /**
+     * verschiebt ein Dokument
+     * @param  documentId                das zu verschibende Dokument
+     * @param  oldFolderId               der alte Folder in dem das Dokument liegt
+     * @param  newFolderId               der Folder, in das Dokument verschoben werden soll
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     */
+    public JSONObject moveDocument(String documentId,
+                                   String oldFolderId,
+                                   String newFolderId) {
+        JSONObject obj = new JSONObject();
+        try {
+            CmisObject document = con.getNodeById(documentId);
+            CmisObject oldFolder = con.getNodeById(oldFolderId);
+            CmisObject newFolder = con.getNodeById(newFolderId);
+            if (document != null && document instanceof Document) {
+                if (oldFolder != null && oldFolder instanceof Folder) {
+                    if (newFolder != null && newFolder instanceof Folder) {
+                        con.moveDocument((Document) document, (Folder) oldFolder, (Folder) newFolder);
+                        obj.put("success", true);
+                        obj.put("result", "");
+                    } else {
+                        obj.put("success", false);
+                        obj.put("result", oldFolder == null ? "Der Pfad mit der Id " + newFolderId + "  ist nicht vorhanden!" : "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
+
+                    }
+                } else {
+                    obj.put("success", false);
+                    obj.put("result", oldFolder == null ? "Der Pfad mit der Id " + oldFolderId + "  ist nicht vorhanden!" : "Der verwendete Pfad mit der Id" + oldFolderId + " ist kein Folder!");
+
+                }
+            } else {
+                obj.put("success", false);
+                obj.put("result", document == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
+            }
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
     }
 
     /**

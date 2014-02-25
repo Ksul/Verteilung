@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
@@ -276,5 +277,149 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         JSONObject result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
+    }
+
+    @Test
+    public void testUpdateDocument() throws Exception {
+        when(request.getParameter("function")).thenReturn("getNodeId");
+        when(request.getParameter("filePath")).thenReturn("/Archiv");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith(("workspace")));
+        sr.getBuffer().delete(0, 9999);
+        // Dokument vorsichtshalber löschen
+        when(request.getParameter("function")).thenReturn("deleteDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
+        // Dokument erstellen
+        when(request.getParameter("function")).thenReturn("createDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        when(request.getParameter("documentText")).thenReturn(content);
+        when(request.getParameter("mimeType")).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject doc = new JSONObject(obj.getString("result"));
+        assertNotNull(doc);
+        assertNotNull(doc.getString("objectId"));
+        // Dokument ändern
+        when(request.getParameter("function")).thenReturn("updateDocument");
+        when(request.getParameter("documentId")).thenReturn(doc.getString("objectId"));
+        content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        when(request.getParameter("documentText")).thenReturn(content);
+        when(request.getParameter("mimeType")).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        // Inhalt lesen
+        when(request.getParameter("function")).thenReturn("getDocumentContent");
+        when(request.getParameter("documentId")).thenReturn(doc.getString("objectId"));
+        when(request.getParameter("extract")).thenReturn("false");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertEquals(content, obj.getString("result"));
+        // und das Dokument wieder löschen
+        when(request.getParameter("function")).thenReturn("deleteDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
+    }
+
+
+    @Test
+    public void testMoveDocument() throws Exception {
+        when(request.getParameter("function")).thenReturn("getNodeId");
+        when(request.getParameter("filePath")).thenReturn("/Archiv");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        String currentLocationId = obj.getString("result");
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("getNodeId");
+        when(request.getParameter("filePath")).thenReturn("/Archiv/Fehler");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        String destinationId = obj.getString("result");
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("deleteDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
+        // Dokument erstellen
+        when(request.getParameter("function")).thenReturn("createDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        when(request.getParameter("documentText")).thenReturn(content);
+        when(request.getParameter("mimeType")).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject doc = new JSONObject(obj.getString("result"));
+        assertNotNull(doc);
+        assertNotNull(doc.getString("objectId"));
+        sr.getBuffer().delete(0, 9999);
+        // Dokument verschieben
+        when(request.getParameter("function")).thenReturn("moveDocument");
+        when(request.getParameter("documentId")).thenReturn(doc.getString("objectId"));
+        when(request.getParameter("currentLocationId")).thenReturn(currentLocationId);
+        when(request.getParameter("destinationId")).thenReturn(destinationId);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() == 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("getNodeId");
+        when(request.getParameter("filePath")).thenReturn("/Archiv/Fehler/TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        // und das Dokument wieder löschen
+        when(request.getParameter("function")).thenReturn("deleteDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv/Fehler");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
     }
 }

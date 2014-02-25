@@ -142,6 +142,26 @@ public class AlfrescoConnectorNewTest extends AlfrescoTest{
     }
 
     @Test
+    public void TestMoveDocument() throws Exception {
+        CmisObject folder = con.getNode("/Archiv");
+        assertNotNull(folder);
+        assertTrue(folder instanceof Folder);
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null);
+        assertNotNull(document);
+        assertTrue(document instanceof Document);
+        assertEquals("TestDocument.txt", document.getName());
+        CmisObject newFolder = con.getNode("/Archiv/Fehler");
+        assertNotNull(newFolder);
+        assertTrue(newFolder instanceof Folder);
+        con.moveDocument(document, (Folder) folder, (Folder) newFolder);
+        CmisObject cmisObject = con.getNode("/Archiv/Fehler/TestDocument.txt");
+        assertNotNull(cmisObject);
+        assertTrue(cmisObject instanceof Document);
+        cmisObject.delete(true);
+    }
+
+    @Test
     public void testCreateFolder() throws Exception {
         CmisObject folder = con.getNode("/Archiv/TestFolder");
         if (folder != null && folder instanceof Folder)

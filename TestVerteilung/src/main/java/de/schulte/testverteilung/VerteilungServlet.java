@@ -141,6 +141,7 @@ public class VerteilungServlet extends HttpServlet {
 		String value = req.getParameter("function");
 		String documentId = req.getParameter("documentId");
 		String destinationId = req.getParameter("destinationId");
+        String currentLocationId = req.getParameter("currentLocationId");
 		String documentText = req.getParameter("documentText");
 		String filePath = req.getParameter("filePath");
 		String fileName = req.getParameter("fileName");
@@ -203,12 +204,13 @@ public class VerteilungServlet extends HttpServlet {
 				if (value.equalsIgnoreCase("updateDocument")) {
 					obj = updateDocument(documentId, documentText, mimeType);
 				}
+                if (value.equalsIgnoreCase("moveDocument")) {
+                    obj = moveDocument(documentId, currentLocationId, destinationId);
+                }
 				if (value.equalsIgnoreCase("getTicket")) {
 					ret = getTicket(server, username, password, proxyHost, proxyPort, null);
 				}
-				if (value.equalsIgnoreCase("moveDocument")) {
-					ret = moveDocument(documentId, destinationId, server, username, password, proxyHost, proxyPort, null);
-				}
+
                 if (value.equalsIgnoreCase("listFolderAsJSON")) {
                     obj = listFolderAsJSON(filePath, withFolder, server, username, password);
                 }
@@ -378,11 +380,28 @@ public class VerteilungServlet extends HttpServlet {
      *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
      * @throws VerteilungException
      */
-    public JSONObject updateDocument(String documentId,
+    protected JSONObject updateDocument(String documentId,
                                      String documentContent,
                                      String documentType) throws VerteilungException {
         VerteilungServices services = getServices(bindingUrl, user, password);
         return services.updateDocument(documentId, documentContent, documentType);
+    }
+
+    /**
+     * verschiebt ein Dokument
+     * @param  documentId                das zu verschibende Dokument
+     * @param  oldFolderId               der alte Folder in dem das Dokument liegt
+     * @param  newFolderId               der Folder, in das Dokument verschoben werden soll
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     * @throws VerteilungException
+     */
+    protected JSONObject moveDocument(String documentId,
+                                   String oldFolderId,
+                                   String newFolderId) throws VerteilungException {
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.moveDocument(documentId, oldFolderId, newFolderId);
     }
 
     /**
@@ -425,7 +444,6 @@ public class VerteilungServlet extends HttpServlet {
         return services.findDocument(cmisQuery);
     }
 
-
     /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
      * @param filePath     der Pfad, der geliefert werden soll (als NodeId)
@@ -442,6 +460,8 @@ public class VerteilungServlet extends HttpServlet {
         VerteilungServices services = new VerteilungServices(server, username, password);
         return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
     }
+
+
 
     protected Object extract(String documentText, String fileName, String clear) {
 		Object ret;
@@ -581,50 +601,4 @@ public class VerteilungServlet extends HttpServlet {
 
         return ret;
     }
-
-    protected Object moveDocument(String documentId, String destinationId, String server, String username,
-                                  String password, String proxyHost, String proxyPort, Credentials credentials) throws VerteilungException,
-            JSONException {
-        AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, credentials);
-        JSONObject obj = new JSONObject(connector.moveDocument(documentId, destinationId));
-        if (!obj.getBoolean("overallSuccess"))
-            throw new VerteilungException(obj.toString());
-        return obj.toString();
-    }
-
-    protected Object updateDocument(String documentId, String documentText, String description, String server,
-                                    String username, String password, String proxyHost, String proxyPort) throws IOException, VerteilungException {
-        String ret = null;
-        AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, null);
-        AlfrescoResponse response = connector.checkout(documentId);
-        if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-            Document<Element> doc = response.getDocument();
-            Entry responseEntry = (Entry) doc.getRoot();
-            String tmp = responseEntry.getId().getPath();
-            final String id = tmp.substring(tmp.lastIndexOf(":") + 1);
-            response = connector.updateContent(documentText, description, id);
-            if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-                response = connector.checkin(id, false, "");
-                if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-                    ret = "Dokument konnte nicht eingecheckt werden: " + response.getStatusText();
-                    ret = ret + "\n" + response.getStackTrace();
-                    throw new VerteilungException(ret);
-                }
-            } else {
-                ret = "Dokument konnte nicht aktualisiert werden: " + response.getStatusText();
-                ret = ret + "\n" + response.getStackTrace();
-                throw new VerteilungException(ret);
-            }
-        } else {
-            ret = "Dokument konnte nicht ausgecheckt werden: " + response.getStatusText();
-            ret = ret + "\n" + response.getStackTrace();
-            throw new VerteilungException(ret);
-        }
-        return ret;
-    }
-
-
-
-
-
 }

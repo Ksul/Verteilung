@@ -439,6 +439,75 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
+     * aktualisiert den Inhalt eines Dokumentes
+     * @param  documentId                Die Id des zu aktualisierenden Dokumentes
+     * @param  documentContent           der neue Inhalt
+     * @param  documentType              der Typ des Dokumentes
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     */
+    public String updateDocument(final String documentId,
+                                 final String documentContent,
+                                 final String documentType)  {
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.updateDocument(documentId, documentContent, documentType);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+
+    }
+
+    /**
+     * verschiebt ein Dokument
+     * @param  documentId                das zu verschibende Dokument
+     * @param  oldFolderId               der alte Folder in dem das Dokument liegt
+     * @param  newFolderId               der Folder, in das Dokument verschoben werden soll
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     */
+    public String moveDocument(final String documentId,
+                               final String oldFolderId,
+                               final String newFolderId) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    return services.moveDocument(documentId, oldFolderId, newFolderId);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+    }
+
+
+    /**
      * erzeugt einen Pfad
      * @param  targetPath           der Name des Folders in dem der Folder erstellt werden soll als String
      * @param  folderName           der Name des neuen Pfades als String
@@ -508,7 +577,6 @@ public class VerteilungApplet extends Applet {
      *                                                      result            die Properties als JSON Objekte
      */
     public String loadProperties(final String propFile) {
-
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {

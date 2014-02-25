@@ -245,6 +245,19 @@ public class AlfrescoConnectorNew {
     }
 
     /**
+     * verschiebt ein Dokument
+     * @param document              das zu verschibende Dokument
+     * @param oldFolder             der alte Folder in dem das Dokument liegt
+     * @param newFolder             der Folder, in das Dokument verschoben werden soll
+     */
+    public void moveDocument(Document document,
+                             Folder oldFolder,
+                             Folder newFolder) {
+         document.removeFromFolder(oldFolder);
+         document.addToFolder(newFolder, true);
+    }
+
+    /**
      * erstellt einen Folder
      *
      * @param targetFolder              der Folder, in dem der neue Folder angelegt werden soll.
