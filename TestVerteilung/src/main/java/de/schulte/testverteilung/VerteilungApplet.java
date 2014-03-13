@@ -53,6 +53,7 @@ public class VerteilungApplet extends Applet {
 
 	BufferedOutputStream bos = new BufferedOutputStream(bys);
 
+    // Speicher für entpackte Files aus einem ZIP File
 	Collection<FileEntry> entries = new ArrayList<FileEntry>();
 
     private static VerteilungServices services;
@@ -405,6 +406,7 @@ public class VerteilungApplet extends Applet {
      * @param  documentContent      der Inhalt als String
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
+     * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                                      result            Dokument als JSONObject
@@ -413,7 +415,8 @@ public class VerteilungApplet extends Applet {
                                         final String fileName,
                                         final String documentContent,
                                         final String documentType,
-                                        final String extraCMSProperties)  {
+                                        final String extraCMSProperties,
+                                        final String versionState)  {
 
 
         JSONObject obj = new JSONObject();
@@ -422,7 +425,7 @@ public class VerteilungApplet extends Applet {
 
                 public JSONObject run() throws JSONException {
                     VerteilungServices services = getServices(bindingUrl, user, password);
-                    return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties);
+                    return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties, versionState);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -443,13 +446,19 @@ public class VerteilungApplet extends Applet {
      * @param  documentId                Die Id des zu aktualisierenden Dokumentes
      * @param  documentContent           der neue Inhalt
      * @param  documentType              der Typ des Dokumentes
+     * @param  extraCMSProperties        zusätzliche Properties
+     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
+     * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
      *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
      */
     public String updateDocument(final String documentId,
                                  final String documentContent,
-                                 final String documentType)  {
+                                 final String documentType,
+                                 final String extraCMSProperties,
+                                 final String majorVersion,
+                                 final String versionComment)  {
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
@@ -457,7 +466,7 @@ public class VerteilungApplet extends Applet {
                 public JSONObject run() throws JSONException {
 
                     VerteilungServices services = getServices(bindingUrl, user, password);
-                    return services.updateDocument(documentId, documentContent, documentType);
+                    return services.updateDocument(documentId, documentContent, documentType, extraCMSProperties, majorVersion, versionComment);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -475,7 +484,7 @@ public class VerteilungApplet extends Applet {
 
     /**
      * verschiebt ein Dokument
-     * @param  documentId                das zu verschibende Dokument
+     * @param  documentId                das zu verschiebende Dokument
      * @param  oldFolderId               der alte Folder in dem das Dokument liegt
      * @param  newFolderId               der Folder, in das Dokument verschoben werden soll
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
@@ -516,7 +525,7 @@ public class VerteilungApplet extends Applet {
      *                                                             result            Folder als JSONObject
      */
     public String createFolder(final String targetPath,
-                                final String folderName) {
+                               final String folderName) {
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
@@ -599,364 +608,277 @@ public class VerteilungApplet extends Applet {
     }
 
 
+    /**
+     * sichert einen String in eine Datei
+     * @param fileName           der Name der Datei
+     * @param string             der zu sichernde String
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg nichts, ansonsten der Fehler
+     */
+    public String save(final String fileName,
+                       final String string) {
 
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
-
-    // Alte Methoden
-
-    public int updateDocument(final String documentId, final String documentText, final String description,
-			final String server, final String username, final String password, final String proxyHost,
-			final String proxyPort, final Credentials credentials) {
-		int ret;
-
-		final AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
-				credentials);
-		AlfrescoResponse response = AccessController.doPrivileged(new PrivilegedAction<AlfrescoResponse>() {
-
-			public AlfrescoResponse run() {
-				try {
-					return connector.checkout(documentId);
-				} catch (IOException e) {
-					logger.severe(e.getMessage());
-					e.printStackTrace();
-					AlfrescoResponse response = new AlfrescoResponse();
-					response.setStatusCode(ResponseType.SERVER_ERROR.toString());
-					response.setStatusText(e.getMessage());
-					return response;
-				}
-			}
-		});
-		if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-			Document<Element> doc = response.getDocument();
-			Entry responseEntry = (Entry) doc.getRoot();
-			String tmp = responseEntry.getId().getPath();
-			final String id = tmp.substring(tmp.lastIndexOf(":") + 1);
-			response = AccessController.doPrivileged(new PrivilegedAction<AlfrescoResponse>() {
-
-				public AlfrescoResponse run() {
-					try {
-
-						return connector.updateContent(documentText, description, id);
-					} catch (IOException e) {
-						logger.severe(e.getMessage());
-						e.printStackTrace();
-						AlfrescoResponse response = new AlfrescoResponse();
-						response.setStatusCode(ResponseType.SERVER_ERROR.toString());
-						response.setStatusText(e.getMessage());
-						return response;
-					}
-				}
-			});
-			if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-				response = AccessController.doPrivileged(new PrivilegedAction<AlfrescoResponse>() {
-
-					public AlfrescoResponse run() {
-						try {
-							return connector.checkin(id, false, "");
-						} catch (IOException e) {
-							logger.severe(e.getMessage());
-							e.printStackTrace();
-							AlfrescoResponse response = new AlfrescoResponse();
-							response.setStatusCode(ResponseType.SERVER_ERROR.toString());
-							response.setStatusText(e.getMessage());
-							return response;
-						}
-					}
-				});
-				if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-					logger.warning("Dokument konnte nicht eingecheckt werden: " + response != null ? response.getStatusText(): "");
-					logger.warning(response.getStackTrace());
-				}
-			} else {
-				logger.warning("Dokument konnte nicht aktualisiert werden: " + response != null ? response.getStatusText(): "");
-				logger.warning(response.getStackTrace());
-			}
-		} else {
-			logger.warning("Dokument konnte nicht ausgecheckt werden: " + response != null ? response.getStatusText(): "");
-			logger.warning(response.getStackTrace());
-		}
-		ret = Integer.parseInt(response.getStatusCode());
-
-		return ret;
-	}
-
-	public int updateDocumentByFile(final String documentId, final String uri, final String description,
-			final String mimeType, final String server, final String username, final String password, final String proxyHost,
-			final String proxyPort, final Credentials credentials) {
-		int ret;
-
-		final AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
-				credentials);
-		AlfrescoResponse response = AccessController.doPrivileged(new PrivilegedAction<AlfrescoResponse>() {
-
-			public AlfrescoResponse run() {
-				try {
-					return connector.checkout(documentId);
-				} catch (IOException e) {
-					logger.severe(e.getMessage());
-					e.printStackTrace();
-					AlfrescoResponse response = new AlfrescoResponse();
-					response.setStatusCode(ResponseType.SERVER_ERROR.toString());
-					response.setStatusText(e.getMessage());
-					return response;
-				}
-			}
-		});
-		if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-			Document<Element> doc = response.getDocument();
-			Entry responseEntry = (Entry) doc.getRoot();
-			String tmp = responseEntry.getId().getPath();
-			final String id = tmp.substring(tmp.lastIndexOf(":") + 1);
-			response = AccessController.doPrivileged(new PrivilegedAction<AlfrescoResponse>() {
-
-				public AlfrescoResponse run() {
-					try {
-
-						try {
-							return connector.updateCheckedOutFile(uri, description, mimeType, id);
-						} catch (URISyntaxException e) {
-							logger.severe(e.getMessage());
-							e.printStackTrace();
-							AlfrescoResponse response = new AlfrescoResponse();
-							response.setStatusCode(ResponseType.SERVER_ERROR.toString());
-							response.setStatusText(e.getMessage());
-							return response;
-						}
-					} catch (IOException e) {
-						logger.severe(e.getMessage());
-						e.printStackTrace();
-						AlfrescoResponse response = new AlfrescoResponse();
-						response.setStatusCode(ResponseType.SERVER_ERROR.toString());
-						response.setStatusText(e.getMessage());
-						return response;
-					}
-				}
-			});
-			if (response != null && ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-				response = AccessController.doPrivileged(new PrivilegedAction<AlfrescoResponse>() {
-
-					public AlfrescoResponse run() {
-						try {
-							return connector.checkin(id, false, "");
-						} catch (IOException e) {
-							logger.severe(e.getMessage());
-							e.printStackTrace();
-							AlfrescoResponse response = new AlfrescoResponse();
-							response.setStatusCode(ResponseType.SERVER_ERROR.toString());
-							response.setStatusText(e.getMessage());
-							return response;
-						}
-					}
-				});
-				if (response == null || !ResponseType.SUCCESS.toString().equals(response.getResponseType())) {
-					logger.warning("Dokument konnte nicht eingecheckt werden: " + response != null ? response.getStatusText(): "");
-					logger.warning(response.getStackTrace());
-				}
-			} else {
-				logger.warning("Dokument konnte nicht aktualisiert werden: " + response != null ? response.getStatusText(): "");
-				logger.warning(response.getStackTrace());
-			}
-		} else {
-			logger.warning("Dokument konnte nicht ausgecheckt werden: " + response != null ? response.getStatusText(): "");
-			logger.warning(response.getStackTrace());
-		}
-		ret = Integer.parseInt(response.getStatusCode());
-
-		return ret;
-	}
-
-	public void save(final String fileName, final String string) {
-		AccessController.doPrivileged(new PrivilegedAction<String>() {
-
-			public String run() {
-				try {
-					File file = new File(new URI(fileName));
-					StringReader stringReader = new StringReader(string);
-					BufferedReader bufferedReader = new BufferedReader(stringReader);
-					FileOutputStream fos = new FileOutputStream(file);
-					BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
-					for (String line = bufferedReader.readLine(); line != null; line = bufferedReader.readLine()) {
-						bufferedWriter.write(line);
-						bufferedWriter.newLine();
-					}
-					bufferedReader.close();
-					bufferedWriter.close();
-				} catch (IOException e1) {
-					logger.severe(e1.getMessage());
-					e1.printStackTrace();
-				} catch (URISyntaxException e) {
-					logger.severe(e.getMessage());
-					e.printStackTrace();
-				}
-				return null;
-			}
-		});
-
-	}
-
-	public void openPDF(final String fileName) {
-		boolean found = false;
-		FileEntry entry = null;
-		Iterator<FileEntry> it = entries.iterator();
-		while (it.hasNext()) {
-			entry = it.next();
-			if (entry.getName().equalsIgnoreCase(fileName)) {
-				found = true;
-				break;
-			}
-		}
-		if (found) {
-			final byte[] ret = entry.getData();
-			final String name = entry.getName();
-			try {
-				AccessController.doPrivileged(new PrivilegedAction<String>() {
-
-					public String run() {
-						try {
-							String property = "java.io.tmpdir";
-
-							// Get the temporary directory and print it.
-							String tempDir = System.getProperty(property);
-							File file = new File(tempDir + "/" + name);
-							FileOutputStream fos = new FileOutputStream(file);
-							fos.write(ret);
-							fos.flush();
-							fos.close();
-							getAppletContext().showDocument(file.toURI().toURL(), "_blank");
-						} catch (IOException e) {
-							logger.severe(e.getMessage());
-							e.printStackTrace();
-
-						}
-						return "";
-					}
-
-				});
-			} catch (Exception e) {
-				logger.severe("Unable to extract ZIP.");
-				logger.severe(e.getMessage());
-                e.printStackTrace();
-			}
-		} else {
-            logger.warning("Unable to find PDF in extracted ZIP.");
+                public JSONObject run() throws URISyntaxException, IOException, JSONException {
+                    JSONObject obj = new JSONObject();
+                    File file = new File(new URI(fileName));
+                    StringReader stringReader = new StringReader(string);
+                    BufferedReader bufferedReader = new BufferedReader(stringReader);
+                    FileOutputStream fos = new FileOutputStream(file);
+                    BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
+                    for (String line = bufferedReader.readLine(); line != null; line = bufferedReader.readLine()) {
+                        bufferedWriter.write(line);
+                        bufferedWriter.newLine();
+                    }
+                    bufferedReader.close();
+                    bufferedWriter.close();
+                    obj.put("success", true);
+                    obj.put("result", "");
+                    return obj;
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
         }
-		return;
-	}
+        return obj.toString();
+    }
 
-	public int extractZIP(final String name) {
+    /**
+     * öffnet ein PDF
+     * @param fileName           der Filename des PDF Dokumentes
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg nichts, ansonsten der Fehler
+     */
+    public String openPDF(final String fileName) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
-		int counter = 0;
-		try {
-			final byte[] ret = bys.toByteArray();
-			counter = AccessController.doPrivileged(new PrivilegedAction<Integer>() {
+                public JSONObject run() throws IOException, JSONException {
+                    JSONObject obj = new JSONObject();
+                    boolean found = false;
+                    FileEntry entry = null;
+                    Iterator<FileEntry> it = entries.iterator();
+                    while (it.hasNext()) {
+                        entry = it.next();
+                        if (entry.getName().equalsIgnoreCase(fileName)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        byte[] ret = entry.getData();
+                        String name = entry.getName();
 
-				public Integer run() {
-					ZipInputStream zipin = null;
-					int counter = 0;
-					boolean multi = false;
-					try {
-						InputStream bais = new ByteArrayInputStream(ret);
-						zipin = new ZipInputStream(bais);
-						ZipEntry entry;
-						int size;
-						entries.clear();
-						while ((entry = zipin.getNextEntry()) != null) {
-							byte[] buffer = new byte[2048];
-							ByteArrayOutputStream bys = new ByteArrayOutputStream();
-							BufferedOutputStream bos = new BufferedOutputStream(bys, buffer.length);
-							while ((size = zipin.read(buffer, 0, buffer.length)) != -1) {
-								bos.write(buffer, 0, size);
-							}
-							bos.flush();
-							bos.close();
-							entries.add(new FileEntry(entry.getName(), bys.toByteArray()));
-						}
-						Iterator<FileEntry> it = entries.iterator();
-						while (it.hasNext()) {
-							FileEntry ent = it.next();
-							counter++;
-							if (it.hasNext())
-								multi = true;
-							String entryFileName = ent.getName();
-							InputStream b = new ByteArrayInputStream(ent.getData());
-							PDFConnector con = new PDFConnector();
-							String result = con.pdftoText(b);
-							if (multi)
-								jsobject.call("loadMultiText", new String[] { result, entryFileName, "application/zip", "true",
-										"false", name });
-							else
-								jsobject.call("loadText", new String[] { result, entryFileName, "application/zip", name });
-						}
-					} catch (Exception e) {
-						logger.severe(e.getMessage());
-						e.printStackTrace();
-					} finally {
-						try {
-							zipin.close();
-						} catch (IOException e) {
-							logger.severe(e.getMessage());
-							e.printStackTrace();
-						}
-					}
-					return counter;
-				}
-			});
-		} catch (Exception e) {
-			logger.severe("Unable to extract ZIP.");
-			logger.severe(e.getMessage());
-            e.printStackTrace();
-		}
-		return counter;
-	}
+                        String property = "java.io.tmpdir";
 
-	// Extracts text from a PDF Document and writes it to a text file
-	public void extract(String fileName, boolean multi, String typ) {
-		entries.clear();
-		final byte[] ret = bys.toByteArray();
-		entries.add(new FileEntry(fileName, ret));
-		String result;
-		try {
-			result = AccessController.doPrivileged(new PrivilegedAction<String>() {
+                        // Get the temporary directory and print it.
+                        String tempDir = System.getProperty(property);
+                        File file = new File(tempDir + "/" + name);
+                        FileOutputStream fos = new FileOutputStream(file);
+                        fos.write(ret);
+                        fos.flush();
+                        fos.close();
+                        getAppletContext().showDocument(file.toURI().toURL(), "_blank");
+                        obj.put("success", true);
+                        obj.put("result", "");
+                    } else {
+                        obj.put("success", false);
+                        obj.put("result", "PDF konnte nicht gefunden werden!");
+                    }
+                    return obj;
+                }
 
-				public String run() {
-					InputStream bais = new ByteArrayInputStream(ret);
-					PDFConnector con = new PDFConnector();
-					return con.pdftoText(bais);
-				}
-			});
-			if (!multi)
-				jsobject.call("loadText", new String[] { result, fileName, typ, null });
-			else
-				jsobject.call("loadMultiText", new String[] { result, fileName, typ, "false", "false", null });
-		} catch (Exception e) {
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-		}
-	}
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+    }
 
-	public void getData(final String str, final boolean init) {
 
-		try {
+    /**
+     * entpackt ein ZIP File
+     * @param name          der Name des ZIP Files
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
+     */
+    public String extractZIP(final String name) {
+        JSONObject obj = new JSONObject();
+
+        try {
+
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws IOException, JSONException {
+                    JSONObject obj = new JSONObject();
+                    byte[] ret = bys.toByteArray();
+                    ZipInputStream zipin = null;
+                    int counter = 0;
+                    boolean multi = false;
+                    InputStream bais = new ByteArrayInputStream(ret);
+                    zipin = new ZipInputStream(bais);
+                    ZipEntry entry;
+                    int size;
+                    entries.clear();
+                    while ((entry = zipin.getNextEntry()) != null) {
+                        byte[] buffer = new byte[2048];
+                        ByteArrayOutputStream bys = new ByteArrayOutputStream();
+                        BufferedOutputStream bos = new BufferedOutputStream(bys, buffer.length);
+                        while ((size = zipin.read(buffer, 0, buffer.length)) != -1) {
+                            bos.write(buffer, 0, size);
+                        }
+                        bos.flush();
+                        bos.close();
+                        entries.add(new FileEntry(entry.getName(), bys.toByteArray()));
+                    }
+                    Iterator<FileEntry> it = entries.iterator();
+                    while (it.hasNext()) {
+                        FileEntry ent = it.next();
+                        counter++;
+                        if (it.hasNext())
+                            multi = true;
+                        String entryFileName = ent.getName();
+                        InputStream b = new ByteArrayInputStream(ent.getData());
+                        PDFConnector con = new PDFConnector();
+                        String result = con.pdftoText(b);
+                        if (multi)
+                            jsobject.call("loadMultiText", new String[]{result, entryFileName, "application/zip", "true",
+                                    "false", name});
+                        else
+                            jsobject.call("loadText", new String[]{result, entryFileName, "application/zip", name});
+                    }
+                    obj.put("success", true);
+                    obj.put("result", counter);
+                    return obj;
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+    }
+
+    /**
+     * extrahiert den Text aus einer PDF Datei und lädt den Text in der Anwendung
+     * @param fileName          der Dateiname
+     * @param multi
+     * @param typ
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg nichts, ansonsten der Fehler
+     */
+    public String extract(final String fileName,
+                          final boolean multi,
+                          final String typ) {
+
+        JSONObject obj = new JSONObject();
+
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    JSONObject obj = new JSONObject();
+                    entries.clear();
+                    final byte[] ret = bys.toByteArray();
+                    entries.add(new FileEntry(fileName, ret));
+                    InputStream bais = new ByteArrayInputStream(ret);
+                    PDFConnector con = new PDFConnector();
+                    String result = con.pdftoText(bais);
+                    if (!multi)
+                        jsobject.call("loadText", new String[]{result, fileName, typ, null});
+                    else
+                        jsobject.call("loadMultiText", new String[]{result, fileName, typ, "false", "false", null});
+                    obj.put("success", true);
+                    obj.put("result", "");
+                    return obj;
+                }
+            });
+
+        } catch (PrivilegedActionException e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+    }
+
+    /**
+     * TODO Was macht diese Methode
+     * @param str           der übegebene String
+     * @param init
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg nichts, ansonsten der Fehler
+     */
+    public String getData(final String str,
+                          final boolean init) {
+        JSONObject obj = new JSONObject();
+        try {
             final byte[] ret = Base64.decodeBase64(str);
-			if (init)
+            if (init)
                 bys.reset();
-			bos.write(ret, 0, ret.length);
-			bos.flush();
-		} catch (Exception e) {
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-		}
+            bos.write(ret, 0, ret.length);
+            bos.flush();
+            obj.put("success", true);
+            obj.put("result", "");
+        } catch (Exception e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj.toString();
+    }
 
-	}
-
+    /**
+     * öffnet eine Datei
+     * @param filePath          der Pfad der zu öffnenden Datei
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg der Inhalt als String, ansonsten der Fehler
+     */
     public String openFile(final String filePath) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
-        String ret = AccessController.doPrivileged(new PrivilegedAction<String>() {
+                public JSONObject run() throws IOException, JSONException, URISyntaxException {
+                    JSONObject obj = new JSONObject();
+                    String r;
+                    StringBuilder fileData = new StringBuilder(1000);
 
-            public String run() {
-                String r;
-                StringBuilder fileData = new StringBuilder(1000);
-                try {
                     InputStream inp = new FileInputStream(new File(new URI(filePath)));
                     InputStreamReader isr = new InputStreamReader(inp, "UTF-8");
                     BufferedReader reader = new BufferedReader(isr);
@@ -968,61 +890,23 @@ public class VerteilungApplet extends Applet {
                         buf = new char[1024];
                     }
                     reader.close();
-                    r = fileData.toString();
-                } catch (IOException e) {
-                    r = "Fehler beim Öffnen der Datei: " + e.getMessage();
-                    e.printStackTrace();
-                } catch (URISyntaxException e1) {
-                    r = "Fehler beim Öffnen der Datei: " + e1.getMessage();
-                    e1.printStackTrace();
-                }
-                return r;
-            }
-        });
-        return ret;
-    }
-
-
-    /**
-     * verschiebt ein Dokument
-     * @param documentId         die Id des zu verschiebenden Dokumentes
-     * @param destinationId      die Id des Folders, wo das Dokument hin verschoben werden soll
-     * @param server             der Alfresco Server
-     * @param username           der verwendete Username
-     * @param password           das Passwort
-     * @param proxyHost          der Proxyhost, falls verwendet
-     * @param proxyPort          der Proxyport, falls verwendet
-     * @param credentials
-     * @return                   das Ergebnis als JSON String
-     * @throws JSONException
-     */
-    public String moveDocument(final String documentId, final String destinationId, final String server,
-                               final String username, final String password, final String proxyHost, final String proxyPort,
-                               final Credentials credentials) throws JSONException {
-        JSONObject ret = new JSONObject();
-        JSONObject obj;
-        try {
-            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
-
-                public JSONObject run() throws VerteilungException, JSONException {
-                    JSONObject o;
-                    AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort,
-                            credentials);
-                    o = new JSONObject(connector.moveDocument(documentId, destinationId));
-                    if (!o.getBoolean("overallSuccess"))
-                        throw new VerteilungException(o.toString());
-                    return o;
+                    obj.put("success", true);
+                    obj.put("result", fileData.toString());
+                    return obj;
                 }
             });
         } catch (PrivilegedActionException e) {
-            ret.put("success", false);
-            ret.put("result", e.getMessage());
-            return ret.toString();
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
         }
-        ret.put("success", true);
-        ret.put("result", obj.toString());
-        return ret.toString();
+        return obj.toString();
     }
+
 
     /**
      * Testmethode

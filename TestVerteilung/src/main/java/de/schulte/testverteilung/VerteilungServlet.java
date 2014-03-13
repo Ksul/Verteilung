@@ -37,6 +37,7 @@ import org.json.JSONObject;
 public class VerteilungServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+    // Speicher für entpackte Files aus einem ZIP File
 	Collection<FileEntry> entries = new ArrayList<FileEntry>();
 
     private VerteilungServices services;
@@ -155,6 +156,9 @@ public class VerteilungServlet extends HttpServlet {
 		String clear = req.getParameter("clear");
         String withFolder = req.getParameter("withFolder");
 		String extract = req.getParameter("extract");
+        String versionState = req.getParameter("versionState");
+        String majorVersion = req.getParameter("majorVersion");
+        String versionComment = req.getParameter("versionComment");
 		String searchFolder = req.getParameter("searchFolder");
         String extraProperties = req.getParameter("extraProperties");
 		String proxyHost = "".equals(req.getParameter("proxyHost")) ? null : req.getParameter("proxyHost");
@@ -168,7 +172,7 @@ public class VerteilungServlet extends HttpServlet {
 				obj.append("result", "Function Name is missing!\nPlease check for Tomcat maxPostSize and maxHeaderSizer Property for HTTPConnector");
 			} else {
 				if (value.equalsIgnoreCase("openPDF")) {
-					openPDF(resp, fileName);
+					openPDF(fileName, resp);
 					return;
 				}
                 if (value.equalsIgnoreCase("setParameter")) {
@@ -190,7 +194,7 @@ public class VerteilungServlet extends HttpServlet {
                     obj = deleteDocument(destinationFolder, fileName);
                 }
                 if (value.equalsIgnoreCase("createDocument")) {
-                    obj = createDocument(destinationFolder, fileName, documentText, mimeType, extraProperties);
+                    obj = createDocument(destinationFolder, fileName, documentText, mimeType, extraProperties, versionState);
                 }
                 if (value.equalsIgnoreCase("createFolder")) {
                     obj = createFolder(destinationFolder, fileName);
@@ -202,27 +206,20 @@ public class VerteilungServlet extends HttpServlet {
 					obj = getDocumentContent(documentId, extract.equalsIgnoreCase("true"));
 				}
 				if (value.equalsIgnoreCase("updateDocument")) {
-					obj = updateDocument(documentId, documentText, mimeType);
+					obj = updateDocument(documentId, documentText, mimeType, extraProperties, majorVersion, versionComment);
 				}
                 if (value.equalsIgnoreCase("moveDocument")) {
                     obj = moveDocument(documentId, currentLocationId, destinationId);
                 }
-				if (value.equalsIgnoreCase("getTicket")) {
-					ret = getTicket(server, username, password, proxyHost, proxyPort, null);
-				}
-
                 if (value.equalsIgnoreCase("listFolderAsJSON")) {
-                    obj = listFolderAsJSON(filePath, withFolder, server, username, password);
+                    obj = listFolderAsJSON(filePath, withFolder);
                 }
 				if (value.equalsIgnoreCase("extract")) {
-					ret = extract(documentText, fileName, clear);
+					obj = extract(documentText, fileName, clear);
 				}
 
 				if (value.equalsIgnoreCase("extractZIP")) {
-					ret = extractZIP(documentText);
-				}
-				if (value.equalsIgnoreCase("doTest")) {
-					ret = doTest(fileName, filePath);
+					obj = extractZIP(documentText);
 				}
 			}
 		} catch (VerteilungException e) {
@@ -356,6 +353,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param  documentContent      der Inhalt als String
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
+     * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
      * @return                      ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result            Dokument als JSONObject
@@ -365,9 +363,10 @@ public class VerteilungServlet extends HttpServlet {
                                         String fileName,
                                         String documentContent,
                                         String documentType,
-                                        String extraCMSProperties) throws  VerteilungException {
+                                        String extraCMSProperties,
+                                        String versionState) throws  VerteilungException {
         VerteilungServices services = getServices(bindingUrl, user, password);
-        return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties);
+        return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties, versionState);
     }
 
     /**
@@ -375,6 +374,9 @@ public class VerteilungServlet extends HttpServlet {
      * @param  documentId                Die Id des zu aktualisierenden Dokumentes
      * @param  documentContent           der neue Inhalt
      * @param  documentType              der Typ des Dokumentes
+     * @param  extraCMSProperties        zusätzliche Properties
+     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
+     * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
      *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
@@ -382,19 +384,22 @@ public class VerteilungServlet extends HttpServlet {
      */
     protected JSONObject updateDocument(String documentId,
                                      String documentContent,
-                                     String documentType) throws VerteilungException {
+                                     String documentType,
+                                     String extraCMSProperties,
+                                     String majorVersion,
+                                     String versionComment) throws VerteilungException {
         VerteilungServices services = getServices(bindingUrl, user, password);
-        return services.updateDocument(documentId, documentContent, documentType);
+        return services.updateDocument(documentId, documentContent, documentType, extraCMSProperties, majorVersion, versionComment);
     }
 
     /**
      * verschiebt ein Dokument
-     * @param  documentId                das zu verschibende Dokument
+     * @param  documentId                das zu verschiebende Dokument
      * @param  oldFolderId               der alte Folder in dem das Dokument liegt
      * @param  newFolderId               der Folder, in das Dokument verschoben werden soll
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
-     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     *                                                                  result           bei Erfolg das Document als JSONObject, ansonsten der Fehler
      * @throws VerteilungException
      */
     protected JSONObject moveDocument(String documentId,
@@ -448,157 +453,204 @@ public class VerteilungServlet extends HttpServlet {
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
      * @param filePath     der Pfad, der geliefert werden soll (als NodeId)
      * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @param server       der Alfresco-Servername
-     * @param username     der Alfresco-Username
-     * @param password     das Alfresco-Passwort
      * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
      */
-    protected JSONObject listFolderAsJSON(String filePath, String listFolder, String server, String username, String password)  {
+    protected JSONObject listFolderAsJSON(String filePath,
+                                          String listFolder) throws VerteilungException {
 
-        VerteilungServices services = new VerteilungServices(server, username, password);
+        VerteilungServices services = getServices(bindingUrl, user, password);
         return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
     }
 
 
-
-    protected Object extract(String documentText, String fileName, String clear) {
-		Object ret;
-		if (clear.equalsIgnoreCase("true"))
-			entries.clear();
-		System.out.println(fileName);
-		final byte[] bytes = Base64.decodeBase64(documentText);
-		entries.add(new FileEntry(fileName, bytes));
-		InputStream bais = new ByteArrayInputStream(bytes);
-		PDFConnector con = new PDFConnector();
-		ret = con.pdftoText(bais);
-		return ret;
-	}
-
-	protected Object extractZIP(String documentText) throws VerteilungException{
-		Object ret;
-		ret = new JSONObject();
-		ZipInputStream zipin = null;
-		final byte[] bytes = Base64.decodeBase64(documentText);
-		InputStream bais = new ByteArrayInputStream(bytes);
-		zipin = new ZipInputStream(bais);
-		ZipEntry entry = null;
-		int size;
-		entries.clear();
-		try {
-			while ((entry = zipin.getNextEntry()) != null) {
-				byte[] buffer = new byte[2048];
-				ByteArrayOutputStream bys = new ByteArrayOutputStream();
-				BufferedOutputStream bos = new BufferedOutputStream(bys, buffer.length);
-				while ((size = zipin.read(buffer, 0, buffer.length)) != -1) {
-					bos.write(buffer, 0, size);
-				}
-				bos.flush();
-				bos.close();
-				entries.add(new FileEntry(entry.getName(), bys.toByteArray()));
-			}
-			Iterator<FileEntry> it = entries.iterator();
-			while (it.hasNext()) {
-				FileEntry ent = it.next();
-				String entryFileName = ent.getName();
-				InputStream b = new ByteArrayInputStream(ent.getData());
-				PDFConnector con = new PDFConnector();
-				String result = con.pdftoText(b);
-				JSONObject resultObj = new JSONObject();
-				resultObj.append("entryFileName", entryFileName);
-				resultObj.append("result", result);
-				((JSONObject) ret).append("entry", resultObj);
-
-			}
-		} catch (Exception e) {
-			System.out.println(e.getLocalizedMessage());
-			e.printStackTrace();
-			throw new VerteilungException("Fehler beim Entpacken der ZIP-Datei! " + e.getLocalizedMessage());
-		} finally {
-			try {
-				zipin.close();
-			} catch (IOException e) {
-				System.err.println(e.getMessage());
-				e.printStackTrace();
-			}
-		}
-		return ret;
-	}
-
-	protected Object doTest(String fileName, String filePath) {
-		JSONObject o = new JSONObject();
-		try {
-			String f1 = openFile(fileName);
-			String f2 = openFile(filePath);
-			o.append("text", f1);
-			o.append("xml", f2);
-		} catch (Exception e) {
-			System.out.println(e.getLocalizedMessage());
-			e.printStackTrace();
-		}
-		return o;
-	}
-
-	protected String openFile(String filePath) throws VerteilungException{
-		StringBuffer fileData = new StringBuffer(1000);
-		String ret = null;
-		try {
-			InputStream inp = getServletContext().getResourceAsStream(filePath);
-			InputStreamReader isr = new InputStreamReader(inp, "UTF-8");
-			BufferedReader reader = new BufferedReader(isr);
-			char[] buf = new char[1024];
-			int numRead = 0;
-			while ((numRead = reader.read(buf)) != -1) {
-				String readData = String.valueOf(buf, 0, numRead);
-				fileData.append(readData);
-				buf = new char[1024];
-			}
-			reader.close();
-			ret = fileData.toString();
-		} catch (IOException e) {
-			System.out.println("Fehler beim Öffnen der Datei: " + e.getLocalizedMessage());
-			e.printStackTrace();
-			throw new VerteilungException("Fehler beim Öffnen der Datei: " + e.getLocalizedMessage());
-		}
-		return ret;
-	}
-
-    protected void openPDF(HttpServletResponse resp, String fileName) throws IOException {
-        boolean found = false;
-        FileEntry entry = null;
-        Iterator<FileEntry> it = entries.iterator();
-        while (it.hasNext()) {
-            entry = it.next();
-            if (entry.getName().equalsIgnoreCase(fileName)) {
-                found = true;
-                break;
+    /**
+     * extrahiert den Text aus einer PDF Datei
+     * @param documentText       der Inhalt der PDF Datei als String
+     * @param fileName           der Name der PDF Datei
+     * @param clear
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg der Inhalt des PDF's als String, ansonsten der Fehler
+     */
+    protected JSONObject extract(String documentText,
+                                 String fileName,
+                                 String clear) {
+        JSONObject obj = new JSONObject();
+        try {
+            if (clear.equalsIgnoreCase("true"))
+                entries.clear();
+            final byte[] bytes = Base64.decodeBase64(documentText);
+            entries.add(new FileEntry(fileName, bytes));
+            InputStream bais = new ByteArrayInputStream(bytes);
+            PDFConnector con = new PDFConnector();
+            obj.put("success", true);
+            obj.put("result", con.pdftoText(bais));
+        } catch (Exception e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
             }
         }
-        if (found) {
-            final byte[] bytes = entry.getData();
-            final String name = entry.getName();
-            resp.reset();
-            resp.resetBuffer();
-            resp.setContentType("application/pdf");
-            resp.setHeader("Content-Disposition", "inline; filename=" + name + "\"");
-            resp.setHeader("Cache-Control", "max-age=0");
-            resp.setContentLength(bytes.length);
-            ServletOutputStream sout = resp.getOutputStream();
-            sout.write(bytes, 0, bytes.length);
-            sout.flush();
-            sout.close();
+        return obj;
+    }
+
+    /**
+     * entpackt ein ZIP File
+     * @param documentText       der Inhalt des ZIP's als String
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
+     */
+    protected JSONObject extractZIP(String documentText) throws VerteilungException {
+        JSONObject obj = new JSONObject();
+        ZipInputStream zipin = null;
+        try {
+
+            final byte[] bytes = Base64.decodeBase64(documentText);
+            InputStream bais = new ByteArrayInputStream(bytes);
+            zipin = new ZipInputStream(bais);
+            ZipEntry entry = null;
+            int size;
+            entries.clear();
+
+            while ((entry = zipin.getNextEntry()) != null) {
+                byte[] buffer = new byte[2048];
+                ByteArrayOutputStream bys = new ByteArrayOutputStream();
+                BufferedOutputStream bos = new BufferedOutputStream(bys, buffer.length);
+                while ((size = zipin.read(buffer, 0, buffer.length)) != -1) {
+                    bos.write(buffer, 0, size);
+                }
+                bos.flush();
+                bos.close();
+                entries.add(new FileEntry(entry.getName(), bys.toByteArray()));
+            }
+            Iterator<FileEntry> it = entries.iterator();
+            JSONObject ergebnis = new JSONObject();
+            while (it.hasNext()) {
+                FileEntry ent = it.next();
+                String entryFileName = ent.getName();
+                InputStream b = new ByteArrayInputStream(ent.getData());
+                PDFConnector con = new PDFConnector();
+                JSONObject resultObj = new JSONObject();
+                resultObj.append("entryFileName", entryFileName);
+                resultObj.append("result", con.pdftoText(b));
+                ergebnis.append("entry", resultObj);
+            }
+            obj.put("success", true);
+            obj.put("result", ergebnis);
+        } catch (Exception e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        } finally {
+            try {
+                zipin.close();
+            } catch (IOException e) {
+                try {
+                    obj.put("success", false);
+                    obj.put("result", e.getMessage());
+                } catch (JSONException jse) {
+                    logger.severe(jse.getLocalizedMessage());
+                    jse.printStackTrace();
+                }
+            }
         }
+        return obj;
     }
 
 
-
-    protected Object getTicket(String server, String username, String password, String proxyHost, String proxyPort,
-                               Credentials credentials) {
-        String ret;
-        AlfrescoConnector connector = new AlfrescoConnector(server, username, password, proxyHost, proxyPort, credentials);
-        ret = connector.getTicket();
-
-        return ret;
+    /**
+     * öffnet eine Datei
+     * @param filePath          der Pfad der zu öffnenden Datei
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg der Inhalt der Datei als String, ansonsten der Fehler
+     */
+    protected JSONObject openFile(String filePath) throws VerteilungException {
+        JSONObject obj = new JSONObject();
+        StringBuffer fileData = new StringBuffer(1000);
+        try {
+            InputStream inp = getServletContext().getResourceAsStream(filePath);
+            InputStreamReader isr = new InputStreamReader(inp, "UTF-8");
+            BufferedReader reader = new BufferedReader(isr);
+            char[] buf = new char[1024];
+            int numRead = 0;
+            while ((numRead = reader.read(buf)) != -1) {
+                String readData = String.valueOf(buf, 0, numRead);
+                fileData.append(readData);
+                buf = new char[1024];
+            }
+            reader.close();
+            obj.put("success", true);
+            obj.put("result", fileData.toString());
+        } catch (Exception e) {
+            try {
+                obj.put("success", false);
+                obj.put("result", e.getMessage());
+            } catch (JSONException jse) {
+                logger.severe(jse.getLocalizedMessage());
+                jse.printStackTrace();
+            }
+        }
+        return obj;
     }
+
+    /**
+     * öffnet ein PDF
+     * @param fileName           der Filename des PDF Dokumentes
+     * @param resp               der Response zum Öffnen des PDFs
+     */
+    protected void openPDF(String fileName,
+                           HttpServletResponse resp) {
+        ServletOutputStream sout = null;
+        try {
+            boolean found = false;
+            FileEntry entry = null;
+            Iterator<FileEntry> it = entries.iterator();
+            while (it.hasNext()) {
+                entry = it.next();
+                if (entry.getName().equalsIgnoreCase(fileName)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                final byte[] bytes = entry.getData();
+                final String name = entry.getName();
+                resp.reset();
+                resp.resetBuffer();
+                resp.setContentType("application/pdf");
+                resp.setHeader("Content-Disposition", "inline; filename=" + name + "\"");
+                resp.setHeader("Cache-Control", "max-age=0");
+                resp.setContentLength(bytes.length);
+                sout = resp.getOutputStream();
+                sout.write(bytes, 0, bytes.length);
+                sout.flush();
+                sout.close();
+            }
+        } catch (Exception e) {
+            logger.severe(e.getLocalizedMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                sout.close();
+            } catch (IOException io) {
+                logger.severe(io.getLocalizedMessage());
+                io.printStackTrace();
+
+            }
+        }
+        return;
+    }
+
+
 }

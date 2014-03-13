@@ -50,6 +50,38 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertTrue(obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("getNodeId");
+        when(request.getParameter("filePath")).thenReturn("/Archiv");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith(("workspace")));
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("deleteDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("Test.pdf");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("deleteDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("deleteDocument");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv/Fehler");
+        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("deleteFolder");
+        when(request.getParameter("destinationFolder")).thenReturn("/Archiv/TestFolder");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
     }
 
     public void testIsURLAvailable() throws Exception {
@@ -66,7 +98,7 @@ public class VerteilungServletTest extends AlfrescoTest {
     @Test
     public void testGetNodeId() throws Exception {
         when(request.getParameter("function")).thenReturn("getNodeId");
-        when(request.getParameter("filePath")).thenReturn("/Archiv");
+        when(request.getParameter("filePath")).thenReturn("/Datenverzeichnis/Skripte/doc.xml");
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
         assertNotNull(sr);
@@ -74,14 +106,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.getBoolean("success"));
         assertTrue(obj.getString("result").startsWith(("workspace")));
         sr.getBuffer().delete(0, 9999);
-        when(request.getParameter("filePath")).thenReturn("/Datenverzeichnis/Skripte/doc.xml");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
-        assertNotNull(sr);
-        obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith(("workspace")));
-        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("getNodeId");
         when(request.getParameter("filePath")).thenReturn("/Datenverzeichnis/Skripte/recognition.js");
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
@@ -155,12 +180,6 @@ public class VerteilungServletTest extends AlfrescoTest {
 
     @Test
     public void testUploadDocument() throws Exception {
-        when(request.getParameter("function")).thenReturn("deleteDocument");
-        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
-        when(request.getParameter("fileName")).thenReturn("Test.pdf");
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
         when(request.getParameter("function")).thenReturn("uploadDocument");
         when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
         when(request.getParameter("fileName")).thenReturn(properties.getProperty("testFile"));
@@ -169,7 +188,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
         assertNotNull(obj);
-        assertTrue(obj.length() == 2);
+        assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
@@ -181,24 +200,18 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
         assertNotNull(obj);
-        assertTrue(obj.length() == 2);
+        assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
     }
 
     @Test
     public void testCreateDocument() throws Exception {
-        // Dokument vorsichtshalber löschen
-        when(request.getParameter("function")).thenReturn("deleteDocument");
-        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
-        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
         // Dokument erstellen
         when(request.getParameter("function")).thenReturn("createDocument");
         when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
         when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        when(request.getParameter("versionState")).thenReturn("none");
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         when(request.getParameter("documentText")).thenReturn(content);
         when(request.getParameter("mimeType")).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
@@ -207,7 +220,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
         assertNotNull(obj);
-        assertTrue(obj.length() == 2);
+        assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         JSONObject doc = new JSONObject(obj.getString("result"));
@@ -235,21 +248,6 @@ public class VerteilungServletTest extends AlfrescoTest {
 
     @Test
     public void testCreateFolder() throws Exception {
-        when(request.getParameter("function")).thenReturn("getNodeId");
-        when(request.getParameter("filePath")).thenReturn("/Archiv");
-        servlet.doPost(request, response);
-        writer.flush();
-        assertNotNull(sr);
-        JSONObject obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith(("workspace")));
-        sr.getBuffer().delete(0, 9999);
-        // Folder vorsichtshalber löschen
-        when(request.getParameter("function")).thenReturn("deleteFolder");
-        when(request.getParameter("destinationFolder")).thenReturn("/Archiv/TestFolder");
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
         // Folder erstellen
         when(request.getParameter("function")).thenReturn("createFolder");
         when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
@@ -257,9 +255,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
-        obj = new JSONObject(sr.toString());
+        JSONObject obj = new JSONObject(sr.toString());
         assertNotNull(obj);
-        assertTrue(obj.length() == 2);
+        assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         JSONObject folder = new JSONObject(obj.getString("result"));
@@ -272,7 +270,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         obj = new JSONObject(sr.toString());
         assertNotNull(obj);
-        assertTrue(obj.length() == 2);
+        assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         JSONObject result = new JSONObject(obj.getString("result"));
@@ -281,40 +279,26 @@ public class VerteilungServletTest extends AlfrescoTest {
 
     @Test
     public void testUpdateDocument() throws Exception {
-        when(request.getParameter("function")).thenReturn("getNodeId");
-        when(request.getParameter("filePath")).thenReturn("/Archiv");
-        servlet.doPost(request, response);
-        writer.flush();
-        assertNotNull(sr);
-        JSONObject obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith(("workspace")));
-        sr.getBuffer().delete(0, 9999);
-        // Dokument vorsichtshalber löschen
-        when(request.getParameter("function")).thenReturn("deleteDocument");
-        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
-        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
         // Dokument erstellen
         when(request.getParameter("function")).thenReturn("createDocument");
         when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
         when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
-        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        when(request.getParameter("versionState")).thenReturn("none");
+        String content = " ";
         when(request.getParameter("documentText")).thenReturn(content);
         when(request.getParameter("mimeType")).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
-        obj = new JSONObject(sr.toString());
+        JSONObject obj = new JSONObject(sr.toString());
         assertNotNull(obj);
-        assertTrue(obj.length() == 2);
+        assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         JSONObject doc = new JSONObject(obj.getString("result"));
         assertNotNull(doc);
         assertNotNull(doc.getString("objectId"));
+        sr.getBuffer().delete(0, 9999);
         // Dokument ändern
         when(request.getParameter("function")).thenReturn("updateDocument");
         when(request.getParameter("documentId")).thenReturn(doc.getString("objectId"));
@@ -326,9 +310,10 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
         assertNotNull(obj);
-        assertTrue(obj.length() == 2);
+        assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        sr.getBuffer().delete(0, 9999);
         // Inhalt lesen
         when(request.getParameter("function")).thenReturn("getDocumentContent");
         when(request.getParameter("documentId")).thenReturn(doc.getString("objectId"));
@@ -339,6 +324,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         assertEquals(content, obj.getString("result"));
+        sr.getBuffer().delete(0, 9999);
         // und das Dokument wieder löschen
         when(request.getParameter("function")).thenReturn("deleteDocument");
         when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
@@ -369,16 +355,11 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         String destinationId = obj.getString("result");
         sr.getBuffer().delete(0, 9999);
-        when(request.getParameter("function")).thenReturn("deleteDocument");
-        when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
-        when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
         // Dokument erstellen
         when(request.getParameter("function")).thenReturn("createDocument");
         when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
         when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
+        when(request.getParameter("versionState")).thenReturn("none");
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         when(request.getParameter("documentText")).thenReturn(content);
         when(request.getParameter("mimeType")).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
@@ -387,7 +368,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
         assertNotNull(obj);
-        assertTrue(obj.length() == 2);
+        assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         JSONObject doc = new JSONObject(obj.getString("result"));
@@ -399,11 +380,12 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter("documentId")).thenReturn(doc.getString("objectId"));
         when(request.getParameter("currentLocationId")).thenReturn(currentLocationId);
         when(request.getParameter("destinationId")).thenReturn(destinationId);
+        servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
         assertNotNull(obj);
-        assertTrue(obj.length() == 2);
+        assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);

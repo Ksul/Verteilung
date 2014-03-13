@@ -1,14 +1,8 @@
 package de.schulte.testverteilung;
 
-import de.schulte.testverteilung.AlfrescoConnectorNew;
-import de.schulte.testverteilung.AlfrescoTest;
-import de.schulte.testverteilung.CMISSessionGenerator;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 import org.apache.chemistry.opencmis.client.api.Session;
 

@@ -1,18 +1,14 @@
 package de.schulte.testverteilung;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.net.URI;
-import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
 
 import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
-import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
-import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
-import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +21,7 @@ import org.json.JSONObject;
  */
 public class VerteilungServices {
 
-    private AlfrescoConnectorNew con;
+    private AlfrescoConnector con;
 
     private static Logger logger = Logger.getLogger(VerteilungServices.class.getName());
 
@@ -44,7 +40,7 @@ public class VerteilungServices {
      */
     public VerteilungServices(String server, String username, String password)  {
         super();
-        this.con = new AlfrescoConnectorNew(username, password, server);
+        this.con = new AlfrescoConnector(username, password, server);
     }
 
 
@@ -272,6 +268,7 @@ public class VerteilungServices {
      * @param  documentContent      der Inhalt als String
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
+     * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
      * @return obj                  ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                      false   ein Fehler ist aufgetreten
      *                                                             result           das Document als JSON Object
@@ -279,14 +276,18 @@ public class VerteilungServices {
     public JSONObject createDocument(String folderName, String documentName,
                                      String documentContent,
                                      String documentType,
-                                     String extraCMSProperties) {
+                                     String extraCMSProperties,
+                                     String versionState) {
         //TODO Content als String oder als Stream?
         JSONObject obj = new JSONObject();
         try {
             CmisObject document;
             CmisObject folder;
+            if (versionState != null && versionState.length() > 0 && !versionState.equals("none") && !versionState.equals("major") && !versionState.equals("minor") && !versionState.equals("checkedout"))
+                throw new VerteilungException("ungültiger VersionsStatus");
             folder = con.getNode(folderName);
             if (folder != null && folder instanceof Folder) {
+
                 Map<String, Object> outMap = null;
                 if (extraCMSProperties != null && extraCMSProperties.length() > 0) {
                     JSONObject props = new JSONObject(extraCMSProperties);
@@ -297,7 +298,9 @@ public class VerteilungServices {
                         outMap.put(name, props.get(name));
                     }
                 }
-                document = con.createDocument((Folder) folder, documentName, documentContent.getBytes(), documentType, outMap);
+
+                VersioningState vs = VersioningState.fromValue(versionState);
+                document = con.createDocument((Folder) folder, documentName, documentContent.getBytes(), documentType, outMap, vs);
                 if (document != null && document instanceof Document) {
                     obj.put("success", true);
                     obj.put("result", convertCMISObjectToJSON(document).toString());
@@ -320,21 +323,43 @@ public class VerteilungServices {
      * @param  documentId                Die Id des zu aktualisierenden Dokumentes
      * @param  documentContent           der neue Inhalt
      * @param  documentType              der Typ des Dokumentes
+     * @param  extraCMSProperties        zusätzliche Properties
+     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
+     * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
-     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     *                                                                  result           bei Erfolg das Document als JSON Object, ansonsten der Fehler
      */
     public JSONObject updateDocument(String documentId,
                                      String documentContent,
-                                     String documentType) {
+                                     String documentType,
+                                     String extraCMSProperties,
+                                     String majorVersion,
+                                     String versionComment) {
         //TODO Content als String oder als Stream?
         JSONObject obj = new JSONObject();
         try {
+
+            if (majorVersion == null)
+                majorVersion = "false";
+
             CmisObject cmisObject = con.getNodeById(documentId);
             if (cmisObject != null && cmisObject instanceof Document) {
-                con.updateDocument((Document) cmisObject, documentContent.getBytes(), documentType);
+
+                Map<String, Object> outMap = null;
+                if (extraCMSProperties != null && extraCMSProperties.length() > 0) {
+                    JSONObject props = new JSONObject(extraCMSProperties);
+                    Iterator<String> nameItr = props.keys();
+                    outMap = new HashMap<String, Object>();
+                    while (nameItr.hasNext()) {
+                        String name = nameItr.next();
+                        outMap.put(name, props.get(name));
+                    }
+                }
+
+                Document document = con.updateDocument((Document) cmisObject, documentContent.getBytes(), documentType, outMap, majorVersion.equalsIgnoreCase("true"), versionComment);
                 obj.put("success", true);
-                obj.put("result", "");
+                obj.put("result", convertCMISObjectToJSON(document).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
@@ -347,12 +372,12 @@ public class VerteilungServices {
 
     /**
      * verschiebt ein Dokument
-     * @param  documentId                das zu verschibende Dokument
+     * @param  documentId                das zu verschiebende Dokument
      * @param  oldFolderId               der alte Folder in dem das Dokument liegt
      * @param  newFolderId               der Folder, in das Dokument verschoben werden soll
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
-     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     *                                                                  result           bei Erfolg das Document als JSONObject, ansonsten der Fehler
      */
     public JSONObject moveDocument(String documentId,
                                    String oldFolderId,
@@ -365,9 +390,9 @@ public class VerteilungServices {
             if (document != null && document instanceof Document) {
                 if (oldFolder != null && oldFolder instanceof Folder) {
                     if (newFolder != null && newFolder instanceof Folder) {
-                        con.moveDocument((Document) document, (Folder) oldFolder, (Folder) newFolder);
+                        CmisObject doc = con.moveDocument((Document) document, (Folder) oldFolder, (Folder) newFolder);
                         obj.put("success", true);
-                        obj.put("result", "");
+                        obj.put("result", convertCMISObjectToJSON(doc).toString());
                     } else {
                         obj.put("success", false);
                         obj.put("result", oldFolder == null ? "Der Pfad mit der Id " + newFolderId + "  ist nicht vorhanden!" : "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
