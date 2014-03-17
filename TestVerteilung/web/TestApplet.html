@@ -27,13 +27,14 @@
         doTest("Check Verteilungsskript vorhanden Function getNodeId", "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/recognition.js\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
         doTest("Check Dokument finden Function findDocument", "document.reader.findDocument(\"SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'\");", "var result = $.parseJSON(erg.toString()); if (result.success){ var obj = $.parseJSON(result.result); (obj.name == 'doc.xml') };");
         doTest("Inhalt lesen Function getDocumentContent", "$.parseJSON(document.reader.getDocumentContent($.parseJSON(document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\")).result, false));", " if (erg.success){ erg.result.indexOf('xmlns:my=\"http://www.schulte.local/archiv\"'); };");
-        doTest("Upload Document Function uploadDocument", "document.reader.uploadDocument(\"/Archiv\", properties.testFile);", "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Upload Document Function uploadDocument", "document.reader.uploadDocument(\"/Archiv\", properties.testPDF);", "var result = $.parseJSON(erg.toString()); result.success;");
         doTest("Delete Document Function deleteDocument", "document.reader.deleteDocument(\"/Archiv\", \"Test.pdf\");", "var result = $.parseJSON(erg.toString()); result.success;");
         doTest("Create Document Function createDocument", "document.reader.createDocument(\"/Archiv\", \"TestDocument.txt\", \"äöüßÄÖÜ/\", \"plain/text\", \"\");", "var result = $.parseJSON(erg.toString()); result.success;");
+        var pdf = doTest("open File Function openFile", "document.reader.openFile(\"file://\" + properties.testPDF);", "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("extract PDF Function extractPDF", "reader.extractPDF(\"file://\" + properties.testPDF, false);", "var result = $.parseJSON(erg.toString()); result.success;");
     } catch (e) {
         errorHandler(e);
     }
-
     function doTest(testName, testEvaluate, testExpected) {
         var erg;
         var test;
@@ -61,6 +62,7 @@
 
     function addRow(test, call, result, status)
     {
+        var res = "" ;
         var nummer = -1;
         var tabellen_id = "t1";
         var trhtml = document.getElementById( tabellen_id ).insertRow( nummer );
@@ -68,9 +70,13 @@
         var tdhtml2 = document.createElement( "td" );
         var tdhtml3 = document.createElement( "td" );
         var tdhtml4 = document.createElement( "td" );
+        if (result.length > 100)
+          res =result.substr(0, 99);
+        else
+          res = result;
         tdhtml1.innerHTML = test; // content
         tdhtml2.innerHTML = call;
-        tdhtml3.innerHTML = result;
+        tdhtml3.innerHTML = res;
         tdhtml4.innerHTML = status;
         trhtml.appendChild( tdhtml1 );
         trhtml.appendChild( tdhtml2 );

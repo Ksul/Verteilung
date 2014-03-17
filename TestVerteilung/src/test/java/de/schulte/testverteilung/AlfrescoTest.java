@@ -3,9 +3,7 @@ package de.schulte.testverteilung;
 import junit.framework.Assert;
 import org.junit.Before;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import java.io.*;
 import java.util.Properties;
 
 /**
@@ -28,8 +26,14 @@ public class AlfrescoTest {
         Assert.assertNotNull(properties.getProperty("host"));
         Assert.assertNotNull(properties.getProperty("bindingUrl"));
         Assert.assertNotNull(properties.getProperty("password"));
-        Assert.assertNotNull(properties.getProperty("testFile"));
+        Assert.assertNotNull(properties.getProperty("testPDF"));
     }
 
-
+    protected byte[] readFile(String name) throws FileNotFoundException, IOException {
+        File sourceFile = new File(name);
+        FileInputStream in = new FileInputStream(sourceFile);
+        byte[] buffer = new byte[(int) sourceFile.length()];
+        in.read(buffer);
+        return buffer;
+    }
 }

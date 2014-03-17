@@ -104,7 +104,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         CmisObject folder = con.getNode("/Archiv");
         assertNotNull(folder);
         assertTrue(folder instanceof Folder);
-        String id = con.uploadDocument(((Folder) folder), new File(properties.getProperty("testFile")), "application/pdf");
+        String id = con.uploadDocument(((Folder) folder), new File(properties.getProperty("testPDF")), "application/pdf");
         assertNotNull(id);
         CmisObject document = con.getNode("/Archiv/Test.pdf");
         assertNotNull(document);

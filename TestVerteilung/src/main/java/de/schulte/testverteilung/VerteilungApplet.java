@@ -29,12 +29,8 @@ import java.util.zip.ZipInputStream;
 
 import netscape.javascript.JSObject;
 
-import org.apache.abdera.model.Document;
-import org.apache.abdera.model.Element;
-import org.apache.abdera.model.Entry;
-import org.apache.abdera.protocol.Response.ResponseType;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.Credentials;
+
 
 
 import org.json.JSONException;
@@ -98,7 +94,9 @@ public class VerteilungApplet extends Applet {
      *                                                              false    ein Fehler ist aufgetreten
      *                                                     result            die Parameter als String
      */
-    public String setParameter(String url, String userName, String pass) {
+    public String setParameter(String url,
+                               String userName,
+                               String pass) {
         logger.fine("Aufruf setParameter mit Url: " + url + " User: " + userName + " Password: " + password);
         this.bindingUrl = url;
         this.user = userName;
@@ -121,7 +119,9 @@ public class VerteilungApplet extends Applet {
      * @param password          Passwort
      * @return
      */
-    public VerteilungServices getServices(String url, String user, String password) {
+    public VerteilungServices getServices(String url,
+                                          String user,
+                                          String password) {
         logger.fine("Aufruf getServices mit Url: " + url + " User: " + user + " Password: " + password);
         if (services == null)
             services = new VerteilungServices(url, user, password);
@@ -138,73 +138,18 @@ public class VerteilungApplet extends Applet {
      */
     public String isURLAvailable(final String urlString) {
         logger.fine("Aufruf isURLAvailabel mit urlString: " + urlString);
+
         JSONObject obj = new JSONObject();
-
         try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
-            obj = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
-
-                public JSONObject run() {
-
-                    JSONObject obj = new JSONObject();
-                    URL url = null;
-                    try {
-                        url = new URL(urlString);
-                        logger.info("Umwandlung in URL " + url);
-                    } catch (MalformedURLException e) {
-                        String error = "Fehler beim Check der URL: " + e.getMessage();
-                        logger.severe(error);
-                        e.printStackTrace();
-                        try {
-                            obj.put("success", false);
-                            obj.put("result", error);
-                        } catch (JSONException jse) {
-                            logger.severe(jse.getMessage());
-                            jse.printStackTrace();
-                        }
-                    }
-                    try {
-                        HttpURLConnection httpUrlConn;
-                        httpUrlConn = (HttpURLConnection) url.openConnection();
-                        logger.info("Open Connection " + httpUrlConn);
-                        httpUrlConn.setRequestMethod("HEAD");
-                        logger.info("Set Request ");
-                        // Set timeouts in milliseconds
-                        httpUrlConn.setConnectTimeout(30000);
-                        httpUrlConn.setReadTimeout(30000);
-
-                        int erg = httpUrlConn.getResponseCode();
-                        logger.info("ResponseCode " + erg);
-                        logger.info(httpUrlConn.getResponseMessage());
-                        obj.put("success", true);
-                        obj.put("result", erg == HttpURLConnection.HTTP_OK);
-
-                    } catch (Throwable t) {
-                        String error = "Fehler beim Check der URL: " + t.getMessage();
-                        logger.severe(error);
-                        t.printStackTrace();
-                        try {
-                            obj.put("success", false);
-                            obj.put("result", error);
-                        } catch (JSONException jse) {
-                            logger.severe(jse.getMessage());
-                            jse.printStackTrace();
-                        }
-                    }
-                    return obj;
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    VerteilungServices services = new VerteilungServices();
+                    return services.isURLAvailable(urlString);
                 }
             });
-        } catch (Exception e) {
-            String error = "Fehler beim Check der URL: " + e.getMessage();
-            logger.severe(error);
-            e.printStackTrace();
-            try {
-                obj.put("success", false);
-                obj.put("result", error);
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -217,7 +162,8 @@ public class VerteilungApplet extends Applet {
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
      */
-    public String listFolderAsJSON(final String filePath, final String listFolder)  {
+    public String listFolderAsJSON(final String filePath,
+                                   final String listFolder)  {
         logger.fine("Aufruf listFolderAsJSON mit filePath: " + filePath + " listFolder: " + listFolder);
         JSONObject obj = new JSONObject();
         try {
@@ -229,13 +175,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -260,13 +200,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -291,13 +225,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -311,7 +239,8 @@ public class VerteilungApplet extends Applet {
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result            der Inhalt als String
      */
-    public String getDocumentContent(final String docId, final boolean extract) {
+    public String getDocumentContent(final String docId,
+                                     final boolean extract) {
 
         JSONObject obj = new JSONObject();
         try {
@@ -323,13 +252,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -342,7 +265,8 @@ public class VerteilungApplet extends Applet {
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            Dokument als JSONObject
      */
-    public String uploadDocument(final String filePath, final String fileName) {
+    public String uploadDocument(final String filePath,
+                                 final String fileName) {
 
         JSONObject obj = new JSONObject();
         try {
@@ -354,13 +278,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
 
@@ -374,7 +292,8 @@ public class VerteilungApplet extends Applet {
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            Dokument als JSONObject
      */
-    public String deleteDocument(final String filePath, final String fileName) {
+    public String deleteDocument(final String filePath,
+                                 final String fileName) {
 
 
         JSONObject obj = new JSONObject();
@@ -387,13 +306,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
 
@@ -412,11 +325,11 @@ public class VerteilungApplet extends Applet {
      *                                                                      result            Dokument als JSONObject
      */
     public String createDocument(final String filePath,
-                                        final String fileName,
-                                        final String documentContent,
-                                        final String documentType,
-                                        final String extraCMSProperties,
-                                        final String versionState)  {
+                                 final String fileName,
+                                 final String documentContent,
+                                 final String documentType,
+                                 final String extraCMSProperties,
+                                 final String versionState)  {
 
 
         JSONObject obj = new JSONObject();
@@ -429,13 +342,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
 
@@ -459,6 +366,7 @@ public class VerteilungApplet extends Applet {
                                  final String extraCMSProperties,
                                  final String majorVersion,
                                  final String versionComment)  {
+
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
@@ -470,13 +378,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
 
@@ -494,6 +396,7 @@ public class VerteilungApplet extends Applet {
     public String moveDocument(final String documentId,
                                final String oldFolderId,
                                final String newFolderId) {
+
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
@@ -504,13 +407,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -526,6 +423,7 @@ public class VerteilungApplet extends Applet {
      */
     public String createFolder(final String targetPath,
                                final String folderName) {
+
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
@@ -536,13 +434,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -555,6 +447,7 @@ public class VerteilungApplet extends Applet {
      *                                                             result
      */
     public String deleteFolder(final String folderPath) {
+
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
@@ -565,13 +458,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -586,6 +473,7 @@ public class VerteilungApplet extends Applet {
      *                                                      result            die Properties als JSON Objekte
      */
     public String loadProperties(final String propFile) {
+
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
@@ -596,13 +484,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -642,13 +524,7 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -661,6 +537,7 @@ public class VerteilungApplet extends Applet {
      *                                                          result            bei Erfolg nichts, ansonsten der Fehler
      */
     public String openPDF(final String fileName) {
+
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
@@ -702,13 +579,7 @@ public class VerteilungApplet extends Applet {
 
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -722,6 +593,7 @@ public class VerteilungApplet extends Applet {
      *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
      */
     public String extractZIP(final String name) {
+
         JSONObject obj = new JSONObject();
 
         try {
@@ -772,29 +644,24 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
 
     /**
-     * extrahiert den Text aus einer PDF Datei und lädt den Text in der Anwendung
-     * @param fileName          der Dateiname
-     * @param multi
-     * @param typ
+     /**
+     * extrahiert den Text aus einer PDF Datei
+     * Der Inhalt dr Datei kommt dabei aus dem internen Speicher, denn durch die Längenbegrenzung der Paramter ist eine
+     * Übergabe an das Applet nur in einezelnen Portionen möglich.
+     * @param fileName           der Name der PDF Datei
+     * @param clear              legt fest, ob der interne Speicher für die extrahierten Dateien initialisiert werden soll.
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg nichts, ansonsten der Fehler
+     *                                                          result            bei Erfolg der Inhalt des PDF's als String, ansonsten der Fehler
      */
-    public String extract(final String fileName,
-                          final boolean multi,
-                          final String typ) {
+    public String extractPDF(final String fileName,
+                             final Boolean clear) {
 
         JSONObject obj = new JSONObject();
 
@@ -802,45 +669,34 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    JSONObject obj = new JSONObject();
-                    entries.clear();
-                    final byte[] ret = bys.toByteArray();
-                    entries.add(new FileEntry(fileName, ret));
-                    InputStream bais = new ByteArrayInputStream(ret);
-                    PDFConnector con = new PDFConnector();
-                    String result = con.pdftoText(bais);
-                    if (!multi)
-                        jsobject.call("loadText", new String[]{result, fileName, typ, null});
+                    VerteilungServices services = getServices(bindingUrl, user, password);
+                    JSONObject obj = new JSONObject(openFile(fileName));
+                    if (obj.getBoolean("success"))
+                        return services.extractPDF(obj.getString("result").getBytes(), fileName, entries, clear);
                     else
-                        jsobject.call("loadMultiText", new String[]{result, fileName, typ, "false", "false", null});
-                    obj.put("success", true);
-                    obj.put("result", "");
-                    return obj;
+                        return obj;
                 }
             });
 
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
 
     /**
-     * TODO Was macht diese Methode
-     * @param str           der übegebene String
-     * @param init
+     * bei der Übertragung von Parametern in das Applet sind lt. HTML Spezifikation Längenbegrenzungen gesetzt.
+     * Damit auch große Datenmengen an das Applet übertragen werden können, gibt es dieses Methode, die einen langen String,
+     * z.B. den Inhalt einer Datei, in Häppchen unterteilt und dann lokal im Applet zwischen speichert.
+     * @param str                der übegebene String
+     * @param init               legt fest, ob der Zwischenspeicher im Applet initialisiert werden soll
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg nichts, ansonsten der Fehler
      */
-    public String getData(final String str,
+    public String fillParameter(final String str,
                           final boolean init) {
+
         JSONObject obj = new JSONObject();
         try {
             final byte[] ret = Base64.decodeBase64(str);
@@ -851,13 +707,7 @@ public class VerteilungApplet extends Applet {
             obj.put("success", true);
             obj.put("result", "");
         } catch (Exception e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
@@ -870,6 +720,7 @@ public class VerteilungApplet extends Applet {
      *                                                          result            bei Erfolg der Inhalt als String, ansonsten der Fehler
      */
     public String openFile(final String filePath) {
+
         JSONObject obj = new JSONObject();
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
@@ -896,16 +747,12 @@ public class VerteilungApplet extends Applet {
                 }
             });
         } catch (PrivilegedActionException e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj.toString();
     }
+
+
 
 
     /**

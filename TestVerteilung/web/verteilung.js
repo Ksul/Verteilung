@@ -8,7 +8,7 @@ String.prototype.endsWith = function (str) {
 };
 
 /**
- * pr�ft, ob ein String mit einem Vergleichsstring beginnt
+ * prüft, ob ein String mit einem Vergleichsstring beginnt
  * @param str               der Vergleichsstring
  * @returns {boolean}
  */
@@ -33,7 +33,7 @@ function getUrlParam(name) {
 }
 
 /**
- * Pr�ft, ob die Anwendung lokal mit Applet l�uft
+ * Prüft, ob die Anwendung lokal mit Applet läuft
  * @returns {*}
  */
 function isLocal() {
@@ -51,7 +51,7 @@ function hasUrlParam(){
 
 /**
  * Globale Fehlerroutine
- * @param e  der ausl�sende Fehler
+ * @param e  der auslösende Fehler
  */
 function errorHandler(e) {
     var str = "FEHLER:\n";
@@ -63,7 +63,7 @@ function errorHandler(e) {
 
 
 /**
- * l�dt das Applet
+ * lädt das Applet
  */
 function loadApplet(level, bindingUrl, user, password) {
     if (isLocal()) {
@@ -102,9 +102,6 @@ function loadApplet(level, bindingUrl, user, password) {
                 'plugin.jar, ' +
                 'bcprov-jdk15on-150.jar, ' +
                 'commons-codec-1.6.jar, ' +
-                'commons-httpclient-3.0.1.jar, ' +
-                'abdera-1.1.2.jar, ' +
-                'axiom.jar, ' +
                 'commons-logging-1.1.1.jar, ' +
                 'fontbox-1.6.0.jar, ' +
                 'jempbox-1.6.0.jar, ' +
@@ -122,7 +119,7 @@ function loadApplet(level, bindingUrl, user, password) {
 }
 
 /**
- * Pr�ft, ob ein Alfresco Server antwortet
+ * Prüft, ob ein Alfresco Server antwortet
  * @param url         URL des Servers
  * @param proxy       Proxy Server
  * @param port        Port des Proxy Servers
@@ -303,7 +300,7 @@ function manageControls() {
 }
 
 /**
- * Öffnet ein PDF
+ * Ãffnet ein PDF
  * @param name       Name des Dokuments
  * @param fromServer legt fest, ob das Dokument vom Server geholt werden soll
  */
@@ -437,7 +434,7 @@ function handleFileSelect(evt) {
 }
 
 /**
- * handelt das Verhalten, wenn eine Datei Ã¼ber den Bereich fallen gelassen wird
+ * handelt das Verhalten, wenn eine Datei Über den Bereich fallen gelassen wird
  * @param evt    das Event
  */
 function handleDragOver(evt) {
@@ -490,12 +487,20 @@ function readFiles(files) {
                             if (evt.target.readyState == FileReader.DONE) {// DONE == 2
                                 var str = btoa(evt.target.result);
                                 if (isLocal()) {
+                                    // den Inhalt häppchenweise übertragen.
                                     for (var k = 0; k < Math.ceil(str.length / maxLen); k++)
-                                        document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
-                                    document.reader.extract(theFile.name, files.length > 1, theFile.type);
+                                        document.reader.fillParameter(str.substr(k * maxLen, maxLen), k == 0);
+                                    var json = jQuery.parseJSON(document.reader.extractPDF(theFile.name, files.length > 1, theFile.type));
+                                    if (!json.success) {
+                                    if (count == 1)
+                                        loadText(json.result, theFile.name, theFile.type, null);
+                                    else {
+                                        loadMultiText(json.result, theFile.name, theFile.type, "false", "false", null);
+                                    }
+                                    }
                                 } else {
                                     var dataString = {
-                                        "function": "extract",
+                                        "function": "extractPDF",
                                         "documentText": str,
                                         "fileName": theFile.name,
                                         "clear": clear
@@ -544,8 +549,9 @@ function readFiles(files) {
                             if (evt.target.readyState == FileReader.DONE) {// DONE == 2
                                 var str = btoa(evt.target.result);
                                 if (isLocal()) {
+                                    // den Inhalt häppchenweise übertragen
                                     for (var k = 0; k < Math.ceil(str.length / maxLen); k++)
-                                        document.reader.getData(str.substr(k * maxLen, maxLen), k == 0);
+                                        document.reader.fillParameter(str.substr(k * maxLen, maxLen), k == 0);
                                     count = count + document.reader.extractZIP(theFile.name) - 1;
                                 } else {
                                     var dataString = {
@@ -658,7 +664,7 @@ function handleImageClicks() {
         manageControls();
     });
     $(document).on("click", ".loeschen", function () {
-        var answer = confirm("Eintrag lÃ¶schen?");
+        var answer = confirm("Eintrag löschen?");
         if (answer) {
             var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
             var row = tabelle.fngetData(aPos[0]);
@@ -795,7 +801,7 @@ function imageFieldFormatter(o) {
     image = document.createElement("div");
     image.href = "#";
     image.className = "loeschen";
-    image.title = "Ergebnis lÃ¶schen";
+    image.title = "Ergebnis lÃÂ¶schen";
     if (daten[o.aData[1]]["notDeleteable"] != "true") {
         image.style.backgroundImage = "url(resource/delete.png)";
         image.style.cursor = "pointer";
@@ -852,7 +858,7 @@ function calcDataTableHeight()  {
 };
 
 /**
- * formatiert die Fehlerdetails in der zusÃ¤tlichen Zeile(n) der Tabelle
+ * formatiert die Fehlerdetails in der zusätzlichen Zeile(n) der Tabelle
  * @param oTable
  * @param nTr
  * @param tableid
@@ -926,7 +932,7 @@ function doReRunAll() {
 /**
  * markiert in den Regeln die verendeten Stellen
  * @param positions   die Positionen im Text
- * @param editor      der zustÃ¤ndige Editor
+ * @param editor      der zuständige Editor
  * @returns {Array}   die erzeugten Markierungen im Editor
  */
 function setMarkers(positions, editor) {
@@ -1262,7 +1268,7 @@ function openSettings() {
 }
 
 /**
- * aktualisiert die geÃ¤nderten Regeln auf dem Server
+ * aktualisiert die geänderten Regeln auf dem Server
  * @param dialog       Merker ob ein Hinweisfenster angezeigt werden soll
  * @returns {boolean}  liefert true zurück, wenn alles geklappt hat
  */
@@ -1314,9 +1320,9 @@ function sendRules(dialog) {
                     success        : function(data) {
                         if (data.success[0]){
                             if (dialog)
-                                alert("Regeln erfolgreich Ã¼bertragen!");
+                                alert("Regeln erfolgreich übertragen!");
                         } else
-                            alert("Fehler beim Ãbertragen der Regeln: " + data.result[0]);
+                            alert("Fehler beim Übertragen der Regeln: " + data.result[0]);
                     }
                 });
             }
@@ -1375,7 +1381,7 @@ function getRules(rulesId, loadLocal, dialog) {
                         rulesEditor.getSession().setValue(data.result[0].toString());
                         rulesEditor.getSession().foldAll(1);
                     } else
-                        alert("Regeln konnten nicht Ã¼bertragen werden: " + data.result[0]);
+                        alert("Regeln konnten nicht Übertragen werden: " + data.result[0]);
                 },
                 error    : function (response) {
                     try {
@@ -1398,7 +1404,7 @@ function getRules(rulesId, loadLocal, dialog) {
 }
 
 /**
- * Öffnet die Regeln
+ * Ãffnet die Regeln
  */
 function openRules() {
     var id;
@@ -1457,15 +1463,14 @@ function formatScript() {
 }
 
 /**
- * �ffnet eine lokale Datei
+ * öffnet eine lokale Datei
  * @param name  der Name der Datei
- * @returns {Array} Inhalt und URL Notation der Datei
+ * @returns den Inhalt
  */
 function openFile(name) {
     try {
         var contents = "";
-        contents = document.reader.openFile(convertPath(name));
-        return [ contents, datafile ];
+        return document.reader.openFile(convertPath(name));
     } catch (e) {
         errorHandler(e);
     }
@@ -1619,7 +1624,7 @@ function loadScript() {
 
 
 /**
- * lädt ein geändertes Verteilungsscript in den Kontext der Anwendung, damit die Änderungen wirksam werden
+ * lädt ein geändertes Verteilungsscript in den Kontext der Anwendung, damit die Ãnderungen wirksam werden
  * @param dialog   legt fest, ob ein Hinweis gezeigt werden soll
  */
 function reloadScript(dialog) {
@@ -1652,7 +1657,7 @@ function getScript(dialog) {
                 if (dialog)
                     alert("Script erfolgreich heruntergeladen!");
             } else
-                alert("Fehler bei der Ãbertragung: " + json.result);
+                alert("Fehler bei der Übertragung: " + json.result);
         } else {
             var dataString = {
                 "function": "getContent",

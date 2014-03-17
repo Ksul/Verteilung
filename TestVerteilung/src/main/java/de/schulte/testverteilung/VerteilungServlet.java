@@ -22,12 +22,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.abdera.model.Document;
-import org.apache.abdera.model.Element;
-import org.apache.abdera.model.Entry;
-import org.apache.abdera.protocol.Response.ResponseType;
+
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.Credentials;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -214,8 +210,8 @@ public class VerteilungServlet extends HttpServlet {
                 if (value.equalsIgnoreCase("listFolderAsJSON")) {
                     obj = listFolderAsJSON(filePath, withFolder);
                 }
-				if (value.equalsIgnoreCase("extract")) {
-					obj = extract(documentText, fileName, clear);
+				if (value.equalsIgnoreCase("extractPDF")) {
+					obj = extractPDF(documentText, fileName, clear);
 				}
 
 				if (value.equalsIgnoreCase("extractZIP")) {
@@ -242,52 +238,9 @@ public class VerteilungServlet extends HttpServlet {
      */
     protected JSONObject isURLAvailable(String urlString) {
 
-        JSONObject obj = new JSONObject();
-        URL url = null;
-        try {
-            url = new URL(urlString);
-            logger.info("Umwandlung in URL " + url);
-        } catch (MalformedURLException e) {
-            String error = "Fehler beim Check der URL: " + e.getMessage();
-            logger.severe(error);
-            e.printStackTrace();
-            try {
-                obj.put("success", false);
-                obj.put("result", error);
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
-        }
-        try {
-            HttpURLConnection httpUrlConn;
-            httpUrlConn = (HttpURLConnection) url.openConnection();
-            logger.info("Open Connection " + httpUrlConn);
-            httpUrlConn.setRequestMethod("HEAD");
-            logger.info("Set Request ");
-            // Set timeouts in milliseconds
-            httpUrlConn.setConnectTimeout(30000);
-            httpUrlConn.setReadTimeout(30000);
+        VerteilungServices services = new VerteilungServices();
+        return services.isURLAvailable(urlString);
 
-            int erg = httpUrlConn.getResponseCode();
-            logger.info("ResponseCode " + erg);
-            logger.info(httpUrlConn.getResponseMessage());
-            obj.put("success", true);
-            obj.put("result", erg == HttpURLConnection.HTTP_OK);
-
-        } catch (Throwable t) {
-            String error = "Fehler beim Check der URL: " + t.getMessage();
-            logger.severe(error);
-            t.printStackTrace();
-            try {
-                obj.put("success", false);
-                obj.put("result", error);
-            } catch (JSONException jse) {
-                logger.severe(jse.getMessage());
-                jse.printStackTrace();
-            }
-        }
-        return obj;
     }
 
     /**
@@ -469,34 +422,17 @@ public class VerteilungServlet extends HttpServlet {
      * extrahiert den Text aus einer PDF Datei
      * @param documentText       der Inhalt der PDF Datei als String
      * @param fileName           der Name der PDF Datei
-     * @param clear
+     * @param clear              legt fest, ob der interne Speicher für die extrahierten Dateien initialisiert werden soll.
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg der Inhalt des PDF's als String, ansonsten der Fehler
      */
-    protected JSONObject extract(String documentText,
-                                 String fileName,
-                                 String clear) {
-        JSONObject obj = new JSONObject();
-        try {
-            if (clear.equalsIgnoreCase("true"))
-                entries.clear();
-            final byte[] bytes = Base64.decodeBase64(documentText);
-            entries.add(new FileEntry(fileName, bytes));
-            InputStream bais = new ByteArrayInputStream(bytes);
-            PDFConnector con = new PDFConnector();
-            obj.put("success", true);
-            obj.put("result", con.pdftoText(bais));
-        } catch (Exception e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
-        }
-        return obj;
+    protected JSONObject extractPDF(String documentText,
+                                    String fileName,
+                                    String clear) throws VerteilungException {
+
+            VerteilungServices services = getServices(bindingUrl, user, password);
+            return  services.extractPDF(Base64.decodeBase64(documentText), fileName, entries, (clear != null && clear.equalsIgnoreCase("true")));
     }
 
     /**
@@ -544,13 +480,7 @@ public class VerteilungServlet extends HttpServlet {
             obj.put("success", true);
             obj.put("result", ergebnis);
         } catch (Exception e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         } finally {
             try {
                 zipin.close();
@@ -593,13 +523,7 @@ public class VerteilungServlet extends HttpServlet {
             obj.put("success", true);
             obj.put("result", fileData.toString());
         } catch (Exception e) {
-            try {
-                obj.put("success", false);
-                obj.put("result", e.getMessage());
-            } catch (JSONException jse) {
-                logger.severe(jse.getLocalizedMessage());
-                jse.printStackTrace();
-            }
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj;
     }

@@ -1,12 +1,16 @@
 package de.schulte.testverteilung;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -182,7 +186,7 @@ public class VerteilungServletTest extends AlfrescoTest {
     public void testUploadDocument() throws Exception {
         when(request.getParameter("function")).thenReturn("uploadDocument");
         when(request.getParameter("destinationFolder")).thenReturn("/Archiv");
-        when(request.getParameter("fileName")).thenReturn(properties.getProperty("testFile"));
+        when(request.getParameter("fileName")).thenReturn(properties.getProperty("testPDF"));
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
@@ -402,6 +406,29 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter("fileName")).thenReturn("TestDocument.txt");
         servlet.doPost(request, response);
         writer.flush();
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
+    public void testExtractPDF() throws Exception {
+        String fileName = properties.getProperty("testPDF");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        Collection<FileEntry> entries = new ArrayList<FileEntry>();
+        when(request.getParameter("function")).thenReturn("extractPDF");
+        when(request.getParameter("documentText")).thenReturn(Base64.encodeBase64String(content));
+        when(request.getParameter("fileName")).thenReturn(fileName);
+        when(request.getParameter("clear")).thenReturn("false");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
         sr.getBuffer().delete(0, 9999);
     }
 }

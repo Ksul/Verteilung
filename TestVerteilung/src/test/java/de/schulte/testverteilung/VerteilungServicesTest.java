@@ -18,7 +18,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Created with IntelliJ IDEA.
@@ -114,7 +119,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
 
     @Test
     public void testUploadDocument() throws Exception {
-        JSONObject obj = services.uploadDocument("/Archiv", properties.getProperty("testFile"));
+        JSONObject obj = services.uploadDocument("/Archiv", properties.getProperty("testPDF"));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -128,7 +133,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
 
     @Test
     public void testCreateDocument() throws Exception {
-        JSONObject obj = services.uploadDocument("/Archiv", properties.getProperty("testFile"));
+        JSONObject obj = services.uploadDocument("/Archiv", properties.getProperty("testPDF"));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -287,4 +292,23 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(props);
         assertTrue(props.length() > 0);
     }
+
+    @Test
+    public void testExtractPDF() throws Exception {
+        String fileName = properties.getProperty("testPDF");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        Collection<FileEntry> entries = new ArrayList<FileEntry>();
+        JSONObject obj = services.extractPDF(content,fileName, entries, false );
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
+        assertTrue(entries.size() == 1);
+        assertEquals(fileName, entries.iterator().next().getName());
+    }
+
+
 }

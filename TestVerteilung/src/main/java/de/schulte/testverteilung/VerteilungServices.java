@@ -1,7 +1,10 @@
 package de.schulte.testverteilung;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -9,6 +12,7 @@ import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -491,6 +495,74 @@ public class VerteilungServices {
             obj.put("result", new JSONObject(properties));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * prüft, ob eine Url verfügbar ist
+     * @param urlString    URL des Servers
+     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            true, wenn die URL verfügbar ist
+     */
+    public JSONObject isURLAvailable(String urlString) {
+
+        JSONObject obj = new JSONObject();
+        URL url = null;
+        try {
+            url = new URL(urlString);
+            logger.info("Umwandlung in URL " + url);
+            HttpURLConnection httpUrlConn;
+            httpUrlConn = (HttpURLConnection) url.openConnection();
+            logger.info("Open Connection " + httpUrlConn);
+            httpUrlConn.setRequestMethod("HEAD");
+            logger.info("Set Request ");
+            // Set timeouts in milliseconds
+            httpUrlConn.setConnectTimeout(30000);
+            httpUrlConn.setReadTimeout(30000);
+
+            int erg = httpUrlConn.getResponseCode();
+            logger.info("ResponseCode " + erg);
+            logger.info(httpUrlConn.getResponseMessage());
+            obj.put("success", true);
+            obj.put("result", erg == HttpURLConnection.HTTP_OK);
+
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * extrahiert eine PDF Datei und trägt den Inhalt in den internen Speicher ein.
+     * @param fileContent       der Inhalt der PDF Datei
+     * @param fileName          der Name der PDF Datei
+     * @param entries           der interne Speicher, in dem der Inhalt soll
+     * @param clear             Merker, ob der interne Speicher initialisiert werden soll
+     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der PDF Datei als String
+     */
+    public JSONObject extractPDF(byte[] fileContent,
+                                 String fileName,
+                                 Collection<FileEntry> entries,
+                                 boolean clear) {
+
+        JSONObject obj = new JSONObject();
+        try {
+            if (entries != null) {
+                if (clear)
+                    entries.clear();
+
+                entries.add(new FileEntry(fileName, fileContent));
+            }
+            InputStream bais = new ByteArrayInputStream(fileContent);
+            PDFConnector con = new PDFConnector();
+            obj.put("success", true);
+            obj.put("result", con.pdftoText(bais));
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj;
     }
