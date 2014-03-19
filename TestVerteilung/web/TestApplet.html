@@ -5,6 +5,25 @@
     <script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" src="./verteilung.js" charset="utf-8"></script>
     <script type="text/javascript" src="jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="jquery-ui-1.10.3.custom.js"></script>
+    <script>
+        $(function() {
+            $( document ).tooltip();
+        });
+    </script>
+    <style  type="text/css">
+        .ui-tooltip {
+            padding: 8px;
+            position: absolute;
+            z-index: 9999;
+            max-width: 300px;
+            -webkit-box-shadow: 0 0 5px #aaa;
+            box-shadow: 0 0 5px #aaa;
+        }
+        body .ui-tooltip {
+            border-width: 2px;
+        }
+    </style>
 </head>
 <body>
 <div id="appl" width="0px"></div>
@@ -16,9 +35,11 @@
     <TH width="3%">Status</TH>
     </TR>
     <script type="text/javascript">
+
     try {
         doTest("Lade Applet", 'loadApplet("FINE");', "typeof(erg) == 'undefined';");
-        doTest("Test Applet", 'document.reader.test()', "erg == 'Hier ist das Verteilungs Applet!'");
+        doTest("Test Applet", 'document.reader.test();', "erg == 'Hier ist das Verteilungs Applet!'");
+        doTest("Test Applet", 'document.reader.testReturn();',"var result = $.parseJSON(erg); result.success;");
         var properties = doTest("Ermittlung Properties", '$.parseJSON(document.reader.loadProperties(convertPath("../test.properties"))).result', "typeof erg == 'object' &&  typeof erg.host == 'string' && typeof erg.bindingUrl == 'string' && typeof erg.password == 'string' ;");
         doTest("Host erreichbar",'document.reader.isURLAvailable(properties.host);', " var result = $.parseJSON(erg.toString()); if (result.success) result.result;");
         doTest("Setze Parameter", 'document.reader.setParameter(properties.bindingUrl, "admin", properties.password);', "var result = $.parseJSON(erg.toString()); result.success;");
@@ -31,16 +52,19 @@
         doTest("Delete Document Function deleteDocument", "document.reader.deleteDocument(\"/Archiv\", \"Test.pdf\");", "var result = $.parseJSON(erg.toString()); result.success;");
         doTest("Create Document Function createDocument", "document.reader.createDocument(\"/Archiv\", \"TestDocument.txt\", \"äöüßÄÖÜ/\", \"plain/text\", \"\");", "var result = $.parseJSON(erg.toString()); result.success;");
         var pdf = doTest("open File Function openFile", "document.reader.openFile(\"file://\" + properties.testPDF);", "var result = $.parseJSON(erg.toString()); result.success;");
-        doTest("extract PDF Function extractPDF", "reader.extractPDF(\"file://\" + properties.testPDF, false);", "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("extract PDF Function extractPDF", "reader.extractPDF(\"file://\" + properties.testPDF);", "var result = $.parseJSON(erg.toString()); result.success;");
     } catch (e) {
         errorHandler(e);
     }
     function doTest(testName, testEvaluate, testExpected) {
         var erg;
         var test;
+        var res;
         var testError = "";
         var success = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/ok.png" style="display: block; margin: 0px auto;"  /></a>';
         var error = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/error.png" style="display: block; margin: 0px auto;"  /></a>';
+        var ergebnis = document.createElement("a");
+
         try {
             erg = eval(testEvaluate);
             try {
@@ -48,10 +72,16 @@
             } catch (t) {
                 testError = t.toString();
             }
-            if (test)
-                addRow(testName, testEvaluate, erg, success);
+            if (typeof erg != "undefined" && erg != null && erg.toString().length > 80)
+                res = erg.toString().substr(0, 79) + "...";
             else
-                addRow(testName, testEvaluate, erg, error);
+                res = erg;
+            ergebnis.setAttribute('title', erg);
+            ergebnis.innerHTML = res;
+            if (test)
+                addRow(testName, testEvaluate, ergebnis.outerHTML, success);
+            else
+                addRow(testName, testEvaluate, ergebnis.outerHTML, error);
             if (testError.length > 0)
                 alert(testError);
         } catch (e) {
@@ -60,28 +90,23 @@
         return erg;
     }
 
-    function addRow(test, call, result, status)
-    {
-        var res = "" ;
+    function addRow(test, call, result, status) {
+        var res = "";
         var nummer = -1;
         var tabellen_id = "t1";
-        var trhtml = document.getElementById( tabellen_id ).insertRow( nummer );
-        var tdhtml1 = document.createElement( "td" );
-        var tdhtml2 = document.createElement( "td" );
-        var tdhtml3 = document.createElement( "td" );
-        var tdhtml4 = document.createElement( "td" );
-        if (result.length > 100)
-          res =result.substr(0, 99);
-        else
-          res = result;
+        var trhtml = document.getElementById(tabellen_id).insertRow(nummer);
+        var tdhtml1 = document.createElement("td");
+        var tdhtml2 = document.createElement("td");
+        var tdhtml3 = document.createElement("td");
+        var tdhtml4 = document.createElement("td");
         tdhtml1.innerHTML = test; // content
         tdhtml2.innerHTML = call;
-        tdhtml3.innerHTML = res;
+        tdhtml3.innerHTML = result;
         tdhtml4.innerHTML = status;
-        trhtml.appendChild( tdhtml1 );
-        trhtml.appendChild( tdhtml2 );
-        trhtml.appendChild( tdhtml3 );
-        trhtml.appendChild( tdhtml4 );
+        trhtml.appendChild(tdhtml1);
+        trhtml.appendChild(tdhtml2);
+        trhtml.appendChild(tdhtml3);
+        trhtml.appendChild(tdhtml4);
     }
 </script>
     </TABLE>

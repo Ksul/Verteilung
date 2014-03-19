@@ -1,10 +1,7 @@
 package de.schulte.testverteilung;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -566,4 +563,59 @@ public class VerteilungServices {
         }
         return obj;
     }
- }
+
+    /**
+     * extrahiert eine PDF Datei und trägt den Inhalt in den internen Speicher ein.
+     * @param filePath          der Pfad zur PDF-Datei
+     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der PDF Datei als String
+     */
+    public JSONObject extractPDF(String filePath) {
+        JSONObject obj = new JSONObject();
+        try {
+            byte[] bytes = readFile(filePath);
+            PDFConnector con = new PDFConnector();
+            obj.put("success", true);
+            obj.put("result", con.pdftoText(new ByteArrayInputStream(bytes)));
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * öfnnet eine Datei und liest den Inhalt
+     * @param filePath          der Pfad zur Datei
+     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der Datei als Base64 encodeter String oder der Fehler
+     */
+    public JSONObject openFile(String filePath) {
+        JSONObject obj = new JSONObject();
+        try {
+            byte[] buffer = readFile(filePath);
+            obj.put("success", true);
+            obj.put("result", Base64Coder.encodeLines(buffer));
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * liest eine Datei
+     * @param filePath                  der Pfad zur Datei
+     * @return                          der Inhalt als Byte Array
+     * @throws URISyntaxException
+     * @throws IOException
+     */
+    private byte[] readFile(String filePath) throws URISyntaxException, IOException {
+        File sourceFile = new File(new URI(filePath));
+        InputStream inp = new FileInputStream(sourceFile);
+        byte[] buffer = new byte[(int) sourceFile.length()];
+        inp.read(buffer);
+        inp.close();
+        return buffer;
+    }
+}

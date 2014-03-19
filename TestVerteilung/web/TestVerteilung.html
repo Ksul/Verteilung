@@ -559,7 +559,7 @@ function toggleStateManagement(skipAlert, mode) {
             alert('This layout will reload as the options specify \nwhen the page is refreshed.');
     }
     else if (!skipAlert)
-        alert('This layout will save & restore its last state \nwhen the page is refreshed.');
+        alert("This layout will save and restore its last state \nwhen the page is refreshed.");
 }
 ;
 
@@ -615,26 +615,26 @@ $(document).ready(function () {
         minSize:				    13,
         initClosed:				    false,
         resizerTip:				    "Resize This Pane",
-        fxName:					    "slide",		// none, slide, drop, scale
+        fxName:					    "slide",
         fxSpeed_open:		    	800,
         fxSpeed_close:		    	1000,
         fxSettings_open:	    	{ easing: "easeInQuint" },
         fxSettings_close:  		    { easing: "easeOutQuint" },
-        closable:		    		true,	// pane can open & close
-        resizable:		    		true,	// when open, pane can be resized
-        //slidable:				true,	// when closed, pane can 'slide' open over other panes - closes on mouse-out
+        closable:		    		true,
+        resizable:		    		true,
+        //slidable:				true,
         livePaneResizing:	    	true,
         spacing_open:		    	8,
         spacing_closed:			    12,
-        initPanes:	    			false, // delay layout init until tab.show calls tabLayout.resizeAll()
-        resizeWithWindow:			false, // needed because 'nested' inside the tabLayout div
+        initPanes:	    			false,
+        resizeWithWindow:			false,
         contentSelector:			".ui-widget-content",
         west: {
             paneSelector:           "#alfrescoWest",
             size:				    .2,
             fxSettings_open:	    { easing: "easeOutBounce" },
-            closable:			    true,	// pane can open & close
-            resizable:			    true,	// when open, pane can be resized
+            closable:			    true,
+            resizable:			    true,
             slidable:			    true
         },
         center: {
@@ -655,8 +655,8 @@ $(document).ready(function () {
             spacing_closed:		    12
         },
         //	enable state management
-        stateManagement__enabled:	true, // automatic cookie load & save enabled by default
-        showDebugMessages:			true // log and/or display messages from debugging & testing code
+        stateManagement__enabled:	true,
+        showDebugMessages:			true
     };
 
 
@@ -666,19 +666,19 @@ $(document).ready(function () {
          minSize:				    13,
          initClosed:				false,
          resizerTip:				"Resize This Pane",
-         fxName:					"slide",		// none, slide, drop, scale
+         fxName:					"slide",
          fxSpeed_open:		    	800,
          fxSpeed_close:		    	1000,
          fxSettings_open:	    	{ easing: "easeInQuint" },
          fxSettings_close:  		{ easing: "easeOutQuint" },
-         closable:		    		true,	// pane can open & close
-         resizable:		    		true,	// when open, pane can be resized
-         //slidable:				true,	// when closed, pane can 'slide' open over other panes - closes on mouse-out
+         closable:		    		true,
+         resizable:		    		true,
+         //slidable:				true,
          livePaneResizing:	    	true,
          spacing_open:		    	8,
          spacing_closed:			12,
-         initPanes:	    			false, // delay layout init until tab.show calls tabLayout.resizeAll()
-         resizeWithWindow:			false, // needed because 'nested' inside the tabLayout div
+         initPanes:	    			false,
+         resizeWithWindow:			false,
          contentSelector:			".ui-widget-content",
 
     //	reference only - these options are NOT required because 'true' is the default
@@ -688,8 +688,8 @@ $(document).ready(function () {
             paneSelector:           "#verteilungWest",
             size:				    .6,
             fxSettings_open:	    { easing: "easeOutBounce" },
-            closable:			    true,	// pane can open & close
-            resizable:			    true,	// when open, pane can be resized
+            closable:			    true,
+            resizable:			    true,
             slidable:			    true,
             onresize:	            function () { textEditor.resize(); $('div.dataTables_scrollBody').css('height',calcDataTableHeight()); tabelle.fnSettings()._iDisplayLength = Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1); tabelle.fnDraw(); tabelle.fnAdjustColumnSizing(); }
         },
@@ -726,8 +726,8 @@ $(document).ready(function () {
             }
         },
         //	enable state management
-        stateManagement__enabled:	true, // automatic cookie load & save enabled by default
-        showDebugMessages:			true // log and/or display messages from debugging & testing code
+        stateManagement__enabled:	true,
+        showDebugMessages:			true
     };
 
 
