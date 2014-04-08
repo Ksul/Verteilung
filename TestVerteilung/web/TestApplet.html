@@ -6,56 +6,100 @@
     <script type="text/javascript" src="./verteilung.js" charset="utf-8"></script>
     <script type="text/javascript" src="jquery-1.9.1.js"></script>
     <script type="text/javascript" src="jquery-ui-1.10.3.custom.js"></script>
-    <script>
+    <script type="text/javascript">
         $(function() {
-            $( document ).tooltip();
+            $( document ).tooltip({
+                        wrap: true,
+                        openTrigger: 'hover',
+                        closeTrigger: 'hover'
+                    });
         });
     </script>
     <style  type="text/css">
         .ui-tooltip {
-            padding: 8px;
             position: absolute;
             z-index: 9999;
-            max-width: 300px;
+
             -webkit-box-shadow: 0 0 5px #aaa;
             box-shadow: 0 0 5px #aaa;
+            display:none;
+            background: white;
+            font-size:12px;
+            padding:10px;
+            color:#000;
+            bottom: 10px;
+            border: 2px solid white;
+            /* for IE */
+            filter:alpha(opacity=80);
+            /* CSS3 standard */
+            opacity:0.8;
         }
         body .ui-tooltip {
             border-width: 2px;
         }
     </style>
+
+
 </head>
 <body>
 <div id="appl" width="0px"></div>
 <TABLE BORDER=1 width="100%" id="t1">
     <TR>
-    <TH width="20%">Test</TH>
-    <TH width="20%">Call</TH>
+    <TH width="10%">Test</TH>
+    <TH width="10%">Call</TH>
     <TH>Ergebnis</TH>
     <TH width="3%">Status</TH>
     </TR>
     <script type="text/javascript">
 
+    const testLoadApplet =          "loadApplet(\"FINE\");";
+    const testTest =                "document.reader.test();";
+    const testTestReturn =          "document.reader.testReturn();";
+    const testLoadProperties =      "document.reader.loadProperties(convertPath(\"../test.properties\"));";
+    const testIsURLAvaiable =       "document.reader.isURLAvailable(properties.host);";
+    const testSetParameter =        "document.reader.setParameter(properties.bindingUrl, \"admin\", properties.password);";
+    const testGetNodeId =           "document.reader.getNodeId(\"/Archiv\");";
+    const testGetNodeId1 =          "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\");";
+    const testGetNodeId2 =          "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/recognition.js\");";
+    const testFindDocument =        "document.reader.findDocument(\"SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'\");";
+    const testGetDocumentContent =  "document.reader.getDocumentContent($.parseJSON(document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\")).result, false);";
+    const testUploadDocument =      "document.reader.uploadDocument(\"/Archiv\", properties.testPDF);";
+    const testDeleteDocument =      "document.reader.deleteDocument(\"/Archiv\", \"Test.pdf\");";
+    const testDeleteDocument1 =     "document.reader.deleteDocument(\"/Archiv\", \"TestDocument.txt\");";
+    const testCreateDocument =      "document.reader.createDocument(\"/Archiv\", \"TestDocument.txt\", \"äöüßÄÖÜ/\", \"plain/text\", \"\", \"none\");";
+    const testOpenFile =            "document.reader.openFile(\"file://\" + properties.testPDF);";
+    const testExtractPDF =          "document.reader.extractPDF(\"file://\" + properties.testPDF);";
+    const testSaveToFile =          "document.reader.saveToFile(\"file:///tmp/TestFile.txt\", \"äöüßÄÖÜ/\");";
+    const testDeleteFile =          "document.reader.deleteFile(\"file:///tmp/TestFile.txt\");";
+
     try {
-        doTest("Lade Applet", 'loadApplet("FINE");', "typeof(erg) == 'undefined';");
-        doTest("Test Applet", 'document.reader.test();', "erg == 'Hier ist das Verteilungs Applet!'");
-        doTest("Test Applet", 'document.reader.testReturn();',"var result = $.parseJSON(erg); result.success;");
-        var properties = doTest("Ermittlung Properties", '$.parseJSON(document.reader.loadProperties(convertPath("../test.properties"))).result', "typeof erg == 'object' &&  typeof erg.host == 'string' && typeof erg.bindingUrl == 'string' && typeof erg.password == 'string' ;");
-        doTest("Host erreichbar",'document.reader.isURLAvailable(properties.host);', " var result = $.parseJSON(erg.toString()); if (result.success) result.result;");
-        doTest("Setze Parameter", 'document.reader.setParameter(properties.bindingUrl, "admin", properties.password);', "var result = $.parseJSON(erg.toString()); result.success;");
-        doTest("Check Archiv vorhanden Function getNodeId", "document.reader.getNodeId(\"/Archiv\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
-        doTest("Check Dokumenddefinition vorhanden Function getNodeId", "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
-        doTest("Check Verteilungsskript vorhanden Function getNodeId", "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/recognition.js\");", "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
-        doTest("Check Dokument finden Function findDocument", "document.reader.findDocument(\"SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'\");", "var result = $.parseJSON(erg.toString()); if (result.success){ var obj = $.parseJSON(result.result); (obj.name == 'doc.xml') };");
-        doTest("Inhalt lesen Function getDocumentContent", "$.parseJSON(document.reader.getDocumentContent($.parseJSON(document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\")).result, false));", " if (erg.success){ erg.result.indexOf('xmlns:my=\"http://www.schulte.local/archiv\"'); };");
-        doTest("Upload Document Function uploadDocument", "document.reader.uploadDocument(\"/Archiv\", properties.testPDF);", "var result = $.parseJSON(erg.toString()); result.success;");
-        doTest("Delete Document Function deleteDocument", "document.reader.deleteDocument(\"/Archiv\", \"Test.pdf\");", "var result = $.parseJSON(erg.toString()); result.success;");
-        doTest("Create Document Function createDocument", "document.reader.createDocument(\"/Archiv\", \"TestDocument.txt\", \"äöüßÄÖÜ/\", \"plain/text\", \"\");", "var result = $.parseJSON(erg.toString()); result.success;");
-        var pdf = doTest("open File Function openFile", "document.reader.openFile(\"file://\" + properties.testPDF);", "var result = $.parseJSON(erg.toString()); result.success;");
-        doTest("extract PDF Function extractPDF", "reader.extractPDF(\"file://\" + properties.testPDF);", "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Lade Applet", testLoadApplet, "$('#reader').get(0).isActive()");
+        doTest("Test Applet", testTest, "erg == 'Hier ist das Verteilungs Applet!'");
+        doTest("Test Applet", testTestReturn,"var result = $.parseJSON(erg); result.success;");
+        var erg = doTest("Ermittlung Properties", testLoadProperties, "var result = $.parseJSON(erg.toString()); typeof result == 'object' &&  typeof result.result.host == 'string' && typeof result.result.bindingUrl == 'string' && typeof result.result.password == 'string' ;");
+        var properties = $.parseJSON(erg).result;
+        doTest("Host erreichbar", testIsURLAvaiable, " var result = $.parseJSON(erg.toString()); if (result.success) result.result;");
+        doTest("Setze Parameter", testSetParameter, "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Check Archiv vorhanden Function getNodeId", testGetNodeId, "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
+        doTest("Check Dokumenddefinition vorhanden Function getNodeId", testGetNodeId1, "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
+        doTest("Check Verteilungsskript vorhanden Function getNodeId", testGetNodeId2, "erg.toString().startsWith('{\"result\":\"workspace://SpacesStore');");
+        doTest("Check Dokument finden Function findDocument", testFindDocument, "var result = $.parseJSON(erg.toString()); if (result.success){ var obj = $.parseJSON(result.result); (obj.name == 'doc.xml') };");
+        doTest("Inhalt lesen Function getDocumentContent", testGetDocumentContent, " var result = $.parseJSON(erg.toString()); if (result.success){ result.result.indexOf('xmlns:my=\"http://www.schulte.local/archiv\"'); };");
+        doTest("Upload Document Function uploadDocument", testUploadDocument, "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Delete Document Function deleteDocument", testDeleteDocument, "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Delete Document Function deleteDocument", testDeleteDocument1);
+        doTest("Create Document Function createDocument", testCreateDocument, "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Delete Document Function deleteDocument", testDeleteDocument1);
+        var pdf = doTest("open File Function openFile", testOpenFile, "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("extract PDF Function extractPDF", testExtractPDF, "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Testdatei löschen", testDeleteFile);
+        doTest("saveToFile Function saveToFile", testSaveToFile, "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Testdatei löschen", testDeleteFile);
     } catch (e) {
         errorHandler(e);
     }
+
+
     function doTest(testName, testEvaluate, testExpected) {
         var erg;
         var test;
@@ -64,29 +108,42 @@
         var success = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/ok.png" style="display: block; margin: 0px auto;"  /></a>';
         var error = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/error.png" style="display: block; margin: 0px auto;"  /></a>';
         var ergebnis = document.createElement("a");
+        var evaluate = document.createElement("a");
 
         try {
             erg = eval(testEvaluate);
-            try {
-                test = eval(testExpected);
-            } catch (t) {
-                testError = t.toString();
+            if (typeof testExpected != "undefined" && testExpected != null && typeof testExpected == "string" && testExpected.length > 0) {
+                try {
+                    test = eval(testExpected);
+                } catch (t) {
+                    testError = t.toString();
+                }
+
+                if (typeof erg != "undefined" && erg != null && erg.toString().length > 90)
+                    res = erg.toString().substr(0, 89) + "...";
+                else
+                    res = erg;
+                ergebnis.setAttribute('title', erg);
+                ergebnis.innerHTML = res;
+                if (testEvaluate.length > 70)
+                    res = testEvaluate.substr(0, 69) + "...";
+                else
+                    res = testEvaluate;
+                evaluate.setAttribute('title', testEvaluate);
+                evaluate.innerHTML = res;
+                if (test)
+                    addRow(testName, evaluate.outerHTML, ergebnis.outerHTML, success);
+                else
+                    addRow(testName, evaluate.outerHTML, ergebnis.outerHTML, error);
+                if (testError.length > 0)
+                    alert(testError);
             }
-            if (typeof erg != "undefined" && erg != null && erg.toString().length > 80)
-                res = erg.toString().substr(0, 79) + "...";
-            else
-                res = erg;
-            ergebnis.setAttribute('title', erg);
-            ergebnis.innerHTML = res;
-            if (test)
-                addRow(testName, testEvaluate, ergebnis.outerHTML, success);
-            else
-                addRow(testName, testEvaluate, ergebnis.outerHTML, error);
-            if (testError.length > 0)
-                alert(testError);
-        } catch (e) {
+        }
+        catch
+                (e) {
             addRow(testName, testEvaluate, e, error);
         }
+
         return erg;
     }
 

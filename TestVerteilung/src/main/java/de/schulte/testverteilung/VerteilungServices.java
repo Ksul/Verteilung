@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
@@ -26,6 +28,10 @@ public class VerteilungServices {
 
     private static Logger logger = Logger.getLogger(VerteilungServices.class.getName());
 
+
+    // Speicher für Files
+    private Collection<FileEntry> entries = new ArrayList<>();
+
     /**
      * Konstruktor
      */
@@ -35,11 +41,14 @@ public class VerteilungServices {
 
     /**
      * Konstruktor
-     * @param server
-     * @param username
-     * @param password
+     * @param server         der Name des Alfresco Servers
+     * @param username       der verwendete Username
+     * @param password       das Passwort
      */
-    public VerteilungServices(String server, String username, String password)  {
+    public VerteilungServices(String server,
+                              String username,
+                              String password)  {
+
         super();
         this.con = new AlfrescoConnector(username, password, server);
     }
@@ -54,7 +63,9 @@ public class VerteilungServices {
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
      */
-    public JSONObject listFolderAsJSON(String filePath, int listFolder) {
+    public JSONObject listFolderAsJSON(String filePath,
+                                       int listFolder) {
+
         JSONObject o;
         JSONObject o1;
         JSONArray list = new JSONArray();
@@ -76,10 +87,7 @@ public class VerteilungServices {
                 if (filePath.equals("-1"))
                     filePath = con.getNode("/Archiv").getId();
 
-                Iterator<CmisObject> it = con.listFolder(filePath).iterator();
-
-                while (it.hasNext()) {
-                    CmisObject cmisObject = it.next();
+                for (CmisObject cmisObject: con.listFolder(filePath)) {
                     o = new JSONObject();
                     o1 = new JSONObject();
                     o.put("id", cmisObject.getId());
@@ -140,7 +148,6 @@ public class VerteilungServices {
 
         JSONObject obj = new JSONObject();
         try {
-            JSONObject obj1 = new JSONObject();
             Document document = con.findDocument(cmisQuery);
             obj.put("success", true);
             obj.put("result", convertCMISObjectToJSON(document).toString());
@@ -157,10 +164,9 @@ public class VerteilungServices {
      * @throws JSONException
      */
     private JSONObject convertCMISObjectToJSON(CmisObject doc) throws JSONException {
+
         JSONObject obj1 = new JSONObject();
-        Iterator<Property<?>> iter = doc.getProperties().iterator();
-        while (iter.hasNext()){
-            Property prop = iter.next();
+        for (Property prop : doc.getProperties()){
             obj1.put(prop.getLocalName(), prop.getValueAsString());
         }
         return obj1;
@@ -174,7 +180,9 @@ public class VerteilungServices {
      *                                                                       false   ein Fehler ist aufgetreten
      *                                                              result           der Inhalt als String
      */
-    public JSONObject getDocumentContent(String documentId, boolean extract) {
+    public JSONObject getDocumentContent(String documentId,
+                                         boolean extract) {
+
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", true);
@@ -206,7 +214,9 @@ public class VerteilungServices {
      *                                                                  false   ein Fehler ist aufgetreten
      *                                                         result           bei Erfolg die Id als String, ansonsten der Fehler
      */
-    public JSONObject uploadDocument(String folderPath, String fileName) {
+    public JSONObject uploadDocument(String folderPath,
+                                     String fileName) {
+
         JSONObject obj = new JSONObject();
         try {
             String typ = null;
@@ -236,7 +246,9 @@ public class VerteilungServices {
      *                                                                   false   ein Fehler ist aufgetreten
      *                                                          result           bei Erfolg nichts, ansonsten der Fehler
      */
-    public JSONObject deleteDocument(String folderName, String documentName) {
+    public JSONObject deleteDocument(String folderName,
+                                     String documentName) {
+
         JSONObject obj = new JSONObject();
         try {
             CmisObject document;
@@ -245,7 +257,7 @@ public class VerteilungServices {
             if (folder != null && folder instanceof Folder) {
                 document = con.getNode(((Folder) folder).getPath() + "/" + documentName);
                 if (document != null && document instanceof Document) {
-                    ((Document) document).delete(true);
+                    document.delete(true);
                     obj.put("success", true);
                     obj.put("result", "");
                 } else {
@@ -279,6 +291,7 @@ public class VerteilungServices {
                                      String documentType,
                                      String extraCMSProperties,
                                      String versionState) {
+
         //TODO Content als String oder als Stream?
         JSONObject obj = new JSONObject();
         try {
@@ -292,22 +305,22 @@ public class VerteilungServices {
                 Map<String, Object> outMap = null;
                 if (extraCMSProperties != null && extraCMSProperties.length() > 0) {
                     JSONObject props = new JSONObject(extraCMSProperties);
-                    Iterator<String> nameItr = props.keys();
-                    outMap = new HashMap<String, Object>();
+                    Iterator nameItr = props.keys();
+                    outMap = new HashMap<>();
                     while (nameItr.hasNext()) {
-                        String name = nameItr.next();
+                        String name = (String) nameItr.next();
                         outMap.put(name, props.get(name));
                     }
                 }
 
                 VersioningState vs = VersioningState.fromValue(versionState);
                 document = con.createDocument((Folder) folder, documentName, documentContent.getBytes(), documentType, outMap, vs);
-                if (document != null && document instanceof Document) {
+                if (document != null) {
                     obj.put("success", true);
                     obj.put("result", convertCMISObjectToJSON(document).toString());
                 } else {
                     obj.put("success", false);
-                    obj.put("result", document == null ? "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!" : "Das verwendete Document " + documentName + " ist nicht vom Typ Document!");
+                    obj.put("result", "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!");
                 }
             } else {
                 obj.put("success", false);
@@ -337,6 +350,7 @@ public class VerteilungServices {
                                      String extraCMSProperties,
                                      String majorVersion,
                                      String versionComment) {
+
         //TODO Content als String oder als Stream?
         JSONObject obj = new JSONObject();
         try {
@@ -350,14 +364,13 @@ public class VerteilungServices {
                 Map<String, Object> outMap = null;
                 if (extraCMSProperties != null && extraCMSProperties.length() > 0) {
                     JSONObject props = new JSONObject(extraCMSProperties);
-                    Iterator<String> nameItr = props.keys();
-                    outMap = new HashMap<String, Object>();
+                    Iterator nameItr = props.keys();
+                    outMap = new HashMap<>();
                     while (nameItr.hasNext()) {
-                        String name = nameItr.next();
+                        String name = (String) nameItr.next();
                         outMap.put(name, props.get(name));
                     }
                 }
-
                 Document document = con.updateDocument((Document) cmisObject, documentContent.getBytes(), documentType, outMap, majorVersion.equalsIgnoreCase("true"), versionComment);
                 obj.put("success", true);
                 obj.put("result", convertCMISObjectToJSON(document).toString());
@@ -383,6 +396,7 @@ public class VerteilungServices {
     public JSONObject moveDocument(String documentId,
                                    String oldFolderId,
                                    String newFolderId) {
+
         JSONObject obj = new JSONObject();
         try {
             CmisObject document = con.getNodeById(documentId);
@@ -396,7 +410,7 @@ public class VerteilungServices {
                         obj.put("result", convertCMISObjectToJSON(doc).toString());
                     } else {
                         obj.put("success", false);
-                        obj.put("result", oldFolder == null ? "Der Pfad mit der Id " + newFolderId + "  ist nicht vorhanden!" : "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
+                        obj.put("result", "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
 
                     }
                 } else {
@@ -423,7 +437,8 @@ public class VerteilungServices {
      *                                                                result           der Folder als JSON Object
      */
     public JSONObject createFolder(String targetFolder,
-                                       String folderName) {
+                                   String folderName) {
+
         JSONObject obj = new JSONObject();
         try {
             Folder folder;
@@ -431,12 +446,12 @@ public class VerteilungServices {
             target = con.getNode(targetFolder);
             if (target != null && target instanceof Folder) {
                 folder = con.createFolder((Folder) target, folderName);
-                if (folder != null && folder instanceof Folder) {
+                if (folder != null ) {
                     obj.put("success", true);
                     obj.put("result", convertCMISObjectToJSON(folder).toString());
                 } else {
                     obj.put("success", false);
-                    obj.put("result", folder == null ? "Ein Folder mit dem Namen " + folderName + " ist nicht vorhanden!" : "Der verwendete Folder " + folderName + " ist nicht vom Typ Folder!");
+                    obj.put("result", "Ein Folder mit dem Namen " + folderName + " ist nicht vorhanden!" );
                 }
             } else {
                 obj.put("success", false);
@@ -456,6 +471,7 @@ public class VerteilungServices {
      *                                                          result           bei Erfolg nichts, ansonsten der Fehler
      */
     public JSONObject deleteFolder(String folderName) {
+
         JSONObject obj = new JSONObject();
         try {
             CmisObject folder;
@@ -483,6 +499,7 @@ public class VerteilungServices {
      *                                                      result            die Properties als JSON Objekte
      */
     public JSONObject loadProperties(String propFile) {
+
         JSONObject obj = new JSONObject();
         try {
             Properties properties = new Properties();
@@ -506,7 +523,7 @@ public class VerteilungServices {
     public JSONObject isURLAvailable(String urlString) {
 
         JSONObject obj = new JSONObject();
-        URL url = null;
+        URL url;
         try {
             url = new URL(urlString);
             logger.info("Umwandlung in URL " + url);
@@ -535,29 +552,22 @@ public class VerteilungServices {
      * extrahiert eine PDF Datei und trägt den Inhalt in den internen Speicher ein.
      * @param fileContent       der Inhalt der PDF Datei
      * @param fileName          der Name der PDF Datei
-     * @param entries           der interne Speicher, in dem der Inhalt soll
-     * @param clear             Merker, ob der interne Speicher initialisiert werden soll
      * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
      *                                                         result            der Inhalt der PDF Datei als String
      */
-    public JSONObject extractPDF(byte[] fileContent,
-                                 String fileName,
-                                 Collection<FileEntry> entries,
-                                 boolean clear) {
+    public JSONObject extractPDFToInternalStorage(byte[] fileContent,
+                                                  String fileName) {
 
         JSONObject obj = new JSONObject();
         try {
-            if (entries != null) {
-                if (clear)
-                    entries.clear();
-
-                entries.add(new FileEntry(fileName, fileContent));
-            }
             InputStream bais = new ByteArrayInputStream(fileContent);
             PDFConnector con = new PDFConnector();
+            if (entries != null) {
+                entries.add(new FileEntry(fileName, fileContent, con.pdftoText(bais)));
+            }
             obj.put("success", true);
-            obj.put("result", con.pdftoText(bais));
+            obj.put("result", 1);
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
@@ -565,19 +575,238 @@ public class VerteilungServices {
     }
 
     /**
-     * extrahiert eine PDF Datei und trägt den Inhalt in den internen Speicher ein.
+     * extrahiert eine PDF Datei.
      * @param filePath          der Pfad zur PDF-Datei
      * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
      *                                                         result            der Inhalt der PDF Datei als String
      */
-    public JSONObject extractPDF(String filePath) {
+    public JSONObject extractPDFFile(String filePath) {
+
         JSONObject obj = new JSONObject();
         try {
             byte[] bytes = readFile(filePath);
             PDFConnector con = new PDFConnector();
             obj.put("success", true);
             obj.put("result", con.pdftoText(new ByteArrayInputStream(bytes)));
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+
+    /**
+     * extrahiert den Inhalt einer PDF Datei.
+     * @param pdfContent        der Inhalt der Datei als Base64 encodeter String
+     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der PDF Datei als String
+     */
+    public JSONObject extractPDFContent(String pdfContent) {
+
+        JSONObject obj = new JSONObject();
+        try {
+            byte[] bytes = Base64Coder.decodeLines(pdfContent);
+            PDFConnector con = new PDFConnector();
+            obj.put("success", true);
+            obj.put("result", con.pdftoText(new ByteArrayInputStream(bytes)));
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * extrahiert ein ZIP File und gibt den Inhalt als Base64 encodete Strings zurück
+     * @param zipContent        der Inhalt des ZIP Files
+     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der ZIP Datei als JSON Aray mit Base64 encodeten STrings
+     */
+    protected JSONObject extractZIP(String zipContent)  {
+
+        JSONObject obj = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        ZipInputStream zipin = null;
+        try {
+
+            final byte[] bytes = Base64.decodeBase64(zipContent);
+            InputStream bais = new ByteArrayInputStream(bytes);
+            zipin = new ZipInputStream(bais);
+            ZipEntry entry = null;
+            int size = 0;
+
+            while ((entry = zipin.getNextEntry()) != null) {
+                byte[] buffer = new byte[2048];
+                ByteArrayOutputStream bys = new ByteArrayOutputStream();
+                BufferedOutputStream bos = new BufferedOutputStream(bys, buffer.length);
+                while ((size = zipin.read(buffer, 0, buffer.length)) != -1) {
+                    bos.write(buffer, 0, size);
+                }
+                bos.flush();
+                bos.close();
+                jsonArray.put(Base64.encodeBase64String(bys.toByteArray()));
+                bys.toByteArray();
+            }
+            obj.put("success", true);
+            obj.put("result", jsonArray);
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        } finally {
+            try {
+                zipin.close();
+            } catch (IOException e) {
+                try {
+                    obj.put("success", false);
+                    obj.put("result", e.getMessage());
+                } catch (JSONException jse) {
+                    logger.severe(jse.getLocalizedMessage());
+                    jse.printStackTrace();
+                }
+            }
+        }
+        return obj;
+    }
+
+    /**
+     * entpackt ein ZIP File in den internen Speicher
+     * @param zipContent         der Inhalt des ZIP's als Base64 dekodierter String String
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
+     */
+    protected JSONObject extractZIPToInternalStorage(String zipContent)  {
+        JSONObject obj = new JSONObject();
+        ZipInputStream zipin = null;
+        try {
+
+            final byte[] bytes = Base64.decodeBase64(zipContent);
+            InputStream bais = new ByteArrayInputStream(bytes);
+            zipin = new ZipInputStream(bais);
+            ZipEntry entry = null;
+            int size;
+            int counter = 0;
+            entries.clear();
+
+            while ((entry = zipin.getNextEntry()) != null) {
+                byte[] buffer = new byte[2048];
+                ByteArrayOutputStream bys = new ByteArrayOutputStream();
+                BufferedOutputStream bos = new BufferedOutputStream(bys, buffer.length);
+                while ((size = zipin.read(buffer, 0, buffer.length)) != -1) {
+                    bos.write(buffer, 0, size);
+                }
+                bos.flush();
+                bos.close();
+                entries.add(new FileEntry(entry.getName(), bys.toByteArray()));
+                counter++;
+            }
+            obj.put("success", true);
+            obj.put("result", counter);
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        } finally {
+            try {
+                zipin.close();
+            } catch (IOException e) {
+                try {
+                    obj.put("success", false);
+                    obj.put("result", e.getMessage());
+                } catch (JSONException jse) {
+                    logger.severe(jse.getLocalizedMessage());
+                    jse.printStackTrace();
+                }
+            }
+        }
+        return obj;
+    }
+
+    /**
+     * entpackt ein ZIP File und stellt die Inhalte und die extrahierten PDF Inhalte in den internen Speicher
+     * @param zipContent          der Inhalt der ZIP Datei als Base64 encodeter String
+     * @return obj                ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
+     */
+    public JSONObject extractZIPAndExtractPDFToInternalStorage(String zipContent) {
+
+        JSONObject obj;
+        int counter = 0;
+        try {
+            obj = extractZIPToInternalStorage(zipContent);
+            if (obj.getBoolean("success")) {
+                PDFConnector con = new PDFConnector();
+                for (FileEntry entry : entries) {
+                    InputStream bais = new ByteArrayInputStream(entry.getData());
+                    entry.setExtractedData(con.pdftoText(bais));
+                    counter++;
+                }
+                obj.put("result", counter);
+            }
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * liefert den Inhalt aus dem internen Speicher
+     * @param fileName           der Name der zu suchenden Datei
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg ein JSONArray mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
+     */
+    public JSONObject getDataFromInternalStorage(String fileName) {
+
+        JSONObject obj = new JSONObject();
+        boolean found = false;
+        try {
+            if (entries.isEmpty()) {
+                obj.put("success", false);
+                obj.put("result", "keine Einträge vorhanden");
+            } else {
+                Iterator<FileEntry> it = entries.iterator();
+                while (it.hasNext()) {
+                    FileEntry entry = it.next();
+                    if (entry.getName().equals(fileName)) {
+                        obj.put("success", true);
+                        JSONArray jsonArray = new JSONArray();
+                        if (entry.getData().length > 0) {
+                            jsonArray.put(Base64Coder.encodeLines(entry.getData()));
+                            if (!entry.getExtractedData().isEmpty())
+                                jsonArray.put(entry.getExtractedData());
+                            obj.put("result", jsonArray);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    obj.put("success", false);
+                    obj.put("result", "keine Einträge vorhanden");
+                }
+            }
+
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+
+    /**
+     * löscht den internen Speicher
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg nichts, ansonsten der Fehler
+     */
+    public JSONObject clearInternalStorage() {
+
+        JSONObject obj = new JSONObject();
+        try {
+            entries.clear();
+            obj.put("success", true);
+            obj.put("result", "");
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
@@ -592,6 +821,7 @@ public class VerteilungServices {
      *                                                         result            der Inhalt der Datei als Base64 encodeter String oder der Fehler
      */
     public JSONObject openFile(String filePath) {
+
         JSONObject obj = new JSONObject();
         try {
             byte[] buffer = readFile(filePath);
@@ -603,6 +833,7 @@ public class VerteilungServices {
         return obj;
     }
 
+
     /**
      * liest eine Datei
      * @param filePath                  der Pfad zur Datei
@@ -610,12 +841,24 @@ public class VerteilungServices {
      * @throws URISyntaxException
      * @throws IOException
      */
+
     private byte[] readFile(String filePath) throws URISyntaxException, IOException {
+
         File sourceFile = new File(new URI(filePath));
         InputStream inp = new FileInputStream(sourceFile);
         byte[] buffer = new byte[(int) sourceFile.length()];
+        //noinspection ResultOfMethodCallIgnored
         inp.read(buffer);
         inp.close();
         return buffer;
     }
+
+    /**
+     * nur für Testzwecke
+     * @return    die FileEntries
+     */
+    public Collection<FileEntry> getEntries() {
+        return entries;
+    }
+
 }

@@ -1,27 +1,14 @@
 package de.schulte.testverteilung;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
-import junit.framework.Assert;
-import org.apache.chemistry.opencmis.client.api.Folder;
-import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
-import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -113,8 +100,8 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         String document =  obj.getString("result");
-        Assert.assertTrue(document.startsWith("<documentTypes"));
-        Assert.assertTrue(document.indexOf("xmlns:my=\"http://www.schulte.local/archiv\"") != -1);
+        assertTrue(document.startsWith("<documentTypes"));
+        assertTrue(document.indexOf("xmlns:my=\"http://www.schulte.local/archiv\"") != -1);
     }
 
     @Test
@@ -294,21 +281,143 @@ public class VerteilungServicesTest extends AlfrescoTest{
     }
 
     @Test
-    public void testExtractPDF() throws Exception {
+    public void testExtractPDFToInternalStorage() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        Collection<FileEntry> entries = new ArrayList<FileEntry>();
-        JSONObject obj = services.extractPDF(content,fileName, entries, false );
+        JSONObject obj = services.extractPDFToInternalStorage(content, fileName);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
-        assertTrue(entries.size() == 1);
-        assertEquals(fileName, entries.iterator().next().getName());
+        assertTrue(obj.getInt("result") == 1);
+        assertTrue(services.getEntries().size() == 1);
+        FileEntry entry =  services.getEntries().iterator().next();
+        assertNotNull(entry);
+        assertEquals(fileName, entry.getName());
+        assertTrue(entry.getData().length > 0);
+        assertTrue(entry.getExtractedData().length() > 0);
+        assertTrue(entry.getExtractedData().startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
     }
 
+    @Test
+    public void testExtractPDFContent() throws Exception {
+        String fileName = properties.getProperty("testPDF");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        JSONObject obj = services.extractPDFContent(Base64Coder.encodeLines(content));
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
+    }
 
+    @Test
+    public void testExtractPDFFile() throws Exception {
+        String fileName = properties.getProperty("testPDF");
+        assertNotNull(fileName);
+        JSONObject obj = services.extractPDFFile("file://" + fileName);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
+    }
+
+    @Test
+    public void testExtractZIP() throws Exception {
+        String fileName = properties.getProperty("testZIP");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        Collection<FileEntry> entries = new ArrayList<FileEntry>();
+        JSONObject obj = services.extractZIP(Base64Coder.encodeLines(content));
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONArray erg = obj.getJSONArray("result");
+        assertNotNull(erg);
+        assertTrue(erg.length() == 2);
+        String str = erg.getString(0);
+        assertTrue(str.length() > 0);
+        str = erg.getString(1);
+        assertTrue(str.length() > 0);
+    }
+
+    @Test
+    public void testExtractZIPToInternalStorage() throws Exception {
+        String fileName = properties.getProperty("testZIP");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        JSONObject obj = services.extractZIPToInternalStorage(Base64Coder.encodeLines(content));
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getInt("result") == 2);
+        assertTrue(services.getEntries().size() == 2);
+        for (FileEntry entry : services.getEntries()){
+            assertTrue(!entry.getName().isEmpty());
+            assertTrue(entry.getData().length > 0);
+            assertTrue(entry.getExtractedData() == null || entry.getExtractedData().isEmpty());
+        }
+    }
+
+    @Test
+    public void testExtractZipAndExtractPDFToInternalStorage() throws Exception {
+        String fileName = properties.getProperty("testZIP");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        JSONObject obj = services.extractZIPAndExtractPDFToInternalStorage(Base64Coder.encodeLines(content));
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getInt("result") == 2);
+        assertTrue(services.getEntries().size() == 2);
+        for (FileEntry entry : services.getEntries()){
+            assertTrue(!entry.getName().isEmpty());
+            assertTrue(entry.getData().length > 0);
+            assertTrue(!entry.getExtractedData().isEmpty());
+        }
+    }
+
+    @Test
+    public void testOpenFile() throws Exception {
+        String fileName = properties.getProperty("testPDF");
+        assertNotNull(fileName);
+        JSONObject obj = services.openFile("file://" + fileName);
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        byte[] content = readFile(fileName);
+        byte[] contentRead = Base64Coder.decodeLines(obj.getString("result"));
+        assertTrue("Unterschiedliche Länge gelesen!", content.length == contentRead.length);
+        for (int i = 0; i < content.length; i++){
+            assertTrue("Unterschiedlicher Inhalt gelesen Position: " + i +" !", content[i] == contentRead[i]);
+        }
+    }
+
+    @Test
+    public void testIsURLAvailable() throws Exception {
+        String urlString = "http://www.spiegel.de";
+        JSONObject obj = services.isURLAvailable(urlString);
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getBoolean("result"));
+        urlString = "http://www.spiegel.dumm";
+        obj = services.isURLAvailable(urlString);
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertFalse(obj.getBoolean("result"));
+    }
 }

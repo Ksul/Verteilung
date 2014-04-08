@@ -20,7 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Created with IntelliJ IDEA.
+ * Tests für das Verteilungsservlet
+ * diese Test laufen nur mit erreichbaren Alfresco Server
  * User: m500288
  * Date: 03.06.13
  * Time: 16:38
@@ -410,14 +411,13 @@ public class VerteilungServletTest extends AlfrescoTest {
     }
 
     @Test
-    public void testExtractPDF() throws Exception {
+    public void testExtractPDFToInternalStorage() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        Collection<FileEntry> entries = new ArrayList<FileEntry>();
-        when(request.getParameter("function")).thenReturn("extractPDF");
-        when(request.getParameter("documentText")).thenReturn(Base64.encodeBase64String(content));
+        when(request.getParameter("function")).thenReturn("extractPDFToInternalStorage");
+        when(request.getParameter("documentText")).thenReturn(Base64Coder.encodeLines(content));
         when(request.getParameter("fileName")).thenReturn(fileName);
         when(request.getParameter("clear")).thenReturn("false");
         servlet.doPost(request, response);
@@ -428,7 +428,26 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
+        assertTrue(obj.getInt("result") == 1);
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
+    public void testExtractZipToInternalStorage() throws Exception {
+        String fileName = properties.getProperty("testZIP");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        when(request.getParameter("function")).thenReturn("extractZipToInternalStorage");
+        when(request.getParameter("documentText")).thenReturn(Base64Coder.encodeLines(content));
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
     }
 }

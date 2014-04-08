@@ -2,6 +2,7 @@ package de.schulte.testverteilung;
 
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
+import org.apache.chemistry.opencmis.commons.data.Ace;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
@@ -80,10 +81,10 @@ public class AlfrescoConnector {
     }
 
     /**
-     * Hilfsmethode, um den Content eines Domkumentes als String zu liefern
+     * Hilfsmethode, um den Content eines Dokumentes als String zu liefern
      *
-     * @param stream
-     * @return
+     * @param stream                           der Stream
+     * @return                                 der Inhalt des Dokumentes als String
      * @throws IOException
      */
     private static String getContentAsString(ContentStream stream) throws IOException {
@@ -114,7 +115,7 @@ public class AlfrescoConnector {
      * @param folderId              die Id des Folders
      * @param maxItemsPerPage       die maximale Anzahl
      * @param pagesToSkip           die Anzahl Seiten die übersprungen werden soll
-     * @return
+     * @return                      die gefundenen Children
      */
 
     public ItemIterable<CmisObject> listFolder(String folderId, int maxItemsPerPage, int pagesToSkip) throws VerteilungException{
@@ -124,9 +125,7 @@ public class AlfrescoConnector {
         operationContext.setMaxItemsPerPage(maxItemsPerPage);
 
         ItemIterable<CmisObject> children = folder.getChildren(operationContext);
-        ItemIterable<CmisObject> page = children.skipTo(pagesToSkip).getPage();
-
-        return page;
+        return children.skipTo(pagesToSkip).getPage();
     }
 
     /**
@@ -145,8 +144,7 @@ public class AlfrescoConnector {
      */
     public CmisObject getNode(String path) throws VerteilungException {
         try {
-            CmisObject object = getSession().getObjectByPath(path);
-            return object;
+            return getSession().getObjectByPath(path);
         } catch (CmisObjectNotFoundException e) {
             return null;
         }
@@ -243,13 +241,13 @@ public class AlfrescoConnector {
         byte[] bytes = new byte[(int) file.length()];
         dis.readFully(bytes);
 
-        Map newDocProps = new HashMap();
+        Map<String, String> newDocProps = new HashMap<String, String>();
         newDocProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         newDocProps.put(PropertyIds.NAME, file.getName());
 
-        List addAces = new LinkedList();
-        List removeAces = new LinkedList();
-        List policies = new LinkedList();
+        List<Ace> addAces = new LinkedList<>();
+        List<Ace> removeAces = new LinkedList<>();
+        List<Policy> policies = new LinkedList<>();
         ContentStream contentStream = new ContentStreamImpl(file.getAbsolutePath(), null, "application/pdf",
                 new ByteArrayInputStream(bytes));
         Document doc = folder.createDocument(newDocProps, contentStream,
@@ -274,9 +272,9 @@ public class AlfrescoConnector {
                                    Map<String, Object> extraCMSProperties,
                                    VersioningState version) {
 
-        Document newDocument = null;
+        Document newDocument;
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         properties.put(PropertyIds.NAME, documentName);
 
@@ -316,11 +314,10 @@ public class AlfrescoConnector {
      * @return                          der neue Folder
      */
     public Folder createFolder(Folder targetFolder, String newFolderName) {
-        Map<String, String> props = new HashMap<String, String>();
+        Map<String, String> props = new HashMap<>();
         props.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
         props.put(PropertyIds.NAME, newFolderName);
-        Folder newFolder = targetFolder.createFolder(props);
-        return newFolder;
+        return targetFolder.createFolder(props);
     }
 
     /**
@@ -334,14 +331,14 @@ public class AlfrescoConnector {
      * @return document                  das geänderte Dokument
      */
     public Document updateDocument(Document document,
-                               byte documentContent[],
-                               String documentType,
-                               Map<String, Object> extraCMSProperties,
-                               boolean majorVersion,
-                               String versionComment){
+                                   byte documentContent[],
+                                   String documentType,
+                                   Map<String, Object> extraCMSProperties,
+                                   boolean majorVersion,
+                                   String versionComment){
 
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        HashMap<String, Object> properties = new HashMap<>();
         InputStream stream = new ByteArrayInputStream(documentContent);
         ContentStream contentStream = new ContentStreamImpl(document.getName(), BigInteger.valueOf(documentContent.length), documentType, stream);
 

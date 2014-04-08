@@ -69,6 +69,7 @@ function loadApplet(level, bindingUrl, user, password) {
     if (isLocal()) {
         var obj = document.createElement('applet');
         obj.setAttribute('name', 'reader');
+        obj.setAttribute('id', 'reader');
         obj.setAttribute('width', '1');
         obj.setAttribute('height', '1');
         obj.setAttribute('codebase', './WEB-INF/lib');
@@ -500,7 +501,7 @@ function readFiles(files) {
                                     }
                                 } else {
                                     var dataString = {
-                                        "function": "extractPDF",
+                                        "function": "extractPDFToInternalStorage",
                                         "documentText": str,
                                         "fileName": theFile.name,
                                         "clear": clear
@@ -555,7 +556,7 @@ function readFiles(files) {
                                     count = count + document.reader.extractZIP(theFile.name) - 1;
                                 } else {
                                     var dataString = {
-                                        "function": "extractZIP",
+                                        "function": "extractZIPToInternalStorage",
                                         "documentText": str
                                     };
                                     $.ajax({

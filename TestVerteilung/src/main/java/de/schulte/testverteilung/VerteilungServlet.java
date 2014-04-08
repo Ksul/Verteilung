@@ -2,19 +2,15 @@ package de.schulte.testverteilung;
 
 import java.net.*;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import java.security.PrivilegedExceptionAction;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -32,9 +28,6 @@ import org.json.JSONObject;
  */
 public class VerteilungServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
-    // Speicher für entpackte Files aus einem ZIP File
-	Collection<FileEntry> entries = new ArrayList<FileEntry>();
 
     private VerteilungServices services;
 
@@ -149,84 +142,79 @@ public class VerteilungServlet extends HttpServlet {
 		String server = req.getParameter("server");
 		String username = req.getParameter("username");
 		String password = req.getParameter("password");
-		String clear = req.getParameter("clear");
         String withFolder = req.getParameter("withFolder");
 		String extract = req.getParameter("extract");
         String versionState = req.getParameter("versionState");
         String majorVersion = req.getParameter("majorVersion");
         String versionComment = req.getParameter("versionComment");
-		String searchFolder = req.getParameter("searchFolder");
         String extraProperties = req.getParameter("extraProperties");
-		String proxyHost = "".equals(req.getParameter("proxyHost")) ? null : req.getParameter("proxyHost");
-		String proxyPort = "".equals(req.getParameter("proxyPort")) ? null : req.getParameter("proxyPort");
         resp.setHeader("Content-Type", "application/json; charset=utf-8");
         PrintWriter out = resp.getWriter();
-		
-		try {
-			if (value == null || "".equals(value)) {
-				obj.append("success", false);
-				obj.append("result", "Function Name is missing!\nPlease check for Tomcat maxPostSize and maxHeaderSizer Property for HTTPConnector");
-			} else {
-				if (value.equalsIgnoreCase("openPDF")) {
-					openPDF(fileName, resp);
-					return;
-				}
-                if (value.equalsIgnoreCase("setParameter")) {
+
+        try {
+            if (value == null || "".equals(value)) {
+                obj.append("success", false);
+                obj.append("result", "Function Name is missing!\nPlease check for Tomcat maxPostSize and maxHeaderSizer Property for HTTPConnector");
+            } else {
+                if (value.equalsIgnoreCase("openPDF")) {
+                    openPDF(fileName, resp);
+                    return;
+                } else if (value.equalsIgnoreCase("setParameter")) {
                     obj = setParameter(server, username, password);
-                }
-                if (value.equalsIgnoreCase("isURLAvailable")) {
+                } else if (value.equalsIgnoreCase("isURLAvailable")) {
                     obj = isURLAvailable(server);
-                }
-                if (value.equalsIgnoreCase("getNodeId")) {
+                } else if (value.equalsIgnoreCase("getNodeId")) {
                     obj = getNodeId(filePath);
-                }
-                if (value.equalsIgnoreCase("findDocument")) {
+                } else if (value.equalsIgnoreCase("findDocument")) {
                     obj = findDocument(cmisQuery);
-                }
-                if (value.equalsIgnoreCase("uploadDocument")) {
+                } else if (value.equalsIgnoreCase("uploadDocument")) {
                     obj = uploadDocument(destinationFolder, fileName);
-                }
-                if (value.equalsIgnoreCase("deleteDocument")) {
+                } else if (value.equalsIgnoreCase("deleteDocument")) {
                     obj = deleteDocument(destinationFolder, fileName);
-                }
-                if (value.equalsIgnoreCase("createDocument")) {
+                } else if (value.equalsIgnoreCase("createDocument")) {
                     obj = createDocument(destinationFolder, fileName, documentText, mimeType, extraProperties, versionState);
-                }
-                if (value.equalsIgnoreCase("createFolder")) {
+                } else if (value.equalsIgnoreCase("createFolder")) {
                     obj = createFolder(destinationFolder, fileName);
-                }
-                if (value.equalsIgnoreCase("deleteFolder")) {
+                } else if (value.equalsIgnoreCase("deleteFolder")) {
                     obj = deleteFolder(destinationFolder);
-                }
-				if (value.equalsIgnoreCase("getDocumentContent")) {
-					obj = getDocumentContent(documentId, extract.equalsIgnoreCase("true"));
-				}
-				if (value.equalsIgnoreCase("updateDocument")) {
-					obj = updateDocument(documentId, documentText, mimeType, extraProperties, majorVersion, versionComment);
-				}
-                if (value.equalsIgnoreCase("moveDocument")) {
+                } else if (value.equalsIgnoreCase("getDocumentContent")) {
+                    obj = getDocumentContent(documentId, extract.equalsIgnoreCase("true"));
+                } else if (value.equalsIgnoreCase("updateDocument")) {
+                    obj = updateDocument(documentId, documentText, mimeType, extraProperties, majorVersion, versionComment);
+                } else if (value.equalsIgnoreCase("moveDocument")) {
                     obj = moveDocument(documentId, currentLocationId, destinationId);
-                }
-                if (value.equalsIgnoreCase("listFolderAsJSON")) {
+                } else if (value.equalsIgnoreCase("listFolderAsJSON")) {
                     obj = listFolderAsJSON(filePath, withFolder);
+                } else if (value.equalsIgnoreCase("extractPDFContent")) {
+                    obj = extractPDFContent(documentText);
+                } else if (value.equalsIgnoreCase("extractPDFFile")) {
+                    obj = extractPDFFile(filePath);
+                } else if (value.equalsIgnoreCase("extractPDFToInternalStorage")) {
+                    obj = extractPDFToInternalStorage(documentText, fileName);
+                } else if (value.equalsIgnoreCase("extractZIPToInternalStorage")) {
+                    obj = extractZIPToInternalStorage(documentText);
+                } else if (value.equalsIgnoreCase("extractZIP")) {
+                    obj = extractZIP(documentText);
+                } else if (value.equalsIgnoreCase("extractZIPAndExtractPDFToInternalStorage")) {
+                    obj = extractZipAndExtractPDFToInternalStorage(documentText);
+                } else if (value.equalsIgnoreCase("getDataFromInternalStorage")) {
+                    obj = getDataFromInternalStorage(fileName);
+                } else if (value.equalsIgnoreCase("clearInternalStorage")) {
+                    obj = clearInternalStorage();
+                } else {
+                    obj.append("success", false);
+                    obj.append("result", "Function " + value + " ist unbekannt!");
                 }
-				if (value.equalsIgnoreCase("extractPDF")) {
-					obj = extractPDF(documentText, fileName, clear);
-				}
+            }
+        } catch (VerteilungException e) {
+            obj.append("success", false);
+            obj.append("result", e.getMessage());
 
-				if (value.equalsIgnoreCase("extractZIP")) {
-					obj = extractZIP(documentText);
-				}
-			}
-		} catch (VerteilungException e) {
-			obj.append("success", false);
-			obj.append("result", e.getMessage());
-
-		} catch (JSONException e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
-		}
-		out.write(obj.toString());
+        } catch (JSONException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+        out.write(obj.toString());
 	}
 
     /**
@@ -417,125 +405,133 @@ public class VerteilungServlet extends HttpServlet {
         return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
     }
 
-
     /**
-     * extrahiert den Text aus einer PDF Datei
-     * @param documentText       der Inhalt der PDF Datei als String
-     * @param fileName           der Name der PDF Datei
-     * @param clear              legt fest, ob der interne Speicher für die extrahierten Dateien initialisiert werden soll.
-     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
-     *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg der Inhalt des PDF's als String, ansonsten der Fehler
+     * extrahiert den Inhalt einer PDF Datei.
+     * @param pdfContent        der Inhalt der Datei als Base64 encodeter String
+     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der PDF Datei als String
      */
-    protected JSONObject extractPDF(String documentText,
-                                    String fileName,
-                                    String clear) throws VerteilungException {
+    protected JSONObject extractPDFContent(String pdfContent) {
 
-            VerteilungServices services = getServices(bindingUrl, user, password);
-            return  services.extractPDF(Base64.decodeBase64(documentText), fileName, entries, (clear != null && clear.equalsIgnoreCase("true")));
+        VerteilungServices services = new VerteilungServices();
+        return services.extractPDFContent(pdfContent);
     }
 
     /**
-     * entpackt ein ZIP File
-     * @param documentText       der Inhalt des ZIP's als String
+     * extrahiert eine PDF Datei.
+     * @param filePath          der Pfad zur PDF-Datei
+     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der PDF Datei als String
+     */
+    protected JSONObject extractPDFFile(String filePath) {
+
+        VerteilungServices services = new VerteilungServices();
+        return services.extractPDFFile(filePath);
+    }
+
+    /**
+     * extrahiert den Text aus einer PDF Datei und speichert ihn in den internen Speicher
+     * @param documentText       der Inhalt der PDF Datei als Base64 encodeter String
+     * @param fileName           der Name der PDF Datei
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg die Anzahl der PDF's, ansonsten der Fehler
+     */
+    protected JSONObject extractPDFToInternalStorage(String documentText,
+                                                     String fileName) throws VerteilungException {
+
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.extractPDFToInternalStorage(Base64.decodeBase64(documentText), fileName);
+    }
+
+    /**
+     * entpackt ein ZIP File in den internen Speicher
+     * @param documentText       der Inhalt des ZIP's als Base64 encodeter String
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
      */
-    protected JSONObject extractZIP(String documentText) throws VerteilungException {
-        JSONObject obj = new JSONObject();
-        ZipInputStream zipin = null;
-        try {
+    protected JSONObject extractZIPToInternalStorage(String documentText) throws VerteilungException {
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.extractZIPToInternalStorage(documentText);
+     }
 
-            final byte[] bytes = Base64.decodeBase64(documentText);
-            InputStream bais = new ByteArrayInputStream(bytes);
-            zipin = new ZipInputStream(bais);
-            ZipEntry entry = null;
-            int size;
-            entries.clear();
+    /**
+     * extrahiert ein ZIP File und gibt den Inhalt als Base64 encodete Strings zurück
+     * @param zipContent        der Inhalt des ZIP Files
+     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der ZIP Datei als JSON Aray mit Base64 encodeten STrings
+     */
+    protected JSONObject extractZIP(String zipContent) {
 
-            while ((entry = zipin.getNextEntry()) != null) {
-                byte[] buffer = new byte[2048];
-                ByteArrayOutputStream bys = new ByteArrayOutputStream();
-                BufferedOutputStream bos = new BufferedOutputStream(bys, buffer.length);
-                while ((size = zipin.read(buffer, 0, buffer.length)) != -1) {
-                    bos.write(buffer, 0, size);
-                }
-                bos.flush();
-                bos.close();
-                entries.add(new FileEntry(entry.getName(), bys.toByteArray()));
-            }
-            Iterator<FileEntry> it = entries.iterator();
-            JSONObject ergebnis = new JSONObject();
-            while (it.hasNext()) {
-                FileEntry ent = it.next();
-                String entryFileName = ent.getName();
-                InputStream b = new ByteArrayInputStream(ent.getData());
-                PDFConnector con = new PDFConnector();
-                JSONObject resultObj = new JSONObject();
-                resultObj.append("entryFileName", entryFileName);
-                resultObj.append("result", con.pdftoText(b));
-                ergebnis.append("entry", resultObj);
-            }
-            obj.put("success", true);
-            obj.put("result", ergebnis);
-        } catch (Exception e) {
-            obj = VerteilungHelper.convertErrorToJSON(e);
-        } finally {
-            try {
-                zipin.close();
-            } catch (IOException e) {
-                try {
-                    obj.put("success", false);
-                    obj.put("result", e.getMessage());
-                } catch (JSONException jse) {
-                    logger.severe(jse.getLocalizedMessage());
-                    jse.printStackTrace();
-                }
-            }
-        }
-        return obj;
+        VerteilungServices services = new VerteilungServices();
+        return services.extractZIP(zipContent);
+
+    }
+
+    /**
+     * entpackt ein ZIP File und stellt die Inhalte und die extrahierten PDF Inhalte in den internen Speicher
+     * @param zipContent          der Inhalt der ZIP Datei als Base64 encodeter String
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
+     */
+    protected JSONObject extractZipAndExtractPDFToInternalStorage(String zipContent) {
+
+        VerteilungServices services = new VerteilungServices();
+        return services.extractZIPAndExtractPDFToInternalStorage(zipContent);
     }
 
 
     /**
+     * liefert den Inhalt aus dem internen Speicher
+     * @param fileName           der Name der zu suchenden Datei
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg ein JSONArray mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
+     */
+    protected JSONObject getDataFromInternalStorage(String fileName) {
+
+        VerteilungServices services = new VerteilungServices();
+        return services.getDataFromInternalStorage(fileName);
+    }
+
+
+    /**
+     * löscht den internen Speicher
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg nichts, ansonsten der Fehler
+     */
+    protected JSONObject clearInternalStorage() {
+
+        VerteilungServices services = new VerteilungServices();
+        return services.clearInternalStorage();
+    }
+
+    /**
      * öffnet eine Datei
-     * @param filePath          der Pfad der zu öffnenden Datei
+     * @param filePath           der Pfad der zu öffnenden Datei
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg der Inhalt der Datei als String, ansonsten der Fehler
      */
     protected JSONObject openFile(String filePath) throws VerteilungException {
-        JSONObject obj = new JSONObject();
-        StringBuffer fileData = new StringBuffer(1000);
-        try {
-            InputStream inp = getServletContext().getResourceAsStream(filePath);
-            InputStreamReader isr = new InputStreamReader(inp, "UTF-8");
-            BufferedReader reader = new BufferedReader(isr);
-            char[] buf = new char[1024];
-            int numRead = 0;
-            while ((numRead = reader.read(buf)) != -1) {
-                String readData = String.valueOf(buf, 0, numRead);
-                fileData.append(readData);
-                buf = new char[1024];
-            }
-            reader.close();
-            obj.put("success", true);
-            obj.put("result", fileData.toString());
-        } catch (Exception e) {
-            obj = VerteilungHelper.convertErrorToJSON(e);
-        }
-        return obj;
+        VerteilungServices services = getServices(bindingUrl, user, password);
+        return services.openFile(filePath);
     }
 
     /**
-     * öffnet ein PDF
+     * öffnet ein PDF im Browser
      * @param fileName           der Filename des PDF Dokumentes
      * @param resp               der Response zum Öffnen des PDFs
      */
     protected void openPDF(String fileName,
                            HttpServletResponse resp) {
-        ServletOutputStream sout = null;
+  /*      ServletOutputStream sout = null;
         try {
             boolean found = false;
             FileEntry entry = null;
@@ -570,11 +566,11 @@ public class VerteilungServlet extends HttpServlet {
             } catch (IOException io) {
                 logger.severe(io.getLocalizedMessage());
                 io.printStackTrace();
-
             }
         }
-        return;
+*/        return;
     }
+
 
 
 }
