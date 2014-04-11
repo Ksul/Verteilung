@@ -550,21 +550,22 @@ public class VerteilungServices {
 
     /**
      * extrahiert eine PDF Datei und trägt den Inhalt in den internen Speicher ein.
-     * @param fileContent       der Inhalt der PDF Datei
+     * @param pdfContent        der Inhalt der Datei als Base64 encodeter String
      * @param fileName          der Name der PDF Datei
-     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
      *                                                         result            der Inhalt der PDF Datei als String
      */
-    public JSONObject extractPDFToInternalStorage(byte[] fileContent,
+    public JSONObject extractPDFToInternalStorage(String pdfContent,
                                                   String fileName) {
 
         JSONObject obj = new JSONObject();
         try {
-            InputStream bais = new ByteArrayInputStream(fileContent);
+            byte[] bytes = Base64Coder.decodeLines(pdfContent);
+            InputStream bais = new ByteArrayInputStream(bytes);
             PDFConnector con = new PDFConnector();
             if (entries != null) {
-                entries.add(new FileEntry(fileName, fileContent, con.pdftoText(bais)));
+                entries.add(new FileEntry(fileName, bytes, con.pdftoText(bais)));
             }
             obj.put("success", true);
             obj.put("result", 1);
@@ -577,7 +578,7 @@ public class VerteilungServices {
     /**
      * extrahiert eine PDF Datei.
      * @param filePath          der Pfad zur PDF-Datei
-     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
      *                                                         result            der Inhalt der PDF Datei als String
      */
@@ -622,9 +623,9 @@ public class VerteilungServices {
      * @param zipContent        der Inhalt des ZIP Files
      * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
-     *                                                         result            der Inhalt der ZIP Datei als JSON Aray mit Base64 encodeten STrings
+     *                                                         result            der Inhalt der ZIP Datei als JSON Array mit Base64 encodeten STrings
      */
-    protected JSONObject extractZIP(String zipContent)  {
+    protected JSONObject extractZIP(String zipContent) {
 
         JSONObject obj = new JSONObject();
         JSONArray jsonArray = new JSONArray();
@@ -636,7 +637,6 @@ public class VerteilungServices {
             zipin = new ZipInputStream(bais);
             ZipEntry entry = null;
             int size = 0;
-
             while ((entry = zipin.getNextEntry()) != null) {
                 byte[] buffer = new byte[2048];
                 ByteArrayOutputStream bys = new ByteArrayOutputStream();
@@ -649,21 +649,20 @@ public class VerteilungServices {
                 jsonArray.put(Base64.encodeBase64String(bys.toByteArray()));
                 bys.toByteArray();
             }
-            obj.put("success", true);
-            obj.put("result", jsonArray);
+            if (jsonArray.length() == 0) {
+                obj.put("success", false);
+                obj.put("result", "Keine Files im ZIP File gefunden!");
+            } else {
+                obj.put("success", true);
+                obj.put("result", jsonArray);
+            }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         } finally {
             try {
                 zipin.close();
             } catch (IOException e) {
-                try {
-                    obj.put("success", false);
-                    obj.put("result", e.getMessage());
-                } catch (JSONException jse) {
-                    logger.severe(jse.getLocalizedMessage());
-                    jse.printStackTrace();
-                }
+                obj = VerteilungHelper.convertErrorToJSON(e);
             }
         }
         return obj;
@@ -676,7 +675,7 @@ public class VerteilungServices {
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
      */
-    protected JSONObject extractZIPToInternalStorage(String zipContent)  {
+    protected JSONObject extractZIPToInternalStorage(String zipContent) {
         JSONObject obj = new JSONObject();
         ZipInputStream zipin = null;
         try {
@@ -701,21 +700,20 @@ public class VerteilungServices {
                 entries.add(new FileEntry(entry.getName(), bys.toByteArray()));
                 counter++;
             }
-            obj.put("success", true);
-            obj.put("result", counter);
+            if (counter == 0) {
+                obj.put("success", false);
+                obj.put("result", "Keine Files im ZIP File gefunden!");
+            } else {
+                obj.put("success", true);
+                obj.put("result", counter);
+            }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         } finally {
             try {
                 zipin.close();
             } catch (IOException e) {
-                try {
-                    obj.put("success", false);
-                    obj.put("result", e.getMessage());
-                } catch (JSONException jse) {
-                    logger.severe(jse.getLocalizedMessage());
-                    jse.printStackTrace();
-                }
+                obj = VerteilungHelper.convertErrorToJSON(e);
             }
         }
         return obj;
@@ -754,11 +752,12 @@ public class VerteilungServices {
      * @param fileName           der Name der zu suchenden Datei
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg ein JSONArray mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
+     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
      */
     public JSONObject getDataFromInternalStorage(String fileName) {
 
         JSONObject obj = new JSONObject();
+        JSONObject result = new JSONObject();
         boolean found = false;
         try {
             if (entries.isEmpty()) {
@@ -770,12 +769,13 @@ public class VerteilungServices {
                     FileEntry entry = it.next();
                     if (entry.getName().equals(fileName)) {
                         obj.put("success", true);
-                        JSONArray jsonArray = new JSONArray();
+                        JSONObject jEntry = new JSONObject();
                         if (entry.getData().length > 0) {
-                            jsonArray.put(Base64Coder.encodeLines(entry.getData()));
+                            jEntry.put("data", Base64Coder.encodeLines(entry.getData()));
                             if (!entry.getExtractedData().isEmpty())
-                                jsonArray.put(entry.getExtractedData());
-                            obj.put("result", jsonArray);
+                                jEntry.put("extractedData", entry.getExtractedData());
+                            result.put(entry.getName(), jEntry);
+                            obj.put("result", result);
                             found = true;
                             break;
                         }
@@ -787,6 +787,45 @@ public class VerteilungServices {
                 }
             }
 
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+
+    /**
+     * liefert den kompletten Inhalt aus dem internen Speicher
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
+     */
+
+    public JSONObject getDataFromInternalStorage() {
+
+        JSONObject obj = new JSONObject();
+        JSONObject results = new JSONObject();
+        boolean found = false;
+        try {
+            if (entries.isEmpty()) {
+                obj.put("success", false);
+                obj.put("result", "keine Einträge vorhanden");
+            } else {
+
+                Iterator<FileEntry> it = entries.iterator();
+                while (it.hasNext()) {
+                    FileEntry entry = it.next();
+                    JSONObject jEntry = new JSONObject();
+                    if (entry.getData().length > 0) {
+                        jEntry.put("data", Base64Coder.encodeLines(entry.getData()));
+                        if (!entry.getExtractedData().isEmpty())
+                            jEntry.put("extractedData", entry.getExtractedData());
+                        results.put(entry.getName(), jEntry);
+                    }
+                }
+                obj.put("success", true);
+                obj.put("result", results);
+            }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }

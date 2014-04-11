@@ -286,7 +286,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        JSONObject obj = services.extractPDFToInternalStorage(content, fileName);
+        JSONObject obj = services.extractPDFToInternalStorage(Base64Coder.encodeLines(content), fileName);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -384,6 +384,66 @@ public class VerteilungServicesTest extends AlfrescoTest{
             assertTrue(entry.getData().length > 0);
             assertTrue(!entry.getExtractedData().isEmpty());
         }
+    }
+
+    @Test
+    public void testGetDataFromInternalStorage() throws Exception {
+        services.getEntries().clear();
+        JSONObject obj = services.getDataFromInternalStorage();
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertFalse(obj.getBoolean("success"));
+        services.getEntries().add(new FileEntry("Test1", new byte[]{0,1,2}, "Test Inhalt 1"));
+        services.getEntries().add(new FileEntry("Test2", new byte[]{2,3,4}, "Test Inhalt 2"));
+        obj = services.getDataFromInternalStorage();
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        JSONObject result = (JSONObject) obj.get("result");
+        assertNotNull(result);
+        assertTrue(result.length() == 2);
+        assertTrue(result.has("Test1"));
+        assertTrue(result.has("Test2"));
+        assertTrue(result.get("Test1") instanceof JSONObject);
+        assertTrue(result.get("Test2") instanceof JSONObject);
+        JSONObject entry = (JSONObject) result.get("Test1");
+        assertTrue(new String(Base64Coder.decodeLines(entry.getString("data"))).equals(new String(new byte[]{0,1,2})));
+        assertTrue(entry.getString("extractedData").equals("Test Inhalt 1"));
+        entry = (JSONObject) result.get("Test2");
+        assertTrue(new String(Base64Coder.decodeLines(entry.getString("data"))).equals(new String(new byte[]{2,3,4})));
+        assertTrue(entry.getString("extractedData").equals("Test Inhalt 2"));
+        obj = services.getDataFromInternalStorage("Test2");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        result = (JSONObject) obj.get("result");
+        assertNotNull(result);
+        assertTrue(result.length() == 1);
+        assertTrue(result.has("Test2"));
+        assertTrue(result.get("Test2") instanceof JSONObject);
+        entry = (JSONObject) result.get("Test2");
+        assertTrue(new String(Base64Coder.decodeLines(entry.getString("data"))).equals(new String(new byte[]{2,3,4})));
+        assertTrue(entry.getString("extractedData").equals("Test Inhalt 2"));
+        obj = services.getDataFromInternalStorage("Test3");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertFalse(obj.getBoolean("success"));
+        services.getEntries().clear();
+    }
+
+    @Test
+    public void testClearInternalStoreage() throws Exception {
+        services.getEntries().add(new FileEntry("Test1", new byte[]{0,1,2}, "Test Inhalt 1"));
+        JSONObject obj = services.clearInternalStorage();
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(services.getEntries().isEmpty());
     }
 
     @Test

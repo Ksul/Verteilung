@@ -89,6 +89,30 @@ public class VerteilungServletTest extends AlfrescoTest {
         sr.getBuffer().delete(0, 9999);
     }
 
+    @Test
+    public void testDoGetAndDoPost() throws Exception {
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertFalse(obj.getBoolean("success"));
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("function")).thenReturn("unbekannt");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertFalse(obj.getBoolean("success"));
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
     public void testIsURLAvailable() throws Exception {
         when(request.getParameter("function")).thenReturn("isURLAvailable");
         when(request.getParameter("server")).thenReturn(properties.getProperty("host"));
@@ -180,7 +204,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter("filePath")).thenReturn("8e6d4fbd-32f1-41ed-b0a2-b7ff8a9934ab");
         when(request.getParameter("withFolder")).thenReturn("1");
         servlet.doPost(request, response);
-         writer.flush(); // it may not have been flushed yet...
+        writer.flush(); // it may not have been flushed yet...
     }
 
     @Test
@@ -411,6 +435,44 @@ public class VerteilungServletTest extends AlfrescoTest {
     }
 
     @Test
+    public void testExtractPDFContent() throws Exception {
+        String fileName = properties.getProperty("testPDF");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        when(request.getParameter("function")).thenReturn("extractPDFContent");
+        when(request.getParameter("documentText")).thenReturn(Base64Coder.encodeLines(content));
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
+    public void testExtractPDFFile() throws Exception {
+        String fileName = properties.getProperty("testPDF");
+        assertNotNull(fileName);
+        when(request.getParameter("function")).thenReturn("extractPDFFile");
+        when(request.getParameter("filePath")).thenReturn("file://" + fileName);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
     public void testExtractPDFToInternalStorage() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
@@ -419,7 +481,6 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter("function")).thenReturn("extractPDFToInternalStorage");
         when(request.getParameter("documentText")).thenReturn(Base64Coder.encodeLines(content));
         when(request.getParameter("fileName")).thenReturn(fileName);
-        when(request.getParameter("clear")).thenReturn("false");
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
@@ -433,12 +494,12 @@ public class VerteilungServletTest extends AlfrescoTest {
     }
 
     @Test
-    public void testExtractZipToInternalStorage() throws Exception {
+    public void testExtractZIP() throws Exception {
         String fileName = properties.getProperty("testZIP");
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        when(request.getParameter("function")).thenReturn("extractZipToInternalStorage");
+        when(request.getParameter("function")).thenReturn("extractZIP");
         when(request.getParameter("documentText")).thenReturn(Base64Coder.encodeLines(content));
         servlet.doPost(request, response);
         writer.flush();
@@ -450,4 +511,101 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
     }
+
+    @Test
+    public void testExtractZIPAndExtractPDFToInternalStorage() throws Exception {
+        String fileName = properties.getProperty("testZIP");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        when(request.getParameter("function")).thenReturn("extractZIPAndExtractPDFToInternalStorage");
+        when(request.getParameter("documentText")).thenReturn(Base64Coder.encodeLines(content));
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getInt("result") == 2);
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
+    public void testExtractZIPToInternalStorage() throws Exception {
+        String fileName = properties.getProperty("testZIP");
+        assertNotNull(fileName);
+        byte[] content = readFile(fileName);
+        assertTrue(content.length > 0);
+        when(request.getParameter("function")).thenReturn("extractZIPToInternalStorage");
+        when(request.getParameter("documentText")).thenReturn(Base64Coder.encodeLines(content));
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getInt("result") == 2);
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
+    public void testGetDataFromInternalStorage() throws Exception {
+        when(request.getParameter("function")).thenReturn("getDataFromInternalStorage");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertFalse(obj.getBoolean("success"));
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter("fileName")).thenReturn("Test");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertFalse(obj.getBoolean("success"));
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
+    public void testClearInternalStorage() throws Exception {
+        when(request.getParameter("function")).thenReturn("clearInternalStorage");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
+    public void testOpenFile() throws Exception {
+        String fileName = properties.getProperty("testPDF");
+        assertNotNull(fileName);
+        when(request.getParameter("function")).thenReturn("openFile");
+        when(request.getParameter("filePath")).thenReturn("file://" + fileName);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertFalse(obj.getString("result").isEmpty());
+        sr.getBuffer().delete(0, 9999);
+    }
+
 }

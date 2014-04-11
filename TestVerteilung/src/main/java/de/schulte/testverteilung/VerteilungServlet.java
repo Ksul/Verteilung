@@ -123,27 +123,27 @@ public class VerteilungServlet extends HttpServlet {
      * @throws URISyntaxException
      * @throws JSONException
      */
-	private void doGetOrPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException,
-			JSONException {
-		// Get the value of a request parameter; the name is case-sensitive
-		Object ret = null;
-		JSONObject obj = new JSONObject();
-		String value = req.getParameter("function");
-		String documentId = req.getParameter("documentId");
-		String destinationId = req.getParameter("destinationId");
+    private void doGetOrPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException,
+            JSONException {
+        // Get the value of a request parameter; the name is case-sensitive
+        Object ret = null;
+        JSONObject obj = new JSONObject();
+        String value = req.getParameter("function");
+        String documentId = req.getParameter("documentId");
+        String destinationId = req.getParameter("destinationId");
         String currentLocationId = req.getParameter("currentLocationId");
-		String documentText = req.getParameter("documentText");
-		String filePath = req.getParameter("filePath");
-		String fileName = req.getParameter("fileName");
+        String documentText = req.getParameter("documentText");
+        String filePath = req.getParameter("filePath");
+        String fileName = req.getParameter("fileName");
         String cmisQuery = req.getParameter("cmisQuery");
-		String destinationFolder = req.getParameter("destinationFolder");
-		String description = req.getParameter("description");
-		String mimeType = req.getParameter("mimeType");
-		String server = req.getParameter("server");
-		String username = req.getParameter("username");
-		String password = req.getParameter("password");
+        String destinationFolder = req.getParameter("destinationFolder");
+        String description = req.getParameter("description");
+        String mimeType = req.getParameter("mimeType");
+        String server = req.getParameter("server");
+        String username = req.getParameter("username");
+        String password = req.getParameter("password");
         String withFolder = req.getParameter("withFolder");
-		String extract = req.getParameter("extract");
+        String extract = req.getParameter("extract");
         String versionState = req.getParameter("versionState");
         String majorVersion = req.getParameter("majorVersion");
         String versionComment = req.getParameter("versionComment");
@@ -153,8 +153,8 @@ public class VerteilungServlet extends HttpServlet {
 
         try {
             if (value == null || "".equals(value)) {
-                obj.append("success", false);
-                obj.append("result", "Function Name is missing!\nPlease check for Tomcat maxPostSize and maxHeaderSizer Property for HTTPConnector");
+                obj.put("success", false);
+                obj.put("result", "Function Name is missing!\nPlease check for Tomcat maxPostSize and maxHeaderSizer Property for HTTPConnector");
             } else {
                 if (value.equalsIgnoreCase("openPDF")) {
                     openPDF(fileName, resp);
@@ -196,31 +196,34 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase("extractZIP")) {
                     obj = extractZIP(documentText);
                 } else if (value.equalsIgnoreCase("extractZIPAndExtractPDFToInternalStorage")) {
-                    obj = extractZipAndExtractPDFToInternalStorage(documentText);
+                    obj = extractZIPAndExtractPDFToInternalStorage(documentText);
                 } else if (value.equalsIgnoreCase("getDataFromInternalStorage")) {
-                    obj = getDataFromInternalStorage(fileName);
+                    if (fileName == null || fileName.isEmpty())
+                        obj = getDataFromInternalStorage();
+                    else
+                        obj = getDataFromInternalStorage(fileName);
                 } else if (value.equalsIgnoreCase("clearInternalStorage")) {
                     obj = clearInternalStorage();
-                } else {
-                    obj.append("success", false);
-                    obj.append("result", "Function " + value + " ist unbekannt!");
+                } else if (value.equalsIgnoreCase("openFile")) {
+                    obj = openFile(filePath);
+            } else {
+                    obj.put("success", false);
+                    obj.put("result", "Function " + value + " ist unbekannt!");
                 }
             }
         } catch (VerteilungException e) {
-            obj.append("success", false);
-            obj.append("result", e.getMessage());
-
+            obj = VerteilungHelper.convertErrorToJSON(e);
         } catch (JSONException e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
         }
         out.write(obj.toString());
-	}
+    }
 
     /**
      * prüft, ob eine Url verfügbar ist
      * @param urlString    URL des Servers
-     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            true, wenn die URL verfügbar ist
      */
@@ -234,7 +237,7 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * liefert eine NodeID als String zurück
      * @param path         der Pfad zum Knoten, der der Knoten gesucht werden soll
-     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            die NodeId als String
      */
@@ -249,7 +252,7 @@ public class VerteilungServlet extends HttpServlet {
      * der Text extrahiert.
      * @param documentId   die Id des Documentes
      * @param extract      legt fest,ob einPDF Document umgewandelt werden soll
-     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            das Document als JSONObject
      */
@@ -263,7 +266,7 @@ public class VerteilungServlet extends HttpServlet {
      * lädt ein Document in den Server
      * @param filePath       der Folder als String, in das Document geladen werden soll
      * @param fileName       der Dateiname ( mit Pfad) als String, die hochgeladen werden soll
-     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            Dokument als JSONObject
      * @throws VerteilungException
@@ -277,7 +280,7 @@ public class VerteilungServlet extends HttpServlet {
      * löscht ein Document
      * @param filePath       der Folder als String, in das Documentliegt
      * @param fileName       der Name des Documentes
-     * @return               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            Dokument als JSONObject
      * @throws VerteilungException
@@ -295,7 +298,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
      * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
-     * @return                      ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result            Dokument als JSONObject
      * @throws VerteilungException
@@ -354,7 +357,7 @@ public class VerteilungServlet extends HttpServlet {
      * erzeugt einen Pfad
      * @param  targetPath             der Name des Folders in dem der Folder erstellt werden soll als String
      * @param  folderName           der Name des neuen Pfades als String
-     * @return                      ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result            Folder als JSONObject
      * @throws VerteilungException
@@ -368,7 +371,7 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * löscht einen Pfad
      * @param  folderPath           der Name des zu löschenden Pfades als String
-     * @return                      ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result
      * @throws VerteilungException
@@ -381,7 +384,7 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * findet ein Document
      * @param cmisQuery    die CMIS Query, mit der der Knoten gesucht werden soll
-     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            Dokument als JSONObject
      */
@@ -394,7 +397,7 @@ public class VerteilungServlet extends HttpServlet {
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
      * @param filePath     der Pfad, der geliefert werden soll (als NodeId)
      * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
      */
@@ -408,7 +411,7 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * extrahiert den Inhalt einer PDF Datei.
      * @param pdfContent        der Inhalt der Datei als Base64 encodeter String
-     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
      *                                                         result            der Inhalt der PDF Datei als String
      */
@@ -421,7 +424,7 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * extrahiert eine PDF Datei.
      * @param filePath          der Pfad zur PDF-Datei
-     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
      *                                                         result            der Inhalt der PDF Datei als String
      */
@@ -435,7 +438,7 @@ public class VerteilungServlet extends HttpServlet {
      * extrahiert den Text aus einer PDF Datei und speichert ihn in den internen Speicher
      * @param documentText       der Inhalt der PDF Datei als Base64 encodeter String
      * @param fileName           der Name der PDF Datei
-     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg die Anzahl der PDF's, ansonsten der Fehler
      */
@@ -443,13 +446,13 @@ public class VerteilungServlet extends HttpServlet {
                                                      String fileName) throws VerteilungException {
 
         VerteilungServices services = getServices(bindingUrl, user, password);
-        return services.extractPDFToInternalStorage(Base64.decodeBase64(documentText), fileName);
+        return services.extractPDFToInternalStorage(documentText, fileName);
     }
 
     /**
      * entpackt ein ZIP File in den internen Speicher
      * @param documentText       der Inhalt des ZIP's als Base64 encodeter String
-     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
      */
@@ -461,7 +464,7 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * extrahiert ein ZIP File und gibt den Inhalt als Base64 encodete Strings zurück
      * @param zipContent        der Inhalt des ZIP Files
-     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
      *                                                         result            der Inhalt der ZIP Datei als JSON Aray mit Base64 encodeten STrings
      */
@@ -469,29 +472,39 @@ public class VerteilungServlet extends HttpServlet {
 
         VerteilungServices services = new VerteilungServices();
         return services.extractZIP(zipContent);
-
     }
 
     /**
      * entpackt ein ZIP File und stellt die Inhalte und die extrahierten PDF Inhalte in den internen Speicher
      * @param zipContent          der Inhalt der ZIP Datei als Base64 encodeter String
-     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
      */
-    protected JSONObject extractZipAndExtractPDFToInternalStorage(String zipContent) {
+    protected JSONObject extractZIPAndExtractPDFToInternalStorage(String zipContent) {
 
         VerteilungServices services = new VerteilungServices();
         return services.extractZIPAndExtractPDFToInternalStorage(zipContent);
     }
 
+    /**
+     * liefert den kompletten Inhalt aus dem internen Speicher
+      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
+     */
+    protected JSONObject getDataFromInternalStorage() {
+
+        VerteilungServices services = new VerteilungServices();
+        return services.getDataFromInternalStorage();
+    }
 
     /**
      * liefert den Inhalt aus dem internen Speicher
      * @param fileName           der Name der zu suchenden Datei
-     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg ein JSONArray mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
+     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
      */
     protected JSONObject getDataFromInternalStorage(String fileName) {
 
@@ -502,7 +515,7 @@ public class VerteilungServlet extends HttpServlet {
 
     /**
      * löscht den internen Speicher
-     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg nichts, ansonsten der Fehler
      */
@@ -515,7 +528,7 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * öffnet eine Datei
      * @param filePath           der Pfad der zu öffnenden Datei
-     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg der Inhalt der Datei als String, ansonsten der Fehler
      */
