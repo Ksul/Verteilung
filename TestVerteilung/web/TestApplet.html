@@ -6,6 +6,7 @@
     <script type="text/javascript" src="./verteilung.js" charset="utf-8"></script>
     <script type="text/javascript" src="jquery-1.9.1.js"></script>
     <script type="text/javascript" src="jquery-ui-1.10.3.custom.js"></script>
+    <script type="text/javascript" src="webtoolkit.base64.js"></script>
     <script type="text/javascript">
         $(function() {
             $( document ).tooltip({
@@ -52,25 +53,28 @@
     </TR>
     <script type="text/javascript">
 
-    const testLoadApplet =          "loadApplet(\"FINE\");";
-    const testTest =                "document.reader.test();";
-    const testTestReturn =          "document.reader.testReturn();";
-    const testLoadProperties =      "document.reader.loadProperties(convertPath(\"../test.properties\"));";
-    const testIsURLAvaiable =       "document.reader.isURLAvailable(properties.host);";
-    const testSetParameter =        "document.reader.setParameter(properties.bindingUrl, \"admin\", properties.password);";
-    const testGetNodeId =           "document.reader.getNodeId(\"/Archiv\");";
-    const testGetNodeId1 =          "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\");";
-    const testGetNodeId2 =          "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/recognition.js\");";
-    const testFindDocument =        "document.reader.findDocument(\"SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'\");";
-    const testGetDocumentContent =  "document.reader.getDocumentContent($.parseJSON(document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\")).result, false);";
-    const testUploadDocument =      "document.reader.uploadDocument(\"/Archiv\", properties.testPDF);";
-    const testDeleteDocument =      "document.reader.deleteDocument(\"/Archiv\", \"Test.pdf\");";
-    const testDeleteDocument1 =     "document.reader.deleteDocument(\"/Archiv\", \"TestDocument.txt\");";
-    const testCreateDocument =      "document.reader.createDocument(\"/Archiv\", \"TestDocument.txt\", \"äöüßÄÖÜ/\", \"plain/text\", \"\", \"none\");";
-    const testOpenFile =            "document.reader.openFile(\"file://\" + properties.testPDF);";
-    const testExtractPDF =          "document.reader.extractPDF(\"file://\" + properties.testPDF);";
-    const testSaveToFile =          "document.reader.saveToFile(\"file:///tmp/TestFile.txt\", \"äöüßÄÖÜ/\");";
-    const testDeleteFile =          "document.reader.deleteFile(\"file:///tmp/TestFile.txt\");";
+    const testLoadApplet =                    "loadApplet(\"FINE\");";
+    const testTest =                          "document.reader.test();";
+    const testTestReturn =                    "document.reader.testReturn();";
+    const testLoadProperties =                "document.reader.loadProperties(convertPath(\"../test.properties\"));";
+    const testIsURLAvaiable =                 "document.reader.isURLAvailable(properties.host);";
+    const testSetParameter =                  "document.reader.setParameter(properties.bindingUrl, \"admin\", properties.password);";
+    const testGetNodeId =                     "document.reader.getNodeId(\"/Archiv\");";
+    const testGetNodeId1 =                    "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\");";
+    const testGetNodeId2 =                    "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/recognition.js\");";
+    const testFindDocument =                  "document.reader.findDocument(\"SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'\");";
+    const testGetDocumentContent =            "document.reader.getDocumentContent($.parseJSON(document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\")).result, false);";
+    const testUploadDocument =                "document.reader.uploadDocument(\"/Archiv\", properties.testPDF);";
+    const testDeleteDocument =                "document.reader.deleteDocument(\"/Archiv\", \"Test.pdf\");";
+    const testDeleteDocument1 =               "document.reader.deleteDocument(\"/Archiv\", \"TestDocument.txt\");";
+    const testCreateDocument =                "document.reader.createDocument(\"/Archiv\", \"TestDocument.txt\", \"äöüßÄÖÜ/\", \"plain/text\", \"\", \"none\");";
+    const testOpenFile =                      "document.reader.openFile(\"file://\" + properties.testPDF);";
+    const testExtractPDFFile =                "document.reader.extractPDFFile(\"file://\" + properties.testPDF);";
+    const testSaveToFile =                    "document.reader.saveToFile(\"file:///tmp/TestFile.txt\", \"äöüßÄÖÜ/\");";
+    const testDeleteFile =                    "document.reader.deleteFile(\"file:///tmp/TestFile.txt\");";
+    const testFillParameter =                 "var str = btoa(pdf); for (var k = 0; k <= Math.ceil(str.length / 1000); k++) document.reader.fillParameter(str.substr(k * 1000, 1000), k == 0);"
+    const testExtractPDFToInternalStorage =   "document.reader.extractPDFToInternalStorage(properties.testPDF);";
+    const testOpenPDF =                       "document.reader.openPDF(properties.testPDF);";
 
     try {
         doTest("Lade Applet", testLoadApplet, "$('#reader').get(0).isActive()");
@@ -90,11 +94,15 @@
         doTest("Delete Document Function deleteDocument", testDeleteDocument1);
         doTest("Create Document Function createDocument", testCreateDocument, "var result = $.parseJSON(erg.toString()); result.success;");
         doTest("Delete Document Function deleteDocument", testDeleteDocument1);
-        var pdf = doTest("open File Function openFile", testOpenFile, "var result = $.parseJSON(erg.toString()); result.success;");
-        doTest("extract PDF Function extractPDF", testExtractPDF, "var result = $.parseJSON(erg.toString()); result.success;");
+        erg = doTest("open File Function openFile", testOpenFile, "var result = $.parseJSON(erg.toString()); result.success;");
+        var pdf = atob($.parseJSON(erg).result);
+        doTest("extract PDF Function extractPDFFile", testExtractPDFFile, "var result = $.parseJSON(erg.toString()); result.success;");
         doTest("Testdatei löschen", testDeleteFile);
         doTest("saveToFile Function saveToFile", testSaveToFile, "var result = $.parseJSON(erg.toString()); result.success;");
         doTest("Testdatei löschen", testDeleteFile);
+        doTest("Parameter füllen Function fillParamter", testFillParameter, "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("Extract PDF in internen Speicher Function extractPDFToInternalStorage", testExtractPDFToInternalStorage, "var result = $.parseJSON(erg.toString()); result.success;");
+        doTest("PDF öffnen Function openPDF", testOpenPDF, "var result = $.parseJSON(erg.toString()); result.success;");
     } catch (e) {
         errorHandler(e);
     }

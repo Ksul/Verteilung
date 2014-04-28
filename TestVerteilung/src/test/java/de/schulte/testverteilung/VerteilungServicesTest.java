@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -286,7 +287,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        JSONObject obj = services.extractPDFToInternalStorage(Base64Coder.encodeLines(content), fileName);
+        JSONObject obj = services.extractPDFToInternalStorage(Base64.encodeBase64String(content), fileName);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -307,7 +308,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        JSONObject obj = services.extractPDFContent(Base64Coder.encodeLines(content));
+        JSONObject obj = services.extractPDFContent(Base64.encodeBase64String(content));
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
@@ -332,7 +333,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
         Collection<FileEntry> entries = new ArrayList<FileEntry>();
-        JSONObject obj = services.extractZIP(Base64Coder.encodeLines(content));
+        JSONObject obj = services.extractZIP(Base64.encodeBase64String(content));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -352,7 +353,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        JSONObject obj = services.extractZIPToInternalStorage(Base64Coder.encodeLines(content));
+        JSONObject obj = services.extractZIPToInternalStorage(Base64.encodeBase64String(content));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -372,7 +373,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        JSONObject obj = services.extractZIPAndExtractPDFToInternalStorage(Base64Coder.encodeLines(content));
+        JSONObject obj = services.extractZIPAndExtractPDFToInternalStorage(Base64.encodeBase64String(content));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -409,10 +410,10 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(result.get("Test1") instanceof JSONObject);
         assertTrue(result.get("Test2") instanceof JSONObject);
         JSONObject entry = (JSONObject) result.get("Test1");
-        assertTrue(new String(Base64Coder.decodeLines(entry.getString("data"))).equals(new String(new byte[]{0,1,2})));
+        assertTrue(new String(Base64.decodeBase64(entry.getString("data"))).equals(new String(new byte[]{0,1,2})));
         assertTrue(entry.getString("extractedData").equals("Test Inhalt 1"));
         entry = (JSONObject) result.get("Test2");
-        assertTrue(new String(Base64Coder.decodeLines(entry.getString("data"))).equals(new String(new byte[]{2,3,4})));
+        assertTrue(new String(Base64.decodeBase64(entry.getString("data"))).equals(new String(new byte[]{2,3,4})));
         assertTrue(entry.getString("extractedData").equals("Test Inhalt 2"));
         obj = services.getDataFromInternalStorage("Test2");
         assertNotNull(obj);
@@ -425,7 +426,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(result.has("Test2"));
         assertTrue(result.get("Test2") instanceof JSONObject);
         entry = (JSONObject) result.get("Test2");
-        assertTrue(new String(Base64Coder.decodeLines(entry.getString("data"))).equals(new String(new byte[]{2,3,4})));
+        assertTrue(new String(Base64.decodeBase64(entry.getString("data"))).equals(new String(new byte[]{2,3,4})));
         assertTrue(entry.getString("extractedData").equals("Test Inhalt 2"));
         obj = services.getDataFromInternalStorage("Test3");
         assertNotNull(obj);
@@ -456,7 +457,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         byte[] content = readFile(fileName);
-        byte[] contentRead = Base64Coder.decodeLines(obj.getString("result"));
+        byte[] contentRead = Base64.decodeBase64(obj.getString("result"));
         assertTrue("Unterschiedliche Länge gelesen!", content.length == contentRead.length);
         for (int i = 0; i < content.length; i++){
             assertTrue("Unterschiedlicher Inhalt gelesen Position: " + i +" !", content[i] == contentRead[i]);

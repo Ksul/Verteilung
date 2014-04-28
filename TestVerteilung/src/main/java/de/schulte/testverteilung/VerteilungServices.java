@@ -53,6 +53,18 @@ public class VerteilungServices {
         this.con = new AlfrescoConnector(username, password, server);
     }
 
+    /**
+     * über diese Methode können die Alfresco Parameter nachträglich gesetzt werden.
+     * @param server         der Name des Alfresco Servers
+     * @param username       der verwendete Username
+     * @param password       das Passwort
+     */
+    public void setParameter(String server,
+                        String username,
+                        String password) {
+        this.con = new AlfrescoConnector(username, password, server);
+    }
+
 
     /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
@@ -561,7 +573,7 @@ public class VerteilungServices {
 
         JSONObject obj = new JSONObject();
         try {
-            byte[] bytes = Base64Coder.decodeLines(pdfContent);
+            byte[] bytes = Base64.decodeBase64(pdfContent);
             InputStream bais = new ByteArrayInputStream(bytes);
             PDFConnector con = new PDFConnector();
             if (entries != null) {
@@ -608,7 +620,7 @@ public class VerteilungServices {
 
         JSONObject obj = new JSONObject();
         try {
-            byte[] bytes = Base64Coder.decodeLines(pdfContent);
+            byte[] bytes = Base64.decodeBase64(pdfContent);
             PDFConnector con = new PDFConnector();
             obj.put("success", true);
             obj.put("result", con.pdftoText(new ByteArrayInputStream(bytes)));
@@ -752,7 +764,7 @@ public class VerteilungServices {
      * @param fileName           der Name der zu suchenden Datei
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
+     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (als Base64 String encoded) und er Inhalt als Text, ansonsten der Fehler
      */
     public JSONObject getDataFromInternalStorage(String fileName) {
 
@@ -771,7 +783,7 @@ public class VerteilungServices {
                         obj.put("success", true);
                         JSONObject jEntry = new JSONObject();
                         if (entry.getData().length > 0) {
-                            jEntry.put("data", Base64Coder.encodeLines(entry.getData()));
+                            jEntry.put("data", Base64.encodeBase64String(entry.getData()));
                             if (!entry.getExtractedData().isEmpty())
                                 jEntry.put("extractedData", entry.getExtractedData());
                             result.put(entry.getName(), jEntry);
@@ -798,7 +810,7 @@ public class VerteilungServices {
      * liefert den kompletten Inhalt aus dem internen Speicher
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (Base64 encoded) und er Inhalt als Text, ansonsten der Fehler
+     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (als Base64 String encoded) und er Inhalt als Text, ansonsten der Fehler
      */
 
     public JSONObject getDataFromInternalStorage() {
@@ -817,7 +829,7 @@ public class VerteilungServices {
                     FileEntry entry = it.next();
                     JSONObject jEntry = new JSONObject();
                     if (entry.getData().length > 0) {
-                        jEntry.put("data", Base64Coder.encodeLines(entry.getData()));
+                        jEntry.put("data", Base64.encodeBase64String(entry.getData()));
                         if (!entry.getExtractedData().isEmpty())
                             jEntry.put("extractedData", entry.getExtractedData());
                         results.put(entry.getName(), jEntry);
@@ -865,7 +877,7 @@ public class VerteilungServices {
         try {
             byte[] buffer = readFile(filePath);
             obj.put("success", true);
-            obj.put("result", Base64Coder.encodeLines(buffer));
+            obj.put("result", Base64.encodeBase64String(buffer));
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }

@@ -23,14 +23,8 @@ import java.security.PrivilegedExceptionAction;
 import java.util.*;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import netscape.javascript.JSObject;
-
-import org.apache.commons.codec.binary.Base64;
-
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,7 +42,7 @@ public class VerteilungApplet extends Applet {
 
 	private BufferedOutputStream bos = new BufferedOutputStream(bys);
 
-    private VerteilungServices services;
+    private VerteilungServices services = new VerteilungServices();
 
     private String bindingUrl;
 
@@ -61,19 +55,26 @@ public class VerteilungApplet extends Applet {
     private String level = "WARNING";
 
     /**
+     * liefert die Services
+     * nur für Testzwecke
+     * @return
+     */
+    public VerteilungServices getServices() {
+        return services;
+    }
+
+    /**
      * Initialisierung
      */
 	public void init() {
 		try {
 			logger.info("Hier ist das Verteilungsapplet");
             level = getParameter ("debug");
-            this.bindingUrl = getParameter("url");
-            this.user = getParameter("user");
-            this.password = getParameter("password");
             Logger log = LogManager.getLogManager().getLogger("");
             for (Handler h : log.getHandlers()) {
                 h.setLevel(Level.parse(level));
             }
+            setParameter(getParameter("url"), getParameter("user"), getParameter("password"));
 			jsobject = JSObject.getWindow(this);
 		} catch (Exception jse) {
 			logger.severe(jse.getMessage());
@@ -83,47 +84,35 @@ public class VerteilungApplet extends Applet {
 
     /**
      * setzt die Parameter
-     * @param  url          die Binding Url
-     * @param  userName     der Username
-     * @param  pass         das Password
+     * @param  bindingUrl   die Binding Url
+     * @param  user         der Username
+     * @param  password     das Password
      * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                              false    ein Fehler ist aufgetreten
      *                                                     result            die Parameter als String
      */
-    public JSONObject setParameter(String url,
-                                   String userName,
-                                   String pass) {
+    public JSONObject setParameter(String bindingUrl,
+                                   String user,
+                                   String password) {
 
-        logger.fine("Aufruf setParameter mit Url: " + url + " User: " + userName + " Password: " + password);
-        this.bindingUrl = url;
-        this.user = userName;
-        this.password = pass;
+        logger.fine("Aufruf setParameter mit Url: " + bindingUrl + " User: " + user + " Password: " + password);
+        this.bindingUrl = bindingUrl;
+        this.user = user;
+        this.password = password;
         JSONObject obj = new JSONObject();
         try {
-            obj.put("success", true);
-            obj.put("result", bindingUrl + " " + user + " " + password);
-        } catch (JSONException jse) {
-            logger.severe(jse.getMessage());
-            jse.printStackTrace();
+            if (this.bindingUrl != null && !this.bindingUrl.isEmpty() && this.user != null && !this.user.isEmpty() && this.password != null && !this.password.isEmpty()) {
+                services.setParameter(this.bindingUrl, this.user, this.password);
+                obj.put("success", true);
+                obj.put("result", "BindingUrl:" + this.bindingUrl + " User:" + this.user + " Password:" + this.password);
+            } else {
+                obj.put("success", false);
+                obj.put("result", "Parameter fehlt: BindingUrl:" + this.bindingUrl + " User: " + this.user + " Password:" + this.password);
+            }
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj;
-    }
-
-    /**
-     * liefert die Alfresco Services
-     * @param url               Binding URL des Servers
-     * @param user              User Name
-     * @param password          Passwort
-     * @return
-     */
-    public VerteilungServices getServices(String url,
-                                          String user,
-                                          String password) {
-
-        logger.fine("Aufruf getServices mit Url: " + url + " User: " + user + " Password: " + password);
-        if (services == null)
-            services = new VerteilungServices(url, user, password);
-        return services;
     }
 
 
@@ -143,7 +132,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws VerteilungException, IOException, JSONException {
-                    VerteilungServices services = new VerteilungServices();
                     return services.isURLAvailable(urlString);
                 }
             });
@@ -170,7 +158,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws VerteilungException, IOException, JSONException {
-                    VerteilungServices services = new VerteilungServices(bindingUrl, user, password);
                     return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
                 }
             });
@@ -196,7 +183,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.getNodeId(path);
                 }
             });
@@ -222,7 +208,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.findDocument(cmisQuery);
                 }
             });
@@ -249,7 +234,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.getDocumentContent(docId, extract);
                 }
             });
@@ -275,7 +259,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.uploadDocument(filePath, fileName);
                 }
             });
@@ -303,7 +286,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.deleteDocument(filePath, fileName);
                 }
             });
@@ -339,7 +321,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties, versionState);
                 }
             });
@@ -374,8 +355,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.updateDocument(documentId, documentContent, documentType, extraCMSProperties, majorVersion, versionComment);
                 }
             });
@@ -404,7 +383,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.moveDocument(documentId, oldFolderId, newFolderId);
                 }
             });
@@ -431,7 +409,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.createFolder(targetPath, folderName);
                 }
             });
@@ -455,7 +432,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.deleteFolder(folderPath);
                 }
             });
@@ -481,7 +457,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = new VerteilungServices();
                     return services.loadProperties(propFile);
                 }
             });
@@ -571,7 +546,6 @@ public class VerteilungApplet extends Applet {
                     byte[] bytes = bys.toByteArray();
                     if (bytes.length == 0)
                         throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    VerteilungServices services = new VerteilungServices();
                     return services.extractPDFContent(new String(bytes));
                 }
             });
@@ -595,7 +569,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = new VerteilungServices();
                     return services.extractPDFFile(filePath);
                 }
             });
@@ -623,7 +596,6 @@ public class VerteilungApplet extends Applet {
                     byte[] bytes = bys.toByteArray();
                     if (bytes.length == 0)
                         throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    VerteilungServices services = new VerteilungServices();
                     return services.extractPDFToInternalStorage(new String(bytes), fileName);
                 }
             });
@@ -650,7 +622,6 @@ public class VerteilungApplet extends Applet {
                     byte[] bytes = bys.toByteArray();
                     if (bytes.length == 0)
                         throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    VerteilungServices services = new VerteilungServices();
                     return services.extractZIP(new String(bytes));
                 }
             });
@@ -677,7 +648,6 @@ public class VerteilungApplet extends Applet {
                     byte[] bytes = bys.toByteArray();
                     if (bytes.length == 0)
                         throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    VerteilungServices services = new VerteilungServices();
                     return services.extractZIPAndExtractPDFToInternalStorage(new String(bytes));
                 }
             });
@@ -705,7 +675,6 @@ public class VerteilungApplet extends Applet {
                     byte[] bytes = bys.toByteArray();
                     if (bytes.length == 0)
                         throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    VerteilungServices services = new VerteilungServices();
                     return services.extractZIPToInternalStorage(new String(bytes));
                 }
             });
@@ -730,7 +699,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = new VerteilungServices();
                     return services.getDataFromInternalStorage(fileName);
                 }
             });
@@ -753,7 +721,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = new VerteilungServices();
                     return services.getDataFromInternalStorage();
                 }
             });
@@ -777,7 +744,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    VerteilungServices services = new VerteilungServices();
                     return services.clearInternalStorage();
                 }
             });
@@ -798,14 +764,14 @@ public class VerteilungApplet extends Applet {
     public JSONObject openPDF(final String fileName) {
 
         JSONObject obj = new JSONObject();
-    /*    try {
+        try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws IOException, JSONException {
                     JSONObject obj = new JSONObject();
                     boolean found = false;
                     FileEntry entry = null;
-                    Iterator<FileEntry> it = entries.iterator();
+                    Iterator<FileEntry> it = services.getEntries().iterator();
                     while (it.hasNext()) {
                         entry = it.next();
                         if (entry.getName().equalsIgnoreCase(fileName)) {
@@ -815,13 +781,7 @@ public class VerteilungApplet extends Applet {
                     }
                     if (found) {
                         byte[] ret = entry.getData();
-                        String name = entry.getName();
-
-                        String property = "java.io.tmpdir";
-
-                        // Get the temporary directory and print it.
-                        String tempDir = System.getProperty(property);
-                        File file = new File(tempDir + "/" + name);
+                        File file = File.createTempFile("Tmp", ".pdf");
                         FileOutputStream fos = new FileOutputStream(file);
                         fos.write(ret);
                         fos.flush();
@@ -840,7 +800,7 @@ public class VerteilungApplet extends Applet {
         } catch (PrivilegedActionException e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
-*/        return obj;
+        return obj;
     }
 
 
@@ -886,7 +846,6 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws IOException, JSONException, URISyntaxException {
-                    VerteilungServices services = getServices(bindingUrl, user, password);
                     return services.openFile(filePath);
                 }
             });

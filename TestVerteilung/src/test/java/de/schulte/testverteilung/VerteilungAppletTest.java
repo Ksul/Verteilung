@@ -5,8 +5,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import org.apache.commons.codec.binary.Base64;
 
 import static org.junit.Assert.*;
 
@@ -175,7 +174,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        String encodedContent =  Base64Coder.encodeLines(content);
+        String encodedContent =  Base64.encodeBase64String(content);
         for (int k = 0; k <= Math.ceil(encodedContent.length() / 1000); k++)
             applet.fillParameter(encodedContent.substring(k * 1000, Math.min(encodedContent.length(), k * 1000 + 1000)), k == 0);
         JSONObject obj = applet.extractPDFContent();
@@ -202,7 +201,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        String encodedContent =  Base64Coder.encodeLines(content);
+        String encodedContent =  Base64.encodeBase64String(content);
         for (int k = 0; k <= Math.ceil(encodedContent.length() / 1000); k++)
             applet.fillParameter(encodedContent.substring(k * 1000, Math.min(encodedContent.length(), k * 1000 + 1000)), k == 0);
         JSONObject obj = applet.extractPDFToInternalStorage(fileName);
@@ -219,7 +218,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        String encodedContent =  Base64Coder.encodeLines(content);
+        String encodedContent =  Base64.encodeBase64String(content);
         for (int k = 0; k <= Math.ceil(encodedContent.length() / 1000); k++)
             applet.fillParameter(encodedContent.substring(k * 1000, Math.min(encodedContent.length(), k * 1000 + 1000)), k == 0);
         JSONObject obj = applet.extractZIP();
@@ -242,7 +241,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
         assertTrue(content.length > 0);
-        String encodedContent =  Base64Coder.encodeLines(content);
+        String encodedContent =  Base64.encodeBase64String(content);
         for (int k = 0; k <= Math.ceil(encodedContent.length() / 1000); k++)
             applet.fillParameter(encodedContent.substring(k * 1000, Math.min(encodedContent.length(), k * 1000 + 1000)), k == 0);
         JSONObject obj = applet.extractZIPAndExtractPDFToInternalStorage();
@@ -258,7 +257,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         String fileName = properties.getProperty("testZIP");
         assertNotNull(fileName);
         byte[] content = readFile(fileName);
-        String encodedContent =  Base64Coder.encodeLines(content);
+        String encodedContent =  Base64.encodeBase64String(content);
         for (int k = 0; k <= Math.ceil(encodedContent.length() / 1000); k++)
             applet.fillParameter(encodedContent.substring(k * 1000, Math.min(encodedContent.length(), k * 1000 + 1000)), k == 0);
         assertTrue(content.length > 0);
@@ -295,7 +294,12 @@ public class VerteilungAppletTest extends AlfrescoTest {
 
     @Test
     public void testOpenPDF() throws Exception {
-
+        JSONObject obj = applet.openPDF("test");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertFalse(obj.getBoolean("success"));
+        assertEquals("PDF konnte nicht gefunden werden!", obj.get("result"));
     }
 
     @Test
