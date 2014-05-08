@@ -626,5 +626,19 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(servletOutputStream.baos.toString().startsWith("%PDF"));
     }
 
-
+    @Test
+    public void testLoadProperties() throws Exception {
+        String file =  "TestVerteilung/test.properties";
+        String fullPath = "file://"+System.getProperty("user.dir").substring(0, System.getProperty("user.dir").lastIndexOf('/') +1)  + file;
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_LOADPROPERTIES);
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn(fullPath);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+    }
 }

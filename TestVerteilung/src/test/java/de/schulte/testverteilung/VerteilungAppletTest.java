@@ -67,7 +67,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
 
     @Test
     public void testGetDocumentContent() throws Exception {
-        JSONObject obj = applet.getDocumentContent("abcde", false);
+        JSONObject obj = applet.getDocumentContent("abcde", "false");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));

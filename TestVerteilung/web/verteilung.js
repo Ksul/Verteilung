@@ -50,15 +50,45 @@ function hasUrlParam(){
 }
 
 /**
- * Globale Fehlerroutine
- * @param e  der auslösende Fehler
+ * prüft, ob eine Variable vorhanden ist
+ * @param val   die zu prüfende Variable
+ * @returns {boolean}    true, wenn sie vorhanden ist
  */
-function errorHandler(e) {
-    var str = "FEHLER:\n";
+function exist(val) {
+    return typeof val != "undefined" && val != null;
+};
+
+
+/**
+ * Globale Fehlerroutine
+ * @param e             der auslösende Fehler
+ * @param description   optionale Fehlermeldung
+ */
+function errorHandler(e, description) {
+    var str;
+    if (exist(description))
+        str = description + "\nFEHLER:\n";
+    else
+        str = "FEHLER:\n";
     str = str + e.toString() + "\n";
     for (var prop in e)
         str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-    alert(str);
+    str = str + "Stacktrace: \n\n" + e.stack;
+    var $dialog = $('<div></div>').html(str).dialog({
+        autoOpen: false,
+        title: 'Fehler',
+        modal: true,
+        height:200,
+        width:800,
+        buttons: {
+            "Ok": function () {
+                $(this).dialog("close");
+            }
+        }
+    }).css({height:"100px", width:"800px", overflow:"auto"});
+    $dialog.dialog('open');
+
+    //alert(str);
 }
 
 
@@ -122,47 +152,117 @@ function loadApplet(level, bindingUrl, user, password) {
 /**
  * Prüft, ob ein Alfresco Server antwortet
  * @param url         URL des Servers
- * @param proxy       Proxy Server
- * @param port        Port des Proxy Servers
  * @returns {boolean} true, wenn der Server verfügbar ist
  */
-function checkServerStatus(url, proxy, port) {
-    var ret;
-    if (isLocal()){
-        ret = document.reader.isURLAvailable(url,  proxy, port);
-    }
-    else {
-        var dataString = {
-            "function"  : "isURLAvailable",
-            "server"    : url,
-            "proxyHost" : proxy,
-            "proxyPort" : port
-        };
-        $.ajax({
-            type        : "POST",
-            data        : dataString,
-            datatype    : "json",
-            cache       : false,
-            async       : false,
-            url         : "/TestVerteilung/VerteilungServlet",
-            error    : function (response) {
-                try {
-                    var r = jQuery.parseJSON(response.responseText);
-                    alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                } catch(e)  {
-                    var str = "FEHLER:\n";
-                    str = str + e.toString() + "\n";
-                    for ( var prop in e)
-                        str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                    alert(str + "\n" + response.responseText);
+function checkServerStatus(url) {
+
+    var obj = executeService("isURLAvailable", [{"name":"url", "value":url}]);
+    return obj.result.toString() == "true";
+}
+
+/**
+ * führt einen Service aus
+ * die Methode prüft dabei im Appletzweig, ob ein String Parameter zu lang ist und überträgt ihn dann häppchenweise.
+ * der entsprechende Parameter wird dann nicht mehr übergeben und muss dann in der entsprechenden Servicemethode im
+ * Applet aus dem internenen Spreicher besorgt werden. Bislang funktioniert dieses Verfahren aber nur mit einem
+ * Parameter.
+ * @param service           der Name des Service
+ * @param params            die Parameter als JSON Objekt
+ * @param errorMessage      eine Fehlermeldung
+ * @return das Ergebnis als JSON Objekt
+ */
+function executeService(service, params, errorMessage, func) {
+    try {
+        if (isLocal()) {
+            var maxLen = 1100000;
+            var execute = "document.reader." + service + "(";
+            var first = true;
+            if (exist(params)) {
+                for (index = 0; index < params.length; ++index) {
+                    // prüfen, ob Parameter zu lang ist
+                    if (typeof params[index].value == "String" && params[index].value.length > maxLen) {
+                        // den Inhalt häppchenweise übertragen
+                        for (var k = 0; k < Math.ceil(params[index].value.length / maxLen); k++)
+                            document.reader.fillParameter(params[index].value.substr(k * maxLen, maxLen), k == 0);
+                    } else {
+                        // der Inhalt ist nicht zu lang und kann direkt zum Applet übertragen werden
+                        if (!first)
+                            execute = execute + ", ";
+                        execute = execute + "'" + params[index].value + "'";
+                        first = false;
+                    }
                 }
-            },
-            success     : function(data) {
-                ret = data.result.toString();
             }
-        });
+            execute = execute + ")";
+            var obj = eval(execute);
+            var json = jQuery.parseJSON(obj);
+            if (json.success) {
+                if (exist(func))
+                    func(json);
+            } else {
+                if (exist(errorMessage))
+                    errorString = errorMessage + " " + json.result;
+                else
+                    errorString = json.result;
+                // gibt es eine Fehlermeldung aus dem Service?
+                if (exist(json.error))
+                    errorString = errorString + json.error;
+                throw new Error(errorString);
+            }
+        } else {
+            var dataString = {
+                "function": service
+            };
+            if (exist(params)) {
+                for (index = 0; index < params.length; ++index) {
+                    evaluate("dataString." + params[index].name + " = " + params[index].value);
+                }
+            }
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                datatype: "json",
+                url: "/TestVerteilung/VerteilungServlet",
+                error: function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch (e) {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for (var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                },
+                success: function (data) {
+                    if (data.success[0]) {
+                        if (data.result[0].entry.length == 1)
+                            loadText(data.result[0].entry[0].result.toString(), data.result[0].entry[0].entryFileName.toString(), "application/zip", null);
+                        else {
+                            for (var index = 0; index < data.result[0].entry.length; index++) {
+                                var array_element = data.result[0].entry[index];
+                                loadMultiText(array_element.result.toString(), array_element.entryFileName.toString(), "application/zip", "true", "false", null);
+                            }
+                        }
+                    } else
+                        alert(errorMessage + data.result[0]);
+                }
+            });
+        }
+        return json;
+    } catch (e) {
+        var p = "Service: " + service + "\n";
+        if (exist(params)) {
+            for (index = 0; index < params.length; ++index) {
+                p = p + "Parameter: " + params[index].name + " : " + params[index].value.substr(0, 40) + "\n";
+            }
+        }
+        if (exist(errorMessage))
+            p =  errorMessage + "\n" + p;
+        errorHandler(e, p);
+        return {result:e, success:false};
     }
-    return ret == "true";
 }
 
 /**
@@ -301,7 +401,8 @@ function manageControls() {
 }
 
 /**
- * Ãffnet ein PDF
+ * TODO prüfen, wie das mit den Services umgesetzt werden kann
+ * Öffnet ein PDF
  * @param name       Name des Dokuments
  * @param fromServer legt fest, ob das Dokument vom Server geholt werden soll
  */
@@ -371,7 +472,7 @@ function loadText(txt, name, typ, container) {
         currentContainer = container;
         removeMarkers(markers, textEditor);
         textEditor.getSession().setValue(txt);
-        document.getElementById("headerWest").firstChild.nodeValue = name;
+        document.getElementById('headerWest').textContent = name;
         fillMessageBox("", false);
         propsEditor.getSession().setValue("");
         manageControls();
@@ -405,8 +506,8 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
         dat["xml"] = REC.currXMLName;
         dat["typ"] = typ;
         dat["error"] = REC.errors;
-        dat["container"] = container; name,
-            dat["notDeleteable"] = notDeleteable;
+        dat["container"] = container;
+        dat["notDeleteable"] = notDeleteable;
         dat["alfContainer"] = alfContainer;
         daten[name] = dat;
         var ergebnis = new Array();
@@ -485,57 +586,21 @@ function readFiles(files) {
                     reader = new FileReader();
                     reader.onloadend = (function (theFile, clear) {
                         return function (evt) {
-                            if (evt.target.readyState == FileReader.DONE) {// DONE == 2
-                                var str = btoa(evt.target.result);
-                                if (isLocal()) {
-                                    // den Inhalt häppchenweise übertragen.
-                                    for (var k = 0; k < Math.ceil(str.length / maxLen); k++)
-                                        document.reader.fillParameter(str.substr(k * maxLen, maxLen), k == 0);
-                                    var json = jQuery.parseJSON(document.reader.extractPDF(theFile.name, files.length > 1, theFile.type));
-                                    if (!json.success) {
-                                    if (count == 1)
-                                        loadText(json.result, theFile.name, theFile.type, null);
-                                    else {
-                                        loadMultiText(json.result, theFile.name, theFile.type, "false", "false", null);
+                            try {
+                                if (evt.target.readyState == FileReader.DONE) {// DONE == 2
+                                    var str = btoa(evt.target.result);
+                                    var json = executeService("extractPDFContent", [
+                                        {"name": "documentText", "value": str}
+                                    ], "PDF Datei konte nicht geparst werden:");
+                                    if (json.success) {
+                                        if (count == 1)
+                                            loadText(json.result, theFile.name, theFile.type, null);
+                                        else
+                                            loadMultiText(json.result, theFile.name, theFile.type, "false", "false", null);
                                     }
-                                    }
-                                } else {
-                                    var dataString = {
-                                        "function": "extractPDFToInternalStorage",
-                                        "documentText": str,
-                                        "fileName": theFile.name,
-                                        "clear": clear
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        data: dataString,
-                                        datatype: "json",
-                                        async: false,
-                                        url: "/TestVerteilung/VerteilungServlet",
-                                        error: function (response) {
-                                            try {
-                                                var r = jQuery.parseJSON(response.responseText);
-                                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                            } catch (e) {
-                                                var str = "FEHLER:\n";
-                                                str = str + e.toString() + "\n";
-                                                for (var prop in e)
-                                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                                                alert(str + "\n" + response.responseText);
-                                            }
-                                        },
-                                        success: function (data) {
-                                            if (data.success[0]) {
-                                                if (count == 1)
-                                                    loadText(data.result[0].toString(), theFile.name, theFile.type, null);
-                                                else {
-                                                    loadMultiText(data.result[0].toString(), theFile.name, theFile.type, "false", "false", null);
-                                                }
-                                            } else
-                                                alert("Fehler beim Lesen des PDF: " + data.result[0]);
-                                        }
-                                    });
                                 }
+                            } catch (e) {
+                                errorHandler(e);
                             }
                         };
                     })(f, first);
@@ -543,54 +608,34 @@ function readFiles(files) {
                     reader.readAsBinaryString(blob);
                 }
                 // ZIP Files
+                //TODO checken, ob das hier funktioniert
                 if (f.name.toLowerCase().endsWith(".zip")) {
                     reader = new FileReader();
                     reader.onloadend = (function (theFile) {
                         return function (evt) {
-                            if (evt.target.readyState == FileReader.DONE) {// DONE == 2
-                                var str = btoa(evt.target.result);
-                                if (isLocal()) {
-                                    // den Inhalt häppchenweise übertragen
-                                    for (var k = 0; k < Math.ceil(str.length / maxLen); k++)
-                                        document.reader.fillParameter(str.substr(k * maxLen, maxLen), k == 0);
-                                    count = count + document.reader.extractZIP(theFile.name) - 1;
-                                } else {
-                                    var dataString = {
-                                        "function": "extractZIPToInternalStorage",
-                                        "documentText": str
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        data: dataString,
-                                        datatype: "json",
-                                        url: "/TestVerteilung/VerteilungServlet",
-                                        error: function (response) {
-                                            try {
-                                                var r = jQuery.parseJSON(response.responseText);
-                                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                            } catch (e) {
-                                                var str = "FEHLER:\n";
-                                                str = str + e.toString() + "\n";
-                                                for (var prop in e)
-                                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                                                alert(str + "\n" + response.responseText);
-                                            }
-                                        },
-                                        success: function (data) {
-                                            if (data.success[0]) {
-                                                if (data.result[0].entry.length == 1)
-                                                    loadText(data.result[0].entry[0].result.toString(), data.result[0].entry[0].entryFileName.toString(), "application/zip", null);
+                            try {
+                                if (evt.target.readyState == FileReader.DONE) {// DONE == 2
+                                    var str = btoa(evt.target.result);
+                                    var json = executeService("extractZIPAndExtractPDFToInternalStorage", [
+                                        {"name": "documentText", "value": str}
+                                    ], "ZIP Datei konte nicht entpackt werden:");
+                                    if (json.success) {
+                                        count = count + json.result - 1;
+                                        var json = executeService("getDataFromInternalStorage");
+                                        if (json.success) {
+                                            var erg = json.result;
+                                            for (var entry in erg) {
+                                                if (count == 1)
+                                                    loadText(entry.extractedData, entry, "application/zip", null);
                                                 else {
-                                                    for (var index = 0; index < data.result[0].entry.length; index++) {
-                                                        var array_element = data.result[0].entry[index];
-                                                        loadMultiText(array_element.result.toString(), array_element.entryFileName.toString(), "application/zip", "true", "false", null);
-                                                    }
+                                                    loadMultiText(entry.extractedData, entry, "application/zip", "true", "false", null);
                                                 }
-                                            } else
-                                                alert("ZIP Datei konnte nicht entpackt werden: " + data.result[0]);
+                                            }
                                         }
-                                    });
+                                    }
                                 }
+                            } catch (e) {
+                                errorHandler(e);
                             }
                         };
                     })(f);
@@ -704,6 +749,10 @@ function handleImageClicks() {
         var row = tabelle.fnGetData(aPos[0]);
         var name = row[1];
         var docId = "workspace:/SpacesStore/" + daten[name]["container"];
+        //TODO Was ist das für eine Funktion
+       // var json = executeService("moveDocument", [
+       //     {"name": "documentId", "value": docId}, {"name": "currentLocationId", "value": inboxID},  {"name": "destinationId", "value": inboxID}
+       // ], "Dokument konnte nicht verschoben werden:");
         if (isLocal()) {
             var json = jQuery.parseJSON(document.reader.moveDocument(docId, inboxID, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null));
             if (!json.success)
@@ -1278,55 +1327,19 @@ function sendRules(dialog) {
         var erg = false;
         if (currentRules.endsWith("doc.xml")) {
             vkbeautify.xml(rulesEditor.getSession().getValue());
-            if (isLocal()) {
-                var ret = document.reader.updateDocumentByFile(rulesID, currentRules,
-                    "XML-Beschreibung der Dokumente", "application/xml", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
-                if (dialog) {
-                    if (ret == 200) {
-                        alert("Regeln erfolgreich übertragen!");
-                        erg = true;
-                    } else
-                        alert("Fehler bei der Übertragung: " + ret);
-                }
-            } else {
-                var dataString = {
-                    "function"     : "updateDocument",
-                    "documentText" : rulesEditor.getSession().getValue(),
-                    "description"  : "XML-Beschreibung der Dokumente",
-                    "documentId"   : rulesID,
-                    "mimeType"     : "application/xml",
-                    "server"       : getSettings("server"),
-                    "username"     : getSettings("user"),
-                    "password"     : getSettings("password"),
-                    "proxyHost"    : getSettings("proxy"),
-                    "proxyPort"    : getSettings("port")
-                };
-                $.ajax({
-                    type           : "POST",
-                    data           : dataString,
-                    datatype       : "json",
-                    url            : "/TestVerteilung/VerteilungServlet",
-                    error    : function (response) {
-                        try {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                        } catch(e)  {
-                            var str = "FEHLER:\n";
-                            str = str + e.toString() + "\n";
-                            for ( var prop in e)
-                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                            alert(str + "\n" + response.responseText);
-                        }
-                    },
-                    success        : function(data) {
-                        if (data.success[0]){
-                            if (dialog)
-                                alert("Regeln erfolgreich übertragen!");
-                        } else
-                            alert("Fehler beim Übertragen der Regeln: " + data.result[0]);
-                    }
-                });
-            }
+            var json = executeService("updateDocument", [
+                {"name": "documentId", "value": rulesID},
+                {"name": "documentText", "value": rulesEditor.getSession().getValue()},
+                {"name": "mimeType", "value": "application/xml"},
+                {"name": "extraProperties", "value": ""},
+                {"name": "majorVersion", "value": ""},
+                {"name": "versionComment", "value": ""}
+            ], "Regeln konnten nicht übertragen werden:");
+            if (json.success) {
+                alert("Regeln erfolgreich übertragen!");
+                erg = true;
+            } else
+                alert("Fehler bei der Übertragung: " + ret);
             return erg;
         }
     } catch (e) {
@@ -1342,61 +1355,23 @@ function sendRules(dialog) {
  */
 function getRules(rulesId, loadLocal, dialog) {
     try {
-        if (isLocal()) {
-            var ret;
-            if (loadLocal) {
-                var open = openFile("doc.xml");
-                rulesEditor.getSession().setValue(open[0]);
-                rulesEditor.getSession().foldAll(1);
-            } else {
-                ret = document.reader.getContent(rulesId, false, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
-                var json = jQuery.parseJSON(ret);
-                if (json.success) {
-                    rulesEditor.getSession().setValue(json.result);
-                    rulesEditor.getSession().foldAll(1);
-                    if (dialog)
-                        alert("Regeln erfolgreich übertragen!");
-                } else
-                    alert("Fehler bei der Übertragung: " + json.result);
-            }
+        var ret;
+        if (loadLocal) {
+            var open = openFile("doc.xml");
+            rulesEditor.getSession().setValue(open[0]);
+            rulesEditor.getSession().foldAll(1);
         } else {
-            var dataString = {
-                "function"   : "getContent",
-                "documentId" : rulesId,
-                "extract"    : "false",
-                "server"     : getSettings("server"),
-                "username"   : getSettings("user"),
-                "password"   : getSettings("password"),
-                "proxyHost"  : getSettings("proxy"),
-                "proxyPort"  : getSettings("port")
-            };
-            $.ajax({
-                type         : "POST",
-                data         : dataString,
-                datatype     : "json",
-                url          : "/TestVerteilung/VerteilungServlet",
-                success      : function(data) {
-                    if (data.success[0]) {
-                        if (dialog)
-                            alert("Regeln erfolgreich übertragen!");
-                        rulesEditor.getSession().setValue(data.result[0].toString());
-                        rulesEditor.getSession().foldAll(1);
-                    } else
-                        alert("Regeln konnten nicht Übertragen werden: " + data.result[0]);
-                },
-                error    : function (response) {
-                    try {
-                        var r = jQuery.parseJSON(response.responseText);
-                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                    } catch(e)  {
-                        var str = "FEHLER:\n";
-                        str = str + e.toString() + "\n";
-                        for ( var prop in e)
-                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                        alert(str + "\n" + response.responseText);
-                    }
-                }
-            });
+            var json = executeService("getDocumentContent", [
+                {"name": "documentId", "value": rulesID},
+                {"name": "extract", "value": "false"}
+            ], "Regeln konnten nicht gelesen werden:");
+            if (json.success) {
+                rulesEditor.getSession().setValue(json.result);
+                rulesEditor.getSession().foldAll(1);
+                if (dialog)
+                    alert("Regeln erfolgreich übertragen!");
+            } else
+                alert("Fehler bei der Übertragung: " + json.result);
         }
         currentRules = "doc.xml";
     } catch (e) {
@@ -1405,7 +1380,7 @@ function getRules(rulesId, loadLocal, dialog) {
 }
 
 /**
- * Ãffnet die Regeln
+ * Öffnet die Regeln
  */
 function openRules() {
     var id;
@@ -1542,75 +1517,33 @@ function loadScript() {
         if (REC.exist(modifiedScript) && modifiedScript - length > 0) {
             content = modifiedScript;
         } else {
-            if (isLocal()) {
-                var open = openFile("recognition.js");
-                content = open[0];
-                workDocument = open[1];
-                eval(content);
-                REC = new Recognition();
-                REC.set(REC);
-                removeMarkers(markers, textEditor);
-                textEditor.getSession().setMode(new jsMode());
-                textEditor.getSession().setValue(content);
-                textEditor.setShowInvisibles(false);
-                scriptMode = true;
-                manageControls();
-            } else {
-                if (REC.exist(scriptID)) {
-                    var dataString = {
-                        "function": "getContent",
-                        "documentId": scriptID,
-                        "extract": "false",
-                        "server": getSettings("server"),
-                        "username": getSettings("user"),
-                        "password": getSettings("password"),
-                        "proxyHost": getSettings("proxy"),
-                        "proxyPort": getSettings("port")
-                    };
-                    $.ajax({
-                        type: "POST",
-                        data: dataString,
-                        datatype: "json",
-                        url: "/TestVerteilung/VerteilungServlet",
-                        error: function (response) {
-                            try {
-                                var r = jQuery.parseJSON(response.responseText);
-                                alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                            } catch (e) {
-                                var str = "FEHLER:\n";
-                                str = str + e.toString() + "\n";
-                                for (var prop in e)
-                                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                                alert(str + "\n" + response.responseText);
-                            }
-                        },
-                        success: function (data) {
-                            if (data.success[0]) {
-                                content = data.result[0].toString();
-                                workDocument = "recognition.js";
-                                eval(content);
-                                REC = new Recognition();
-                                REC.set(REC);
-                                removeMarkers(markers, textEditor);
-                                textEditor.getSession().setMode(new jsMode());
-                                textEditor.getSession().setValue(content);
-                                textEditor.setShowInvisibles(false);
-                                scriptMode = true;
-                                manageControls();
-                            } else
-                                alert("Script konnte nicht gefunden werden: " + data.result[0]);
-                        }
-                    });
+            if (REC.exist(scriptID)) {
+                var json = executeService("getDocumentContent", [
+                    {"name": "documentId", "value": scriptID},
+                    {"name": "extract", "value": "false"}
+                ], "Skript konnte nicht gelesen werden:");
+                if (json.success) {
+                    content = json.result;
+                    workDocument = "recognition.js";
+                    eval(content);
+                    REC = new Recognition();
+                    REC.set(REC);
+                    removeMarkers(markers, textEditor);
+                    textEditor.getSession().setMode(new jsMode());
+                    textEditor.getSession().setValue(content);
+                    textEditor.setShowInvisibles(false);
+                    scriptMode = true;
+                    manageControls();
                 }
-                else {
-                    $.get('recognition.js', function (msg) {
-                        textEditor.getSession().setMode(new jsMode());
-                        textEditor.getSession().setValue(msg);
-                        textEditor.setShowInvisibles(false);
-                        scriptMode = true;
-                        manageControls();
-                    });
-                }
+            }
+            else {
+                $.get('recognition.js', function (msg) {
+                    textEditor.getSession().setMode(new jsMode());
+                    textEditor.getSession().setValue(msg);
+                    textEditor.setShowInvisibles(false);
+                    scriptMode = true;
+                    manageControls();
+                });
             }
         }
     } catch (e) {
@@ -1648,55 +1581,17 @@ function reloadScript(dialog) {
  */
 function getScript(dialog) {
     try {
-        if (isLocal()) {
-            var ret = document.reader.getContent(scriptID, false, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
-                getSettings("port"), null);
-            var json = jQuery.parseJSON(ret);
-            if (json.success) {
-                save(workDocument, textEditor.getSession().getValue(), false);
-                textEditor.getSession().setValue(json.result);
-                if (dialog)
-                    alert("Script erfolgreich heruntergeladen!");
-            } else
-                alert("Fehler bei der Übertragung: " + json.result);
-        } else {
-            var dataString = {
-                "function": "getContent",
-                "documentId": scriptID,
-                "extract": "false",
-                "server": getSettings("server"),
-                "username": getSettings("user"),
-                "password": getSettings("password"),
-                "proxyHost": getSettings("proxy"),
-                "proxyPort": getSettings("port")
-            };
-            $.ajax({
-                type: "POST",
-                data: dataString,
-                datatype: "json",
-                url: "/TestVerteilung/VerteilungServlet",
-                error: function (response) {
-                    try {
-                        var r = jQuery.parseJSON(response.responseText);
-                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                    } catch (e) {
-                        var str = "FEHLER:\n";
-                        str = str + e.toString() + "\n";
-                        for (var prop in e)
-                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                        alert(str + "\n" + response.responseText);
-                    }
-                },
-                success: function (data) {
-                    if (data.success[0]) {
-                        if (dialog)
-                            alert("Script erfolgreich heruntergeladen!");
-                        textEditor.getSession().setValue(data.result.toString());
-                    } else
-                        alert("Script konnte nicht geladen werden: " + data.result[0]);
-                }
-            });
-        }
+        var json = executeService("getDocumentContent", [
+            {"name": "documentId", "value": scriptID},
+            {"name": "extract", "value": "false"}
+        ], "Skript konnte nicht gelesen werden:");
+        if (json.success) {
+            save(workDocument, textEditor.getSession().getValue(), false);
+            textEditor.getSession().setValue(json.result);
+            if (dialog)
+                alert("Script erfolgreich heruntergeladen!");
+        } else
+            alert("Fehler bei der Übertragung: " + json.result);
     } catch (e) {
         errorHandler(e);
     }
@@ -1712,57 +1607,17 @@ function sendScript(dialog) {
     try {
         var erg = false;
         if (workDocument.endsWith("recognition.js")) {
-            if (isLocal()) {
-                document.reader.save(workDocument, textEditor.getSession().getValue());
-                var ret = document.reader.updateDocument(scriptID, textEditor.getSession().getValue(),
-                    "VerteilungsScript", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null);
-                if (dialog) {
-                    if (ret == 200) {
-                        alert("Script erfolgreich übertragen!");
-                        erg = true;
-                    } else
-                        alert("Fehler bei der Übertragung: " + ret);
-                }
-            } else {
-                var dataString = {
-                    "function"     : "updateDocument",
-                    "documentId"   : scriptID,
-                    "documentText" : textEditor.getSession().getValue(),
-                    "description"  : "VerteilungsScript",
-                    "server"       : getSettings("server"),
-                    "username"     : getSettings("user"),
-                    "password"     : getSettings("password"),
-                    "proxyHost"    : getSettings("proxy"),
-                    "proxyPort"    : getSettings("port")
-                };
-                $.ajax({
-                    type           : "POST",
-                    data           : dataString,
-                    datatype       : "json",
-                    url            : "/TestVerteilung/VerteilungServlet",
-                    error    : function (response) {
-                        try {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                        } catch(e)  {
-                            var str = "FEHLER:\n";
-                            str = str + e.toString() + "\n";
-                            for ( var prop in e)
-                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                            alert(str + "\n" + response.responseText);
-                        }
-                    },
-                    success        : function(data) {
-                        if (data.success[0]){
-                            if (dialog)
-                                alert("Script erfolgreich übertragen!");
-                        } else
-                            alert("Script konnte nicht Übertragen werden: " + data.result[0]);
-                    }
-                });
-            }
-            return erg;
+            var json = executeService("updateDocument", [
+                {"name": "documentId", "value": scriptID},
+                {"name": "documentText", "value": textEditor.getSession().getValue()},
+                {"name": "mimetype", "value": "application/javascript"},
+                {"name": "extraProperties", "value": ""},
+                {"name": "majorVersion", "value": ""},
+                {"name": "versionComment", "value": ""}
+            ], "Skript konnte nicht zum Server gesendet werden:");
+            erg = json.success;
         }
+        return erg;
     } catch (e) {
         errorHandler(e);
     }
@@ -1829,194 +1684,26 @@ function init() {
         } else {
             settings = {};
             settings.settings = [];
-            if (!hasUrlParam())
-                settings.settings = [
-                    {"key": "server", "value": "http://192.168.178.100:9080"},
-                    {"key": "user", "value": "admin"},
-                    {"key": "password", "value": "admin"},
-                    {"key": "proxy", "value": ""},
-                    {"key": "port", "value": ""}
-                ];
-        }
-        if (REC.exist(getSettings("server")))
-            alfrescoServerAvailable = checkServerStatus(getSettings("server"), getSettings("proxy"), getSettings("port"));
-        if (alfrescoServerAvailable) {
-            var txt = [];
-            if (isLocal()) {
-                var json;
-                var pattern = new RegExp("true", "ig");
-                if (getUrlParam("runLocal") != null || pattern.test(getUrlParam("runLocal"))) {
-                    runLocal = true;
-                } else {
-                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"),
-                        getSettings("port")));
-                    if (json.success)
-                        scriptID = json.result;
-                    else
-                        txt.push("Script nicht gefunden! Fehler: " + json.result);
-                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port")
-                    ));
-                    if (json.success)
-                        rulesID = json.result;
-                    else
-                        txt.push("Regeln nicht gefunden! Fehler: " + json.result);
-                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port")
-                    ));
-                    if (json.success)
-                        inboxID = json.result;
-                    else
-                        txt.push("Inbox nicht gefunden! Fehler: " + json.result);
-                    json = jQuery.parseJSON(document.reader.getNodeId("SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port")
-                    ));
-                    if (json.success)
-                        rootID = json.result;
-                    else
-                        txt.push("Archiv nicht gefunden! Fehler: " + json.result);
-                }
-            } else {
-                var dataString = {
-                    "function": "getNodeId",
-                    "cmisQuery": "SELECT cmis:objectId from cmis:document where cmis:name='recognition.js'",
-                    "server": getSettings("server"),
-                    "username": getSettings("user"),
-                    "password": getSettings("password"),
-                    "proxyHost": getSettings("proxy"),
-                    "proxyPort": getSettings("port")
-                };
-                $.ajax({
-                    type: "POST",
-                    data: dataString,
-                    datatype: "json",
-                    url: "/TestVerteilung/VerteilungServlet",
-                    async: false,
-                    error: function (response) {
-                        try {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                        } catch (e) {
-                            var str = "FEHLER:\n";
-                            str = str + e.toString() + "\n";
-                            for (var prop in e)
-                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                            alert(str + "\n" + response.responseText);
-                        }
-                    },
-                    success: function (data) {
-                        if (data.success[0])
-                            scriptID = data.result[0];
-                        else {
-                            txt.push("Script nicht gefunden! " + data.result[0]);
-                        }
-                    }
-                });
-                var dataString = {
-                    "function": "getNodeId",
-                    "cmisQuery": "SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'",
-                    "server": getSettings("server"),
-                    "username": getSettings("user"),
-                    "password": getSettings("password"),
-                    "proxyHost": getSettings("proxy"),
-                    "proxyPort": getSettings("port")
-                };
-                $.ajax({
-                    type: "POST",
-                    data: dataString,
-                    datatype: "json",
-                    url: "/TestVerteilung/VerteilungServlet",
-                    async: false,
-                    error: function (response) {
-                        try {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                        } catch (e) {
-                            var str = "FEHLER:\n";
-                            str = str + e.toString() + "\n";
-                            for (var prop in e)
-                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                            alert(str + "\n" + response.responseText);
-                        }
-                    },
-                    success: function (data) {
-                        if (data.success[0])
-                            rulesID = data.result[0];
-                        else {
-                            txt.push("Regeln nicht gefunden! " + data.result[0]);
-                        }
-                    }
-                });
-                var dataString = {
-                    "function": "getNodeId",
-                    "cmisQuery": "SELECT cmis:objectId from cmis:folder where cmis:name='Inbox'",
-                    "server": getSettings("server"),
-                    "username": getSettings("user"),
-                    "password": getSettings("password"),
-                    "proxyHost": getSettings("proxy"),
-                    "proxyPort": getSettings("port")
-                };
-                $.ajax({
-                    type: "POST",
-                    data: dataString,
-                    datatype: "json",
-                    url: "/TestVerteilung/VerteilungServlet",
-                    async: false,
-                    error: function (response) {
-                        try {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                        } catch (e) {
-                            var str = "FEHLER:\n";
-                            str = str + e.toString() + "\n";
-                            for (var prop in e)
-                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                            alert(str + "\n" + response.responseText);
-                        }
-                    },
-                    success: function (data) {
-                        if (data.success[0])
-                            inboxID = data.result[0];
-                        else {
-                            txt.push("Inbox nicht gefunden! " + data.result[0]);
-                        }
-                    }
-                });
-                var dataString = {
-                    "function": "getNodeId",
-                    "cmisQuery": "SELECT * from cmis:folder where CONTAINS('PATH:\"//app:company_home/cm:Archiv\"')",
-                    "server": getSettings("server"),
-                    "username": getSettings("user"),
-                    "password": getSettings("password"),
-                    "proxyHost": getSettings("proxy"),
-                    "proxyPort": getSettings("port")
-                };
-                $.ajax({
-                    type: "POST",
-                    data: dataString,
-                    datatype: "json",
-                    url: "/TestVerteilung/VerteilungServlet",
-                    async: false,
-                    error: function (response) {
-                        try {
-                            var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                        } catch (e) {
-                            var str = "FEHLER:\n";
-                            str = str + e.toString() + "\n";
-                            for (var prop in e)
-                                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                            alert(str + "\n" + response.responseText);
-                        }
-                    },
-                    success: function (data) {
-                        if (data.success[0])
-                            rootID = data.result[0];
-                        else {
-                            txt.push("Archiv nicht gefunden! " + data.result[0]);
-                        }
-                    }
-                });
+            var obj = executeService("loadProperties", [
+                {"name": "filePath", "value": convertPath("../test.properties")}
+            ]);
+            if (obj.success) {
+                if (!exist(getSettings("server")))
+                    settings.settings.push({"key": "server", "value": obj.result.host});
+                if (!exist(getSettings("user")))
+                    settings.settings.push({"key": "user", "value": obj.result.user});
+                if (!exist(getSettings("password")))
+                    settings.settings.push({"key": "password", "value": obj.result.password});
             }
-            if (txt.length > 0)
-                alert(txt.join("\n"));
+        }
+        if (exist(getSettings("server")))
+            alfrescoServerAvailable = checkServerStatus(getSettings("server"));
+        if (alfrescoServerAvailable) {
+            executeService("setParameter", [{"name":"server", "value":getSettings("server") + "service/cmis"},{"name":"user", "value":getSettings("user")},{"name":"password", "value":getSettings("password")}], "Parameter für die Services konnten nicht gesetzt werden:");
+            scriptID = executeService("getNodeId", [{"name":"filePath", "value":"/Datenverzeichnis/Skripte/recognition.js"}], "Verteilungsscript konnte nicht gefunden werden:").result;
+            rulesID = executeService("getNodeId", [{"name":"filePath", "value":"/Datenverzeichnis/Skripte/doc.xml"}], "Verteilregeln konnten nicht gefunden werden:").result;
+            inboxID = executeService("getNodeId", [{"name":"filePath", "value":"/Archiv/Inbox"}], "Inbox konnte nicht gefunden werden:").result;
+            rootID = executeService("getNodeId", [{"name":"filePath", "value":"/Archiv/Archiv"}], "Archiv konnte nicht gefunden werden:").result;
             $( "#tabs" ).tabs( "option", "active", 0 );
         } else {
             $( "#tabs" ).tabs({ disabled: [ 0 ] });

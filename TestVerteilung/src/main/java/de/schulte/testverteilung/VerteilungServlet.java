@@ -2,14 +2,9 @@ package de.schulte.testverteilung;
 
 import java.net.*;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
-import java.security.PrivilegedExceptionAction;
-import java.util.*;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -19,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
-import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,12 +24,6 @@ public class VerteilungServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
     private VerteilungServices services;
-
-    private String bindingUrl;
-
-    private String user;
-
-    private String password;
 
     private Logger logger = Logger.getLogger(VerteilungApplet.class.getName());
 
@@ -49,7 +37,6 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_FILENAME = "fileName";
     public static final String PARAMETER_CMISQUERY = "cmisQuery";
     public static final String PARAMETER_DESTINATIONFOLDER = "destinationFolder";
-    public static final String PARAMETER_DESCRIPTION = "description";
     public static final String PARAMETER_MIMETYPE = "mimeType";
     public static final String PARAMETER_SERVER = "server";
     public static final String PARAMETER_USERNAME = "username";
@@ -84,6 +71,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_SETPARAMETER = "setParameter";
     public static final String FUNCTION_UPDATEDOCUMENT = "updateDocument";
     public static final String FUNCTION_UPLOADDOCUMENT = "uploadDocument";
+    public static final String FUNCTION_LOADPROPERTIES = "loadProperies";
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -97,7 +85,7 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * liefert die Services
      * nur für Testzwecke
-     * @return
+     * @return  die Services
      */
     public VerteilungServices getServices() {
         return services;
@@ -115,18 +103,15 @@ public class VerteilungServlet extends HttpServlet {
      *                                                    ret               die Parameter als String
      */
     public JSONObject setParameter(String bindingUrl, String user, String password) {
-        this.bindingUrl = bindingUrl;
-        this.user = user;
-        this.password = password;
         JSONObject obj = new JSONObject();
         try {
-            if (this.bindingUrl != null && !this.bindingUrl.isEmpty() && this.user != null && !this.user.isEmpty() && this.password != null && !this.password.isEmpty()) {
-                services.setParameter(this.bindingUrl, this.user, this.password);
+            if (bindingUrl != null && !bindingUrl.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
+                services.setParameter(bindingUrl, user, password);
                 obj.put("success", true);
-                obj.put("result", "BindingUrl:" + this.bindingUrl + " User:" + this.user + " Password:" + this.password);
+                obj.put("result", "BindingUrl:" + bindingUrl + " User:" + user + " Password:" + password);
             } else {
                 obj.put("success", false);
-                obj.put("result", "Parameter fehlt: BindingUrl:" + this.bindingUrl + " User: " + this.user + " Password:" + this.password);
+                obj.put("result", "Parameter fehlt: BindingUrl:" + bindingUrl + " User: " + user + " Password:" + password);
             }        } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
@@ -141,9 +126,7 @@ public class VerteilungServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
 			doGetOrPost(request, response);
-		} catch (URISyntaxException e) {
-			throw new ServletException(e);
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			throw new ServletException(e);
 		}
 	}
@@ -155,17 +138,15 @@ public class VerteilungServlet extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
 			doGetOrPost(request, response);
-		} catch (URISyntaxException e) {
-			throw new ServletException(e);
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			throw new ServletException(e);
 		}
 	}
 
     /**
      * diese Methode handelt get und post Requests
-     * @param req
-     * @param resp
+     * @param req   der Request
+     * @param resp  der Response
      * @throws IOException
      * @throws URISyntaxException
      * @throws JSONException
@@ -173,7 +154,6 @@ public class VerteilungServlet extends HttpServlet {
     private void doGetOrPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException,
             JSONException {
         // Get the value of a request parameter; the name is case-sensitive
-        Object ret = null;
         JSONObject obj = new JSONObject();
         String value = req.getParameter(PARAMETER_FUNCTION);
         String documentId = req.getParameter(PARAMETER_DOCUMENTID);
@@ -184,7 +164,6 @@ public class VerteilungServlet extends HttpServlet {
         String fileName = req.getParameter(PARAMETER_FILENAME);
         String cmisQuery = req.getParameter(PARAMETER_CMISQUERY);
         String destinationFolder = req.getParameter(PARAMETER_DESTINATIONFOLDER);
-        String description = req.getParameter(PARAMETER_DESCRIPTION);
         String mimeType = req.getParameter(PARAMETER_MIMETYPE);
         String server = req.getParameter(PARAMETER_SERVER);
         String username = req.getParameter(PARAMETER_USERNAME);
@@ -253,6 +232,8 @@ public class VerteilungServlet extends HttpServlet {
                     obj = clearInternalStorage();
                 } else if (value.equalsIgnoreCase("openFile")) {
                     obj = openFile(filePath);
+                } else if (value.equalsIgnoreCase(FUNCTION_LOADPROPERTIES)) {
+                    obj = loadPropertiest(filePath);
             } else {
                     obj.put("success", false);
                     obj.put("result", "Function " + value + " ist unbekannt!");
@@ -454,6 +435,20 @@ public class VerteilungServlet extends HttpServlet {
     }
 
     /**
+     * liest die Testproperties
+     *
+     * @param filePath       der Name der Properties Datei
+     * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                               false    ein Fehler ist aufgetreten
+     *                                                      result            die Properties als JSON Objekte
+     */
+    protected JSONObject loadPropertiest(String filePath) throws VerteilungException {
+
+
+        return services.loadProperties(filePath);
+    }
+
+    /**
      * extrahiert den Inhalt einer PDF Datei.
      * @param pdfContent        der Inhalt der Datei als Base64 encodeter String
      * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
@@ -583,29 +578,22 @@ public class VerteilungServlet extends HttpServlet {
                            HttpServletResponse resp) {
         ServletOutputStream sout = null;
         try {
-            boolean found = false;
-            FileEntry entry = null;
-            Iterator<FileEntry> it = services.getEntries().iterator();
-            while (it.hasNext()) {
-                entry = it.next();
+            for (FileEntry entry : services.getEntries()) {
                 if (entry.getName().equalsIgnoreCase(fileName)) {
-                    found = true;
+                    final byte[] bytes = entry.getData();
+                    final String name = entry.getName();
+                    resp.reset();
+                    resp.resetBuffer();
+                    resp.setContentType("application/pdf");
+                    resp.setHeader("Content-Disposition", "inline; filename=" + name + "\"");
+                    resp.setHeader("Cache-Control", "max-age=0");
+                    resp.setContentLength(bytes.length);
+                    sout = resp.getOutputStream();
+                    sout.write(bytes, 0, bytes.length);
+                    sout.flush();
+                    sout.close();
                     break;
                 }
-            }
-            if (found) {
-                final byte[] bytes = entry.getData();
-                final String name = entry.getName();
-                resp.reset();
-                resp.resetBuffer();
-                resp.setContentType("application/pdf");
-                resp.setHeader("Content-Disposition", "inline; filename=" + name + "\"");
-                resp.setHeader("Cache-Control", "max-age=0");
-                resp.setContentLength(bytes.length);
-                sout = resp.getOutputStream();
-                sout.write(bytes, 0, bytes.length);
-                sout.flush();
-                sout.close();
             }
         } catch (Exception e) {
             logger.severe(e.getLocalizedMessage());
@@ -619,6 +607,5 @@ public class VerteilungServlet extends HttpServlet {
                 io.printStackTrace();
             }
         }
-        return;
     }
 }

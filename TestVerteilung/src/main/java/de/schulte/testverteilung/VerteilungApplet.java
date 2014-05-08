@@ -44,12 +44,6 @@ public class VerteilungApplet extends Applet {
 
     private VerteilungServices services = new VerteilungServices();
 
-    private String bindingUrl;
-
-    private String user;
-
-    private String password;
-
     private  Logger logger = Logger.getLogger(VerteilungApplet.class.getName());
 
     private String level = "WARNING";
@@ -57,10 +51,22 @@ public class VerteilungApplet extends Applet {
     /**
      * liefert die Services
      * nur für Testzwecke
-     * @return
+     * @return  die Services
      */
     public VerteilungServices getServices() {
         return services;
+    }
+
+    /**
+     * gibt einen vorher häppchenweise übertragenen Parameter
+     * @return  der Parameter als String
+     * @throws VerteilungException
+     */
+    private String getParameter() throws VerteilungException {
+        byte[] bytes = bys.toByteArray();
+        if (bytes.length == 0)
+            throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
+        return new String(bytes);
     }
 
     /**
@@ -70,6 +76,8 @@ public class VerteilungApplet extends Applet {
 		try {
 			logger.info("Hier ist das Verteilungsapplet");
             level = getParameter ("debug");
+            if (level == null || level.isEmpty())
+                level = "WARNING";
             Logger log = LogManager.getLogManager().getLogger("");
             for (Handler h : log.getHandlers()) {
                 h.setLevel(Level.parse(level));
@@ -95,19 +103,15 @@ public class VerteilungApplet extends Applet {
                                    String user,
                                    String password) {
 
-        logger.fine("Aufruf setParameter mit Url: " + bindingUrl + " User: " + user + " Password: " + password);
-        this.bindingUrl = bindingUrl;
-        this.user = user;
-        this.password = password;
         JSONObject obj = new JSONObject();
         try {
-            if (this.bindingUrl != null && !this.bindingUrl.isEmpty() && this.user != null && !this.user.isEmpty() && this.password != null && !this.password.isEmpty()) {
-                services.setParameter(this.bindingUrl, this.user, this.password);
+            if (bindingUrl != null && !bindingUrl.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
+                services.setParameter(bindingUrl, user, password);
                 obj.put("success", true);
-                obj.put("result", "BindingUrl:" + this.bindingUrl + " User:" + this.user + " Password:" + this.password);
+                obj.put("result", "BindingUrl:" + bindingUrl + " User:" + user + " Password:" + password);
             } else {
                 obj.put("success", false);
-                obj.put("result", "Parameter fehlt: BindingUrl:" + this.bindingUrl + " User: " + this.user + " Password:" + this.password);
+                obj.put("result", "Parameter fehlt: BindingUrl:" + bindingUrl + " User: " + user + " Password:" + password);
             }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
@@ -125,9 +129,7 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject isURLAvailable(final String urlString) {
 
-        logger.fine("Aufruf isURLAvailabel mit urlString: " + urlString);
-
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -152,8 +154,7 @@ public class VerteilungApplet extends Applet {
     public JSONObject listFolderAsJSON(final String filePath,
                                        final String listFolder)  {
 
-        logger.fine("Aufruf listFolderAsJSON mit filePath: " + filePath + " listFolder: " + listFolder);
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -177,8 +178,7 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject getNodeId(final String path) {
 
-        logger.fine("Aufruf getNodeId mit path: " + path);
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -202,8 +202,7 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject findDocument(final String cmisQuery) {
 
-        logger.fine("Aufruf findDocument mit cmisQuery: " + cmisQuery);
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -221,20 +220,20 @@ public class VerteilungApplet extends Applet {
      * liefert den Inhalt eines Dokumentes. Wenn es sich um eine PDF Dokument handelt, dann wird
      * der Text extrahiert.
      * @param docId                 die Id des Documentes
-     * @param extract               legt fest,ob einPDF Document umgewandelt werden soll
+     * @param extract               legt fest,ob ein PDF Document umgewandelt werden soll
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result            der Inhalt als String
      */
     public JSONObject getDocumentContent(final String docId,
-                                         final boolean extract) {
+                                         final String extract) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.getDocumentContent(docId, extract);
+                    return services.getDocumentContent(docId, extract.equalsIgnoreCase("true"));
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -254,7 +253,7 @@ public class VerteilungApplet extends Applet {
     public JSONObject uploadDocument(final String filePath,
                                      final String fileName) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -281,7 +280,7 @@ public class VerteilungApplet extends Applet {
                                      final String fileName) {
 
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -316,7 +315,7 @@ public class VerteilungApplet extends Applet {
                                      final String versionState)  {
 
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -328,7 +327,71 @@ public class VerteilungApplet extends Applet {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj;
+    }
 
+    /**
+     * erzeugt ein Document
+     * @param  filePath             der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  fileName             der Name des Dokumentes als String
+     * @param  documentType         der Typ des Dokumentes
+     * @param  extraCMSProperties   zusätzliche Properties
+     * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
+     * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                      false    ein Fehler ist aufgetreten
+     *                                                                      result            Dokument als JSONObject
+     */
+    public JSONObject createDocument(final String filePath,
+                                     final String fileName,
+                                     final String documentType,
+                                     final String extraCMSProperties,
+                                     final String versionState)  {
+
+
+        JSONObject obj;
+        try {
+            final String documentContent = getParameter();
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties, versionState);
+                }
+            });
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * aktualisiert den Inhalt eines Dokumentes
+     * @param  documentId                Die Id des zu aktualisierenden Dokumentes
+     * @param  documentType              der Typ des Dokumentes
+     * @param  extraCMSProperties        zusätzliche Properties
+     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
+     * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     */
+    public JSONObject updateDocument(final String documentId,
+                                     final String documentType,
+                                     final String extraCMSProperties,
+                                     final String majorVersion,
+                                     final String versionComment)  {
+
+        JSONObject obj;
+        try {
+            final String content = getParameter();
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    return services.updateDocument(documentId, content, documentType, extraCMSProperties, majorVersion, versionComment);
+                }
+            });
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
     }
 
     /**
@@ -350,7 +413,7 @@ public class VerteilungApplet extends Applet {
                                      final String majorVersion,
                                      final String versionComment)  {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -378,7 +441,7 @@ public class VerteilungApplet extends Applet {
                                    final String oldFolderId,
                                    final String newFolderId) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -404,7 +467,7 @@ public class VerteilungApplet extends Applet {
     public JSONObject createFolder(final String targetPath,
                                    final String folderName) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -427,7 +490,7 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject deleteFolder(final String folderPath) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -452,7 +515,7 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject loadProperties(final String propFile) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -466,19 +529,37 @@ public class VerteilungApplet extends Applet {
         return obj;
     }
 
+    /**
+     * sichert einen String in eine lokale Datei
+     * @param fileName           der Name der Datei
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg nichts, ansonsten der Fehler
+     */
+    public JSONObject saveToFile(final String fileName) {
+
+        JSONObject obj;
+        try {
+            obj =saveToFile(fileName, getParameter());
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
 
     /**
      * sichert einen String in eine lokale Datei
      * @param fileName           der Name der Datei
-     * @param string             der zu sichernde String
+     * @param content            der zu sichernde String
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg nichts, ansonsten der Fehler
      */
     public JSONObject saveToFile(final String fileName,
-                                 final String string) {
+                                 final String content) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -487,7 +568,7 @@ public class VerteilungApplet extends Applet {
                     File file = new File(new URI(fileName));
                     FileOutputStream fos = new FileOutputStream(file);
                     BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
-                    bufferedWriter.write(string);
+                    bufferedWriter.write(content);
                     bufferedWriter.close();
                     obj.put("success", true);
                     obj.put("result", "");
@@ -510,7 +591,7 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject deleteFile(final String fileName) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -532,21 +613,42 @@ public class VerteilungApplet extends Applet {
     /**
      * extrahiert den Inhalt einer PDF Datei.
      * der Inhalt der ZIP Datei muss vorher mit @see fillParamter gefüllt worden sein.
+     * @param content der Content der Datei als Base64 encodeter String
+     * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der PDF Datei als String
+     */
+    public JSONObject extractPDFContent(final String content) {
+
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException, VerteilungException {
+                    return services.extractPDFContent(content);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * extrahiert den Inhalt einer PDF Datei.
+     * der Inhalt der ZIP Datei muss vorher mit @see fillParamter gefüllt worden sein.
      * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
      *                                                         result            der Inhalt der PDF Datei als String
      */
     public JSONObject extractPDFContent() {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException, VerteilungException {
-                    byte[] bytes = bys.toByteArray();
-                    if (bytes.length == 0)
-                        throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    return services.extractPDFContent(new String(bytes));
+                    return services.extractPDFContent(getParameter());
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -564,7 +666,7 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject extractPDFFile(final String filePath) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -588,15 +690,12 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject extractPDFToInternalStorage(final String fileName) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException, VerteilungException {
-                    byte[] bytes = bys.toByteArray();
-                    if (bytes.length == 0)
-                        throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    return services.extractPDFToInternalStorage(new String(bytes), fileName);
+                    return services.extractPDFToInternalStorage(getParameter(), fileName);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -614,15 +713,60 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject extractZIP()  {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException, VerteilungException {
-                    byte[] bytes = bys.toByteArray();
-                    if (bytes.length == 0)
-                        throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    return services.extractZIP(new String(bytes));
+                    return services.extractZIP(getParameter());
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * extrahiert ein ZIP File und gibt den Inhalt als Base64 encodete Strings zurück
+     * der Inhalt der ZIP Datei muss vorher mit @see fillParamter gefüllt worden sein.
+     * @param content der Content der Datei als Base64 encodeter String
+     * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der ZIP Datei als JSON Aray mit Base64 encodeten STrings
+     */
+    public JSONObject extractZIP(final String content)  {
+
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException, VerteilungException {
+                    return services.extractZIP(content);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * entpackt ein ZIP File und stellt die Inhalte und die extrahierten PDF Inhalte in den internen Speicher
+     * der Inhalt der ZIP Datei muss vorher mit @see fillParamter gefüllt worden sein.
+     * @param content der Content der Datei als Base64 encodeter String
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
+     */
+    public JSONObject extractZIPAndExtractPDFToInternalStorage(final String content) {
+
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException, VerteilungException {
+                    return services.extractZIPAndExtractPDFToInternalStorage(content);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -640,15 +784,12 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject extractZIPAndExtractPDFToInternalStorage() {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException, VerteilungException {
-                    byte[] bytes = bys.toByteArray();
-                    if (bytes.length == 0)
-                        throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    return services.extractZIPAndExtractPDFToInternalStorage(new String(bytes));
+                    return services.extractZIPAndExtractPDFToInternalStorage(getParameter());
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -661,21 +802,42 @@ public class VerteilungApplet extends Applet {
     /**
      * entpackt ein ZIP File in den internen Speicher
      * der Inhalt der ZIP Datei muss vorher mit @see fillParamter gefüllt worden sein.
+     * @param content der Content der Datei als Base64 encodeter String
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
+     */
+    public JSONObject extractZIPToInternalStorage(final String content)  {
+
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException, VerteilungException {
+                    return services.extractZIPToInternalStorage(content);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * entpackt ein ZIP File in den internen Speicher
+     * der Inhalt der ZIP Datei muss vorher mit @see fillParamter gefüllt worden sein.
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
      */
     public JSONObject extractZIPToInternalStorage()  {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException, VerteilungException {
-                    byte[] bytes = bys.toByteArray();
-                    if (bytes.length == 0)
-                        throw new VerteilungException("kein Fileinhalt vorhanden! fillParameter ist nicht vorher benutzt worden.");
-                    return services.extractZIPToInternalStorage(new String(bytes));
+                    return services.extractZIPToInternalStorage(getParameter());
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -694,7 +856,7 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject getDataFromInternalStorage(final String fileName) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -716,7 +878,7 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject getDataFromInternalStorage() {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -739,7 +901,7 @@ public class VerteilungApplet extends Applet {
       */
     public JSONObject clearInternalStorage()  {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
@@ -763,33 +925,29 @@ public class VerteilungApplet extends Applet {
      */
     public JSONObject openPDF(final String fileName) {
 
-        JSONObject obj = new JSONObject();
+        JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws IOException, JSONException {
                     JSONObject obj = new JSONObject();
                     boolean found = false;
-                    FileEntry entry = null;
-                    Iterator<FileEntry> it = services.getEntries().iterator();
-                    while (it.hasNext()) {
-                        entry = it.next();
+                    for (FileEntry entry : services.getEntries()) {
                         if (entry.getName().equalsIgnoreCase(fileName)) {
                             found = true;
+                            byte[] ret = entry.getData();
+                            File file = File.createTempFile("Tmp", ".pdf");
+                            FileOutputStream fos = new FileOutputStream(file);
+                            fos.write(ret);
+                            fos.flush();
+                            fos.close();
+                            getAppletContext().showDocument(file.toURI().toURL(), "_blank");
+                            obj.put("success", true);
+                            obj.put("result", "");
                             break;
                         }
                     }
-                    if (found) {
-                        byte[] ret = entry.getData();
-                        File file = File.createTempFile("Tmp", ".pdf");
-                        FileOutputStream fos = new FileOutputStream(file);
-                        fos.write(ret);
-                        fos.flush();
-                        fos.close();
-                        getAppletContext().showDocument(file.toURI().toURL(), "_blank");
-                        obj.put("success", true);
-                        obj.put("result", "");
-                    } else {
+                    if (!found) {
                         obj.put("success", false);
                         obj.put("result", "PDF konnte nicht gefunden werden!");
                     }
@@ -856,10 +1014,13 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
-     * Testmethode
-     * @return
+     * Testmethode zur Ermittlung der maximalen Parameterlänge
+     * @param string             der Teststring
+     * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            die Länge des Strings
      */
-    public JSONObject testReturn() {
+    public JSONObject testReturn(final String string) {
 
         JSONObject obj;
         try {
@@ -868,7 +1029,7 @@ public class VerteilungApplet extends Applet {
                 public JSONObject run() throws IOException, JSONException, URISyntaxException {
                     JSONObject obj = new JSONObject();
                     obj.put("success", true);
-                    obj.put("result", "dies ist das Testergebnis");
+                    obj.put("result", string.length());
                     return obj;
                 }
             });
@@ -881,7 +1042,7 @@ public class VerteilungApplet extends Applet {
 
     /**
      * Testmethode
-     * @return
+     * @return  ein Teststring
      */
     public String test() {
 		return "Hier ist das Verteilungs Applet!";

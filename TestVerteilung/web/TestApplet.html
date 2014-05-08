@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html>
 <head>
-    <title></title>
+    <title>Testapplet</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" src="./verteilung.js" charset="utf-8"></script>
     <script type="text/javascript" src="jquery-1.9.1.js"></script>
     <script type="text/javascript" src="jquery-ui-1.10.3.custom.js"></script>
-    <script type="text/javascript" src="webtoolkit.base64.js"></script>
     <script type="text/javascript">
         $(function() {
             $( document ).tooltip({
@@ -72,11 +73,19 @@
     const testExtractPDFFile =                "document.reader.extractPDFFile(\"file://\" + properties.testPDF);";
     const testSaveToFile =                    "document.reader.saveToFile(\"file:///tmp/TestFile.txt\", \"äöüßÄÖÜ/\");";
     const testDeleteFile =                    "document.reader.deleteFile(\"file:///tmp/TestFile.txt\");";
-    const testFillParameter =                 "var str = btoa(pdf); for (var k = 0; k <= Math.ceil(str.length / 1000); k++) document.reader.fillParameter(str.substr(k * 1000, 1000), k == 0);"
+    const testMaxLength =                     "document.reader.testReturn(testString);";
+    const testFillParameter =                 "var str = btoa(pdf); for (var k = 0; k <= Math.ceil(str.length / maxLength); k++) document.reader.fillParameter(str.substr(k * maxLength, maxLength), k == 0);"
     const testExtractPDFToInternalStorage =   "document.reader.extractPDFToInternalStorage(properties.testPDF);";
     const testOpenPDF =                       "document.reader.openPDF(properties.testPDF);";
 
+    var success = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/ok.png" style="display: block; margin: 0px auto;"  /></a>';
+    var error = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/error.png" style="display: block; margin: 0px auto;"  /></a>';
+    var ergebnis = document.createElement("a");
+    var evaluate = document.createElement("a");
+
+
     try {
+        var maxLength = 10000000;
         doTest("Lade Applet", testLoadApplet, "$('#reader').get(0).isActive()");
         doTest("Test Applet", testTest, "erg == 'Hier ist das Verteilungs Applet!'");
         doTest("Test Applet", testTestReturn,"var result = $.parseJSON(erg); result.success;");
@@ -113,10 +122,6 @@
         var test;
         var res;
         var testError = "";
-        var success = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/ok.png" style="display: block; margin: 0px auto;"  /></a>';
-        var error = '<a class="control" href="#" ><img  border="0" align="middle" alt="Fehler" src="./resource/error.png" style="display: block; margin: 0px auto;"  /></a>';
-        var ergebnis = document.createElement("a");
-        var evaluate = document.createElement("a");
 
         try {
             erg = eval(testEvaluate);

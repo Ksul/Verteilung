@@ -27,9 +27,9 @@ public class AlfrescoTest {
         assertNotNull(fileInputStream);
         properties.load(fileInputStream);
         assertNotNull(properties.getProperty("host"));
-        assertNotNull(properties.getProperty("bindingUrl"));
         assertNotNull(properties.getProperty("password"));
         assertNotNull(properties.getProperty("testPDF"));
+        properties.put("bindingUrl", properties.getProperty("host") + "service/cmis");
         if (needsProxy()) {
             System.getProperties().put("proxySet", "true");
             System.getProperties().put("proxyHost", "www-proxy");

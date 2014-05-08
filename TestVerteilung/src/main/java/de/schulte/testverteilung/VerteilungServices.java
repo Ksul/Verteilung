@@ -504,7 +504,7 @@ public class VerteilungServices {
 
     /**
      * liest die Testproperties
-     * nur für Testzwecke
+     *
      * @param propFile       der Name der Properties Datei
      * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
@@ -672,7 +672,8 @@ public class VerteilungServices {
             obj = VerteilungHelper.convertErrorToJSON(e);
         } finally {
             try {
-                zipin.close();
+                if (zipin != null)
+                    zipin.close();
             } catch (IOException e) {
                 obj = VerteilungHelper.convertErrorToJSON(e);
             }
@@ -695,7 +696,7 @@ public class VerteilungServices {
             final byte[] bytes = Base64.decodeBase64(zipContent);
             InputStream bais = new ByteArrayInputStream(bytes);
             zipin = new ZipInputStream(bais);
-            ZipEntry entry = null;
+            ZipEntry entry;
             int size;
             int counter = 0;
             entries.clear();
@@ -723,7 +724,8 @@ public class VerteilungServices {
             obj = VerteilungHelper.convertErrorToJSON(e);
         } finally {
             try {
-                zipin.close();
+                if (zipin != null)
+                    zipin.close();
             } catch (IOException e) {
                 obj = VerteilungHelper.convertErrorToJSON(e);
             }
@@ -741,14 +743,21 @@ public class VerteilungServices {
     public JSONObject extractZIPAndExtractPDFToInternalStorage(String zipContent) {
 
         JSONObject obj;
+        String extractedData;
         int counter = 0;
         try {
             obj = extractZIPToInternalStorage(zipContent);
             if (obj.getBoolean("success")) {
                 PDFConnector con = new PDFConnector();
                 for (FileEntry entry : entries) {
-                    InputStream bais = new ByteArrayInputStream(entry.getData());
-                    entry.setExtractedData(con.pdftoText(bais));
+
+                    if (entry.getName().toLowerCase().endsWith(".pdf")) {
+                        InputStream bais = new ByteArrayInputStream(entry.getData());
+                        extractedData = con.pdftoText(bais);
+                    }
+                    else
+                        extractedData = new String(entry.getData());
+                    entry.setExtractedData(extractedData);
                     counter++;
                 }
                 obj.put("result", counter);
@@ -776,15 +785,13 @@ public class VerteilungServices {
                 obj.put("success", false);
                 obj.put("result", "keine Einträge vorhanden");
             } else {
-                Iterator<FileEntry> it = entries.iterator();
-                while (it.hasNext()) {
-                    FileEntry entry = it.next();
+                for (FileEntry entry : entries) {
                     if (entry.getName().equals(fileName)) {
                         obj.put("success", true);
                         JSONObject jEntry = new JSONObject();
                         if (entry.getData().length > 0) {
                             jEntry.put("data", Base64.encodeBase64String(entry.getData()));
-                            if (!entry.getExtractedData().isEmpty())
+                            if (entry.getExtractedData() != null && !entry.getExtractedData().isEmpty())
                                 jEntry.put("extractedData", entry.getExtractedData());
                             result.put(entry.getName(), jEntry);
                             obj.put("result", result);
@@ -817,20 +824,16 @@ public class VerteilungServices {
 
         JSONObject obj = new JSONObject();
         JSONObject results = new JSONObject();
-        boolean found = false;
         try {
             if (entries.isEmpty()) {
                 obj.put("success", false);
                 obj.put("result", "keine Einträge vorhanden");
             } else {
-
-                Iterator<FileEntry> it = entries.iterator();
-                while (it.hasNext()) {
-                    FileEntry entry = it.next();
+                for (FileEntry entry: entries) {
                     JSONObject jEntry = new JSONObject();
                     if (entry.getData().length > 0) {
                         jEntry.put("data", Base64.encodeBase64String(entry.getData()));
-                        if (!entry.getExtractedData().isEmpty())
+                        if (entry.getExtractedData() != null && !entry.getExtractedData().isEmpty())
                             jEntry.put("extractedData", entry.getExtractedData());
                         results.put(entry.getName(), jEntry);
                     }

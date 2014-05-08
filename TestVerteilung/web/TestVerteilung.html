@@ -1059,53 +1059,17 @@ window.onload = function () {
     // Eventhandler für die Image Clicks
     handleImageClicks();
     tree = $("#tree").jstree({
-       "json_data": {
+        "json_data": {
             "data": function (aNode, aFunction) {
                 if (alfrescoServerAvailable) {
-                    if (isLocal()) {
-                        try {
-                            var ret = document.reader.listFolderAsJSON(aNode != -1 ? aNode[0].attributes["id"].value : "", "-1", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
-                            var json = jQuery.parseJSON(ret);
-                            if (json.success)
-                              aFunction(json.result);
-                            else
-                              alert("Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
-                        } catch (e) {
-                            errorHandler(e);
-                        }
-                    } else {
-                        var dataString = {
-                            "function": "listFolderAsJSON",
-                            "filePath": aNode.attr ? aNode.attr("id") : "",
-                            "server": getSettings("server"),
-                            "username": getSettings("user"),
-                            "password": getSettings("password"),
-                            "searchFolder": "true",
-                            "withFolder": "-1",
-                            "proxyHost": getSettings("proxy"),
-                            "proxyPort": getSettings("port")
-                        };
-                        $.ajax({
-                            type: "POST",
-                            data: dataString,
-                            cache: false,
-                            datatype: "json",
-                            url: "VerteilungServlet",
-                            success: function (erg) {
-                                if (erg.success[0]) {
-                                    aFunction(erg.result);
-                                }
-                            },
-                            error: function (response) {
-                                try {
-                                    var r = jQuery.parseJSON(response.responseText);
-                                    alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                } catch (e) {
-                                    errorHandler(e);
-                                }
-                            }
-                        });
-                    }
+                    var json = executeService("listFolderAsJSON", [
+                        {"name": "filePath", "value": aNode.attr ? aNode.attr("id") : ""},
+                        {"name": "withFolder", "value": -1}
+                    ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
+                    if (json.success)
+                        aFunction(json.result);
+                    else
+                        alert("Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
                 }
             }
         },
