@@ -1063,7 +1063,7 @@ window.onload = function () {
             "data": function (aNode, aFunction) {
                 if (alfrescoServerAvailable) {
                     var json = executeService("listFolderAsJSON", [
-                        {"name": "filePath", "value": aNode.attr ? aNode.attr("id") : ""},
+                        {"name": "filePath", "value": aNode.attr ? aNode.attr("id") : "-1"},
                         {"name": "withFolder", "value": -1}
                     ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
                     if (json.success)
@@ -1325,22 +1325,22 @@ treeObject = jQuery.jstree._reference(tree);
                                                    value="" style="display: none"/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="reloadScript(true);" name="reloadScript" id="reloadScript"
+                    onclick="reloadScript();" name="reloadScript" id="reloadScript"
                     type="submit" class="reload" title="Reload" value=""
                     style="display: none"/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="save(this.workDocument, textEditor.getSession().getValue(), true);modifiedScript=null;"
+                    onclick="save(this.workDocument, textEditor.getSession().getValue());modifiedScript=null;"
                     name="saveScript" id="saveScript" type="submit" class="save"
                     title="Save" value="" style="display: none"/>
             </td>
-            <td width="60px" align="center"><input onclick="getScript(true);"
+            <td width="60px" align="center"><input onclick="getScript();"
                                                    name="getScript" id="getScript" type="submit"
                                                    class="download"
                                                    title="Download"
                                                    value="" style="display: none"/>
             </td>
-            <td width="60px" align="center"><input onclick="sendScript(true);"
+            <td width="60px" align="center"><input onclick="sendScript();"
                                                    name="sendScript" id="sendScript" type="submit"
                                                    class="upload"
                                                    title="Upload"
@@ -1372,15 +1372,15 @@ treeObject = jQuery.jstree._reference(tree);
                     name="unfoldAll" id="unfoldAll" type="submit" class="maximize"
                     title="Unfold All" value=""/></td>
             <td width="60px" align="center"><input
-                    onclick="getRules(window.parent.rulesID, false, true);" name="getRules"
+                    onclick="getRules(window.parent.rulesID, false);" name="getRules"
                     id="getRules" type="submit" class="download" title="Download Regeln" value=""/>
             </td>
-            <td width="60px" align="center"><input onclick="sendRules(true);"
+            <td width="60px" align="center"><input onclick="sendRules();"
                                                    name="sendRules" id="sendRules" type="submit" class="upload"
                                                    title="Sende Regeln" value=""/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="save(currentRules, vkbeautify.xml(rulesEditor.getSession().getValue()), true);"
+                    onclick="save(currentRules, vkbeautify.xml(rulesEditor.getSession().getValue()));"
                     name="saveRules" id="saveRules" type="submit" class="save" title="Save"
                     value=""/>
             </td>

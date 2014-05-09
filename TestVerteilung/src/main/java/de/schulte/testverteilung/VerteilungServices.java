@@ -99,23 +99,28 @@ public class VerteilungServices {
                 if (filePath.equals("-1"))
                     filePath = con.getNode("/Archiv").getId();
 
-                for (CmisObject cmisObject: con.listFolder(filePath)) {
-                    o = new JSONObject();
-                    o1 = new JSONObject();
-                    o.put("id", cmisObject.getId());
-                    if (cmisObject instanceof Folder) {
-                        o.put("rel", "folder");
-                        o1.put("state", "closed");
-                    } else {
-                        o.put("rel", "default");
-                        o1.put("state", "");
+                for (CmisObject cmisObject : con.listFolder(filePath)) {
+
+                    // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
+                    if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1)) {
+                        o = new JSONObject();
+                        o1 = new JSONObject();
+                        o.put("id", cmisObject.getId());
+                        if (cmisObject instanceof Folder) {
+                            o.put("rel", "folder");
+                            o1.put("state", "closed");
+                        } else {
+                            o.put("rel", "default");
+                            o1.put("state", "");
+                        }
+                        if (cmisObject instanceof AlfrescoDocument && ((AlfrescoDocument) cmisObject).hasAspect("P:cm:titled") && cmisObject.getPropertyValue("cm:title").toString().length() > 0)
+                            o1.put("data", cmisObject.getPropertyValue("cm:title"));
+                        else
+                            o1.put("data", cmisObject.getName());
+                        o1.put("attr", o);
+
+                        list.put(o1);
                     }
-                    if (cmisObject instanceof AlfrescoDocument && ((AlfrescoDocument) cmisObject).hasAspect("P:cm:titled") && cmisObject.getPropertyValue("cm:title").toString().length() > 0)
-                        o1.put("data", cmisObject.getPropertyValue("cm:title"));
-                    else
-                        o1.put("data", cmisObject.getName());
-                    o1.put("attr", o);
-                    list.put(o1);
                 }
             }
             obj.put("success", true);

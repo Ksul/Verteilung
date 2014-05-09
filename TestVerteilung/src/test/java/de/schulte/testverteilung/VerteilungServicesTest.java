@@ -37,8 +37,6 @@ public class VerteilungServicesTest extends AlfrescoTest{
 
     @Test
     public void testListFolderAsJSON() throws Exception {
-
-        // Root Eintrag
         JSONObject obj = services.listFolderAsJSON(null, 0);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -54,13 +52,41 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         assertTrue(obj.get("result") instanceof JSONArray);
-        assertTrue(((JSONArray) obj.get("result")).length() == 4);
+        assertEquals(4, ((JSONArray) obj.get("result")).length());
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++){
             assertEquals("closed", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("state"));
             assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("data"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
             assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("id"));
             assertEquals("folder", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("rel"));
         }
+        obj = services.uploadDocument("/Archiv", properties.getProperty("testPDF"));
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        obj = services.listFolderAsJSON("-1", -1);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.get("result") instanceof JSONArray);
+        assertEquals(4, ((JSONArray) obj.get("result")).length());
+        for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++){
+            assertEquals("closed", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("state"));
+            assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("data"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
+            assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("id"));
+            assertEquals("folder", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("rel"));
+        }
+        obj = services.listFolderAsJSON("-1", 1);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.get("result") instanceof JSONArray);
+        assertEquals(1, ((JSONArray) obj.get("result")).length());
+        obj = services.deleteDocument("/Archiv", "Test.pdf");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
     }
 
     @Test

@@ -188,7 +188,7 @@ function executeService(service, params, errorMessage, func) {
                         // der Inhalt ist nicht zu lang und kann direkt zum Applet übertragen werden
                         if (!first)
                             execute = execute + ", ";
-                        execute = execute + "'" + params[index].value + "'";
+                        execute = execute + "params[" + index + "].value";
                         first = false;
                     }
                 }
@@ -473,7 +473,6 @@ function loadText(txt, name, typ, container) {
         removeMarkers(markers, textEditor);
         textEditor.getSession().setValue(txt);
         document.getElementById('headerWest').textContent = name;
-        fillMessageBox("", false);
         propsEditor.getSession().setValue("");
         manageControls();
     } catch (e) {
@@ -569,7 +568,6 @@ function readFiles(files) {
             rulesEditor.getSession().foldAll(1);
         }
         textEditor.getSession().setValue("");
-        fillMessageBox("", false);
         tabelle.fnClearTable();
         daten = new Array();
         var count = files.length;
@@ -723,7 +721,7 @@ function handleImageClicks() {
             currentFile = daten[name]["file"];
             textEditor.getSession().setValue("");
             propsEditor.getSession().setValue("");
-            fillMessageBox("", false);
+            clearMessageBox();
             rulesEditor.getSession().foldAll(1);
             if (currentFile.length > 0) {
                 var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
@@ -957,7 +955,7 @@ function uuid() {
 function doReRunAll() {
     try {
         textEditor.getSession().setValue("");
-        fillMessageBox("", false);
+        clearMessageBox();
         var tabData =  tabelle.fnGetData();
         tabelle._fnClearTable();
         for ( var i = 0; i < tabData.length; i++) {
@@ -1081,7 +1079,15 @@ function fillMessageBox(text, reverse) {
         if (text.startsWith("\n"))
             text = text.substr(1);
     }
-    outputEditor.getSession().setValue(text);
+    var inhalt = text + "\n" + outputEditor.getSession().getValue();
+    outputEditor.getSession().setValue(inhalt);
+}
+
+/**
+ * löscht den Inhalt des Meldungsfensters
+ */
+function clearMessageBox(){
+    outputEditor.getSession().setValue("");
 }
 
 /**
@@ -1092,7 +1098,7 @@ function doBack() {
         multiMode = true;
         showMulti = false;
         textEditor.getSession().setValue("");
-        fillMessageBox("", false);
+        clearMessageBox();
         propsEditor.getSession().setValue("");
         rulesEditor.getSession().foldAll(1);
         manageControls();
@@ -1319,10 +1325,9 @@ function openSettings() {
 
 /**
  * aktualisiert die geänderten Regeln auf dem Server
- * @param dialog       Merker ob ein Hinweisfenster angezeigt werden soll
  * @returns {boolean}  liefert true zurück, wenn alles geklappt hat
  */
-function sendRules(dialog) {
+function sendRules() {
     try {
         var erg = false;
         if (currentRules.endsWith("doc.xml")) {
@@ -1336,10 +1341,9 @@ function sendRules(dialog) {
                 {"name": "versionComment", "value": ""}
             ], "Regeln konnten nicht übertragen werden:");
             if (json.success) {
-                alert("Regeln erfolgreich übertragen!");
+                fillMessageBox("Regeln erfolgreich zum Server übertragen!");
                 erg = true;
-            } else
-                alert("Fehler bei der Übertragung: " + ret);
+            }
             return erg;
         }
     } catch (e) {
@@ -1351,15 +1355,15 @@ function sendRules(dialog) {
  * liest die Regeln entweder vom Server oder lokal von der Platte
  * @param rulesId   die DokumentenId der Regeln auf dem Server
  * @param loadLocal legt fest, ob lokal oder vom Server gelesen werden soll
- * @param dialog    legt fest, ob ein Hinweisdialog angezeigt werden soll
  */
-function getRules(rulesId, loadLocal, dialog) {
+function getRules(rulesId, loadLocal) {
     try {
         var ret;
         if (loadLocal) {
             var open = openFile("doc.xml");
             rulesEditor.getSession().setValue(open[0]);
             rulesEditor.getSession().foldAll(1);
+            fillMessageBox("Regeln erfolgreich lokal gelesen!");
         } else {
             var json = executeService("getDocumentContent", [
                 {"name": "documentId", "value": rulesID},
@@ -1368,8 +1372,7 @@ function getRules(rulesId, loadLocal, dialog) {
             if (json.success) {
                 rulesEditor.getSession().setValue(json.result);
                 rulesEditor.getSession().foldAll(1);
-                if (dialog)
-                    alert("Regeln erfolgreich übertragen!");
+                fillMessageBox("Regeln erfolgreich vom Server übertragen!");
             } else
                 alert("Fehler bei der Übertragung: " + json.result);
         }
@@ -1387,11 +1390,11 @@ function openRules() {
     try {
         if (rulesID != null) {
             id = rulesID.substring(rulesID.lastIndexOf('/') + 1);
-            getRules(id, !alfrescoServerAvailable, false);
+            getRules(id, !alfrescoServerAvailable);
             document.getElementById('headerCenter').textContent = "Regeln (Server: doc.xml)";
         } else {
             if (isLocal()) {
-                getRules("doc.xml", true, false);
+                getRules("doc.xml", true);
             } else {
                 $.get('doc.xml', function (msg) {
                     rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
@@ -1440,13 +1443,21 @@ function formatScript() {
 
 /**
  * öffnet eine lokale Datei
- * @param name  der Name der Datei
+ * @param file  der Name der Datei
  * @returns den Inhalt
  */
-function openFile(name) {
+function openFile(file) {
     try {
-        var contents = "";
-        return document.reader.openFile(convertPath(name));
+        var name = convertPath(file);
+        var json = executeService("openFile", [
+            {"name": "filePath", "value": name}
+        ], "Datei konnte nicht geöffnet werden:");
+        if (json.success) {
+            fillMessageBox("Datei " + name + " erfolgreich geöffnet!");
+            return json.result;
+        }
+        else
+            return "";
     } catch (e) {
         errorHandler(e);
     }
@@ -1465,16 +1476,18 @@ function convertPath(name) {
  * sichert einen Text in eine Datei
  * @param file         die zu erzeugende Datei
  * @param text         der in die Datei zu speichernde Text
- * @param dialog       legt fest, ob ein Hinweis angezeigt werden soll
  * @returns {boolean}  true, wenn alles geklappt hat
  */
-function save(file, text, dialog) {
+function save(file, text) {
     try {
-        var ret = true;
-        document.reader.save(file, text)
-        if (dialog)
-            alert(file + " erfolgreich gesichert!");
-        return ret;
+        var name =  convertPath(file);
+        var json = executeService("saveToFile", [
+            {"name": "filePath", "value": name},
+            {"name": "documentText", "value": text}
+        ], "Skript konnte nicht gespeichert werden:");
+        if (json.success)
+            fillMessageBox(file + " erfolgreich gesichert!");
+        return json.success;
     } catch (e) {
         errorHandler(e);
     }
@@ -1559,16 +1572,14 @@ function loadScript() {
 
 /**
  * lädt ein geändertes Verteilungsscript in den Kontext der Anwendung, damit die Ãnderungen wirksam werden
- * @param dialog   legt fest, ob ein Hinweis gezeigt werden soll
  */
-function reloadScript(dialog) {
+function reloadScript() {
     try {
         modifiedScript = textEditor.getSession().getValue();
         eval(modifiedScript);
         REC = new Recognition();
         REC.set(REC);
-        if (dialog)
-            alert("Script erfolgreich aktualisiert");
+        fillMessageBox("Script erfolgreich aktualisiert");
     } catch (e) {
         errorHandler(e);
     }
@@ -1577,21 +1588,18 @@ function reloadScript(dialog) {
 
 /**
  * lädt das Verteilungsscript vom Server
- * @param dialog  legt fest, ob ein Hinweis gezeigt werden soll
  */
-function getScript(dialog) {
+function getScript() {
     try {
         var json = executeService("getDocumentContent", [
             {"name": "documentId", "value": scriptID},
             {"name": "extract", "value": "false"}
         ], "Skript konnte nicht gelesen werden:");
         if (json.success) {
-            save(workDocument, textEditor.getSession().getValue(), false);
+            save(workDocument, textEditor.getSession().getValue());
             textEditor.getSession().setValue(json.result);
-            if (dialog)
-                alert("Script erfolgreich heruntergeladen!");
-        } else
-            alert("Fehler bei der Übertragung: " + json.result);
+            fillMessageBox("Script erfolgreich heruntergeladen!");
+        }
     } catch (e) {
         errorHandler(e);
     }
@@ -1600,10 +1608,9 @@ function getScript(dialog) {
 
 /**
  * sendet das Script zum Server
- * @param dialog       legt fest, ob ein Hinweis gezeigt werden soll
  * @returns {boolean}  true, wenn alles geklappt hat
  */
-function sendScript(dialog) {
+function sendScript() {
     try {
         var erg = false;
         if (workDocument.endsWith("recognition.js")) {
@@ -1616,6 +1623,8 @@ function sendScript(dialog) {
                 {"name": "versionComment", "value": ""}
             ], "Skript konnte nicht zum Server gesendet werden:");
             erg = json.success;
+            if (erg)
+                fillMessageBox("Script erfolgreich zum Server gesendet!");
         }
         return erg;
     } catch (e) {
