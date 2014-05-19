@@ -25,7 +25,7 @@ public class VerteilungHelper {
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", false);
-            obj.put("result", e.getMessage() != null ? e.getMessage() : e.toString());
+            obj.put("result", e.getMessage() != null ? e.getMessage() +"\n" : e.toString() + "\n");
             StringBuilder sb = new StringBuilder();
             for (StackTraceElement element : e.getStackTrace()) {
                 sb.append(element.toString());

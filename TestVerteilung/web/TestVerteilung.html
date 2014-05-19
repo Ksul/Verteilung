@@ -986,13 +986,12 @@ window.onload = function () {
             { "sTitle": "Datum", "sType": "date", "sClass": "alignLeft" },
             { "sTitle": "Person", "sType": "string", "sClass": "alignLeft" },
             { "sTitle": "Betrag", "sType": "numeric", "sClass": "alignLeft" },
-            { "sTitle": "Id" },
-            { "sTitle": "Fehler" }
+            { "sTitle": "Id" }
         ],
         "aoColumnDefs": [
            // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
             { "aTargets": [1,2,3, 4], "bVisible": true},
-             { "aTargets": [5,6], "bVisible": false}
+             { "aTargets": [5], "bVisible": false}
         ],
         "oLanguage": {
             "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
@@ -1058,7 +1057,7 @@ window.onload = function () {
             "data": function (aNode, aFunction) {
                 if (alfrescoServerAvailable) {
                     var json = executeService("listFolderAsJSON", [
-                        {"name": "filePath", "value": aNode.attr ? aNode.attr("id") : "-1"},
+                        {"name": "filePath", "value": aNode.attr ? aNode.attr("objectId") : "-1"},
                         {"name": "withFolder", "value": -1}
                     ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
                     if (json.success)
@@ -1070,61 +1069,27 @@ window.onload = function () {
         },
         "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "hotkeys", "themeroller"]
     }).bind("select_node.jstree",function (event, data) {
-                if (data.rslt.obj.attr("rel") == "default") {
+                if (data.rslt.obj.attr("rel") == "folder") {
                     if (alfrescoServerAvailable) {
                         try {
-                            if (isLocal()) {
-                                var ret = document.reader.listFolderAsJSON(aNode.attr ? aNode.attr("id") : "", "1", getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"));
-                                var json = jQuery.parseJSON(ret);
-                                if (json.success) {
-                                    textEditor.getSession().setValue(json.result);
-                                    currentContent = json.result;
-                                    currentFile = data.rslt.obj.text().trim();
-                                    document.getElementById('headerWest').textContent = currentFile;
-                                    alfrescoMode = false;
-                                    manageControls();
-
-                                } else
-                                    alert("Daten konnten nicht übertragen werden: " + json.result)
-                            } else {
-                                var dataString = {
-                                    "function": "getContent",
-                                    "documentId": data.rslt.obj.attr("id"),
-                                    "extract": "true",
-                                    "server": getSettings("server"),
-                                    "username": getSettings("user"),
-                                    "password": getSettings("password"),
-                                    "proxyHost": getSettings("proxy"),
-                                    "proxyPort": getSettings("port")
-                                };
-                                $.ajax({
-                                    type: "POST",
-                                    data: dataString,
-                                    cache: false,
-                                    datatype: "json",
-                                    url: "VerteilungServlet",
-                                    success: function (erg) {
-                                        if (erg.success[0]) {
-                                            textEditor.getSession().setValue(erg.result.toString());
-                                            currentContent = erg.result.toString();
-                                            currentFile = data.rslt.obj.text().trim();
-                                            document.getElementById('headerWest').textContent = currentFile;
-                                            alfrescoMode = false;
-                                            manageControls();
-
-                                        } else
-                                            alert("Daten konnten nicht übertragen werden: " + erg.result[0]);
-                                    },
-                                    error: function (response) {
-                                        try {
-                                            var r = jQuery.parseJSON(response.responseText);
-                                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                                        } catch (e) {
-                                            errorHandler(e);
-                                        }
-                                    }
-                                });
+                            var json = executeService("listFolderAsJSON", [
+                                {"name": "filePath", "value": data.rslt.obj.attr("objectId")},
+                                {"name": "withFolder", "value": 1}
+                            ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
+                            if (json.success) {
+                                for (var index = 0; index < json.result.length; ++index) {
+                                    var name = json.result[index].attr.title ? json.result[index].attr.title : json.result[index].attr.name ? json.result[index].attr.name : "";
+                                    var datum = json.result[index].attr.documentDate ? json.result[index].attr.documentDate : json.result[index].attr.creationDate ? json.result[index].attr.creationDate : "";
+                                    var date = parseDate(datum);
+                                    var dateString = date ? REC.dateFormat(date, "dd.MM.YYYY") : "";
+                                    var person = json.result[index].attr.person ? json.result[index].attr.person : "";
+                                    var amount = json.result[index].attr.amount ? json.result[index].attr.amount : "";
+                                    var id = json.result[index].attr.objectId ? json.result[index].attr.objectId : "";
+                                    var row = [ null, name, dateString, person, amount, id];
+                                    alfrescoTabelle.fnAddData(row);
+                                }
                             }
+
                         } catch (e) {
                             errorHandler(e);
                         }

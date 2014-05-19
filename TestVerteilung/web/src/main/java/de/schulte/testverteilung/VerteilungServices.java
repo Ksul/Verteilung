@@ -103,9 +103,8 @@ public class VerteilungServices {
 
                     // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
                     if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1)) {
-                        o = new JSONObject();
                         o1 = new JSONObject();
-                        o.put("id", cmisObject.getId());
+                        o = convertCMISObjectToJSON(cmisObject);
                         if (cmisObject instanceof Folder) {
                             o.put("rel", "folder");
                             o1.put("state", "closed");
@@ -652,9 +651,8 @@ public class VerteilungServices {
             final byte[] bytes = Base64.decodeBase64(zipContent);
             InputStream bais = new ByteArrayInputStream(bytes);
             zipin = new ZipInputStream(bais);
-            ZipEntry entry = null;
-            int size = 0;
-            while ((entry = zipin.getNextEntry()) != null) {
+            int size;
+            while ((zipin.getNextEntry()) != null) {
                 byte[] buffer = new byte[2048];
                 ByteArrayOutputStream bys = new ByteArrayOutputStream();
                 BufferedOutputStream bos = new BufferedOutputStream(bys, buffer.length);

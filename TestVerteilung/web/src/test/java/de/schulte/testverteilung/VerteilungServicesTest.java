@@ -56,10 +56,10 @@ public class VerteilungServicesTest extends AlfrescoTest{
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++){
             assertEquals("closed", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("state"));
             assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("data"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
-            assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("id"));
+            assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("objectId"));
             assertEquals("folder", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("rel"));
         }
-        obj = services.uploadDocument("/Archiv", properties.getProperty("testPDF"));
+        obj = services.uploadDocument("/Archiv", System.getProperty("user.dir") + properties.getProperty("testPDF"));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -73,7 +73,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++){
             assertEquals("closed", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("state"));
             assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("data"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
-            assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("id"));
+            assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("objectId"));
             assertEquals("folder", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("rel"));
         }
         obj = services.listFolderAsJSON("-1", 1);
@@ -133,7 +133,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
 
     @Test
     public void testUploadDocument() throws Exception {
-        JSONObject obj = services.uploadDocument("/Archiv", properties.getProperty("testPDF"));
+        JSONObject obj = services.uploadDocument("/Archiv", System.getProperty("user.dir") + properties.getProperty("testPDF"));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -147,7 +147,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
 
     @Test
     public void testCreateDocument() throws Exception {
-        JSONObject obj = services.uploadDocument("/Archiv", properties.getProperty("testPDF"));
+        JSONObject obj = services.uploadDocument("/Archiv", System.getProperty("user.dir") + properties.getProperty("testPDF"));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -311,7 +311,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testExtractPDFToInternalStorage() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
-        byte[] content = readFile(fileName);
+        byte[] content = readFile(System.getProperty("user.dir") + fileName);
         assertTrue(content.length > 0);
         JSONObject obj = services.extractPDFToInternalStorage(Base64.encodeBase64String(content), fileName);
         assertNotNull(obj);
@@ -345,7 +345,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testExtractPDFFile() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
-        JSONObject obj = services.extractPDFFile("file://" + fileName);
+        JSONObject obj = services.extractPDFFile("file://" + System.getProperty("user.dir") + fileName);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
@@ -356,7 +356,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testExtractZIP() throws Exception {
         String fileName = properties.getProperty("testZIP");
         assertNotNull(fileName);
-        byte[] content = readFile(fileName);
+        byte[] content = readFile(System.getProperty("user.dir") + fileName);
         assertTrue(content.length > 0);
         Collection<FileEntry> entries = new ArrayList<FileEntry>();
         JSONObject obj = services.extractZIP(Base64.encodeBase64String(content));
@@ -377,7 +377,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testExtractZIPToInternalStorage() throws Exception {
         String fileName = properties.getProperty("testZIP");
         assertNotNull(fileName);
-        byte[] content = readFile(fileName);
+        byte[] content = readFile(System.getProperty("user.dir") + fileName);
         assertTrue(content.length > 0);
         JSONObject obj = services.extractZIPToInternalStorage(Base64.encodeBase64String(content));
         assertNotNull(obj);
@@ -397,7 +397,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testExtractZipAndExtractPDFToInternalStorage() throws Exception {
         String fileName = properties.getProperty("testZIP");
         assertNotNull(fileName);
-        byte[] content = readFile(fileName);
+        byte[] content = readFile(System.getProperty("user.dir") + fileName);
         assertTrue(content.length > 0);
         JSONObject obj = services.extractZIPAndExtractPDFToInternalStorage(Base64.encodeBase64String(content));
         assertNotNull(obj);
@@ -477,7 +477,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testOpenFile() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
-        JSONObject obj = services.openFile("file://" + fileName);
+        JSONObject obj = services.openFile("file://" + System.getProperty("user.dir") + fileName);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));

@@ -2099,7 +2099,7 @@ Recognition.prototype.dateFormat = function(formatDate, formatString) {
 
 			// Day
 			d : function() {
-				return (formatDate.getDate() < 10 ? '0' : '') + formatDate.getDate();
+				return (formatDate.getDate() < 10 ? '0' : '') + formatDate.getDay();
 			},
 			D : function() {
 				return this.replaceChars.shortDays[formatDate.getDay()];

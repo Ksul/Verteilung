@@ -19,6 +19,28 @@ String.prototype.startsWith = function (str) {
 };
 
 /**
+ * parst einen Alfresco Datums String
+ */
+function parseDate(dateString) {
+    try {
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var parts = dateString.split(" ");
+        var month = parts[1];
+        var day = parts [2];
+        var year = parts[5];
+        var timeString = parts[3];
+        parts = timeString.split(":");
+        var hours = parts[0];
+        var minutes = parts[1];
+        var seconds = parts[2];
+        var date = new Date(year, months.indexOf(month), day, hours, minutes, seconds, 0);
+        return date;
+    } catch(e) {
+        return null;
+    }
+}
+
+/**
  * liefert einen Url-Paramter
  * @param name          der Name des Parameters
  * @returns {String}
