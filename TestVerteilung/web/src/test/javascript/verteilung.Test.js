@@ -17,3 +17,12 @@ VerteilungTest.prototype.testURL = function() {
     assertTrue(result);
 
 };
+
+
+VerteilungTest.prototype.testParseDate = function() {
+    var dateString = "Thu May 22 16:23:07 CEST 2014";
+    var date = parseDate(dateString);
+    var vergleich = new Date(2014, 4, 22, 16, 23, 7, 0);
+    assertEquals("Datum ist nicht gleich!", vergleich, date);
+};
+

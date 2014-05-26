@@ -11,10 +11,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 
@@ -89,9 +86,8 @@ public class AlfrescoConnector {
      */
     private static String getContentAsString(ContentStream stream) throws IOException {
         StringBuilder sb = new StringBuilder();
-        Reader reader = new InputStreamReader(stream.getStream(), "UTF-8");
 
-        try {
+        try (Reader reader = new InputStreamReader(stream.getStream(), "UTF-8")) {
             final char[] buffer = new char[4 * 1024];
             int b;
             while (true) {
@@ -102,8 +98,6 @@ public class AlfrescoConnector {
                     break;
                 }
             }
-        } finally {
-            reader.close();
         }
 
         return sb.toString();
@@ -169,9 +163,10 @@ public class AlfrescoConnector {
 
         ItemIterable<QueryResult> results = getSession().query(queryString, false);
 
-        for (QueryResult qResult : results) {
-                 String objectId = qResult.getPropertyValueByQueryName("cmis:objectId");
-            return  (Document) getSession().getObject(getSession().createObjectId(objectId));
+        for (Iterator<QueryResult> iterator = results.iterator(); iterator.hasNext(); ) {
+            QueryResult qResult = iterator.next();
+            String objectId = qResult.getPropertyValueByQueryName("cmis:objectId");
+            return (Document) getSession().getObject(getSession().createObjectId(objectId));
 
         }
         return null;
@@ -262,7 +257,7 @@ public class AlfrescoConnector {
      * @param documentContent           der Inhalt des Dokumentes
      * @param documentType              der Typ des Dokumentes
      * @param extraCMSProperties        zusätzliche Properties
-     * @param version                   die Version @see VersioningState
+     * @param versioningState           der Versionsstatus @see VersioningState
      * @return newDocument              das neue Dokument
      */
     public Document createDocument(Folder parentFolder,
@@ -270,7 +265,7 @@ public class AlfrescoConnector {
                                    byte documentContent[],
                                    String documentType,
                                    Map<String, Object> extraCMSProperties,
-                                   VersioningState version) {
+                                   VersioningState versioningState) {
 
         Document newDocument;
 
@@ -286,7 +281,7 @@ public class AlfrescoConnector {
         ContentStream contentStream = new ContentStreamImpl(documentName, BigInteger.valueOf(documentContent.length), documentType, stream);
 
         // create a major version
-        newDocument = parentFolder.createDocument(properties, contentStream, version);
+        newDocument = parentFolder.createDocument(properties, contentStream, versioningState);
 
         return newDocument;
     }

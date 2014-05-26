@@ -91,13 +91,13 @@ function exist(val) {
 function errorHandler(e, description) {
     var str;
     if (exist(description))
-        str = description + "\nFEHLER:\n";
+        str = description + "<br>FEHLER:<br>";
     else
-        str = "FEHLER:\n";
-    str = str + e.toString() + "\n";
+        str = "FEHLER:<br>";
+    str = str + e.toString() + "<br>";
     for (var prop in e)
-        str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-    str = str + "Stacktrace: \n\n" + e.stack;
+        str = str + "property: " + prop + " value: [" + e[prop] + "]<br>";
+    str = str + "Stacktrace: <br>" + e.stack;
     var $dialog = $('<div></div>').html(str).dialog({
         autoOpen: false,
         title: 'Fehler',
@@ -118,6 +118,11 @@ function errorHandler(e, description) {
 
 /**
  * lädt das Applet
+ * @param level         der Level für die Log AUsgaben
+ * @param bindingUrl    die Binding Url für den Alfresco Server (optional)
+ * @param user          der User für den Alfresco Server (optional)
+ * @param password      das Password für den Alfresco Server (optional)
+ * @returns             true, wenn das Applet geladen werden konnte, ansonsten false
  */
 function loadApplet(level, bindingUrl, user, password) {
     if (isLocal()) {
@@ -171,6 +176,8 @@ function loadApplet(level, bindingUrl, user, password) {
                 'chemistry-opencmis-commons-impl-0.10.0.jar');
         obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
         document.getElementById('appl').appendChild(obj);
+        var app =  $('#reader').get(0);
+        return (app.isActive != null && app.isActive());
     }
 }
 
@@ -193,13 +200,27 @@ function checkServerStatus(url) {
  * Parameter.
  * @param service           der Name des Service
  * @param params            die Parameter als JSON Objekt
- * @param errorMessage      eine Fehlermeldung
+ * @param messages          Array mit Meldungen. Die erste ist die Fehlermeldung, der zweite Eintrag ist eine Erfolgsmeldung
  * @param ignoreError       Flag, ob ein Fehler ignoriert werden soll
  * @return das Ergebnis als JSON Objekt
  */
-function executeService(service, params, errorMessage, ignoreError) {
+function executeService(service, params, messages, ignoreError) {
     var json;
+    var errorMessage;
+    var successMessage;
     try {
+        if (exist(messages)) {
+            if (typeof messages == "object") {
+                if (messages.length == 2) {
+                    errorMessage = messages[0];
+                    successMessage = messages[1];
+                } else {
+                    errorMessage = messages[0];
+                }
+            } else if (typeof messages == "string") {
+                errorMessage = messages;
+            }
+        }
         if (isLocal()) {
             // Aufruf über Applet
             var maxLen = 1100000;
@@ -238,8 +259,8 @@ function executeService(service, params, errorMessage, ignoreError) {
                 type: "POST",
                 data: dataString,
                 datatype: "json",
-                cache       : false,
-                async       : false,
+                cache: false,
+                async: false,
                 url: "/TestVerteilung/VerteilungServlet",
                 error: function (response) {
                     try {
@@ -267,6 +288,9 @@ function executeService(service, params, errorMessage, ignoreError) {
             if (exist(json.error))
                 errorString = errorString + json.error;
             throw new Error(errorString);
+        } else {
+            if (exist(successMessage))
+                fillMessageBox(successMessage);
         }
         return json;
     } catch (e) {
@@ -501,14 +525,14 @@ function loadText(txt, name, typ, container) {
  * lädt ein Dokument und trägt die Inhalte in die Tabelle ein
  * Methode wird benutzt wenn mehr als ein Dokument geladen werden soll
  * Methode wird auch aus dem Applet aufgerufen
+ * @param content           der originale Inhalt der Datei
  * @param txt               Textinhalt des Dokumentes
  * @param name              Name des Dokumentes
  * @param typ               Typ des Dokumentes
  * @param notDeleteable     Merker, ob das Dokument gelöscht werden kann (geht nur bei lokalen)
- * @param alfContainer      ???
  * @param container         ???
  */
-function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) {
+function loadMultiText(content, txt, name, typ,  notDeleteable, container) {
     try {
         multiMode = true;
         var dat = [];
@@ -516,6 +540,7 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
         REC.testRules(rulesEditor.getSession().getValue());
         dat["text"] = txt;
         dat["file"] = name;
+        dat["content"] = content;
         dat["log"] = REC.getMessage();
         dat["result"] = REC.results;
         dat["position"] = REC.positions;
@@ -524,7 +549,6 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
         dat["error"] = REC.errors;
         dat["container"] = container;
         dat["notDeleteable"] = notDeleteable;
-        dat["alfContainer"] = alfContainer;
         daten[name] = dat;
         var ergebnis = [];
         ergebnis["error"] = REC.errors.length > 0;
@@ -608,7 +632,7 @@ function readFiles(files) {
                                         if (count == 1)
                                             loadText(json.result, theFile.name, theFile.type, null);
                                         else
-                                            loadMultiText(json.result, theFile.name, theFile.type, "false", "false", null);
+                                            loadMultiText(evt.target.result, json.result, theFile.name, theFile.type, "false", null);
                                     }
                                 }
                             } catch (e) {
@@ -620,7 +644,6 @@ function readFiles(files) {
                     reader.readAsBinaryString(blob);
                 }
                 // ZIP Files
-                //TODO checken, ob das hier funktioniert
                 if (f.name.toLowerCase().endsWith(".zip")) {
                     reader = new FileReader();
                     reader.onloadend = (function (theFile) {
@@ -640,7 +663,7 @@ function readFiles(files) {
                                                 if (count == 1)
                                                     loadText(entry.extractedData, entry, "application/zip", null);
                                                 else {
-                                                    loadMultiText(entry.extractedData, entry, "application/zip", "true", "false", null);
+                                                    loadMultiText(entry.data, entry.extractedData, entry.name, entry.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain", "true",  null);
                                                 }
                                             }
                                         }
@@ -666,7 +689,7 @@ function readFiles(files) {
                     } else {
                         r.onload = (function (theFile) {
                             return function (e) {
-                                loadMultiText(e.target.result, theFile.name, theFile.mozFullPath, theFile.type, "false", "false", null);
+                                loadMultiText(e.target.result, e.target.result, theFile.name,  theFile.type, "false", null);
                             };
                         })(f);
                     }
@@ -686,7 +709,7 @@ function readFiles(files) {
  * handelt die Clicks auf die Icons in der Tabelle
  */
 function handleImageClicks() {
-    $(document).on("click", ".run",function () {
+    $(document).on("click", ".run", function () {
         var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
         var row = tabelle.fnGetData(aPos[0]);
         var name = row[1];
@@ -750,65 +773,27 @@ function handleImageClicks() {
         var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
         var row = tabelle.fnGetData(aPos[0]);
         var name = row[1];
-        if (daten[name]["alfContainer"].toLowerCase() == "true" && typeof daten[name]["container"] != "undefined" && daten[name]["container"] != null) {
+        if (typeof daten[name]["container"] != "undefined" && daten[name]["container"] != null) {
             openPDF(daten[name]["container"], true);
         } else {
             openPDF(daten[name]["file"]);
         }
     });
     $(document).on("click", ".moveToInbox", function () {
-        var aPos = tabelle.fnGetPosition(this);
+        var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
         var row = tabelle.fnGetData(aPos[0]);
         var name = row[1];
         var docId = "workspace:/SpacesStore/" + daten[name]["container"];
         //TODO Was ist das für eine Funktion
-       // var json = executeService("moveDocument", [
-       //     {"name": "documentId", "value": docId}, {"name": "currentLocationId", "value": inboxID},  {"name": "destinationId", "value": inboxID}
-       // ], "Dokument konnte nicht verschoben werden:");
-        if (isLocal()) {
-            var json = jQuery.parseJSON(document.reader.moveDocument(docId, inboxID, getSettings("server"), getSettings("user"), getSettings("password"), getSettings("proxy"), getSettings("port"), null));
-            if (!json.success)
-                alert("Dokument nicht verschoben: " + json.result);
-        }
-        else {
-            var dataString = {
-                "function": "moveDocument",
-                "documentId": docId,
-                "destinationId": inboxID,
-                "server": getSettings("server"),
-                "username": getSettings("user"),
-                "password": getSettings("password"),
-                "proxyHost": getSettings("proxy"),
-                "proxyPort": getSettings("port")
-            };
-            $.ajax({
-                type: "POST",
-                data: dataString,
-                datatype: "json",
-                url: "/TestVerteilung/VerteilungServlet",
-                async: false,
-                error: function (response) {
-                    try {
-                        var r = jQuery.parseJSON(response.responseText);
-                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                    } catch (e) {
-                        var str = "FEHLER:\n";
-                        str = str + e.toString() + "\n";
-                        for (var prop in e)
-                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                        alert(str + "\n" + response.responseText);
-                    }
-                },
-                success: function (data) {
-                    if (data.success[0])
-                        alert("Dokument verschoben!")
-                    else
-                        alert("Dokument nicht verschoben: " + data.result[0]);
-                }
-            });
-        }
+        var json = executeService("createDocument", [
+            {"name": "folder", "value": "/Archiv/Inbox"},
+            { "name": "fileName", "value": name},
+            { "name": "documentContent", "value": daten[name].content},
+            { "name": "documentType", "value": "application/pdf"},
+            { "name": "extraCMSProperties", "value": ""},
+            { "name": "versionState", "value": "none"}
+        ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
     });
-
 }
 
 /**
@@ -863,7 +848,7 @@ function imageFieldFormatter(o) {
     image = document.createElement("div");
     image.href = "#";
     image.className = "loeschen";
-    image.title = "Ergebnis lÃÂ¶schen";
+    image.title = "Ergebnis löschen";
     if (daten[o.aData[1]]["notDeleteable"] != "true") {
         image.style.backgroundImage = "url(resource/delete.png)";
         image.style.cursor = "pointer";
@@ -894,13 +879,8 @@ function imageFieldFormatter(o) {
     container.appendChild(image);
     image = document.createElement("div");
     image.className = "moveToInbox";
-    if (daten[o.aData[1]]["alfContainer"] == "true") {
-        image.style.backgroundImage = "url(resource/move-file.png)";
-        image.style.cursor = "pointer";
-    } else {
-        image.style.backgroundImage = "url(resource/move-file-bw.png)";
-        image.style.cursor = "not-allowed";
-    }
+    image.style.backgroundImage = "url(resource/move-file.png)";
+    image.style.cursor = "pointer";
     image.style.cssFloat = "left";
     image.style.width = "16px";
     image.style.height = "16px";
@@ -909,15 +889,6 @@ function imageFieldFormatter(o) {
     container.appendChild(image);
     return container.outerHTML;
 }
-
-/**
- * berechnet die Höhe für die Tabelle
- * @returns {string}
- */
-function calcDataTableHeight()  {
-    var h = verteilungLayout.state.west.innerHeight -68;
-    return h + 'px';
-};
 
 /**
  * formatiert die Fehlerdetails in der zusätzlichen Zeile(n) der Tabelle

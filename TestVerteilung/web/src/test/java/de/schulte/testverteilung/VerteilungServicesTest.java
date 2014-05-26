@@ -87,6 +87,8 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        obj = services.listFolderAsJSON(services.getNodeId("/Archiv/Inbox").getString("result"), 0);
+        System.out.println(obj);
     }
 
     @Test
@@ -332,7 +334,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testExtractPDFContent() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
-        byte[] content = readFile(fileName);
+        byte[] content = readFile(System.getProperty("user.dir") + fileName);
         assertTrue(content.length > 0);
         JSONObject obj = services.extractPDFContent(Base64.encodeBase64String(content));
         assertTrue(obj.length() >= 2);
@@ -482,7 +484,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        byte[] content = readFile(fileName);
+        byte[] content = readFile(System.getProperty("user.dir") + fileName);
         byte[] contentRead = Base64.decodeBase64(obj.getString("result"));
         assertTrue("Unterschiedliche Länge gelesen!", content.length == contentRead.length);
         for (int i = 0; i < content.length; i++){

@@ -2099,7 +2099,7 @@ Recognition.prototype.dateFormat = function(formatDate, formatString) {
 
 			// Day
 			d : function() {
-				return (formatDate.getDate() < 10 ? '0' : '') + formatDate.getDay();
+				return (formatDate.getDate() < 10 ? '0' : '') + formatDate.getDate();
 			},
 			D : function() {
 				return this.replaceChars.shortDays[formatDate.getDay()];
@@ -2239,7 +2239,7 @@ Recognition.prototype.dateFormat = function(formatDate, formatString) {
 			}
 		};
 
-		formatString = formatString.replace("MMMM", "F").replace("MMM", "M").replace("MM", "m").replace("YYYY", "Y").replace("YY", "y");
+		formatString = formatString.replace("MMMM", "F").replace("MMM", "M").replace("MM", "m").replace("YYYY", "Y").replace("YY", "y").replace("dd", "d");
 
 		for ( var i = 0; i < formatString.length; i++) {
 			var curChar = formatString.charAt(i);

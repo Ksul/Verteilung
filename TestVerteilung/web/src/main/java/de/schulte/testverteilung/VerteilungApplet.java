@@ -83,7 +83,7 @@ public class VerteilungApplet extends Applet {
             }
             setParameter(getParameter("url"), getParameter("user"), getParameter("password"));
 			jsobject = JSObject.getWindow(this);
-		} catch (Exception jse) {
+  		} catch (Exception jse) {
 			logger.severe(jse.getMessage());
 			jse.printStackTrace();
 		}
@@ -243,13 +243,13 @@ public class VerteilungApplet extends Applet {
 
     /**
      * lädt ein Document in den Server
-     * @param filePath       der Folder als String, in das Document geladen werden soll
-     * @param fileName       der Dateiname ( mit Pfad) als String, die hochgeladen werden soll
-     * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
-     *                                                               false    ein Fehler ist aufgetreten
-     *                                                      result            Dokument als JSONObject
+     * @param folder                  der Folder als String, in das Document geladen werden soll
+     * @param fileName                der Dateiname ( mit Pfad) als String, die hochgeladen werden soll
+     * @return                        ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                        false    ein Fehler ist aufgetreten
+     *                                                               result            Dokument als JSONObject
      */
-    public JSONObject uploadDocument(final String filePath,
+    public JSONObject uploadDocument(final String folder,
                                      final String fileName) {
 
         JSONObject obj;
@@ -257,7 +257,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.uploadDocument(filePath, fileName);
+                    return services.uploadDocument(folder, fileName);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -269,13 +269,13 @@ public class VerteilungApplet extends Applet {
 
     /**
      * löscht ein Document
-     * @param filePath       der Folder als String, in das Documentliegt
+     * @param folder         der Folder als String, in das Documentliegt
      * @param fileName       der Name des Documentes
      * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            Dokument als JSONObject
      */
-    public JSONObject deleteDocument(final String filePath,
+    public JSONObject deleteDocument(final String folder,
                                      final String fileName) {
 
 
@@ -284,7 +284,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.deleteDocument(filePath, fileName);
+                    return services.deleteDocument(folder, fileName);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -296,7 +296,7 @@ public class VerteilungApplet extends Applet {
 
     /**
      * erzeugt ein Document
-     * @param  filePath             der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  folder               der Name des Folders in dem das Dokument erstellt werden soll als String
      * @param  fileName             der Name des Dokumentes als String
      * @param  documentContent      der Inhalt als String
      * @param  documentType         der Typ des Dokumentes
@@ -306,7 +306,7 @@ public class VerteilungApplet extends Applet {
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                                      result            Dokument als JSONObject
      */
-    public JSONObject createDocument(final String filePath,
+    public JSONObject createDocument(final String folder,
                                      final String fileName,
                                      final String documentContent,
                                      final String documentType,
@@ -319,7 +319,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties, versionState);
+                    return services.createDocument(folder, fileName, documentContent, documentType, extraCMSProperties, versionState);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -330,7 +330,7 @@ public class VerteilungApplet extends Applet {
 
     /**
      * erzeugt ein Document
-     * @param  filePath             der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  destinationFolder    der Name des Folders in dem das Dokument erstellt werden soll als String
      * @param  fileName             der Name des Dokumentes als String
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
@@ -339,7 +339,7 @@ public class VerteilungApplet extends Applet {
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                                      result            Dokument als JSONObject
      */
-    public JSONObject createDocument(final String filePath,
+    public JSONObject createDocument(final String destinationFolder,
                                      final String fileName,
                                      final String documentType,
                                      final String extraCMSProperties,
@@ -352,7 +352,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.createDocument(filePath, fileName, documentContent, documentType, extraCMSProperties, versionState);
+                    return services.createDocument(destinationFolder, fileName, documentContent, documentType, extraCMSProperties, versionState);
                 }
             });
         } catch (Exception e) {
