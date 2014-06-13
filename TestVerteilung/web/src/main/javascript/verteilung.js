@@ -297,7 +297,11 @@ function executeService(service, params, messages, ignoreError) {
         var p = "Service: " + service + "\n";
         if (exist(params)) {
             for (index = 0; index < params.length; ++index) {
-                p = p + "Parameter: " + params[index].name + " : " + params[index].value.substr(0, 40) + "\n";
+                p = p + "Parameter: " + params[index].name
+                if (exist(params[index].value))
+                    p = p + " : " + params[index].value.substr(0, 40) + "\n";
+                else
+                    p = p + " : Parameter Value fehlt!";
             }
         }
         if (exist(errorMessage))
@@ -557,7 +561,6 @@ function loadMultiText(content, txt, name, typ,  notDeleteable, container) {
         manageControls();
     } catch (e) {
         errorHandler(e);
-        fillMessageBox(str, false);
     }
 }
 
@@ -659,9 +662,10 @@ function readFiles(files) {
                                         var json1 = executeService("getDataFromInternalStorage");
                                         if (json1.success) {
                                             var erg = json1.result;
-                                            for (var entry in erg) {
+                                            for (var pos in erg) {
+                                                var entry = erg[pos];
                                                 if (count == 1)
-                                                    loadText(entry.extractedData, entry, "application/zip", null);
+                                                    loadText(entry.extractedData, entry.name, "application/zip", null);
                                                 else {
                                                     loadMultiText(entry.data, entry.extractedData, entry.name, entry.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain", "true",  null);
                                                 }
@@ -708,7 +712,7 @@ function readFiles(files) {
 /**
  * handelt die Clicks auf die Icons in der Tabelle
  */
-function handleImageClicks() {
+function handleVerteilungImageClicks() {
     $(document).on("click", ".run", function () {
         var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
         var row = tabelle.fnGetData(aPos[0]);

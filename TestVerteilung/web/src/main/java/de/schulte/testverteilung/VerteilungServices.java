@@ -795,6 +795,7 @@ public class VerteilungServices {
                     if (entry.getName().equals(fileName)) {
                         obj.put("success", true);
                         JSONObject jEntry = new JSONObject();
+                        jEntry.put("name", entry.getName());
                         if (entry.getData().length > 0) {
                             jEntry.put("data", Base64.encodeBase64String(entry.getData()));
                             if (entry.getExtractedData() != null && !entry.getExtractedData().isEmpty())
@@ -837,6 +838,7 @@ public class VerteilungServices {
             } else {
                 for (FileEntry entry: entries) {
                     JSONObject jEntry = new JSONObject();
+                    jEntry.put("name", entry.getName());
                     if (entry.getData().length > 0) {
                         jEntry.put("data", Base64.encodeBase64String(entry.getData()));
                         if (entry.getExtractedData() != null && !entry.getExtractedData().isEmpty())

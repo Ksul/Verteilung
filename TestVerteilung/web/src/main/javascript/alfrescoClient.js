@@ -278,6 +278,13 @@ function loadAlfrescoFolderTable() {
         ],
         "oLanguage": {
             "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
+        } ,
+        "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+            // Cell click
+            $('td', nRow).on('click', function() {
+               switchAlfrescoDirectory( aData[4]);
+
+            });
         }
     });
 }
@@ -383,6 +390,49 @@ function aktionFieldFormatter(o) {
 }
 
 /**
+ * führt die Aktualisierungen für eine Verzeichniswechsel im Alfresco durch
+ * @param id  die Objectid des ausgewählten Folders
+ */
+function switchAlfrescoDirectory(id) {
+    try {
+        var json = executeService("listFolderAsJSON", [
+            {"name": "filePath", "value": id},
+            {"name": "withFolder", "value": -1}
+        ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
+        if (json.success) {
+            alfrescoFolderTabelle.fnClearTable();
+            for (var index = 0; index < json.result.length; ++index) {
+                var name = json.result[index].attr.name ? json.result[index].attr.name : "";
+                var description = json.result[index].attr.description ? json.result[index].attr.description : "";
+                var id = json.result[index].attr.objectId ? json.result[index].attr.objectId : "";
+                var row = [ null, name, description, null, id];
+                alfrescoFolderTabelle.fnAddData(row);
+            }
+        }
+        json = executeService("listFolderAsJSON", [
+            {"name": "filePath", "value": id},
+            {"name": "withFolder", "value": 1}
+        ], "Dokumente konnten nicht aus dem Server gelesen werden:");
+        if (json.success) {
+            alfrescoTabelle.fnClearTable();
+            for (var index = 0; index < json.result.length; ++index) {
+                var name = json.result[index].attr.title ? json.result[index].attr.title : json.result[index].attr.name ? json.result[index].attr.name : "";
+                var datum = json.result[index].attr.documentDate ? json.result[index].attr.documentDate : json.result[index].attr.creationDate ? json.result[index].attr.creationDate : "";
+                var date = parseDate(datum);
+                var dateString = date ? REC.dateFormat(date, "dd.MM.YYYY") : "";
+                var person = json.result[index].attr.person ? json.result[index].attr.person : "";
+                var amount = json.result[index].attr.amount ? json.result[index].attr.amount : "";
+                var id = json.result[index].attr.objectId ? json.result[index].attr.objectId : "";
+                var row = [ null, name, dateString, person, amount, id];
+                alfrescoTabelle.fnAddData(row);
+            }
+        }
+
+    } catch (e) {
+        errorHandler(e);
+    }
+}
+/**
  * lädt den Alfresco Tree
  */
 function loadAlfrescoTree() {
@@ -405,46 +455,18 @@ function loadAlfrescoTree() {
     }).bind("select_node.jstree",function (event, data) {
         if (data.rslt.obj.attr("rel") == "folder") {
             if (alfrescoServerAvailable) {
-                try {
-                    var json = executeService("listFolderAsJSON", [
-                        {"name": "filePath", "value": data.rslt.obj.attr("objectId")},
-                        {"name": "withFolder", "value": -1}
-                    ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
-                    if (json.success) {
-                        alfrescoFolderTabelle.fnClearTable();
-                        for (var index = 0; index < json.result.length; ++index) {
-                            var name = json.result[index].attr.name ? json.result[index].attr.name : "";
-                            var description = json.result[index].attr.description ? json.result[index].attr.description : "";
-                            var id = json.result[index].attr.objectId ? json.result[index].attr.objectId : "";
-                            var row = [ null, name, description, null, id];
-                            alfrescoFolderTabelle.fnAddData(row);
-                        }
-                    }
-                    json = executeService("listFolderAsJSON", [
-                        {"name": "filePath", "value": data.rslt.obj.attr("objectId")},
-                        {"name": "withFolder", "value": 1}
-                    ], "Dokumente konnte nicht aus dem Server gelesen werden:");
-                    if (json.success) {
-                        alfrescoTabelle.fnClearTable();
-                        for (var index = 0; index < json.result.length; ++index) {
-                            var name = json.result[index].attr.title ? json.result[index].attr.title : json.result[index].attr.name ? json.result[index].attr.name : "";
-                            var datum = json.result[index].attr.documentDate ? json.result[index].attr.documentDate : json.result[index].attr.creationDate ? json.result[index].attr.creationDate : "";
-                            var date = parseDate(datum);
-                            var dateString = date ? REC.dateFormat(date, "dd.MM.YYYY") : "";
-                            var person = json.result[index].attr.person ? json.result[index].attr.person : "";
-                            var amount = json.result[index].attr.amount ? json.result[index].attr.amount : "";
-                            var id = json.result[index].attr.objectId ? json.result[index].attr.objectId : "";
-                            var row = [ null, name, dateString, person, amount, id];
-                            alfrescoTabelle.fnAddData(row);
-                        }
-                    }
-
-                } catch (e) {
-                    errorHandler(e);
-                }
+                switchAlfrescoDirectory(data.rslt.obj.attr("objectId"));
             }
         }
     }).delegate("a", "click", function (event, data) {
         event.preventDefault();
     });
+}
+
+function handleAlfrescoFolderImageClicks() {
+    $(document).on("click", ".open", function () {
+        var aPos = alfrescoFolderTabelle.fnGetPosition(this.parentNode.parentNode);
+        var row = alfrescoFolderTabelle.fnGetData(aPos[0]);
+        switchAlfrescoDirectory(row[4]);
+     });
 }
