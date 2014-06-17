@@ -294,7 +294,7 @@ public class VerteilungServices {
      * erstellt ein Dokument
      * @param  folder               der Name des Folders in dem das Dokument erstellt werden soll als String
      * @param  documentName         der Name des Dokumentes als String
-     * @param  documentContent      der Inhalt als String
+     * @param  documentContent      der Inhalt als Base64 decodierter String
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
      * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
@@ -333,7 +333,7 @@ public class VerteilungServices {
                 VersioningState vs = VersioningState.fromValue(versionState);
                 if (vs == null)
                     vs = VersioningState.NONE;
-                document = con.createDocument((Folder) folderObject, documentName, documentContent.getBytes(), documentType, outMap, vs);
+                document = con.createDocument((Folder) folderObject, documentName, Base64.decodeBase64(documentContent), documentType, outMap, vs);
                 if (document != null) {
                     obj.put("success", true);
                     obj.put("result", convertCMISObjectToJSON(document).toString());
@@ -354,7 +354,7 @@ public class VerteilungServices {
     /**
      * aktualisiert den Inhalt eines Dokumentes
      * @param  documentId                Die Id des zu aktualisierenden Dokumentes
-     * @param  documentContent           der neue Inhalt
+     * @param  documentContent           der neue Inhalt als Base64 decodierter String
      * @param  documentType              der Typ des Dokumentes
      * @param  extraCMSProperties        zusätzliche Properties
      * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
@@ -390,7 +390,7 @@ public class VerteilungServices {
                         outMap.put(name, props.get(name));
                     }
                 }
-                Document document = con.updateDocument((Document) cmisObject, documentContent.getBytes(), documentType, outMap, majorVersion.equalsIgnoreCase("true"), versionComment);
+                Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, majorVersion.equalsIgnoreCase("true"), versionComment);
                 obj.put("success", true);
                 obj.put("result", convertCMISObjectToJSON(document).toString());
             } else {

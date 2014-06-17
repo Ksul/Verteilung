@@ -261,7 +261,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
         when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn("none");
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(content);
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
         when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
         servlet.doPost(request, response);
         writer.flush();
@@ -333,7 +333,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
         when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn("none");
         String content = " ";
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(content);
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
         when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
         servlet.doPost(request, response);
         writer.flush();
@@ -351,7 +351,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_UPDATEDOCUMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
         content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(content);
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
         when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
         servlet.doPost(request, response);
         writer.flush();

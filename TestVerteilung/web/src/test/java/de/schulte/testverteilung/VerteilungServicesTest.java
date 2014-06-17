@@ -154,7 +154,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        obj = services.createDocument("/Archiv",  "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null, "none");
+        obj = services.createDocument("/Archiv",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, "none");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -211,7 +211,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(result.getString("name").equalsIgnoreCase("TestDocument.txt"));
         assertNotNull(result.getString("objectId"));
         content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        services.updateDocument(result.getString("objectId"), content, CMISConstants.DOCUMENT_TYPE_TEXT, null, "false", null);
+        services.updateDocument(result.getString("objectId"), Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, "false", null);
         obj = services.getDocumentContent(result.getString("objectId"), false);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -224,7 +224,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
 
-        obj = services.createDocument("/Archiv",  "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null, "major");
+        obj = services.createDocument("/Archiv",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, "major");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -234,7 +234,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertEquals("1.0", result.getString("versionLabel"));
         assertEquals("Initial Version", result.getString("checkinComment"));
         content = "Dies ist ein neuer Inhalt";
-        obj = services.updateDocument(result.getString("objectId"), content, CMISConstants.DOCUMENT_TYPE_TEXT, null, "true", "neuer Versionskommentar");
+        obj = services.updateDocument(result.getString("objectId"), Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, "true", "neuer Versionskommentar");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));

@@ -193,126 +193,6 @@ function checkServerStatus(url) {
 }
 
 /**
- * führt einen Service aus
- * die Methode prüft dabei im Appletzweig, ob ein String Parameter zu lang ist und überträgt ihn dann häppchenweise.
- * der entsprechende Parameter wird dann nicht mehr übergeben und muss dann in der entsprechenden Servicemethode im
- * Applet aus dem internenen Spreicher besorgt werden. Bislang funktioniert dieses Verfahren aber nur mit einem
- * Parameter.
- * @param service           der Name des Service
- * @param params            die Parameter als JSON Objekt
- * @param messages          Array mit Meldungen. Die erste ist die Fehlermeldung, der zweite Eintrag ist eine Erfolgsmeldung
- * @param ignoreError       Flag, ob ein Fehler ignoriert werden soll
- * @return das Ergebnis als JSON Objekt
- */
-function executeService(service, params, messages, ignoreError) {
-    var json;
-    var errorMessage;
-    var successMessage;
-    try {
-        if (exist(messages)) {
-            if (typeof messages == "object") {
-                if (messages.length == 2) {
-                    errorMessage = messages[0];
-                    successMessage = messages[1];
-                } else {
-                    errorMessage = messages[0];
-                }
-            } else if (typeof messages == "string") {
-                errorMessage = messages;
-            }
-        }
-        if (isLocal()) {
-            // Aufruf über Applet
-            var maxLen = 1100000;
-            var execute = "document.reader." + service + "(";
-            var first = true;
-            if (exist(params)) {
-                for (index = 0; index < params.length; ++index) {
-                    // prüfen, ob Parameter zu lang ist
-                    if (typeof params[index].value == "String" && params[index].value.length > maxLen) {
-                        // den Inhalt häppchenweise übertragen
-                        for (var k = 0; k < Math.ceil(params[index].value.length / maxLen); k++)
-                            document.reader.fillParameter(params[index].value.substr(k * maxLen, maxLen), k == 0);
-                    } else {
-                        // der Inhalt ist nicht zu lang und kann direkt zum Applet übertragen werden
-                        if (!first)
-                            execute = execute + ", ";
-                        execute = execute + "params[" + index + "].value";
-                        first = false;
-                    }
-                }
-            }
-            execute = execute + ")";
-            var obj = eval(execute);
-            json = jQuery.parseJSON(obj);
-        } else {
-            // Aufruf über Servlet
-            var dataString = {
-                "function": service
-            };
-            if (exist(params)) {
-                for (index = 0; index < params.length; ++index) {
-                    eval("dataString." + params[index].name + " = params[" + index + "].value");
-                }
-            }
-            $.ajax({
-                type: "POST",
-                data: dataString,
-                datatype: "json",
-                cache: false,
-                async: false,
-                url: "/TestVerteilung/VerteilungServlet",
-                error: function (response) {
-                    try {
-                        var r = jQuery.parseJSON(response.responseText);
-                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
-                    } catch (e) {
-                        var str = "FEHLER:\n";
-                        str = str + e.toString() + "\n";
-                        for (var prop in e)
-                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                        alert(str + "\n" + response.responseText);
-                    }
-                },
-                success: function (data) {
-                    json = data;
-                }
-            });
-        }
-        if (!json.success) {
-            if (exist(errorMessage))
-                errorString = errorMessage + " " + json.result;
-            else
-                errorString = json.result;
-            // gibt es eine Fehlermeldung aus dem Service?
-            if (exist(json.error))
-                errorString = errorString + json.error;
-            throw new Error(errorString);
-        } else {
-            if (exist(successMessage))
-                fillMessageBox(successMessage);
-        }
-        return json;
-    } catch (e) {
-        var p = "Service: " + service + "\n";
-        if (exist(params)) {
-            for (index = 0; index < params.length; ++index) {
-                p = p + "Parameter: " + params[index].name
-                if (exist(params[index].value))
-                    p = p + " : " + params[index].value.substr(0, 40) + "\n";
-                else
-                    p = p + " : Parameter Value fehlt!";
-            }
-        }
-        if (exist(errorMessage))
-            p = errorMessage + "\n" + p;
-        if (!ignoreError)
-            errorHandler(e, p);
-        return {result: e, success: false};
-    }
-}
-
-/**
  * liefert die Einstellungen
  * wenn noch keine Einstellungen gesetzt sind, dann sucht die Funktion einen passenden URL-Parameter
  * und trägt diesen dann in. Ist dieser auch nicht vorhanden, dann wird <null> zurück geliefert.
@@ -627,9 +507,8 @@ function readFiles(files) {
                         return function (evt) {
                             try {
                                 if (evt.target.readyState == FileReader.DONE) {// DONE == 2
-                                    var str = btoa(evt.target.result);
                                     var json = executeService("extractPDFContent", [
-                                        {"name": "documentText", "value": str}
+                                        {"name": "documentText", "value": evt.target.result, "type": "byte"}
                                     ], "PDF Datei konte nicht geparst werden:");
                                     if (json.success) {
                                         if (count == 1)
@@ -652,10 +531,9 @@ function readFiles(files) {
                     reader.onloadend = (function (theFile) {
                         return function (evt) {
                             try {
-                                if (evt.target.readyState == FileReader.DONE) {// DONE == 2
-                                    var str = btoa(evt.target.result);
+                                if (evt.target.readyState == FileReader.DONE) {
                                     var json = executeService("extractZIPAndExtractPDFToInternalStorage", [
-                                        {"name": "documentText", "value": str}
+                                        {"name": "documentText", "value": evt.target.result, "type": "byte"}
                                     ], "ZIP Datei konte nicht entpackt werden:");
                                     if (json.success) {
                                         count = count + json.result - 1;
@@ -667,7 +545,7 @@ function readFiles(files) {
                                                 if (count == 1)
                                                     loadText(entry.extractedData, entry.name, "application/zip", null);
                                                 else {
-                                                    loadMultiText(entry.data, entry.extractedData, entry.name, entry.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain", "true",  null);
+                                                    loadMultiText(atob(entry.data), entry.extractedData, entry.name, entry.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain", "true",  null);
                                                 }
                                             }
                                         }
@@ -788,16 +666,146 @@ function handleVerteilungImageClicks() {
         var row = tabelle.fnGetData(aPos[0]);
         var name = row[1];
         var docId = "workspace:/SpacesStore/" + daten[name]["container"];
-        //TODO Was ist das für eine Funktion
         var json = executeService("createDocument", [
             {"name": "folder", "value": "/Archiv/Inbox"},
             { "name": "fileName", "value": name},
-            { "name": "documentContent", "value": daten[name].content},
+            { "name": "documentContent", "value": daten[name].content, "type": "byte"},
             { "name": "documentType", "value": "application/pdf"},
             { "name": "extraCMSProperties", "value": ""},
             { "name": "versionState", "value": "none"}
         ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
     });
+}
+
+/**
+ * führt einen Service aus
+ * die Methode prüft dabei im Appletzweig, ob ein String Parameter zu lang ist und überträgt ihn dann häppchenweise.
+ * der entsprechende Parameter wird dann nicht mehr übergeben und muss dann in der entsprechenden Servicemethode im
+ * Applet aus dem internenen Spreicher besorgt werden. Bislang funktioniert dieses Verfahren aber nur mit einem
+ * Parameter.
+ * @param service           der Name des Service
+ * @param params            die Parameter als JSON Objekt
+ *                          name:  der Name des Parameters ( wird nur für das Servlet gebraucht)
+ *                          value: der Inhalt des Paramaters
+ *                          type: der Typ des Parameters
+ * @param messages          Array mit Meldungen. Die erste ist die Fehlermeldung, der zweite Eintrag ist eine Erfolgsmeldung
+ * @param ignoreError       Flag, ob ein Fehler ignoriert werden soll
+ * @return das Ergebnis als JSON Objekt
+ */
+function executeService(service, params, messages, ignoreError) {
+    var json;
+    var errorMessage;
+    var successMessage;
+    var longParameter = false;
+    try {
+        if (exist(messages)) {
+            if (typeof messages == "object") {
+                if (messages.length == 2) {
+                    errorMessage = messages[0];
+                    successMessage = messages[1];
+                } else {
+                    errorMessage = messages[0];
+                }
+            } else if (typeof messages == "string") {
+                errorMessage = messages;
+            }
+        }
+        if (isLocal()) {
+            // Aufruf über Applet
+            var maxLen = 1100000;
+            var execute = "document.reader." + service + "(";
+            var first = true;
+            if (exist(params)) {
+                for (index = 0; index < params.length; ++index) {
+                    // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
+                    if (exist(params[index].type) && params[index].type == "byte")
+                        params[index].value = btoa(params[index].value);
+                    // prüfen, ob Parameter zu lang ist
+                    if (typeof params[index].value == "String" && params[index].value.length > maxLen) {
+                        // den Inhalt häppchenweise übertragen
+                        longParameter = true;
+                        for (var k = 0; k < Math.ceil(params[index].value.length / maxLen); k++)
+                            document.reader.fillParameter(params[index].value.substr(k * maxLen, maxLen), k == 0);
+                    } else {
+                        // der Inhalt ist nicht zu lang und kann direkt zum Applet übertragen werden
+                        if (!first)
+                            execute = execute + ", ";
+                        execute = execute + "params[" + index + "].value";
+                        first = false;
+                    }
+                }
+            }
+            execute = execute + ")";
+            var obj = eval(execute);
+            json = jQuery.parseJSON(obj);
+        } else {
+            // Aufruf über Servlet
+            var dataString = {
+                "function": service
+            };
+            if (exist(params)) {
+                for (index = 0; index < params.length; ++index) {
+                    // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
+                    if (exist(params[index].type) && params[index].type == "byte")
+                        params[index].value = btoa(params[index].value);
+                    eval("dataString." + params[index].name + " = params[" + index + "].value");
+                }
+            }
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                datatype: "json",
+                cache: false,
+                async: false,
+                url: "/TestVerteilung/VerteilungServlet",
+                error: function (response) {
+                    try {
+                        var r = jQuery.parseJSON(response.responseText);
+                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                    } catch (e) {
+                        var str = "FEHLER:\n";
+                        str = str + e.toString() + "\n";
+                        for (var prop in e)
+                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                        alert(str + "\n" + response.responseText);
+                    }
+                },
+                success: function (data) {
+                    json = data;
+                }
+            });
+        }
+        if (!json.success) {
+            if (exist(errorMessage))
+                errorString = errorMessage + " " + json.result;
+            else
+                errorString = json.result;
+            // gibt es eine Fehlermeldung aus dem Service?
+            if (exist(json.error))
+                errorString = errorString + json.error;
+            throw new Error(errorString);
+        } else {
+            if (exist(successMessage))
+                fillMessageBox(successMessage);
+        }
+        return json;
+    } catch (e) {
+        var p = "Service: " + service + "\n";
+        if (exist(params)) {
+            for (index = 0; index < params.length; ++index) {
+                p = p + "Parameter: " + params[index].name
+                if (exist(params[index].value))
+                    p = p + " : " + params[index].value.substr(0, 40) + "\n";
+                else
+                    p = p + " : Parameter Value fehlt!";
+            }
+        }
+        if (exist(errorMessage))
+            p = errorMessage + "\n" + p;
+        if (!ignoreError)
+            errorHandler(e, p);
+        return {result: e, success: false};
+    }
 }
 
 /**
