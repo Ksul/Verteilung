@@ -1,13 +1,14 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>jQuery UI Dialog - Modal form</title>
-    <link rel="stylesheet" href="./themes/redmond/jquery-ui.css" />
+<!DOCTYPE html>
+<html lang="en"><head>
+
+
+    <meta charset="utf-8"><title>jQuery UI Dialog - Modal form</title>
+    
+    <link rel="stylesheet" href="./themes/redmond/jquery-ui.css">
     <script src="./jquery-ui-1.10.2/jquery-1.9.1.js"></script>
     <script src="./jquery-ui-1.10.2/ui/jquery-ui.js"></script>
     <script src="../src/main/javascript/jquery.cookie.js"></script>
-    <link rel="stylesheet" href="/resources/demos/style.css" />
+    <link rel="stylesheet" href="/resources/demos/style.css">
     <style>
         body { font-size: 62.5%; }
         label, input { display:block; }
@@ -54,7 +55,7 @@
             $( "#dialog-form" ).dialog({
                 autoOpen: false,
                 height: 300,
-                width: 350,
+                width: 800,
                 modal: true,
                 buttons: {
                     "Save": function() {
@@ -86,26 +87,23 @@
             $( "#create-user" )
                     .button()
                     .click(function() {
-                        $( "#dialog-form" ).dialog( "open" );
+                        $('<div>').load('ServerSettings.html').dialog();
                     });
         });
-    </script>
-</head>
-<body>
+    </script></head><body>
 <div id="dialog-form" title="Server-Settings">
     <p class="validateTips">Server Einstellungen festlegen</p>
     <form>
         <fieldset>
             <label for="server">Server</label>
-            <input type="text" name="server" id="server" class="text ui-widget-content ui-corner-all" />
+            <input name="server" id="server" class="text ui-widget-content ui-corner-all" type="text">
             <label for="user">User</label>
-            <input type="text" name="user" id="user" value="" class="text ui-widget-content ui-corner-all" />
+            <input name="user" id="user" value="" class="text ui-widget-content ui-corner-all" type="text">
             <label for="password">Password</label>
-            <input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
+            <input name="password" id="password" value="" class="text ui-widget-content ui-corner-all" type="password">
         </fieldset>
     </form>
 </div>
 
 <button id="create-user">Create new user</button>
-</body>
-</html>
+</body></html>

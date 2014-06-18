@@ -617,7 +617,8 @@ $(function() {
             return true;
         }
     }
-    $( "#dialog-form" ).dialog({
+    $('<div id="settingsDialog">').load('ServerSettings.html')
+        .dialog({
         autoOpen: false,
         height: 450,
         width: 350,
@@ -836,21 +837,6 @@ treeObject = jQuery.jstree._reference(tree);
 
 <body>
 
-
-<div id="dialog-form" title="Server-Settings">
-    <p class="validateTips">Server Einstellungen festlegen</p>
-
-    <form>
-        <fieldset>
-            <label for="server">Server</label>
-            <input type="text" name="server" id="server" class="text ui-widget-content ui-corner-all"/>
-            <label for="user">User</label>
-            <input type="text" name="user" id="user" class="text ui-widget-content ui-corner-all"/>
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password" class="text ui-widget-content ui-corner-all"/>
-        </fieldset>
-    </form>
-</div>
 
 <div id="clientPage" class="ui-state-active">
 

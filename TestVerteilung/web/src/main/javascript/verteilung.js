@@ -545,6 +545,7 @@ function readFiles(files) {
                                                 if (count == 1)
                                                     loadText(entry.extractedData, entry.name, "application/zip", null);
                                                 else {
+                                                    // die originalen Bytes kommen decodiert, als encoden!
                                                     loadMultiText(atob(entry.data), entry.extractedData, entry.name, entry.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain", "true",  null);
                                                 }
                                             }
@@ -1300,7 +1301,7 @@ function work() {
 
 
 /**
- * Öffnet den Einstellungsdialog
+ * Öffnet den Einstellungsdialog für die Alfresco Server Settings
  */
 function openSettings() {
     try {
@@ -1310,7 +1311,7 @@ function openSettings() {
         userInput.value = getSettings("user");
         var passInput = document.getElementById('password');
         passInput.value = getSettings("password");
-        $("#dialog-form").dialog("open");
+        $("#settingsDialog").dialog("open");
     } catch (e) {
         errorHandler(e);
     }
