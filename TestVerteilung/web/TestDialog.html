@@ -7,12 +7,14 @@
     <link rel="stylesheet" href="./themes/redmond/jquery-ui.css">
     <script src="./jquery-ui-1.10.2/jquery-1.9.1.js"></script>
     <script src="./jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+    <script type="text/javascript" src="./src/main/javascript/jquery.layout.js"></script>
     <script src="../src/main/javascript/jquery.cookie.js"></script>
-    <link rel="stylesheet" href="/resources/demos/style.css">
+    <link type="text/css" rel="stylesheet" href="./themes/layout/layout-default.css"/>
     <style>
         body { font-size: 62.5%; }
         label, input { display:block; }
-        input.text { margin-bottom:12px; width:95%; padding: .4em; }
+        input.text { margin-bottom:12px;width:95%; padding: .4em; }
+
         fieldset { padding:0; border:0; margin-top:25px; }
         h1 { font-size: 1.2em; margin: .6em 0; }
         .ui-dialog .ui-state-error { padding: .3em; }
@@ -20,6 +22,19 @@
     </style>
     <script>
         $(function() {
+
+            var dialogLayout;
+            var dialogLayout_settings = {
+                zIndex: 0		// HANDLE BUG IN CHROME - required if using 'modal' (background mask)
+                , resizeWithWindow: false	// resizes with the dialog, not the window
+                , closable:         false
+                , resizable:        false
+                , slidable:         false
+
+                //,	applyDefaultStyles:		true // DEBUGGING
+            };
+
+
             var server = $( "#server" ),
                     user = $( "#user" ),
                     password = $( "#password" ),
@@ -52,11 +67,21 @@
                     return true;
                 }
             }
-            $( "#dialog-form" ).dialog({
+            $('<div id="dialogBox">').load('ServerSettings.html').dialog({
                 autoOpen: false,
-                height: 300,
-                width: 800,
+                width:400,
+                height:260,
                 modal: true,
+                open:		function() {
+                    if (!dialogLayout) {
+
+                        // init layout *the first time* dialog opens
+                        dialogLayout = $("#dialogBox").layout(dialogLayout_settings);
+                    }
+                    else
+                    // just in case - probably not required
+                        dialogLayout.resizeAll();
+                },
                 buttons: {
                     "Save": function() {
                         var bValid = true;
@@ -87,23 +112,10 @@
             $( "#create-user" )
                     .button()
                     .click(function() {
-                        $('<div>').load('ServerSettings.html').dialog();
+                        $('#dialogBox').dialog("open");
                     });
         });
     </script></head><body>
-<div id="dialog-form" title="Server-Settings">
-    <p class="validateTips">Server Einstellungen festlegen</p>
-    <form>
-        <fieldset>
-            <label for="server">Server</label>
-            <input name="server" id="server" class="text ui-widget-content ui-corner-all" type="text">
-            <label for="user">User</label>
-            <input name="user" id="user" value="" class="text ui-widget-content ui-corner-all" type="text">
-            <label for="password">Password</label>
-            <input name="password" id="password" value="" class="text ui-widget-content ui-corner-all" type="password">
-        </fieldset>
-    </form>
-</div>
 
 <button id="create-user">Create new user</button>
 </body></html>

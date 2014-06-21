@@ -620,8 +620,6 @@ $(function() {
     $('<div id="settingsDialog">').load('ServerSettings.html')
         .dialog({
         autoOpen: false,
-        height: 450,
-        width: 350,
         modal: true,
         buttons: {
             "Save": function() {
@@ -727,7 +725,7 @@ window.onload = function () {
     try {
         var erg = loadApplet();
         if (erg != null && !erg) {
-          throw new Error("Applet konnte nicht geladen werden!");
+          throw new Error("Applet konnte nicht geladen werdedesignern!");
         }
         document.getElementById('filesinput').addEventListener('change', readMultiFile, false);
 

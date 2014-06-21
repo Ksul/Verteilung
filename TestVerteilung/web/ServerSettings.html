@@ -1,44 +1,42 @@
-<form>
-    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-        <tbody>
-        <tr>
-            <td style="vertical-align: top; width: 527px;">
-                <table style="text-align: left; height: 36px; width: 574px;" border="0" cellpadding="2" cellspacing="2">
-                    <tbody>
-                    <tr>
-                        <td style="vertical-align: middle; width: 28px; height: 22px; text-align: center;"><img
-                                style="width: 24px; height: 24px;" alt="" src="resource/alfresco.png"><br></td>
-                        <td style="vertical-align: middle; width: 528px; height: 22px;">Alfresco Server Einstellungen
-                            festlegen
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top; width: 527px;"><label for="server">Server</label></td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top; width: 527px;"><input tabindex="1" name="server" id="server"
-                                                                  class="text ui-widget-content ui-corner-all"></td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top; width: 527px;"><label for="user">User</label></td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top; width: 527px;"><input tabindex="2" name="user" id="user"
-                                                                  class="text ui-widget-content ui-corner-all"></td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top; width: 527px;"><label for="password">Password</label></td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top; width: 527px;"><input style="" tabindex="3" name="password"
-                                                                  id="password"
-                                                                  class="text ui-widget-content ui-corner-all"
-                                                                  type="password"></td>
-        </tr>
-        </tbody>
-    </table>
-</form>
+<script>
+    $(document).ready(function () {
+
+        $('#container').layout();
+        $('#oben').layout({west__size: 26});
+        $('#central').layout();
+        $('#innerCentral').layout();
+    });
+</script>
+
+
+
+
+
+
+<div class="ui-layout-center" id="container" >
+    <div class="ui-layout-north" id="oben">
+        <div class="ui-layout-west" >
+            <img style="width: 24px; height: 24px;" alt="" src="resource/alfresco.png">
+        </div>
+        <div class="ui-layout-center">Alfresco Server Einstellungen festlegen
+        </div>
+    </div>
+    <div class="ui-layout-center" id="central">
+        <div class="ui-layout-north">Server
+            <input maxlength="100" tabindex="1" name="server" id="server"
+                   class="text ui-widget-content ui-corner-all">
+        </div>
+        <div class="ui-layout-center" id="innerCentral">
+            <div class="ui-layout-west">User
+                <input maxlength="40" tabindex="2" name="user" id="user"
+                       class="text ui-widget-content ui-corner-all">
+            </div>
+            <div class="ui-layout-center">Password
+                <input maxlength="40" style="" tabindex="3" name="password"
+                       id="password"
+                       class="text ui-widget-content ui-corner-all"
+                       type="password">
+            </div>
+        </div>
+    </div>
+</div>
