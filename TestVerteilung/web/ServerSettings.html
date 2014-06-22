@@ -1,14 +1,41 @@
 <script>
-    $(document).ready(function () {
+    $('#container').layout({zIndex: 0
+            , resizeWithWindow: false
+            , closable:         false
+            , resizable:        false
+            , slidable:         false});
+    $('#oben').layout({zIndex: 0
+        , resizeWithWindow: false
+        , closable:         false
+        , resizable:        false
+        , slidable:         false
+        ,west__size: 26});
+    $('#central').layout({zIndex: 0
+        , resizeWithWindow: false
+        , closable:         false
+        , resizable:        false
+        , slidable:         false});
+    $('#inner-central').layout({zIndex: 0
+            , resizeWithWindow: false
+            , closable:         false
+            , resizable:        false
+            , slidable:         false});
 
-        $('#container').layout();
-        $('#oben').layout({west__size: 26});
-        $('#central').layout();
-        $('#innerCentral').layout();
-    });
 </script>
 
+<style>
+    .settings-headline {
+      top:5px !important;
+    }
+   .ui-layout-pane-center {
+        right: 10px !important;
+        width: auto !important;
 
+    }
+    .text {
+        height: 18px !important;
+    }
+</style>
 
 
 
@@ -16,17 +43,17 @@
 <div class="ui-layout-center" id="container" >
     <div class="ui-layout-north" id="oben">
         <div class="ui-layout-west" >
-            <img style="width: 24px; height: 24px;" alt="" src="resource/alfresco.png">
+            <img alt="" src="resource/alfresco.png">
         </div>
-        <div class="ui-layout-center">Alfresco Server Einstellungen festlegen
+        <div class="ui-layout-center settings-headline" >Alfresco Server Einstellungen festlegen
         </div>
     </div>
     <div class="ui-layout-center" id="central">
         <div class="ui-layout-north">Server
-            <input maxlength="100" tabindex="1" name="server" id="server"
+            <input maxlength="120" tabindex="1" name="server" id="server"
                    class="text ui-widget-content ui-corner-all">
         </div>
-        <div class="ui-layout-center" id="innerCentral">
+        <div class="ui-layout-center" id="inner-central">
             <div class="ui-layout-west">User
                 <input maxlength="40" tabindex="2" name="user" id="user"
                        class="text ui-widget-content ui-corner-all">
