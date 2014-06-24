@@ -1,69 +1,155 @@
-<script>
-    $('#container').layout({zIndex: 0
-            , resizeWithWindow: false
-            , closable:         false
-            , resizable:        false
-            , slidable:         false});
-    $('#oben').layout({zIndex: 0
-        , resizeWithWindow: false
-        , closable:         false
-        , resizable:        false
-        , slidable:         false
-        ,west__size: 26});
-    $('#central').layout({zIndex: 0
-        , resizeWithWindow: false
-        , closable:         false
-        , resizable:        false
-        , slidable:         false});
-    $('#inner-central').layout({zIndex: 0
-            , resizeWithWindow: false
-            , closable:         false
-            , resizable:        false
-            , slidable:         false});
+<html>
+<meta charset="utf-8">
+<title>jQuery UI Dialog - Modal form</title>
 
-</script>
+<head>
+    <script src="./src/main/javascript/jquery-ui/js/jquery-1.10.2.js"></script>
+    <script src="./src/main/javascript/jquery-ui/js/jquery-ui-1.10.4.custom.min.js"></script>
+    <script type="text/javascript" src="./src/main/javascript/alpaca/jquery.tmpl.js"></script>
 
-<style>
-    .settings-headline {
-      top:5px !important;
-    }
-   .ui-layout-pane-center {
-        right: 10px !important;
-        width: auto !important;
+    <link rel="stylesheet" href="./themes/redmond/jquery-ui.css">
 
-    }
-    .text {
-        height: 18px !important;
-    }
-</style>
+    <link type="text/css" rel="stylesheet" href="./src/main/resource/ArchivLayout.css"/>
 
+    <script type="text/javascript" src="./src/main/javascript/alpaca/alpaca/alpaca.js"></script>
+    <link type="text/css" href="./src/main/javascript/alpaca/alpaca/alpaca.css" rel="stylesheet"/>
 
+    <script>
+        $(function () {
+            Alpaca.setDefaultLocale("de_DE");
+            $("#form").alpaca({
+                "schema": {
+                    "title": "Server Einstellungen",
+                    "type": "object",
+                    "properties": {
+                        "server": {
+                            "type": "string",
+                            "title": "Server",
+                            "required": true
+                        },
+                        "user": {
+                            "type": "string",
+                            "title": "Benutzer",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "title": "Password",
+                            "required": true,
+                            "pattern": "^[a-zA-Z0-9_]+$"
+                        }
+                    }
+                },
+                "options": {
+                    "renderForm": true,
+                    "fields": {
+                        "server": {
+                            "size": 60,
+                            "helper": "Adresse des Alfresco Servers"
+                        },
+                        "user": {
+                            "size": 30,
+                            "helper": "Alfresco Benutzer"
+                        },
+                        "password": {
+                            "type": "password",
+                            "size": 20
+                        }
+                    }
+                },
+                "data": {
+                    "user": "1234",
+                    "password": "@@@"
+                },
+                "postRender": function (renderedField) {
+                    var form = renderedField.form;
+                    if (form) {
+                        form.registerSubmitHandler(function (e) {
+                            return (renderedField.isValid(true));
+                        });
+                    }
+                }
 
+            });
+        });
 
-<div class="ui-layout-center" id="container" >
-    <div class="ui-layout-north" id="oben">
-        <div class="ui-layout-west" >
-            <img alt="" src="resource/alfresco.png">
-        </div>
-        <div class="ui-layout-center settings-headline" >Alfresco Server Einstellungen festlegen
-        </div>
-    </div>
-    <div class="ui-layout-center" id="central">
-        <div class="ui-layout-north">Server
-            <input maxlength="120" tabindex="1" name="server" id="server"
-                   class="text ui-widget-content ui-corner-all">
-        </div>
-        <div class="ui-layout-center" id="inner-central">
-            <div class="ui-layout-west">User
-                <input maxlength="40" tabindex="2" name="user" id="user"
-                       class="text ui-widget-content ui-corner-all">
-            </div>
-            <div class="ui-layout-center">Password
-                <input maxlength="40" style="" tabindex="3" name="password"
-                       id="password"
-                       class="text ui-widget-content ui-corner-all"
-                       type="password">
-            </div>
-        </div>
-    </div>
-</div>
+        /*$(function() {
+         Alpaca.setDefaultLocale("es_ES");
+         $("#form").alpaca({
+         "schema": {
+         "type": "object",
+         "properties": {
+         "username": {
+         "type": "string",
+         "title": "Username",
+         "required": true,
+         "pattern": "^[a-zA-Z0-9_]+$"
+         },
+         "password": {
+         "type": "string",
+         "title": "Password",
+         "required": true,
+         "pattern": "^[a-zA-Z0-9_]+$"
+         }
+         }
+         },
+         "options": {
+         "renderForm": true,
+         "form": {
+         "attributes": {
+         "action": "../../endpoints/echo.php",
+         "method": "post"
+         },
+         "buttons": {
+         "submit": {}
+         }
+         },
+         "fields": {
+         "username": {
+         "size": 20,
+         "label": "Nombre de usuario",
+         "helper": "Por favor, introduzca su nombre de usuario."
+         },
+         "password": {
+         "type": "password",
+         "size": 20,
+         "label": "contrase�a",
+         "helper": "Por favor, introduzca su contrase�a."
+         }
+         }
+         },
+         "data": {
+         "username": "1234",
+         "password": "@@@"
+         },
+         "view": {
+         "fields": {
+         "/username": {
+         "messages": {
+         "es_ES": {
+         "invalidPattern": "Nombre de usuario no v�lido!"
+         }
+         }
+         }
+         }
+         },
+         "postRender": function(renderedField) {
+         var form = renderedField.form;
+         if (form) {
+         form.registerSubmitHandler(function(e) {
+         return (renderedField.isValid(true));
+         });
+         }
+         }
+         });
+         });*/
+
+    </script>
+</head>
+
+<body>
+
+<div id="form"></div>
+
+</body>
+</html>
