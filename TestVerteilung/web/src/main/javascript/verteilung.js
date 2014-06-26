@@ -1305,12 +1305,7 @@ function work() {
  */
 function openSettings() {
     try {
-        var serverInput = document.getElementById('server');
-        serverInput.value = getSettings("server");
-        var userInput = document.getElementById('user');
-        userInput.value = getSettings("user");
-        var passInput = document.getElementById('password');
-        passInput.value = getSettings("password");
+
         $("#settingsDialog").dialog("open");
     } catch (e) {
         errorHandler(e);

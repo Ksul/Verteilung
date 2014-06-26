@@ -1,3 +1,23 @@
+function changeCss(className, classValue) {
+// we need invisible container to store additional css definitions
+    var cssMainContainer = $('#css-modifier-container');
+    if (cssMainContainer.length == 0) {
+        var cssMainContainer = $('<div id="css-modifier-container"></div>');
+        cssMainContainer.hide();
+        cssMainContainer.appendTo($('body'));
+    }
+
+// and we need one div for each class
+    classContainer = cssMainContainer.find('div[data-class="' + className + '"]');
+    if (classContainer.length == 0) {
+        classContainer = $('<div data-class="' + className + '"></div>');
+        classContainer.appendTo(cssMainContainer);
+    }
+
+// append additional style
+    classContainer.html('<style>' + className + ' {' + classValue + '}</style>');
+};
+
 /**
  * baut das Layout der Anwendung auf
  */

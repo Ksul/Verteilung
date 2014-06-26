@@ -16,8 +16,9 @@
 <script type="text/javascript" src="./src/main/javascript/alfrescoClient.js" charset="utf-8"></script>
 <script type="text/javascript" src="./src/main/javascript/recognition.js" charset="utf-8"></script>
 <script type="text/javascript" src="./src/main/javascript/verteilung.js"  charset="utf-8"></script>
-<script src="./src/main/javascript/jquery-ui/js/jquery-1.10.2.js"></script>
-<script src="./src/main/javascript/jquery-ui/js/jquery-ui-1.10.4.custom.min.js"></script>
+<script type="text/javascript" src="./src/main/javascript/jquery-ui/js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="./src/main/javascript/jquery-ui/js/jquery-ui-1.10.4.custom.min.js"></script>
+<script type="text/javascript" src="./src/main/javascript/jquery.tmpl.min.js"></script>
 <script type="text/javascript" src="./src/main/javascript/jquery.layout.js"></script>
 <script type="text/javascript" src="./src/main/javascript/jquery.layout.resizeTabLayout-1.3.js"></script>
 <script type="text/javascript" src="./src/main/javascript/jquery.cookie.js" charset="utf-8"></script>
@@ -26,10 +27,14 @@
 <script type="text/javascript" src="./src/main/javascript/jquery.themeswitcher.js" charset="utf-8"></script>
 <script type="text/javascript" src="./src/main/javascript/jquery.dataTables.js" charset="utf-8"></script>
 
+<script type="text/javascript" src="./src/main/javascript/alpaca/alpaca/alpaca.min.js"></script>
+
 <script src="./src/main/javascript/vkbeautify.js" type="text/javascript" charset="utf-8"></script>
 <script src="./src/main/javascript/jsbeautify.js" type="text/javascript" charset="utf-8"></script>
 
-<link type="text/css" rel="stylesheet" href="./src/main/resource/ArchivLayout.css" />
+<link type="text/css" href="./src/main/javascript/alpaca/alpaca/alpaca.css" rel="stylesheet"/>
+<link type="text/css" href="./src/main/javascript/alpaca/alpaca/960.fluid.css" rel="stylesheet"/>
+<link type="text/css" href="./src/main/resource/ArchivLayout.css" rel="stylesheet"/>
 
 
 <script type="text/javascript" charset="utf-8">
@@ -82,13 +87,73 @@ $(document).ready(function () {
 
 
 $(function() {
+    try {
     var dialogSettingsLayout;
-    var server = $("#server"),
+
+    var dialogSettings = { "id": "settingsDialog",
+        "schema": {
+            "type": "object",
+            "title": "Server Einstellungen",
+            "properties": {
+
+                "user": {
+                    "type": "string",
+                    "title": "Benutzer",
+                    "required": true
+                },
+                "password": {
+                    "type": "string",
+                    "title": "Password",
+                    "required": true,
+                    "pattern": "^[a-zA-Z0-9_]+$"
+                },
+                "server": {
+                    "type": "string",
+                    "title": "Server",
+                    "required": true
+                }
+            }
+        },
+        "options": {
+
+            "fields": {
+                "server": {
+                    "size": 56
+                },
+                "user": {
+                    "size": 30
+                },
+                "password": {
+                    "type": "password",
+                    "size": 20
+                }
+            }
+        },
+        "view": {
+            "parent": "VIEW_WEB_EDIT",
+            "layout": {
+                "template": "threeColumnGridLayout",
+                "bindings": {
+                    "server": "column-1",
+                    "user": "column-1",
+                    "password": "column-2"
+
+                }
+            },
+            "templates": {
+                "threeColumnGridLayout": '<div class="filter-content">' + '{{if options.label}}<h2>${options.label}</h2><span></span>{{/if}}' + '{{if options.helper}}<p>${options.helper}</p>{{/if}}' + '<div id="column-1" class="grid_6"> </div>' + '<div id="column-2" class="grid_6"> </div>' + '<div id="column-3" class="grid_12"> </div>' + '<div class="clear"></div>' + '</div>'
+            }
+
+        },
+        "ui": "jquery-ui"
+    } ;
+
+ /*   var server = $("#server"),
             user = $("#user"),
             password = $("#password"),
             allFields = $([]).add(server).add(user).add(password),
             tips = $(".validateTips");
-
+*/
     function updateTips(t) {
         tips.text(t).addClass("ui-state-highlight");
         setTimeout(function () {
@@ -119,11 +184,13 @@ $(function() {
             return true;
         }
     }
-    $('<div id="settingsDialog">').load('ServerSettings.html').dialog({
+    changeCss('.grid_6','width: 200px');
+    changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
+    $('<div id="settingsDialog">').append(Alpaca( $('<div id="form">'), dialogSettings)).dialog({
         autoOpen:   false,
         modal:      true,
-        width:410,
-        height:250,
+        width:470,
+        height:300,
         open:		function() {
                     if (!dialogSettingsLayout) {
                         // init layout *the first time* dialog opens
@@ -159,6 +226,9 @@ $(function() {
             allFields.val( "" ).removeClass( "ui-state-error" );
         }
     });
+    } catch (e) {
+        errorHandler(e);
+    }
 
 });
 

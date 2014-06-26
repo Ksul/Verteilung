@@ -15,39 +15,33 @@
     <link type="text/css" href="./src/main/javascript/alpaca/alpaca/alpaca.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/javascript/alpaca/alpaca/960.fluid.css" rel="stylesheet"/>
 
+    <style>
+        /*damit wird die Breite der 1. Spalte festgelegt um zu verhindern, das der Abstand der Spalten voneinander zu groß wird.*/
+        .grid_6 {
+            width: 200px;
+        }
+        h2 {
+            background-color: transparent;
+            background-image: url('./src/main/resource/images/alfresco.png');
+            background-repeat: no-repeat;
+            background-position: left;
+            height: 24px;
+            border: 0;
+            padding-left: 28px;
+            padding-top: 4px;
+
+        }
+    </style>
     <script>
         $(function () {
 
-            $("#form0").alpaca({
+          $("#form").alpaca({
+                "id": "settingsDialog",
                 "schema": {
+                    "type": "object",
                     "title": "Server Einstellungen",
-                    "type": "object",
                     "properties": {
-                        "server": {
-                            "type": "string",
-                            "titel":  "Server",
-                            "required": true
-                        }
-                    }
-                },
-                "options": {
-                    "renderForm": true,
-                    "fields": {
-                        "server": {
-                            "size": 60
-                             }
-                    }
-                },
-                "view": {
-                    "parent": "VIEW_WEB_EDIT"
-                }
 
-
-            });
-            $("#form1").alpaca({
-                "schema": {
-                    "type": "object",
-                    "properties": {
                         "user": {
                             "type": "string",
                             "title": "Benutzer",
@@ -58,16 +52,22 @@
                             "title": "Password",
                             "required": true,
                             "pattern": "^[a-zA-Z0-9_]+$"
+                        },
+                        "server": {
+                            "type": "string",
+                            "title": "Server",
+                            "required": true
                         }
                     }
-
                 },
                 "options": {
 
                     "fields": {
+                        "server": {
+                            "size": 60
+                        },
                         "user": {
                             "size": 30
-
                         },
                         "password": {
                             "type": "password",
@@ -80,10 +80,11 @@
                     "password": "@@@"
                 },
                 "view": {
-                    "parent":  "VIEW_WEB_EDIT",
+                    "parent": "VIEW_WEB_EDIT",
                     "layout": {
                         "template": "threeColumnGridLayout",
                         "bindings": {
+                            "server": "column-1",
                             "user": "column-1",
                             "password": "column-2"
 
@@ -93,18 +94,19 @@
                         "threeColumnGridLayout": '<div class="filter-content">' + '{{if options.label}}<h2>${options.label}</h2><span></span>{{/if}}' + '{{if options.helper}}<p>${options.helper}</p>{{/if}}' + '<div id="column-1" class="grid_6"> </div>' + '<div id="column-2" class="grid_6"> </div>' + '<div id="column-3" class="grid_12"> </div>' + '<div class="clear"></div>' + '</div>'
                     }
 
-                }
+                },
+                "ui": "jquery-ui"
             });
 
         });
+
 
     </script>
 </head>
 
 <body>
 
-<div id="form0"></div>
-<div id="form1"></div>
+<div id="form"></div>
 
 </body>
 </html>

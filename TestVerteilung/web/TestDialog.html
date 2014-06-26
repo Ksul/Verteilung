@@ -3,527 +3,90 @@
 
 
     <meta charset="utf-8"><title>jQuery UI Dialog - Modal form</title>
-    
-    <link rel="stylesheet" href="./themes/redmond/jquery-ui.css">
-    <link rel="stylesheet" href="./themes/alpaca/alpaca.css">
+
     <script src="./src/main/javascript/jquery-ui/js/jquery-1.10.2.js"></script>
     <script src="./src/main/javascript/jquery-ui/js/jquery-ui-1.10.4.custom.min.js"></script>
-    <script type="text/javascript" src="./src/main/javascript/jquery.layout.js"></script>
-    <script type="text/javascript" src="./src/main/javascript/alpaca.js"></script>
-    <script src="../src/main/javascript/jquery.cookie.js"></script>
-    <style type="text/css" media="screen">
+    <script type="text/javascript" src="./src/main/javascript/jquery.tmpl.js"></script>
 
-       /* @import "/media/css/site_jui.ccss"; */
-    /*@import "./themes/cupertino/jquery-ui-1.10.3.custom.css";*/
-    @import "./themes/demo_table.css";
+    <link rel="stylesheet" href="./themes/redmond/jquery-ui.css">
 
+    <link type="text/css" rel="stylesheet" href="./src/main/resource/ArchivLayout.css"/>
 
-    .ace_scroller {
-        overflow-x: auto !important;
-    }
-
-    .ace_sb {
-        overflow-y: auto !important;
-    }
-
-    .dataTables_info {
-        padding-top: 0;
-    }
-
-    .dataTables_paginate {
-        padding-top: 0;
-    }
-
-    .css_right {
-        float: right;
-    }
-
-    #example_wrapper .fg-toolbar {
-        font-size: 0.8em
-    }
-
-    #theme_links span {
-        float: left;
-        padding: 2px 10px;
-    }
-
-    .alignRight {
-        text-align: right;
-    }
-
-    .alignLeft {
-        text-align: left;
-    }
-
-    .alignCenter {
-        text-align: center;
-    }
-
-    .ui-widget .ui-widget {
-        font-size: 0.87em;
-    }
-
-    /*td {
-        font-size: 0.7em;
-    }
-
-    th {
-        font-size: 0.7em;
-    }*/
-
-    /* remove padding & scrolling from panes that are 'containers' for nested layouts */
-    .ui-layout-pane {
-        border: 0; /* cosmetic */
-        padding: 0;
-        overflow: hidden;
-    }
-
-    .header {
-        height: 12px;
-        text-align: center;
-        padding-bottom: 2px;
-        /*   background: #80ade5 url(./resource/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
-           border-bottom: 1px solid #777;
-
-           font-weight: normal;
-           font-size: 9pt;
-
-
-           position: relative;
-           overflow: hidden;
-       */}
-
-    label, input {
-        display: block;
-    }
-
-    input.text {
-        margin-bottom: 12px;
-        width: 90%;
-        padding: .4em;
-    }
-
-    fieldset {
-        padding: 0;
-        border: 0;
-        margin-top: 25px;
-    }
-
-    h1 {
-        font-size: 1.2em;
-        margin: .6em 0;
-    }
-
-    .ui-dialog .ui-state-error {
-        padding: .3em;
-    }
-
-    .validateTips {
-        border: 1px solid transparent;
-        padding: 0.3em;
-    }
-
-    .ui-progressbar {
-        height: 2em;
-        text-align: left;
-    }
-
-    .ui-progressbar .ui-progressbar-value {
-        margin: -1px;
-        height: 100%;
-    }
-
-    .progress-label {
-        float: left;
-        margin-left: 50%;
-        margin-top: 0px;
-        font-weight: bold;
-        text-shadow: 1px 1px 0 #fff;
-    }
-
-    #progressbar {
-        width: 300px;
-        height: 20px;
-    }
-
-    input.search {
-        background-color: transparent;
-        background-image: url('src/main/resource/images/search.png');
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.search:disabled {
-        background-image: url('src/main/resource/images/search-bw.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.save {
-        background-image: url('src/main/resource/images/save.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer
-    }
-
-    input.save:disabled {
-        background-image: url('src/main/resource/images/save-bw.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.play {
-        background-image: url('src/main/resource/images/play.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.play:disabled {
-        background-image: url('src/main/resource/images/play-bw.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.maximize {
-        background-image: url('src/main/resource/images/maximize.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.maximize:disabled {
-        background-image: url('src/main/resource/images/maximize-bw.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.minimize {
-        background-image: url('src/main/resource/images/minimize.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.minimize:disabled {
-        background-image: url('src/main/resource/images/minimize-bw.png');
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.upload {
-        background-image: url('src/main/resource/images/upload.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.upload:disabled {
-        background-image: url('src/main/resource/images/upload-bw.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.download {
-        background-image: url('src/main/resource/images/download.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.download:disabled {
-        background-image: url('src/main/resource/images/download-bw.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.beautify {
-        background-image: url('src/main/resource/images/beautify.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.beautify:disabled {
-        background-image: url('src/main/resource/images/beautify-bw.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.pdf {
-        background-image: url('src/main/resource/images/file_pdf.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.pdf:disabled {
-        background-image: url('src/main/resource/images/file_pdf-bw.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.close {
-        background-image: url('src/main/resource/images/exit.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.test {
-        background-image: url('src/main/resource/images/tabicon_pipette.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.reload {
-        background-image: url('src/main/resource/images/refresh.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.docAlfresco {
-        background-image: url('src/main/resource/images/alfresco.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.docAlfresco:disabled {
-        background-image: url('src/main/resource/images/alfresco-bw.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: text;
-        disabled: true;
-    }
-
-    input.settings {
-        background-image: url('src/main/resource/images/settings.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    input.themes {
-        background-image: url('src/main/resource/images/themes.png');
-        background-color: transparent;
-        width: 24px;
-        height: 24px;
-        border: 0;
-        cursor: pointer;
-    }
-
-    /* add padding and min/max sizes to BODY */
-    html {
-        /* allow scrolling if layout hits min-width/height */
-        overflow:		auto !important; /* override Layout default of 'hidden' to allow scrollbars */
-    }
-    body {
-        padding:		0 0px !important; /* override Layout default of '0' */
-        /* set min dimensions for layout - window will scroll if smaller than this */
-        min-width:		950px;
-        min-height:		600px;
-        font-size: 62.5%;
-        /* max-width works for left-aligned layout - need a container-div to 'center' the layout */
-        /*max-width:		1000px;*/
-    }
-    p {
-        margin:	0 0 1ex;
-    }
-    /*
-    *	HELPER CLASSES
-    */
-    .container {
-        /* used for elements that should not have padding or scrollbars */
-        padding:	0;
-        overflow:	hidden;
-    }
-    .hidden {
-        /* used to HIDE layout-panes until Layout initializes */
-        display:	none;
-    }
-
-    .ace_gutter {
-        opacity: 0.3;
-    }
-
-    .ui-layout-resizer-open-hover, .ui-layout-resizer-dragging {
-        background: none !important;
-    }
-
-    .ui-layout-resizer {
-        background: none !important;
-    }
-    button.ui-dialog-titlebar-close span.ui-icon
-    {
-        margin-left: -8px !important;
-        margin-top: -8px !important;
-    }
-
-
-    /*
-     *	TAB CLASSES - STRUCTURAL, REQUIRED
-     */
-    DIV#tabs { /* page-wrapper - used ONLY to 'wrap' tabButtons and tabPanels */
-        position:	relative	!important; /* overide UI Theme - prevent from becoming a positional wrapper */
-    }
-    UL#tabButtons ,
-    DIV#tabPanels {
-        margin:		0 !important; /* layout-panes should never have margins */
-    }
-
-    .tabPanel { /* container for tabLayout */
-        height:		100%; /* need to 'fill' the tabPanels - layout container must have 'height' */
-        padding:	0 !important;  // DO NOT set top- or bottom-padding because height=100%
-    }
-
-
-    DIV#verteilungSouth {
-        background: none !important;
-    }
-
-
-
-    /*
-     *	DEBUG - add colored padding & borders to show what is possible
-     */
-
-    .ui-layout-north  {
-        overflow: visible;
-    }
-
-    /*
-     *	add some padding and set overflow
-     */
-    /*   .ui-widget-header {
-           padding:	2px 1em 3px;
-           overflow:	hidden;
-       }
-   */    .ui-widget-content {
-
-                 overflow:	auto;
-             }
-
-    #tabButtons {
-        padding: 0 0.2em 0;
-    }
-
-
-    .jstree-icon {
-        background:url("src/main/resource/images/d.png") -90px 0px no-repeat !important;
-    }
-
-    .jstree-leaf > ins {
-        background:url("src/main/resource/images/d.png") -36px 0px no-repeat !important;
-    }
-
-    .ui-icon-triangle-1-e {
-        background:url("src/main/resource/images/d.png") -54px 0px no-repeat !important;
-    }
-
-    /*li[rel="root"] ins.ui-icon-triangle-1-se  {
-        background:url("./resource/d.png") -54px -54px no-repeat !important;
-    }*/
-
-    .ui-icon-triangle-1-se {
-        background:url("src/main/resource/images/d.png") -72px 0px no-repeat !important;
-    }
-
-    .ui-icon-folder-collapsed {
-        background:url("src/main/resource/images/d.png") -54px -18px no-repeat !important;
-    }
-
-    .ui-icon-folder-open {
-        background:url("src/main/resource/images/d.png") -54px -36px no-repeat !important;
-    }
-
-    .ui-icon-document {
-        background:url("src/main/resource/images/file18x18.gif") no-repeat !important;
-    }
-    a.ui-state-default  {
-        background: none !important ;
-        color: inherit !important;
-        border: none !important;
-    }
-
-
-    </style>
+    <script type="text/javascript" src="./src/main/javascript/alpaca/alpaca/alpaca.js"></script>
+    <link type="text/css" href="./src/main/javascript/alpaca/alpaca/alpaca.css" rel="stylesheet"/>
+    <link type="text/css" href="./src/main/javascript/alpaca/alpaca/960.fluid.css" rel="stylesheet"/>
+    <link type="text/css" rel="stylesheet" href="./src/main/resource/ArchivLayout.css" />
     <script>
         $(function() {
 
+            var dialogSettings = { "id": "settingsDialog",
+                "schema": {
+                    "type": "object",
+                    "title": "Server Einstellungen",
+                    "properties": {
+
+                        "user": {
+                            "type": "string",
+                            "title": "Benutzer",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "title": "Password",
+                            "required": true,
+                            "pattern": "^[a-zA-Z0-9_]+$"
+                        },
+                        "server": {
+                            "type": "string",
+                            "title": "Server",
+                            "required": true
+                        }
+                    }
+                },
+                "options": {
+
+                    "fields": {
+                        "server": {
+                            "size": 56
+                        },
+                        "user": {
+                            "size": 30
+                        },
+                        "password": {
+                            "type": "password",
+                            "size": 20
+                        }
+                    }
+                },
+                "data": {
+                    "user": "1234",
+                    "password": "@@@"
+                },
+                "view": {
+                    "parent": "VIEW_WEB_EDIT",
+                    "layout": {
+                        "template": "threeColumnGridLayout",
+                        "bindings": {
+                            "server": "column-1",
+                            "user": "column-1",
+                            "password": "column-2"
+
+                        }
+                    },
+                    "templates": {
+                        "threeColumnGridLayout": '<div class="filter-content">' + '{{if options.label}}<h2>${options.label}</h2><span></span>{{/if}}' + '{{if options.helper}}<p>${options.helper}</p>{{/if}}' + '<div id="column-1" class="grid_6"> </div>' + '<div id="column-2" class="grid_6"> </div>' + '<div id="column-3" class="grid_12"> </div>' + '<div class="clear"></div>' + '</div>'
+                    }
+
+                },
+                "ui": "jquery-ui"
+            } ;
+
             var dialogLayout;
-            var server = $( "#server" ),
+            /*var server = $( "#server" ),
                     user = $( "#user" ),
                     password = $( "#password" ),
                     allFields = $( [] ).add( server ).add( user ).add( password ),
-                    tips = $( ".validateTips" );
+                    tips = $( ".validateTips" );*/
             function updateTips( t ) {
                 tips
                         .text( t )
@@ -551,10 +114,33 @@
                     return true;
                 }
             }
-            $('<div id="dialogBox">').load('DocumentEdit.html').dialog({
+
+            function changeCss(className, classValue) {
+// we need invisible container to store additional css definitions
+                var cssMainContainer = $('#css-modifier-container');
+                if (cssMainContainer.length == 0) {
+                    var cssMainContainer = $('<div id="css-modifier-container"></div>');
+                    cssMainContainer.hide();
+                    cssMainContainer.appendTo($('body'));
+                }
+
+// and we need one div for each class
+                classContainer = cssMainContainer.find('div[data-class="' + className + '"]');
+                if (classContainer.length == 0) {
+                    classContainer = $('<div data-class="' + className + '"></div>');
+                    classContainer.appendTo(cssMainContainer);
+                }
+
+// append additional style
+                classContainer.html('<style>' + className + ' {' + classValue + '}</style>');
+            };
+
+            changeCss('.grid_6','width: 200px');
+            changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
+            $('<div id="dialogBox">').append(Alpaca( $('<div id="form">'), dialogSettings)).dialog({
                 autoOpen: false,
-                width:800,
-                height:600,
+                width:470,
+                height:300,
                 modal: true,
                 open:		function() {
                     if (!dialogLayout) {
