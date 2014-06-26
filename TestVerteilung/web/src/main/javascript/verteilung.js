@@ -1301,18 +1301,6 @@ function work() {
 
 
 /**
- * Öffnet den Einstellungsdialog für die Alfresco Server Settings
- */
-function openSettings() {
-    try {
-
-        $("#settingsDialog").dialog("open");
-    } catch (e) {
-        errorHandler(e);
-    }
-}
-
-/**
  * aktualisiert die geänderten Regeln auf dem Server
  * @returns {boolean}  liefert true zurück, wenn alles geklappt hat
  */

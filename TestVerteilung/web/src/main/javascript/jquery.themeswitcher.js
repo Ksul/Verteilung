@@ -182,7 +182,7 @@
             "font-family": "'Trebuchet MS', Verdana, sans-serif",
             "font-size": "11px",
             "color": "#666",
-            "background-image": "url('./resource/themes.png') ",
+            "background-image": "url('./src/main/resource/images/themes.png')" ,
             "border": "1px solid #CCC",
             "text-decoration": "none",
             "display": "block",
@@ -204,13 +204,13 @@
             .bind({
                 mouseenter: function () {
                     $(this).css({
-                        "background-image": "url('./resource/themes.png') "
+                        "background-image": "url('./src/main/resource/images/themes.png')"
                     })
                 },
                 mouseleave: function () {
                     if (!switcherDiv.find(".jquery-ui-switcher-list-hldr").is(":visible")) {
                         $(this).css({
-                            "background-image": "url('./resource/themes.png') "
+                            "background-image": "url('./src/main/resource/images/themes.png')"
                         })
                     }
                 },
