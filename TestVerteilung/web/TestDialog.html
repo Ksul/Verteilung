@@ -46,30 +46,33 @@
                 "options": {
 
                     "fields": {
-                        "server": {
-                            "size": 56
-                        },
+
                         "user": {
                             "size": 30
                         },
                         "password": {
                             "type": "password",
                             "size": 20
+                        } ,
+                        "server": {
+                            "size": 55
                         }
                     }
                 },
                 "data": {
                     "user": "1234",
-                    "password": "@@@"
+                    "password": "@@@" ,
+                    "server": "wdwdwd"
                 },
                 "view": {
                     "parent": "VIEW_WEB_EDIT",
                     "layout": {
                         "template": "threeColumnGridLayout",
                         "bindings": {
-                            "server": "column-1",
+
                             "user": "column-1",
-                            "password": "column-2"
+                            "password": "column-2",
+                            "server": "column-1"
 
                         }
                     },
@@ -136,14 +139,15 @@
             };
 
             changeCss('.grid_6','width: 200px');
+            changeCss ('.ui-dialog', 'overflow: hidden');
             changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
-            $('<div id="dialogBox">').append(Alpaca( $('<div id="form">'), dialogSettings)).dialog({
-                autoOpen: false,
-                width:470,
-                height:300,
+            $('<div id="dialogBox">').append(Alpaca($('<div id="form">'), dialogSettings)).dialog({
+                autoOpen: true,
+                width:440,
+                height:'auto',
                 modal: true,
                 open:		function() {
-                    if (!dialogLayout) {
+                  /*  if (!dialogLayout) {
 
 
                         // init layout *the first time* dialog opens
@@ -152,7 +156,7 @@
                     }
                     else
                     // just in case - probably not required
-                        dialogLayout.resizeAll();
+                        dialogLayout.resizeAll();*/
                 },
                 buttons: {
                     "Save": function() {

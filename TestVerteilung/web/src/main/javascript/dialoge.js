@@ -33,7 +33,7 @@ function startSettingsDialog(){
 
                 "fields": {
                     "server": {
-                        "size": 56
+                        "size": 57
                     },
                     "user": {
                         "size": 30
@@ -60,22 +60,21 @@ function startSettingsDialog(){
                 }
 
             },
-            "ui": "jquery-ui"
+            "ui": "jquery-ui" ,
+            "data": {
+                "server":    getSettings("server"),
+                "user":      getSettings("user"),
+                "password":  getSettings("password")
+            }
         } ;
 
         changeCss('.grid_6','width: 200px');
         changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
         $('<div id="settingsDialog">').append(Alpaca( $('<div id="form">'), dialogSettings)).dialog({
-            autoOpen:   false,
+            autoOpen:   true,
             modal:      true,
-            width:470,
-            height:300,
-            open:		function() {
-                if (!dialogSettingsLayout) {
-                    // init layout *the first time* dialog opens
-                    dialogSettingsLayout = $("#settingsDialog").layout();
-                }
-            },
+            width:440,
+            height: 'auto',
             buttons: {
                 "Save": function() {
                     var bValid = true;
@@ -102,7 +101,7 @@ function startSettingsDialog(){
                 allFields.val( "" ).removeClass( "ui-state-error" );
             }
         });
-        $("#settingsDialog").dialog("open");
+
     } catch (e) {
         errorHandler(e);
     }
