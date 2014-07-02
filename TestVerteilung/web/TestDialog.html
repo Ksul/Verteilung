@@ -65,29 +65,52 @@
                         }
                     }
                 },
-                "form":{
-                    "attributes":{
-                        "action":"../../endpoints/echo.php",
-                        "method":"post"
-                    },
-                    "buttons":{
-                        "submit":{},
-                        "reset":{}
-                    }
-                },
-                "options": {
 
+                "options": {
+                    "renderForm": true,
+                    "form":{
+
+                        "attributes":{
+                            "action":"../../endpoints/echo.php",
+                            "method":"post"
+                        },
+                        "buttons":{
+                            "submit":{"value":"Sichern"},
+                            "reset":{"value":"Abbrechen"}
+                        }
+                    },
                     "fields": {
 
                         "user": {
-                            "size": 30
+                            "size": 30,
+                            "onFieldKeyup": function(renderedForm) {
+                                if (renderedForm.isValid(true)) {
+                                    $('#btn-ok').addClass('ui-state-enabled');
+                                } else {
+                                    $('#btn-ok').addClass('ui-state-disabled');
+                                }
+                            }
                         },
                         "password": {
                             "type": "password",
-                            "size": 20
+                            "size": 20,
+                            "onFieldKeyup": function(renderedForm) {
+                                if (renderedForm.isValid(true)) {
+                                    $('#btn-ok').addClass('ui-state-enabled');
+                                } else {
+                                    $('#btn-ok').addClass('ui-state-disabled');
+                                }
+                            }
                         } ,
                         "server": {
-                            "size": 65
+                            "size": 65,
+                            "onFieldKeyup": function(renderedForm) {
+                                if (renderedForm.isValid(true)) {
+                                    $('#btn-ok').addClass('ui-state-enabled');
+                                } else {
+                                    $('#btn-ok').addClass('ui-state-disabled');
+                                }
+                            }
                         }
                     }
                 },
@@ -124,6 +147,7 @@
 
                 },
                 "ui": "jquery-ui"
+
             } ;
 
             var dialogLayout;
@@ -183,7 +207,11 @@
                         dialogLayout.resizeAll();*/
                 },
                 buttons: {
-                    "Save": function() {
+
+                    "Save": {
+                        "id" : "btn-ok",
+                        "text": "Save",
+                        "click": function() {
                         var server = $("[name='server']"),
                                 user = $("[name='user']"),
                                 password = $("[name='password']");
@@ -197,11 +225,15 @@
                             alert("Einstellungen gesichert");
                             $( this ).dialog( "close" );
                         }*/
-                    },
-                    Cancel: function() {
+                    }},
+
+                    "Cancel": {
+                        "id" : "btn-cancel",
+                        "text": "Cancel",
+                        "click":function() {
                         $( this ).dialog( "close" );
                     }
-                },
+                }},
                 close: function() {
                     //allFields.val( "" ).removeClass( "ui-state-error" );
                 }
