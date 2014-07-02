@@ -25,7 +25,8 @@ function startSettingsDialog(){
                     "server": {
                         "type": "string",
                         "title": "Server",
-                        "required": true
+                        "required": true,
+                        "pattern": "@^(https?|ftp)://[^\s/$.?#].[^\s]*$@iS"
                     }
                 }
             },
@@ -33,7 +34,7 @@ function startSettingsDialog(){
 
                 "fields": {
                     "server": {
-                        "size": 57
+                        "size": 60
                     },
                     "user": {
                         "size": 30
@@ -47,17 +48,20 @@ function startSettingsDialog(){
             "view": {
                 "parent": "VIEW_WEB_EDIT",
                 "layout": {
-                    "template": "threeColumnGridLayout",
+                    "template": "columnGridLayout",
                     "bindings": {
-                        "server": "column-1",
-                        "user": "column-1",
-                        "password": "column-2"
-
+                        "server":"column-1-1",
+                        "user":"column-1-7_12",
+                        "password":"column-2-5_12"
                     }
                 },
                 "templates": {
-                    "threeColumnGridLayout": '<div class="filter-content">' + '{{if options.label}}<h2>${options.label}</h2><span></span>{{/if}}' + '{{if options.helper}}<p>${options.helper}</p>{{/if}}' + '<div id="column-1" class="grid_6"> </div>' + '<div id="column-2" class="grid_6"> </div>' + '<div id="column-3" class="grid_12"> </div>' + '<div class="clear"></div>' + '</div>'
-                }
+                    "columnGridLayout": '<div class="filter-content">' + '{{if options.label}}<h2>${options.label}</h2><span></span>{{/if}}' + '{{if options.helper}}<p>${options.helper}</p>{{/if}}'
+                        + '<div id="column-1-1" class="col-1-1"> </div>'
+                        + '<div id="column-1-2" class="col-1-2"> </div> <div id="column-2-2" class="col-1-2"> </div>'
+                        + '<div id="column-1-7_12" class="col-7-12"> </div> <div id="column-2-5_12" class="col-5-12"> </div>'
+                        + '<div id="column-1-3" class="col-1-3"> </div> <div id="column-2-3" class="col-1-3"> </div> <div id="column-3-3" class="col-1-3"> </div>'
+                        + '</div>'                }
 
             },
             "ui": "jquery-ui" ,
@@ -68,37 +72,30 @@ function startSettingsDialog(){
             }
         } ;
 
-        changeCss('.grid_6','width: 200px');
+        changeCss('.grid','max-width: 100%; min-width:100%');
+        changeCss('input', 'width:100%');
         changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
         $('<div id="settingsDialog">').append(Alpaca( $('<div id="form">'), dialogSettings)).dialog({
             autoOpen:   true,
             modal:      true,
-            width:440,
+            width:420,
             height: 'auto',
             buttons: {
                 "Save": function() {
-                    var bValid = true;
-                    var reg = "@^(https?|ftp)://[^\s/$.?#].[^\s]*$@iS";
-                    allFields.removeClass( "ui-state-error" );
-                    // bValid = bValid && checkRegexp( server, /(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/, "Server Adresse ist ungültig" );
-                    bValid = bValid && checkLength(user, "User", 1, -1);
-                    bValid = bValid && checkLength(password, "Passwort", 1, -1);
+                    var server = $("[name='server']"),
+                        user = $("[name='user']"),
+                        password = $("[name='password']");
                     settings = {"settings": [{"key":"server", "value":server.val()},
                         {"key":"user", "value":user.val()},
                         {"key":"password", "value":password.val()}]};
-                    if ( bValid ) {
                         $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
                         alert("Einstellungen gesichert");
-                        init();
                         $( this ).dialog( "close" );
-                    }
+                    init();
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" );
                 }
-            },
-            close: function() {
-                allFields.val( "" ).removeClass( "ui-state-error" );
             }
         });
 

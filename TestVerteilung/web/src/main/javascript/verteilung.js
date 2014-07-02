@@ -1338,7 +1338,7 @@ function getRules(rulesId, loadLocal) {
         var ret;
         if (loadLocal) {
             var open = openFile("doc.xml");
-            rulesEditor.getSession().setValue(open[0]);
+            rulesEditor.getSession().setValue(open);
             rulesEditor.getSession().foldAll(1);
             fillMessageBox("Regeln erfolgreich lokal gelesen!");
         } else {
@@ -1431,7 +1431,7 @@ function openFile(file) {
         ], "Datei konnte nicht geöffnet werden:");
         if (json.success) {
             fillMessageBox("Datei " + name + " erfolgreich geöffnet!");
-            return json.result;
+            return atob(json.result);
         }
         else
             return "";
