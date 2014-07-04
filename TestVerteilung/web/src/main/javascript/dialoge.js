@@ -1,3 +1,4 @@
+
 /**
  * Öffnet den Einstellungsdialog für die Alfresco Server Settings
  */
