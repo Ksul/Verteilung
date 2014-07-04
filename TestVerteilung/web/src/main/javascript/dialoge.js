@@ -4,8 +4,6 @@
  */
 function startSettingsDialog(){
     try {
-        var dialogSettingsLayout;
-
         var dialogSettings = { "id": "settingsDialog",
             "schema": {
                 "type": "object",
@@ -20,8 +18,7 @@ function startSettingsDialog(){
                     "password": {
                         "type": "string",
                         "title": "Password",
-                        "required": true,
-                        "pattern": "^[a-zA-Z0-9_]+$"
+                        "required": true
                     },
                     "server": {
                         "type": "string",
@@ -83,16 +80,22 @@ function startSettingsDialog(){
             height: 'auto',
             buttons: {
                 "Save": function() {
-                    var server = $("[name='server']"),
-                        user = $("[name='user']"),
-                        password = $("[name='password']");
-                    settings = {"settings": [{"key":"server", "value":server.val()},
-                        {"key":"user", "value":user.val()},
-                        {"key":"password", "value":password.val()}]};
+                    try {
+                    var server = $("[name='server']").val(),
+                        user = $("[name='user']").val(),
+                        password = $("[name='password']").val();
+                    if (!server.endsWith("/"))
+                        server = server + "/";
+                    settings = {"settings": [{"key":"server", "value":server},
+                        {"key":"user", "value":user},
+                        {"key":"password", "value":password}]};
                         $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
                         alert("Einstellungen gesichert");
                         $( this ).dialog( "close" );
                     init();
+                    } catch (e) {
+                        errorHandler(e);
+                    }
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" );

@@ -1687,8 +1687,24 @@ function init() {
         if (exist(getSettings("server")))
             alfrescoServerAvailable = checkServerStatus(getSettings("server"));
         if (alfrescoServerAvailable) {
+            var erg;
             executeService("setParameter", [{"name":"server", "value":getSettings("server") + "service/cmis"},{"name":"user", "value":getSettings("user")},{"name":"password", "value":getSettings("password")}], "Parameter für die Services konnten nicht gesetzt werden:");
-            scriptID = executeService("getNodeId", [{"name":"filePath", "value":"/Datenverzeichnis/Skripte/recognition.js"}], "Verteilungsscript konnte nicht gefunden werden:").result;
+            erg = executeService("getNodeId", [{"name":"filePath", "value":"/Datenverzeichnis/Skripte/recognition.js"}]);
+            if (!erg.success)  {
+                var script;
+                $.get('recognition.js', function (msg) {
+                    script = msg;
+                });
+                if (exist(script)) {
+                    executeService("createDocument", [
+                        {"name": "folder", "value": "/Datenverzeichnis/Skripte", "name": "fileName", "value": "recognition.js", "name": "versionState", "value": "major", "name": "documentText", "value": btoa(script), "name": "mimeType", "value": "application/javascript"}
+                    ]);
+                    scriptID = executeService("getNodeId", [{"name":"filePath", "value":"/Datenverzeichnis/Skripte/recognition.js"}], "Verteilungsscript konnte nicht gefunden werden:").result;
+
+                }
+            } else {
+                scriptID = erg.result;
+            }
             rulesID = executeService("getNodeId", [{"name":"filePath", "value":"/Datenverzeichnis/Skripte/doc.xml"}], "Verteilregeln konnten nicht gefunden werden:").result;
             inboxID = executeService("getNodeId", [{"name":"filePath", "value":"/Archiv/Inbox"}], "Inbox konnte nicht gefunden werden:").result;
             rootID = executeService("getNodeId", [{"name":"filePath", "value":"/Archiv/Archiv"}], "Archiv konnte nicht gefunden werden:").result;
