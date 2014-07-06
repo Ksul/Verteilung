@@ -38,7 +38,10 @@
 
 
     <script>
-        $(function() {
+
+
+
+    $(function() {
 
             var dialogSettings = { "id": "settingsDialog",
                 "schema": {
@@ -82,37 +85,16 @@
                     "fields": {
 
                         "user": {
-                            "size": 30,
-                            "onFieldKeyup": function(renderedForm) {
-                                if (renderedForm.isValid(true)) {
-                                    $('#btn-ok').addClass('ui-state-enabled');
-                                } else {
-                                    $('#btn-ok').addClass('ui-state-disabled');
-                                }
-                            }
+                            "size": 30
                         },
                         "password": {
                             "type": "password",
-                            "size": 20,
-                            "onFieldKeyup": function(renderedForm) {
-                                if (renderedForm.isValid(true)) {
-                                    $('#btn-ok').addClass('ui-state-enabled');
-                                } else {
-                                    $('#btn-ok').addClass('ui-state-disabled');
-                                }
-                            }
+                            "size": 20 }
                         } ,
                         "server": {
-                            "size": 65,
-                            "onFieldKeyup": function(renderedForm) {
-                                if (renderedForm.isValid(true)) {
-                                    $('#btn-ok').addClass('ui-state-enabled');
-                                } else {
-                                    $('#btn-ok').addClass('ui-state-disabled');
-                                }
-                            }
+                            "size": 65
                         }
-                    }
+
                 },
                /* "data": {
                     "user": "1234",
@@ -187,6 +169,7 @@
 
             changeCss('.grid','max-width: 100%; min-width:100%');
             changeCss('input', 'width:100%');
+
             //changeCss ('.ui-dialog', 'overflow: hidden');
             changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
             $('<div id="dialogBox">').append(Alpaca($('<div id="form" class="grid grid-pad">'), dialogSettings)).dialog({

@@ -90,9 +90,11 @@ function startSettingsDialog(){
                         {"key":"user", "value":user},
                         {"key":"password", "value":password}]};
                         $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
-                        alert("Einstellungen gesichert");
+                        fillMessageBox("Einstellungen gesichert");
                         $( this ).dialog( "close" );
-                    init();
+                        checkAndBuidAlfrescoEnvironment();
+                        openRules();
+                        manageControls();
                     } catch (e) {
                         errorHandler(e);
                     }
