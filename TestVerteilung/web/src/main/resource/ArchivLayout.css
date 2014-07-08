@@ -497,3 +497,12 @@ a.ui-state-default  {
     color: inherit !important;
     border: none !important;
 }
+
+.grid-pad {
+    padding: 0px 0px 0px 0px;
+}
+
+.alpaca-form {
+    margin-top: 5px;
+    margin-left: 0px;
+}

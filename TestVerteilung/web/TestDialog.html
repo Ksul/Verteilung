@@ -73,10 +73,7 @@
                     "renderForm": true,
                     "form":{
 
-                        "attributes":{
-                            "action":"../../endpoints/echo.php",
-                            "method":"post"
-                        },
+
                         "buttons":{
                             "submit":{"value":"Sichern"},
                             "reset":{"value":"Abbrechen"}
@@ -128,7 +125,27 @@
                     }
 
                 },
-                "ui": "jquery-ui"
+                "ui": "jquery-ui"  ,
+                "postRender": function(renderedField) {
+                    var form = renderedField.form;
+                    if (form) {
+                        form.registerSubmitHandler(function(e) {
+                            if (form.isFormValid()) {
+                                try {
+                                    var server = $("[name='server']").val(),
+                                            user = $("[name='user']").val(),
+                                            password = $("[name='password']").val();
+                                    if (!server.endsWith("/"))
+                                        server = server + "/";
+                                    $('#dialogBox').dialog("close");
+                                alert(server + "\n" + user+ "\n" + password);
+                                } catch (e) {
+                                    errorHandler(e);
+                                }
+                            }
+                        });
+                    }
+                }
 
             } ;
 
@@ -178,7 +195,7 @@
                 height:'auto',
                 modal: true,
                 open:		function() {
-                  /*  if (!dialogLayout) {            Einige Batchanwendungen (Unfall / Konzerninkasso) haben durch die Verwendung von Zentralkomponenten sehr viele Abhängigkeiten. Die EAR Files der Anwendungen sind dann bis zu 160 MB groß und verbrauchen sehr viel Speicher. Außerdem liegen die Startzeiten dieser Anwendungen bei ca. 20 Minuten, so dass es bei Fehlersituationen recht lange dauert diese zu beheben, auch weil der Build lange läuft.
+                  /*  if (!dialogLayout) {
 
 
                         // init layout *the first time* dialog opens
@@ -189,7 +206,7 @@
                     // just in case - probably not required
                         dialogLayout.resizeAll();*/
                 },
-                buttons: {
+  /*              buttons: {
 
                     "Save": {
                         "id" : "btn-ok",
@@ -201,13 +218,13 @@
 
                         $( this ).dialog( "close" );
                         alert(server.val() + "\n"+user.val()+"\n"+password.val());
-  /*                      if ( bValid ) {
+  *//*                      if ( bValid ) {
                             $.cookie("server", server.val(), { expires: 9999 });
                             $.cookie("user", user.val(), { expires: 9999 });
                             $.cookie("password", password.val(), { expires: 9999 });
                             alert("Einstellungen gesichert");
                             $( this ).dialog( "close" );
-                        }*/
+                        }*//*
                     }},
 
                     "Cancel": {
@@ -217,8 +234,16 @@
                         $( this ).dialog( "close" );
                     }
                 }},
-                close: function() {
+*/                close: function() {
                     //allFields.val( "" ).removeClass( "ui-state-error" );
+                },
+                open: function(){
+                    $(".alpaca-form-button-submit").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
+                    $(".alpaca-form-button-submit").css({padding: "0.4em 1em 0.4em 1em"});
+                    $(".alpaca-form-button-reset").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
+                    $(".alpaca-form-button-reset").css({padding: "0.4em 1em 0.4em 1em"});
+                    $(".alpaca-form-button-reset").click(function(){  $('#dialogBox').dialog("close"); });
+                    $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
                 }
             });
             $( "#create-user" )
