@@ -1081,8 +1081,30 @@ function fillMessageBox(text, reverse) {
         if (text.startsWith("\n"))
             text = text.substr(1);
     }
-    var inhalt = text + "\n" + outputEditor.getSession().getValue();
+    var inhalt = timeStamp(false) + " " + text + "\n" + outputEditor.getSession().getValue();
     outputEditor.getSession().setValue(inhalt);
+}
+
+/**
+ * gibt einen aktuellen Timestamp zutück "m/d/yy h:MM:ss TT"
+ * @param withDate mit Datum
+ * @type {Date}
+ */
+function timeStamp(withDate) {
+    var returnString = "";
+    var now = new Date();
+    var time = [ now.getHours(), now.getMinutes(), now.getSeconds() ];
+    for ( var i = 1; i < 3; i++ ) {
+        if ( time[i] < 10 ) {
+            time[i] = "0" + time[i];
+        }
+    }
+    if (withDate){
+        var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
+        returnString = returnString + date.join(".") + " ";
+    }
+    returnString = returnString +   time.join(":");
+    return returnString;
 }
 
 /**

@@ -1,8 +1,7 @@
-
 /**
  * Öffnet den Einstellungsdialog für die Alfresco Server Settings
  */
-function startSettingsDialog(){
+function startSettingsDialog() {
     try {
         var dialogSettings = { "id": "settingsDialog",
             "schema": {
@@ -24,18 +23,16 @@ function startSettingsDialog(){
                         "type": "string",
                         "title": "Server",
                         "required": true,
-                        "pattern": "@^(https?|ftp)://[^\s/$.?#].[^\s]*$@iS"
+                        "pattern": "^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-‌​\.\?\,\'\/\\\+&amp;%\$#_]*)?$"
                     }
                 }
             },
             "options": {
                 "renderForm": true,
-                "form":{
-
-
-                    "buttons":{
-                        "submit":{"value":"Sichern"},
-                        "reset":{"value":"Abbrechen"}
+                "form": {
+                    "buttons": {
+                        "submit": {"value": "Sichern"},
+                        "reset": {"value": "Abbrechen"}
                     }
                 },
                 "fields": {
@@ -56,9 +53,9 @@ function startSettingsDialog(){
                 "layout": {
                     "template": "columnGridLayout",
                     "bindings": {
-                        "server":"column-1-1",
-                        "user":"column-1-7_12",
-                        "password":"column-2-5_12"
+                        "server": "column-1-1",
+                        "user": "column-1-7_12",
+                        "password": "column-2-5_12"
                     }
                 },
                 "templates": {
@@ -70,16 +67,16 @@ function startSettingsDialog(){
                         + '</div>'                }
 
             },
-            "ui": "jquery-ui" ,
+            "ui": "jquery-ui",
             "data": {
-                "server":    getSettings("server"),
-                "user":      getSettings("user"),
-                "password":  getSettings("password")
+                "server": getSettings("server"),
+                "user": getSettings("user"),
+                "password": getSettings("password")
             },
-            "postRender": function(renderedField) {
+            "postRender": function (renderedField) {
                 var form = renderedField.form;
                 if (form) {
-                    form.registerSubmitHandler(function(e) {
+                    form.registerSubmitHandler(function (e) {
                         if (form.isFormValid()) {
                             try {
                                 var server = $("[name='server']").val(),
@@ -87,12 +84,14 @@ function startSettingsDialog(){
                                     password = $("[name='password']").val();
                                 if (!server.endsWith("/"))
                                     server = server + "/";
-                                settings = {"settings": [{"key":"server", "value":server},
-                                    {"key":"user", "value":user},
-                                    {"key":"password", "value":password}]};
+                                settings = {"settings": [
+                                    {"key": "server", "value": server},
+                                    {"key": "user", "value": user},
+                                    {"key": "password", "value": password}
+                                ]};
                                 $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
                                 fillMessageBox("Einstellungen gesichert");
-                                $('#settingsDialog').dialog("close");
+                                $('#settingsDialog').dialog("destroy");
                                 checkAndBuidAlfrescoEnvironment();
                                 openRules();
                                 manageControls();
@@ -103,25 +102,26 @@ function startSettingsDialog(){
                     });
                 }
             }
-        } ;
+        };
 
-        changeCss('.grid','max-width: 100%; min-width:100%');
+        changeCss('.grid', 'max-width: 100%; min-width:100%');
         changeCss('input', 'width:100%');
-        changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
-        $('<div id="settingsDialog">').append(Alpaca( $('<div id="form">'), dialogSettings)).dialog({
-            autoOpen:   true,
-            modal:      true,
-            width:420,
+        changeCss('h2', 'background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
+        $('<div id="settingsDialog">').append(Alpaca($('<div id="form">'), dialogSettings)).dialog({
+            autoOpen: true,
+            modal: true,
+            width: 420,
             height: 'auto',
-            open: function(){
-                    $(".alpaca-form-button-submit").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
-                    $(".alpaca-form-button-submit").css({padding: "0.4em 1em 0.4em 1em"});
-                    $(".alpaca-form-button-reset").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
-                    $(".alpaca-form-button-reset").css({padding: "0.4em 1em 0.4em 1em"});
-                    $(".alpaca-form-button-reset").click(function(){  $('#settingsDialog').dialog("close"); });
-                    $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
-                }
-
+            open: function () {
+                $(".alpaca-form-button-submit").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
+                $(".alpaca-form-button-submit").css({padding: "0.4em 1em 0.4em 1em"});
+                $(".alpaca-form-button-reset").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
+                $(".alpaca-form-button-reset").css({padding: "0.4em 1em 0.4em 1em"});
+                $(".alpaca-form-button-reset").click(function () {
+                    $('#settingsDialog').dialog("destroy");
+                });
+                $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
+            }
         });
 
     } catch (e) {
