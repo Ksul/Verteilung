@@ -490,3 +490,76 @@ function handleAlfrescoFolderImageClicks() {
         switchAlfrescoDirectory(row[4]);
      });
 }
+
+/**
+ * startet die Anwendung
+ */
+function start() {
+    try {
+        var erg = loadApplet();
+        if (erg != null && !erg) {
+            throw new Error("Applet konnte nicht geladen werden!");
+        }
+        document.getElementById('filesinput').addEventListener('change', readMultiFile, false);
+
+        propsEditor = ace.edit("inProps");
+        propsEditor.setReadOnly(true);
+        propsEditor.renderer.setShowGutter(false);
+        propsEditor.setShowPrintMargin(false);
+
+        outputEditor = ace.edit("inOutput");
+        outputEditor.setReadOnly(true);
+        outputEditor.setShowPrintMargin(false);
+
+        var zoneRules = document.getElementById('inRules');
+        zoneRules.addEventListener('dragover', handleDragOver, false);
+        zoneRules.addEventListener('drop', handleRulesSelect, false);
+
+        rulesEditor = ace.edit("inRules");
+        //rulesEditor.setTheme("ace/theme/eclipse");
+        var xmlMode = require("ace/mode/xml").Mode;
+        rulesEditor.getSession().setMode(new xmlMode());
+        rulesEditor.setShowPrintMargin(false);
+        rulesEditor.setDisplayIndentGuides(true);
+        rulesEditor.commands.addCommand({
+            name: "save",
+            bindKey: {
+                win: "Ctrl-Shift-S",
+                mac: "Command-s"
+            },
+            exec: save
+        });
+        rulesEditor.commands.addCommand({
+            name: "format",
+            bindKey: {
+                win: "Ctrl-Shift-F",
+                mac: "Command-f"
+            },
+            exec: format
+        });
+
+        textEditor = ace.edit("inTxt");
+        textEditor.setTheme("ace/theme/chrome");
+        textEditor.setShowInvisibles(true);
+        textEditor.setShowPrintMargin(false);
+        jsMode = require("ace/mode/javascript").Mode;
+        txtMode = require("ace/mode/text").Mode;
+        textEditor.getSession().setMode(new txtMode());
+        var zone = document.getElementById('inTxt');
+        zone.addEventListener('dragover', handleDragOver, false);
+        zone.addEventListener('drop', handleFileSelect, false);
+
+        loadAlfrescoTable();
+        loadAlfrescoFolderTable();
+        var anOpen = [];
+        loadVerteilungTable();
+
+        init();
+        // Eventhandler für die Image Clicks
+        handleVerteilungImageClicks();
+        handleAlfrescoFolderImageClicks();
+        loadAlfrescoTree();
+    } catch(e) {
+        errorHandler(e);
+    }
+}

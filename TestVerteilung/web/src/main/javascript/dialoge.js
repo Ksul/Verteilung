@@ -103,9 +103,8 @@ function startSettingsDialog() {
                             $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
                             fillMessageBox("Einstellungen gesichert");
                             $('#settingsDialog').dialog("destroy");
-                            checkAndBuidAlfrescoEnvironment();
-                            openRules();
-                            manageControls();
+                            init();
+                            loadAlfrescoTree();
                         } catch (e) {
                             errorHandler(e);
                         }

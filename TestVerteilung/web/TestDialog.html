@@ -137,7 +137,7 @@
                                             password = $("[name='password']").val();
                                     if (!server.endsWith("/"))
                                         server = server + "/";
-                                    $('#dialogBox').dialog("close");
+                                    $('#dialogBox').dialog("destroy");
                                 alert(server + "\n" + user+ "\n" + password);
                                 } catch (e) {
                                     errorHandler(e);
@@ -238,12 +238,14 @@
                     //allFields.val( "" ).removeClass( "ui-state-error" );
                 },
                 open: function(){
-                    $(".alpaca-form-button-submit").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
+                    $(".alpaca-form-button-submit").button();
+                    $(".alpaca-form-button-reset").button().click(function(){  $('#dialogBox').dialog("close"); });
+                 /*   $(".alpaca-form-button-submit").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
                     $(".alpaca-form-button-submit").css({padding: "0.4em 1em 0.4em 1em"});
                     $(".alpaca-form-button-reset").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
                     $(".alpaca-form-button-reset").css({padding: "0.4em 1em 0.4em 1em"});
                     $(".alpaca-form-button-reset").click(function(){  $('#dialogBox').dialog("close"); });
-                    $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
+                    $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");*/
                 }
             });
             $( "#create-user" )

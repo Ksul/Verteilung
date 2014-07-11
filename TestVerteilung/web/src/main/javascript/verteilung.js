@@ -1684,8 +1684,10 @@ function stringToBytes(str) {
 
 /**
  * prüft und baut das Alfresco Environment auf.
+ * @return true, wenn alles geklappt hat
  */
 function checkAndBuidAlfrescoEnvironment() {
+    var ret;
     // prüfen, ob Server ansprechbar ist
     if (exist(getSettings("server")))
         alfrescoServerAvailable = checkServerStatus(getSettings("server"));
@@ -1713,10 +1715,7 @@ function checkAndBuidAlfrescoEnvironment() {
                     {"name": "versionState", "value": "major"}
                 ], "Verteilungsskript konnte nicht erstellt werden!");
                 if (erg.success)
-                    scriptID = executeService("getNodeId", [
-                        {"name": "filePath", "value": "/Datenverzeichnis/Skripte/recognition.js"}
-                    ], "Verteilungsscript konnte nicht gefunden werden:").result;
-
+                    scriptID = $.parseJSON(erg.result).objectId;
             }
         } else {
             scriptID = erg.result;
@@ -1738,10 +1737,7 @@ function checkAndBuidAlfrescoEnvironment() {
 
                 ], "Verteilungsregeln konnten nicht erstellt werden!");
                 if (erg.success)
-                    rulesID = executeService("getNodeId", [
-                        {"name": "filePath", "value": "/Datenverzeichnis/Skripte/doc.xml"}
-                    ], "Verteilregeln konnten nicht gefunden werden:").result;
-
+                    rulesID = $.parseJSON(erg.result).objectId;
             }
         } else {
             scriptID = erg.result;
@@ -1751,87 +1747,112 @@ function checkAndBuidAlfrescoEnvironment() {
             {"name": "filePath", "value": "/Archiv"}
         ], null, true);
         if (!erg.success) {
-            executeService("createFolder", [
+            erg = executeService("createFolder", [
                 {"name": "folder", "value": "/"},
                 {"name": "fileName", "value": "Archiv"}
             ]);
-            executeService("getNodeId", [
-                {"name": "filePath", "value": "/Archiv"}
-            ], "Archiv konnte nicht gefunden werden:");
+            if (erg.success)
+                erg = executeService("getNodeId", [
+                    {"name": "filePath", "value": "/Archiv"}
+                ], "Archiv konnte nicht gefunden werden:");
         }
-        // Archiv Root prüfen
-        erg = executeService("getNodeId", [
-            {"name": "filePath", "value": "/Archiv/Archiv"}
-        ], null, true);
-        if (!erg.success) {
-            executeService("createFolder", [
-                {"name": "folder", "value": "/Archiv"},
-                {"name": "fileName", "value": "Archiv"}
-            ]);
-            rootID = executeService("getNodeId", [
-                {"name": "filePath", "value": "/Archiv"}
-            ], "Archiv Root konnte nicht gefunden werden:").result;
-        } else {
-            rootID = erg.result;
+        if (erg.success) {
+            // Archiv Root prüfen
+            erg = executeService("getNodeId", [
+                {"name": "filePath", "value": "/Archiv/Archiv"}
+            ], null, true);
+            if (!erg.success) {
+                erg = executeService("createFolder", [
+                    {"name": "folder", "value": "/Archiv"},
+                    {"name": "fileName", "value": "Archiv"}
+                ]);
+                if (erg.success) {
+                    erg = executeService("getNodeId", [
+                        {"name": "filePath", "value": "/Archiv"}
+                    ], "Archiv Root konnte nicht gefunden werden:");
+                    if (erg.success)
+                        rootID = erg.result;
+                }
+            } else {
+                rootID = erg.result;
+            }
         }
-        // Inbox prüfen
-        erg = executeService("getNodeId", [
-            {"name": "filePath", "value": "/Archiv/Inbox"}
-        ], null, true);
-        if (!erg.success) {
-            executeService("createFolder", [
-                {"name": "folder", "value": "/Archiv"},
-                {"name": "fileName", "value": "Inbox"}
-            ]);
-            inboxID = executeService("getNodeId", [
+        if (erg.success) {
+            // Inbox prüfen
+            erg = executeService("getNodeId", [
                 {"name": "filePath", "value": "/Archiv/Inbox"}
-            ], "Inbox konnte nicht gefunden werden:").result;
-        } else {
-            inboxID = erg.result;
+            ], null, true);
+            if (!erg.success) {
+                erg = executeService("createFolder", [
+                    {"name": "folder", "value": "/Archiv"},
+                    {"name": "fileName", "value": "Inbox"}
+                ]);
+                if (erg.success) {
+                    erg = executeService("getNodeId", [
+                        {"name": "filePath", "value": "/Archiv/Inbox"}
+                    ], "Inbox konnte nicht gefunden werden:");
+                    if (erg.success)
+                        inboxID = erg.result;
+                }
+            } else {
+                inboxID = erg.result;
+            }
         }
-        // Fehlerbox prüfen
-        erg = executeService("getNodeId", [
-            {"name": "filePath", "value": "/Archiv/Fehler"}
-        ], null, true);
-        if (!erg.success) {
-            executeService("createFolder", [
-                {"name": "folder", "value": "/Archiv"},
-                {"name": "fileName", "value": "Fehler"}
-            ]);
-            executeService("getNodeId", [
+        if (erg.success) {
+            // Fehlerbox prüfen
+            erg = executeService("getNodeId", [
                 {"name": "filePath", "value": "/Archiv/Fehler"}
-            ], "Verzeichnis für fehlerhafte Dokumente konnte nicht gefunden werden:");
+            ], null, true);
+            if (!erg.success) {
+                erg = executeService("createFolder", [
+                    {"name": "folder", "value": "/Archiv"},
+                    {"name": "fileName", "value": "Fehler"}
+                ]);
+                if (erg.success)
+                    erg = executeService("getNodeId", [
+                        {"name": "filePath", "value": "/Archiv/Fehler"}
+                    ], "Verzeichnis für fehlerhafte Dokumente konnte nicht gefunden werden:");
+            }
         }
-        // Unbekanntbox prüfen
-        erg = executeService("getNodeId", [
-            {"name": "filePath", "value": "/Archiv/Unbekannt"}
-        ], null, true);
-        if (!erg.success) {
-            executeService("createFolder", [
-                {"name": "folder", "value": "/Archiv"},
-                {"name": "fileName", "value": "Unbekannt"}
-            ]);
-            executeService("getNodeId", [
+        if (erg.success) {
+            // Unbekanntbox prüfen
+            erg = executeService("getNodeId", [
                 {"name": "filePath", "value": "/Archiv/Unbekannt"}
-            ], "Verzeichnis für unbekannte Dokumente konnte nicht gefunden werden:");
+            ], null, true);
+            if (!erg.success) {
+                erg = executeService("createFolder", [
+                    {"name": "folder", "value": "/Archiv"},
+                    {"name": "fileName", "value": "Unbekannt"}
+                ]);
+                if (erg.success)
+                    erg = executeService("getNodeId", [
+                        {"name": "filePath", "value": "/Archiv/Unbekannt"}
+                    ], "Verzeichnis für unbekannte Dokumente konnte nicht gefunden werden:");
+            }
         }
-        // Doppelte Box prüfen
-        erg = executeService("getNodeId", [
-            {"name": "filePath", "value": "/Archiv/Fehler/Doppelte"}
-        ], null, true);
-        if (!erg.success) {
-            executeService("createFolder", [
-                {"name": "folder", "value": "/Archiv/Fehler"},
-                {"name": "fileName", "value": "Doppelte"}
-            ]);
-            executeService("getNodeId", [
+        if (erg.success) {
+            // Doppelte Box prüfen
+            erg = executeService("getNodeId", [
                 {"name": "filePath", "value": "/Archiv/Fehler/Doppelte"}
-            ], "Verzeichnis für doppelte Dokumente konnte nicht gefunden werden:");
+            ], null, true);
+            if (!erg.success) {
+                erg = executeService("createFolder", [
+                    {"name": "folder", "value": "/Archiv/Fehler"},
+                    {"name": "fileName", "value": "Doppelte"}
+                ]);
+                if (erg.success)
+                    erg = executeService("getNodeId", [
+                        {"name": "filePath", "value": "/Archiv/Fehler/Doppelte"}
+                    ], "Verzeichnis für doppelte Dokumente konnte nicht gefunden werden:");
+            }
         }
         $("#tabs").tabs("option", "active", 0);
+        ret = erg.success;
     } else {
         $("#tabs").tabs({ disabled: [ 0 ] });
+        ret = true;
     }
+    return ret;
 }
 
 /**

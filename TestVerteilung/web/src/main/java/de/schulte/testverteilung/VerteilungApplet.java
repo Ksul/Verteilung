@@ -304,7 +304,7 @@ public class VerteilungApplet extends Applet {
      * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
-     *                                                                      result            Dokument als JSONObject
+     *                                                                      result   Dokument als JSONObject
      */
     public JSONObject createDocument(final String folder,
                                      final String fileName,
@@ -337,7 +337,7 @@ public class VerteilungApplet extends Applet {
      * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
-     *                                                                      result            Dokument als JSONObject
+     *                                                                      result   Dokument als JSONObject
      */
     public JSONObject createDocument(final String destinationFolder,
                                      final String fileName,

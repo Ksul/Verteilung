@@ -154,7 +154,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        obj = services.createDocument("/Archiv",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, "none");
+        obj = services.createDocument("/",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, "none");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -169,7 +169,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         String document =  obj.getString("result");
         assertEquals("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", document);
-        obj = services.deleteDocument("/Archiv", "TestDocument.txt");
+        obj = services.deleteDocument("/", "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
