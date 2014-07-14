@@ -274,6 +274,7 @@ function manageControls() {
     document.getElementById('getRules').removeAttribute("disabled");
     document.getElementById('sendRules').removeAttribute("disabled");
     document.getElementById('saveRules').setAttribute("disabled", true);
+    document.getElementById('sendToInbox').style.display = 'block';
 
     if (testMode) {
         document.getElementById('test').style.display = 'none';
@@ -301,6 +302,7 @@ function manageControls() {
     if (multiMode) {
         document.getElementById('inTxt').style.display = 'none';
         document.getElementById('dtable').style.display = 'block';
+        document.getElementById('sendToInbox').style.display = 'none';
     }
     if (showMulti) {
         document.getElementById('back').style.display = 'block';
@@ -1633,6 +1635,21 @@ function sendScript() {
     } catch (e) {
         errorHandler(e);
     }
+}
+
+/**
+ * sendet ein Dokument zur Inbox
+ */
+function sendToInbox() {
+
+    var json = executeService("createDocument", [
+        {"name": "folder", "value": "/Archiv/Inbox"},
+        { "name": "fileName", "value": currentFile},
+        { "name": "documentContent", "value": currentContent, "type": "byte"},
+        { "name": "documentType", "value": "application/pdf"},
+        { "name": "extraCMSProperties", "value": ""},
+        { "name": "versionState", "value": "none"}
+    ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
 }
 
 /**

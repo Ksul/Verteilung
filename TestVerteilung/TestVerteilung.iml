@@ -48,7 +48,7 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="mockito-all-1.9.5" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Tomcat 7.0.41" level="application_server_libraries" />
+    <orderEntry type="library" scope="PROVIDED" name="Tomcat 7.0.47" level="application_server_libraries" />
   </component>
 </module>
 

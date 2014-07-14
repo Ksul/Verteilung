@@ -365,6 +365,15 @@ input.themes {
     cursor: pointer;
 }
 
+input.sendToInbox {
+    background-image: url('./images/inbox_icon.jpg');
+    background-color: transparent;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+}
+
 /* add padding and min/max sizes to BODY */
 html {
     /* allow scrolling if layout hits min-width/height */
@@ -433,7 +442,6 @@ DIV#tabPanels {
 DIV#verteilungSouth {
     background: none !important;
 }
-
 
 
 /*
