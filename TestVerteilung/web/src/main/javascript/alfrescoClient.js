@@ -386,7 +386,7 @@ function aktionFieldFormatter(o) {
     var image = document.createElement("div");
     image.href = "#";
     image.className = "edit";
-    image.style.backgroundImage = "url(resource/file_edit.png)";
+    image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
     image.title = "Details bearbeiten";
     image.style.cursor = "pointer";
     image.style.width = "16px";
@@ -398,7 +398,7 @@ function aktionFieldFormatter(o) {
     image.href = "#";
     image.className = "open";
     image.title = "Ordner öffnen";
-    image.style.backgroundImage = "url(resource/details_open.png)";
+    image.style.backgroundImage = "url(src/main/resource/images/details_open.png)";
     image.style.width = "16px";
     image.style.height = "16px";
     image.style.cursor = "pointer";
@@ -467,7 +467,7 @@ function loadAlfrescoTree() {
                     if (json.success)
                         aFunction(json.result);
                     else
-                        alert("Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
+                        message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
                 }
             }
         },

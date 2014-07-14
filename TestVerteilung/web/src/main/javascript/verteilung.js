@@ -1,5 +1,3 @@
-
-
 /**
  * prüft, ob ein String mit einem Vergleichsstring endet
  * @param str               der Vergleichsstring
@@ -98,21 +96,27 @@ function errorHandler(e, description) {
     for (var prop in e)
         str = str + "property: " + prop + " value: [" + e[prop] + "]<br>";
     str = str + "Stacktrace: <br>" + e.stack;
+    message("Fehler", str);
+ }
+
+/**
+ * zeigt eine Meldung
+ * @param title Titel des Fensters
+ * @param str   Meldungstext
+ */
+function message(title, str) {
     var $dialog = $('<div></div>').html(str).dialog({
-        autoOpen: false,
-        title: 'Fehler',
+        autoOpen: true,
+        title: title,
         modal: true,
         height:200,
         width:800,
         buttons: {
             "Ok": function () {
-                $(this).dialog("close");
+                $(this).dialog("destroy");
             }
         }
     }).css({height:"100px", width:"800px", overflow:"auto"});
-    $dialog.dialog('open');
-
-    //alert(str);
 }
 
 
@@ -363,7 +367,7 @@ function openPDF(name, fromServer) {
                     error: function (response) {
                         try {
                             var r = jQuery.parseJSON(response.responseText);
-                            alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                            message("Fehler", "Fehler: " + r.Message + "<br>StackTrace: " + r.StackTrace + "<br>ExceptionType: " + r.ExceptionType);
                         } catch (e) {
                             errorHandler(e);
                         }
@@ -613,7 +617,7 @@ function handleVerteilungImageClicks() {
         row[3] = ergebnis;
         row[5] = REC.errors;
         if (tabelle.fnUpdate(row, aPos[0]) > 0)
-            alert("Tabelle konnte nicht aktualisiert werden!");
+            message("Fehler", "Tabelle konnte nicht aktualisiert werden!");
     });
     $(document).on("click", ".glass", function () {
         var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
@@ -640,7 +644,7 @@ function handleVerteilungImageClicks() {
             try {
                 netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
             } catch (e) {
-                alert("Permission to delete file was denied.");
+                message("Fehler", "Permission to delete file was denied.");
             }
             currentFile = daten[name]["file"];
             textEditor.getSession().setValue("");
@@ -766,13 +770,13 @@ function executeService(service, params, messages, ignoreError) {
                 error: function (response) {
                     try {
                         var r = jQuery.parseJSON(response.responseText);
-                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                        message("Fehler", "Fehler: " + r.Message + "<br>StackTrace: " + r.StackTrace + "<br>ExceptionType: " + r.ExceptionType);
                     } catch (e) {
                         var str = "FEHLER:\n";
                         str = str + e.toString() + "\n";
                         for (var prop in e)
                             str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                        alert(str + "\n" + response.responseText);
+                        message("Fehler", str + "<br>" + response.responseText);
                     }
                 },
                 success: function (data) {
@@ -1171,13 +1175,13 @@ function doTest() {
                 error: function (response) {
                     try {
                         var r = jQuery.parseJSON(response.responseText);
-                        alert("Fehler: " + r.Message + "\nStackTrace: " + r.StackTrace + "\nExceptionType: " + r.ExceptionType);
+                        message("Fehler", "Fehler: " + r.Message + "<br>StackTrace: " + r.StackTrace + "<br>ExceptionType: " + r.ExceptionType);
                     } catch (e) {
                         var str = "FEHLER:\n";
                         str = str + e.toString() + "\n";
                         for (var prop in e)
                             str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                        alert(str + "\n" + response.responseText);
+                        message("Fehler", str + "<br>" + response.responseText);
                     }
                 },
                 success: function (data) {
@@ -1196,7 +1200,7 @@ function doTest() {
                         testMode = true;
                         manageControls();
                     } else
-                        alert("Fehler: " + data.result[0]);
+                        message("Fehler", "Fehler: " + data.result[0]);
                 }
             });
         }
@@ -1377,7 +1381,7 @@ function getRules(rulesId, loadLocal) {
                 rulesEditor.getSession().foldAll(1);
                 fillMessageBox("Regeln erfolgreich vom Server übertragen!");
             } else
-                alert("Fehler bei der Übertragung: " + json.result);
+                message("Fehler", "Fehler bei der Übertragung: " + json.result);
         }
         currentRules = "doc.xml";
     } catch (e) {
@@ -1515,7 +1519,7 @@ function handleRulesSelect(evt) {
             };
             r.readAsText(f);
         } else {
-            alert("Failed to load file!");
+            message("Fehler", "Failed to load file!");
         }
     }
 }
@@ -1694,156 +1698,162 @@ function checkAndBuidAlfrescoEnvironment() {
     // falls ja, dann Server Parameter eintragen
     if (alfrescoServerAvailable) {
         var erg;
-        executeService("setParameter", [
+        erg = executeService("setParameter", [
             {"name": "server", "value": getSettings("server") + "service/cmis"},
             {"name": "user", "value": getSettings("user")},
             {"name": "password", "value": getSettings("password")}
         ], "Parameter für die Services konnten nicht gesetzt werden:");
         // Verteilskript prüfen
-        erg = executeService("getNodeId", [
-            {"name": "filePath", "value": "/Datenverzeichnis/Skripte/recognition.js"}
-        ], null, true);
-        if (!erg.success) {
-            var script = openFile('src/main/javascript/recognition.js');
-            if (exist(script)) {
-                erg = executeService("createDocument", [
-                    {"name": "folder", "value": "/Datenverzeichnis/Skripte"},
-                    {"name": "fileName", "value": "recognition.js"},
-                    {"name": "documentText", "value": btoa(script)},
-                    {"name": "mimeType", "value": "application/javascript"},
-                    {"name": "extraProperties", "value": "{}"},
-                    {"name": "versionState", "value": "major"}
-                ], "Verteilungsskript konnte nicht erstellt werden!");
-                if (erg.success)
-                    scriptID = $.parseJSON(erg.result).objectId;
-            }
-        } else {
-            scriptID = erg.result;
-        }
-        // Regeln prüfen
-        erg = executeService("getNodeId", [
-            {"name": "filePath", "value": "/Datenverzeichnis/Skripte/doc.xml"}
-        ], null, true);
-        if (!erg.success) {
-            var doc = openFile('doc.xml');
-            if (exist(doc)) {
-                erg = executeService("createDocument", [
-                    {"name": "folder", "value": "/Datenverzeichnis/Skripte"},
-                    {"name": "fileName", "value": "doc.xml"},
-                    {"name": "documentText", "value": btoa(doc)},
-                    {"name": "mimeType", "value": "application/xml"},
-                    {"name": "extraProperties", "value": "{}"},
-                    {"name": "versionState", "value": "major"}
-
-                ], "Verteilungsregeln konnten nicht erstellt werden!");
-                if (erg.success)
-                    rulesID = $.parseJSON(erg.result).objectId;
-            }
-        } else {
-            scriptID = erg.result;
-        }
-        // Archiv prüfen
-        erg = executeService("getNodeId", [
-            {"name": "filePath", "value": "/Archiv"}
-        ], null, true);
-        if (!erg.success) {
-            erg = executeService("createFolder", [
-                {"name": "folder", "value": "/"},
-                {"name": "fileName", "value": "Archiv"}
-            ]);
-            if (erg.success)
-                erg = executeService("getNodeId", [
-                    {"name": "filePath", "value": "/Archiv"}
-                ], "Archiv konnte nicht gefunden werden:");
-        }
         if (erg.success) {
-            // Archiv Root prüfen
             erg = executeService("getNodeId", [
-                {"name": "filePath", "value": "/Archiv/Archiv"}
+                {"name": "filePath", "value": "/Datenverzeichnis/Skripte/recognition.js"}
             ], null, true);
             if (!erg.success) {
-                erg = executeService("createFolder", [
-                    {"name": "folder", "value": "/Archiv"},
-                    {"name": "fileName", "value": "Archiv"}
-                ]);
+                var script = openFile('src/main/javascript/recognition.js');
+                if (exist(script)) {
+                    erg = executeService("createDocument", [
+                        {"name": "folder", "value": "/Datenverzeichnis/Skripte"},
+                        {"name": "fileName", "value": "recognition.js"},
+                        {"name": "documentText", "value": btoa(script)},
+                        {"name": "mimeType", "value": "application/javascript"},
+                        {"name": "extraProperties", "value": "{}"},
+                        {"name": "versionState", "value": "major"}
+                    ], "Verteilungsskript konnte nicht erstellt werden!");
+                    if (erg.success)
+                        scriptID = $.parseJSON(erg.result).objectId;
+                }
+            } else {
+                scriptID = erg.result;
+            }
+            if (erg.success) {
+                // Regeln prüfen
+                erg = executeService("getNodeId", [
+                    {"name": "filePath", "value": "/Datenverzeichnis/Skripte/doc.xml"}
+                ], null, true);
+                if (!erg.success) {
+                    var doc = openFile('doc.xml');
+                    if (exist(doc)) {
+                        erg = executeService("createDocument", [
+                            {"name": "folder", "value": "/Datenverzeichnis/Skripte"},
+                            {"name": "fileName", "value": "doc.xml"},
+                            {"name": "documentText", "value": btoa(doc)},
+                            {"name": "mimeType", "value": "application/xml"},
+                            {"name": "extraProperties", "value": "{}"},
+                            {"name": "versionState", "value": "major"}
+
+                        ], "Verteilungsregeln konnten nicht erstellt werden!");
+                        if (erg.success)
+                            rulesID = $.parseJSON(erg.result).objectId;
+                    }
+                } else {
+                    scriptID = erg.result;
+                }
                 if (erg.success) {
+                    // Archiv prüfen
                     erg = executeService("getNodeId", [
                         {"name": "filePath", "value": "/Archiv"}
-                    ], "Archiv Root konnte nicht gefunden werden:");
-                    if (erg.success)
-                        rootID = erg.result;
+                    ], null, true);
+                    if (!erg.success) {
+                        erg = executeService("createFolder", [
+                            {"name": "folder", "value": "/"},
+                            {"name": "fileName", "value": "Archiv"}
+                        ]);
+                        if (erg.success)
+                            erg = executeService("getNodeId", [
+                                {"name": "filePath", "value": "/Archiv"}
+                            ], "Archiv konnte nicht gefunden werden:");
+                    }
+                    if (erg.success) {
+                        // Archiv Root prüfen
+                        erg = executeService("getNodeId", [
+                            {"name": "filePath", "value": "/Archiv/Archiv"}
+                        ], null, true);
+                        if (!erg.success) {
+                            erg = executeService("createFolder", [
+                                {"name": "folder", "value": "/Archiv"},
+                                {"name": "fileName", "value": "Archiv"}
+                            ]);
+                            if (erg.success) {
+                                erg = executeService("getNodeId", [
+                                    {"name": "filePath", "value": "/Archiv"}
+                                ], "Archiv Root konnte nicht gefunden werden:");
+                                if (erg.success)
+                                    rootID = erg.result;
+                            }
+                        } else {
+                            rootID = erg.result;
+                        }
+                    }
+                    if (erg.success) {
+                        // Inbox prüfen
+                        erg = executeService("getNodeId", [
+                            {"name": "filePath", "value": "/Archiv/Inbox"}
+                        ], null, true);
+                        if (!erg.success) {
+                            erg = executeService("createFolder", [
+                                {"name": "folder", "value": "/Archiv"},
+                                {"name": "fileName", "value": "Inbox"}
+                            ]);
+                            if (erg.success) {
+                                erg = executeService("getNodeId", [
+                                    {"name": "filePath", "value": "/Archiv/Inbox"}
+                                ], "Inbox konnte nicht gefunden werden:");
+                                if (erg.success)
+                                    inboxID = erg.result;
+                            }
+                        } else {
+                            inboxID = erg.result;
+                        }
+                    }
+                    if (erg.success) {
+                        // Fehlerbox prüfen
+                        erg = executeService("getNodeId", [
+                            {"name": "filePath", "value": "/Archiv/Fehler"}
+                        ], null, true);
+                        if (!erg.success) {
+                            erg = executeService("createFolder", [
+                                {"name": "folder", "value": "/Archiv"},
+                                {"name": "fileName", "value": "Fehler"}
+                            ]);
+                            if (erg.success)
+                                erg = executeService("getNodeId", [
+                                    {"name": "filePath", "value": "/Archiv/Fehler"}
+                                ], "Verzeichnis für fehlerhafte Dokumente konnte nicht gefunden werden:");
+                        }
+                    }
+                    if (erg.success) {
+                        // Unbekanntbox prüfen
+                        erg = executeService("getNodeId", [
+                            {"name": "filePath", "value": "/Archiv/Unbekannt"}
+                        ], null, true);
+                        if (!erg.success) {
+                            erg = executeService("createFolder", [
+                                {"name": "folder", "value": "/Archiv"},
+                                {"name": "fileName", "value": "Unbekannt"}
+                            ]);
+                            if (erg.success)
+                                erg = executeService("getNodeId", [
+                                    {"name": "filePath", "value": "/Archiv/Unbekannt"}
+                                ], "Verzeichnis für unbekannte Dokumente konnte nicht gefunden werden:");
+                        }
+                    }
+                    if (erg.success) {
+                        // Doppelte Box prüfen
+                        erg = executeService("getNodeId", [
+                            {"name": "filePath", "value": "/Archiv/Fehler/Doppelte"}
+                        ], null, true);
+                        if (!erg.success) {
+                            erg = executeService("createFolder", [
+                                {"name": "folder", "value": "/Archiv/Fehler"},
+                                {"name": "fileName", "value": "Doppelte"}
+                            ]);
+                            if (erg.success)
+                                erg = executeService("getNodeId", [
+                                    {"name": "filePath", "value": "/Archiv/Fehler/Doppelte"}
+                                ], "Verzeichnis für doppelte Dokumente konnte nicht gefunden werden:");
+                        }
+                    }
                 }
-            } else {
-                rootID = erg.result;
-            }
-        }
-        if (erg.success) {
-            // Inbox prüfen
-            erg = executeService("getNodeId", [
-                {"name": "filePath", "value": "/Archiv/Inbox"}
-            ], null, true);
-            if (!erg.success) {
-                erg = executeService("createFolder", [
-                    {"name": "folder", "value": "/Archiv"},
-                    {"name": "fileName", "value": "Inbox"}
-                ]);
-                if (erg.success) {
-                    erg = executeService("getNodeId", [
-                        {"name": "filePath", "value": "/Archiv/Inbox"}
-                    ], "Inbox konnte nicht gefunden werden:");
-                    if (erg.success)
-                        inboxID = erg.result;
-                }
-            } else {
-                inboxID = erg.result;
-            }
-        }
-        if (erg.success) {
-            // Fehlerbox prüfen
-            erg = executeService("getNodeId", [
-                {"name": "filePath", "value": "/Archiv/Fehler"}
-            ], null, true);
-            if (!erg.success) {
-                erg = executeService("createFolder", [
-                    {"name": "folder", "value": "/Archiv"},
-                    {"name": "fileName", "value": "Fehler"}
-                ]);
-                if (erg.success)
-                    erg = executeService("getNodeId", [
-                        {"name": "filePath", "value": "/Archiv/Fehler"}
-                    ], "Verzeichnis für fehlerhafte Dokumente konnte nicht gefunden werden:");
-            }
-        }
-        if (erg.success) {
-            // Unbekanntbox prüfen
-            erg = executeService("getNodeId", [
-                {"name": "filePath", "value": "/Archiv/Unbekannt"}
-            ], null, true);
-            if (!erg.success) {
-                erg = executeService("createFolder", [
-                    {"name": "folder", "value": "/Archiv"},
-                    {"name": "fileName", "value": "Unbekannt"}
-                ]);
-                if (erg.success)
-                    erg = executeService("getNodeId", [
-                        {"name": "filePath", "value": "/Archiv/Unbekannt"}
-                    ], "Verzeichnis für unbekannte Dokumente konnte nicht gefunden werden:");
-            }
-        }
-        if (erg.success) {
-            // Doppelte Box prüfen
-            erg = executeService("getNodeId", [
-                {"name": "filePath", "value": "/Archiv/Fehler/Doppelte"}
-            ], null, true);
-            if (!erg.success) {
-                erg = executeService("createFolder", [
-                    {"name": "folder", "value": "/Archiv/Fehler"},
-                    {"name": "fileName", "value": "Doppelte"}
-                ]);
-                if (erg.success)
-                    erg = executeService("getNodeId", [
-                        {"name": "filePath", "value": "/Archiv/Fehler/Doppelte"}
-                    ], "Verzeichnis für doppelte Dokumente konnte nicht gefunden werden:");
             }
         }
         $("#tabs").tabs("option", "active", 0);
@@ -1860,27 +1870,30 @@ function checkAndBuidAlfrescoEnvironment() {
  */
 function init() {
     try {
-        var cookie = $.cookie("settings");
-        // prüfen, ob ein Cookie vorhanden ist
-        if (REC.exist(cookie)) {
-            // Cookie ist vorhanden, also die Daten aus diesem verwenden
-            settings = $.parseJSON(cookie);
-        } else {
-            settings = {};
-            settings.settings = [];
-            // Settings aus test.properties laden. Das wird nur lokal mit Applet funktionieren
-            var obj = executeService("loadProperties", [
-                {"name": "filePath", "value": convertPath("../test.properties")}
-            ],
-            "", true);
-            if (obj.success) {
-                // Datei wurde gefunden. Settings setzen, aber nur wenn diese noch nicht über URL Parameter gesetzt worden sind.
-                if (!exist(getSettings("server")))
-                    settings.settings.push({"key": "server", "value": obj.result.host});
-                if (!exist(getSettings("user")))
-                    settings.settings.push({"key": "user", "value": obj.result.user});
-                if (!exist(getSettings("password")))
-                    settings.settings.push({"key": "password", "value": obj.result.password});
+        // Settings schon vorhanden?
+        if (!exist(getSettings("server")) || !exist(getSettings("user")) || !exist(getSettings("password"))){
+            var cookie = $.cookie("settings");
+            // prüfen, ob ein Cookie vorhanden ist
+            if (REC.exist(cookie)) {
+                // Cookie ist vorhanden, also die Daten aus diesem verwenden
+                settings = $.parseJSON(cookie);
+            } else {
+                settings = {};
+                settings.settings = [];
+                // Settings aus test.properties laden. Das wird nur lokal mit Applet funktionieren
+                var obj = executeService("loadProperties", [
+                        {"name": "filePath", "value": convertPath("../test.properties")}
+                    ],
+                    "", true);
+                if (obj.success) {
+                    // Datei wurde gefunden. Settings setzen, aber nur wenn diese noch nicht über URL Parameter gesetzt worden sind.
+                    if (!exist(getSettings("server")))
+                        settings.settings.push({"key": "server", "value": obj.result.host});
+                    if (!exist(getSettings("user")))
+                        settings.settings.push({"key": "user", "value": obj.result.user});
+                    if (!exist(getSettings("password")))
+                        settings.settings.push({"key": "password", "value": obj.result.password});
+                }
             }
         }
         checkAndBuidAlfrescoEnvironment();
