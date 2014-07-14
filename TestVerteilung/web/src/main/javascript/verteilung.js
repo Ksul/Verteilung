@@ -394,16 +394,18 @@ function openPDF(name, fromServer) {
 /**
  * lädt einen Text
  * diese Methode wird auch aus dem Applet aufgerufen
+ * @param content    der originale Inhalt der Datei
  * @param txt        der Inhalt des Dokumentes in Textform
  * @param name       der Name des Dokumentes
  * @param typ        der Dokuemttyp  (wird der eigentlich noch gebraucht)
  * @param container  ???
  */
-function loadText(txt, name, typ, container) {
+function loadText(content, txt, name, typ, container) {
     try {
         multiMode = false;
         currentFile = name;
-        currentContent = txt;
+        currentContent = content;
+        currentText = txt;
         currentContainer = container;
         removeMarkers(markers, textEditor);
         textEditor.getSession().setValue(txt);
@@ -522,7 +524,7 @@ function readFiles(files) {
                                     ], "PDF Datei konte nicht geparst werden:");
                                     if (json.success) {
                                         if (count == 1)
-                                            loadText(json.result, theFile.name, theFile.type, null);
+                                            loadText(evt.target.result, json.result, theFile.name, theFile.type, null);
                                         else
                                             loadMultiText(evt.target.result, json.result, theFile.name, theFile.type, "false", null);
                                     }
@@ -553,7 +555,7 @@ function readFiles(files) {
                                             for (var pos in erg) {
                                                 var entry = erg[pos];
                                                 if (count == 1)
-                                                    loadText(entry.extractedData, entry.name, "application/zip", null);
+                                                    loadText(atob(entry.data), entry.extractedData, entry.name, "application/zip", null);
                                                 else {
                                                     // die originalen Bytes kommen decodiert, als encoden!
                                                     loadMultiText(atob(entry.data), entry.extractedData, entry.name, entry.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain", "true",  null);
@@ -576,7 +578,7 @@ function readFiles(files) {
                     if (files.length == 1) {
                         r.onload = (function (theFile) {
                             return function (e) {
-                                loadText(e.target.result, theFile.name, theFile.mozFullPath, theFile.type);
+                                loadText(e.target.result, e.target.result, theFile.name, theFile.mozFullPath, theFile.type);
                             };
                         })(f);
                     } else {
