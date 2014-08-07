@@ -271,7 +271,7 @@ public class VerteilungServices {
             CmisObject folderObject;
             folderObject = con.getNode(folder);
             if (folderObject != null && folderObject instanceof Folder) {
-                document = con.getNode(((Folder) folderObject).getPath() + "/" + documentName);
+                document = con.getNode(((Folder) folderObject).getPath() + (((Folder) folderObject).isRootFolder() ? "" : "/") + documentName);
                 if (document != null && document instanceof Document) {
                     document.delete(true);
                     obj.put("success", true);

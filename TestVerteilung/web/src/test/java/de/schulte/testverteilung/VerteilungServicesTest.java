@@ -149,12 +149,9 @@ public class VerteilungServicesTest extends AlfrescoTest{
 
     @Test
     public void testCreateDocument() throws Exception {
-        JSONObject obj = services.uploadDocument("/Archiv", System.getProperty("user.dir") + properties.getProperty("testPDF"));
-        assertNotNull(obj);
-        assertTrue(obj.length() >= 2);
-        assertNotNull(obj.get("result"));
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        obj = services.createDocument("/",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, "none");
+        String extraProperties = "{'aspect':'cm:titled','cm:description':'Testdokument'}";
+        JSONObject obj = services.createDocument("/",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, "none");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));

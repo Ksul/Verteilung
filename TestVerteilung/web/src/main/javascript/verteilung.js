@@ -1708,6 +1708,7 @@ function stringToBytes(str) {
 /**
  * prüft und baut das Alfresco Environment auf.
  * @return true, wenn alles geklappt hat
+ * TODO Regel für die Inbox
  */
 function checkAndBuidAlfrescoEnvironment() {
     var ret;
@@ -1734,8 +1735,8 @@ function checkAndBuidAlfrescoEnvironment() {
                         {"name": "folder", "value": "/Datenverzeichnis/Skripte"},
                         {"name": "fileName", "value": "recognition.js"},
                         {"name": "documentText", "value": btoa(script)},
-                        {"name": "mimeType", "value": "application/javascript"},
-                        {"name": "extraProperties", "value": "{}"},
+                        {"name": "mimeType", "value": "application/x-javascript"},
+                        {"name": "extraProperties", "value": "{'aspect':'cm:titled','cm:description':'Skript zum Verteilen der Dokumente'}"},
                         {"name": "versionState", "value": "major"}
                     ], "Verteilungsskript konnte nicht erstellt werden!");
                     if (erg.success)
@@ -1757,7 +1758,7 @@ function checkAndBuidAlfrescoEnvironment() {
                             {"name": "fileName", "value": "doc.xml"},
                             {"name": "documentText", "value": btoa(doc)},
                             {"name": "mimeType", "value": "application/xml"},
-                            {"name": "extraProperties", "value": "{}"},
+                            {"name": "extraProperties", "value": "{'aspect':'cm:titled','cm:description':'Dokument mit den Verteil-Regeln'}"},
                             {"name": "versionState", "value": "major"}
 
                         ], "Verteilungsregeln konnten nicht erstellt werden!");
