@@ -339,12 +339,18 @@ public class AlfrescoConnector {
 
 
         HashMap<String, Object> properties = new HashMap<>();
+        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         InputStream stream = new ByteArrayInputStream(documentContent);
         ContentStream contentStream = new ContentStreamImpl(document.getName(), BigInteger.valueOf(documentContent.length), documentType, stream);
 
         if (extraCMSProperties != null) {
-            for (String key : extraCMSProperties.keySet())
-                properties.put(key, extraCMSProperties.get(key));
+            for (String key : extraCMSProperties.keySet()) {
+                if (key.equals("aspect")) {
+                    if (!((String) properties.get(PropertyIds.OBJECT_TYPE_ID)).contains((String) extraCMSProperties.get("aspect")))
+                        properties.put(PropertyIds.OBJECT_TYPE_ID, (String) properties.get(PropertyIds.OBJECT_TYPE_ID) + ",P:" + extraCMSProperties.get("aspect"));
+                } else
+                    properties.put(key, extraCMSProperties.get(key));
+            }
         }
         ObjectId id = checkOutDocument(document) ;
         if (id != null) {

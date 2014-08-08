@@ -48,17 +48,17 @@
                     "type": "object",
                     "title": "Dokument Einstellungen",
                     "properties": {
-
-                        "titel": {
-                            "type": "string",
-                            "title": "Titel",
-                            "required": true
-                        },
                         "name": {
                             "type": "string",
                             "title": "Dateiname",
                             "required": false
                         },
+                        "titel": {
+                            "type": "string",
+                            "title": "Titel",
+                            "required": true
+                        },
+
                         "beschreibung": {
                             "type": "string",
                             "title": "Beschreibung",
@@ -71,7 +71,7 @@
                                 "Klaus",
                                 "Katja",
                                 "Till",
-                                "Killian"
+                                "Kilian"
                             ],
                             "required": true
                         },
@@ -82,6 +82,7 @@
                         },
                         "datum": {
                             "type": "string",
+                            "format":"date",
                             "title": "Datum",
                             "required": true
                         },
@@ -112,6 +113,7 @@
 
                         "titel": {
                             "size": 30
+
                         },
                         "name": {
                             "size": 30,
@@ -123,35 +125,42 @@
                         },
                         "steuer": {
                             "rightLabel": "relevant"
+                        },
+                        "datum": {
+                            "dateFormatRegex": "/(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19|20)\d\d$/",
+                            "dateFormat":"dd.mm.yy"
                         }
+
                     }
                 },
                 "data": {
                     "name": "1234.pdf",
-                    "steuer": false
+                    "steuer": false,
+                    "datum": getCurrentDate("dd.m.YYYY"),
+                    "person": "Klaus"
                 },
                 "view": {
                     "parent": "VIEW_WEB_EDIT",
                     "layout": {
                         "template": "threeColumnGridLayout",
                         "bindings": {
+                            "name":"column-1-1",
+                            "titel":"column-1-1",
 
-                            "titel":"column-1-2",
-                            "name":"column-2-2",
                             "beschreibung":"column-1-1",
-                            "person":"column-1-3",
-                            "datum":"column-2-3",
-                            "betrag":"column-3-3",
-                            "kennung":"column-1-3",
-                            "steuer":"column-2-3"
+                            "person":"column-1-2",
+                            "datum":"column-2-2",
+                            "betrag":"column-1-2",
+                            "kennung":"column-2-2",
+                            "steuer":"column-1-2"
 
                         }
                     },
                     "templates": {
                         "threeColumnGridLayout": '<div class="filter-content">' + '{{if options.label}}<h2>${options.label}</h2><span></span>{{/if}}' + '{{if options.helper}}<p>${options.helper}</p>{{/if}}'
-
-                                + '<div id="column-1-2" class="col-1-2"> </div> <div id="column-2-2" class="col-1-2"> </div>'
                                 + '<div id="column-1-1" class="col-1-1"> </div>'
+                                + '<div id="column-1-2" class="col-1-2"> </div> <div id="column-2-2" class="col-1-2"> </div>'
+
                                 + '<div id="column-1-7_12" class="col-7-12"> </div> <div id="column-2-5_12" class="col-5-12"> </div>'
                                 + '<div id="column-1-3" class="col-1-3"> </div> <div id="column-2-3" class="col-1-3"> </div> <div id="column-3-3" class="col-1-3"> </div>'
 //                                + '<div id="column-1" class="grid_6"> </div>' + '<div id="column-2" class="grid_6"> </div>' + '<div class="grid_8 push_8"> <div id="column-3" class="grid_6"> </div> </div>' +  '<div class="clear"></div>'
@@ -223,57 +232,17 @@
             changeCss('input', 'width:100%');
             changeCss('.ui-widget textarea', 'width:100%');
             changeCss('select','max-width: 100%; min-width:10%');
-        //changeCss ('.ui-dialog', 'overflow: hidden');
+            changeCss('.alpaca-controlfield-checkbox input', 'margin-top:-1px');
+            changeCss("input[type='checkbox']", 'width:10px;float:left');
             changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
+
             $('<div id="dialogBox">').append(Alpaca($('<div id="form" class="grid grid-pad">'), dialogSettings)).dialog({
                 autoOpen: false,
                 width: 420,
                 height:'auto',
                 modal: true,
-                open:		function() {
-                  /*  if (!dialogLayout) {
-
-
-                        // init layout *the first time* dialog opens
-                        dialogLayout = $("#dialogBox").layout();
-
-                    }
-                    else
-                    // just in case - probably not required
-                        dialogLayout.resizeAll();*/
-                },
-  /*              buttons: {
-
-                    "Save": {
-                        "id" : "btn-ok",
-                        "text": "Save",
-                        "click": function() {
-                        var server = $("[name='server']"),
-                                user = $("[name='user']"),
-                                password = $("[name='password']");
-
-                        $( this ).dialog( "close" );
-                        alert(server.val() + "\n"+user.val()+"\n"+password.val());
-  *//*                      if ( bValid ) {
-                            $.cookie("server", server.val(), { expires: 9999 });
-                            $.cookie("user", user.val(), { expires: 9999 });
-                            $.cookie("password", password.val(), { expires: 9999 });
-                            alert("Einstellungen gesichert");
-                            $( this ).dialog( "close" );
-                        }*//*
-                    }},
-
-                    "Cancel": {
-                        "id" : "btn-cancel",
-                        "text": "Cancel",
-                        "click":function() {
-                        $( this ).dialog( "close" );
-                    }
-                }},
-*/                close: function() {
-                    //allFields.val( "" ).removeClass( "ui-state-error" );
-                },
                 open: function(){
+                    $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
                     $(".alpaca-form-button-submit").button();
                     $(".alpaca-form-button-reset").button().click(function(){  $('#dialogBox').dialog("close"); });
                  /*   $(".alpaca-form-button-submit").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");

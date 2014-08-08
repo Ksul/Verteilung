@@ -1,20 +1,20 @@
+/**
+ * ändert das CSS für einen bestimmte Class
+ * @param className   der Name der Class
+ * @param classValue  der neue Wert
+ */
 function changeCss(className, classValue) {
-// we need invisible container to store additional css definitions
     var cssMainContainer = $('#css-modifier-container');
     if (cssMainContainer.length == 0) {
         var cssMainContainer = $('<div id="css-modifier-container"></div>');
         cssMainContainer.hide();
         cssMainContainer.appendTo($('body'));
     }
-
-// and we need one div for each class
     classContainer = cssMainContainer.find('div[data-class="' + className + '"]');
     if (classContainer.length == 0) {
         classContainer = $('<div data-class="' + className + '"></div>');
         classContainer.appendTo(cssMainContainer);
     }
-
-// append additional style
     classContainer.html('<style>' + className + ' {' + classValue + '}</style>');
 };
 
@@ -250,16 +250,22 @@ function loadAlfrescoTable() {
         // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
         "aoColumns": [
             { "mDataProp": null, "sClass": "control center", "sWidth": "12px"},
-            { "sTitle": "Name", "sType": "string", "sClass": "alignLeft"  },
+            { "sTitle": "Titel", "sType": "string", "sClass": "alignLeft"  },
             { "sTitle": "Datum", "sType": "date", "sClass": "alignLeft" },
             { "sTitle": "Person", "sType": "string", "sClass": "alignLeft" },
             { "sTitle": "Betrag", "sType": "numeric", "sClass": "alignLeft" },
+            { "sTitle": "Schlüssel", "sType": "string", "sClass": "alignLeft" },
+            { "sTitle": "Name", "sType": "string", "sClass": "alignLeft" },
+            { "sTitle": "Beschreibung", "sType": "string", "sClass": "alignLeft" },
+            { "sTitle": "Aktion", "sWidth": "102px", "sClass": "alignLeft" },
             { "sTitle": "Id" }
         ],
         "aoColumnDefs": [
             // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
-            { "aTargets": [1, 2, 3, 4], "bVisible": true},
-            { "aTargets": [5], "bVisible": false}
+            { "aTargets": [1, 2, 3, 4, 5], "bVisible": true},
+            { "aTargets": [6, 7], "bVisible": false},
+            { "aTargets": [8], "fnRender": alfrescoAktionFieldFormatter, "bSortable": false},
+            { "aTargets": [9], "bVisible": false}
         ],
         "oLanguage": {
             "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
@@ -293,7 +299,7 @@ function loadAlfrescoFolderTable() {
         "aoColumnDefs": [
             // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
             { "aTargets": [1, 2], "bVisible": true},
-            { "aTargets": [3], "fnRender": aktionFieldFormatter, "bSortable": false},
+            { "aTargets": [3], "fnRender": alfrescoFolderAktionFieldFormatter, "bSortable": false},
             { "aTargets": [4], "bVisible": false}
         ],
         "oLanguage": {
@@ -374,18 +380,18 @@ function calcDataTableHeight()  {
 }
 
 /**
- * formatiert die Iconspalte in der Tabelle
+ * formatiert die Iconspalte in der AlfrescoFolderTabelle
  * @param o
  * @returns {string}
  */
-function aktionFieldFormatter(o) {
+function alfrescoFolderAktionFieldFormatter(o) {
     if (o.iDataRow == 0) {
         //	o.cell.setStyle('width', '102px');
     }
     var container =  document.createElement("div");
     var image = document.createElement("div");
     image.href = "#";
-    image.className = "edit";
+    image.className = "folderEdit";
     image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
     image.title = "Details bearbeiten";
     image.style.cursor = "pointer";
@@ -396,7 +402,7 @@ function aktionFieldFormatter(o) {
     container.appendChild(image);
     image = document.createElement("div");
     image.href = "#";
-    image.className = "open";
+    image.className = "folderOpen";
     image.title = "Ordner öffnen";
     image.style.backgroundImage = "url(src/main/resource/images/details_open.png)";
     image.style.width = "16px";
@@ -405,6 +411,29 @@ function aktionFieldFormatter(o) {
     image.style.cssFloat = "left";
     image.style.marginRight = "5px";
     container.appendChild(image);
+    return container.outerHTML;
+}
+
+/**
+ * formatiert die Iconspalte in der AlfrescoTabelle
+ * @param o
+ * @returns {string}
+ */
+function alfrescoAktionFieldFormatter(o) {
+    if (o.iDataRow == 0) {
+        //	o.cell.setStyle('width', '102px');
+    }
+    var container =  document.createElement("div");
+    var image = document.createElement("div");
+    image.href = "#";
+    image.className = "detailEdit";
+    image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
+    image.title = "Details bearbeiten";
+    image.style.cursor = "pointer";
+    image.style.width = "16px";
+    image.style.height = "16px";
+    image.style.cssFloat = "left";
+    image.style.marginRight = "5px";
     container.appendChild(image);
     return container.outerHTML;
 }
@@ -436,14 +465,17 @@ function switchAlfrescoDirectory(id) {
         if (json.success) {
             alfrescoTabelle.fnClearTable();
             for (var index = 0; index < json.result.length; ++index) {
-                var name = json.result[index].attr.title ? json.result[index].attr.title : json.result[index].attr.name ? json.result[index].attr.name : "";
+                var titel = json.result[index].attr.title ? json.result[index].attr.title : json.result[index].attr.name ? json.result[index].attr.name : "";
                 var datum = json.result[index].attr.documentDate ? json.result[index].attr.documentDate : json.result[index].attr.creationDate ? json.result[index].attr.creationDate : "";
                 var date = parseDate(datum);
                 var dateString = date ? REC.dateFormat(date, "dd.MM.YYYY") : "";
                 var person = json.result[index].attr.person ? json.result[index].attr.person : "";
                 var amount = json.result[index].attr.amount ? json.result[index].attr.amount : "";
+                var schluessel = json.result[index].attr.idvalue ? json.result[index].attr.idvalue : "";
                 var id = json.result[index].attr.objectId ? json.result[index].attr.objectId : "";
-                var row = [ null, name, dateString, person, amount, id];
+                var name = json.result[index].attr.name ? json.result[index].attr.name : "";
+                var beschreibung = json.result[index].attr.description ? json.result[index].attr.description : "";
+                var row = [ null, titel, dateString, person, amount, schluessel, name, beschreibung, null, id];
                 alfrescoTabelle.fnAddData(row);
             }
         }
@@ -484,11 +516,28 @@ function loadAlfrescoTree() {
 }
 
 function handleAlfrescoFolderImageClicks() {
-    $(document).on("click", ".open", function () {
-        var aPos = alfrescoFolderTabelle.fnGetPosition(this.parentNode.parentNode);
-        var row = alfrescoFolderTabelle.fnGetData(aPos[0]);
-        switchAlfrescoDirectory(row[4]);
+    $(document).on("click", ".folderPpen", function () {
+        try {
+            var aPos = alfrescoFolderTabelle.fnGetPosition(this.parentNode.parentNode);
+            var row = alfrescoFolderTabelle.fnGetData(aPos[0]);
+            switchAlfrescoDirectory(row[4]);
+        } catch (e) {
+            errorHandler(e);
+        }
      });
+}
+
+
+function handleAlfrescoImageClicks() {
+    $(document).on("click", ".detailEdit", function () {
+        try {
+            var aPos = alfrescoTabelle.fnGetPosition(this.parentNode.parentNode);
+            var row = alfrescoTabelle.fnGetData(aPos[0]);
+            startDocumentDialog(row[6], row[1], row[7], row[3], row[4], row[2], row[5], null);
+        } catch (e) {
+            errorHandler(e);
+        }
+    });
 }
 
 /**
@@ -558,6 +607,7 @@ function start() {
         // Eventhandler für die Image Clicks
         handleVerteilungImageClicks();
         handleAlfrescoFolderImageClicks();
+        handleAlfrescoImageClicks();
         loadAlfrescoTree();
     } catch(e) {
         errorHandler(e);

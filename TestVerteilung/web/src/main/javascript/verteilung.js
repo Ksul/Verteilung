@@ -39,6 +39,17 @@ function parseDate(dateString) {
 }
 
 /**
+ * liefert das aktuelle Tagesdatum
+ * @param formatString der String zum formatieren
+ * @return {number}
+ */
+function getCurrentDate(formatString) {
+    {
+        return REC.dateFormat(new Date(), formatString)
+    }
+}
+
+/**
  * liefert einen Url-Paramter
  * @param name          der Name des Parameters
  * @returns {String}
