@@ -25,6 +25,7 @@
     <script type="text/javascript" src="./src/main/javascript/jquery.jstree.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jquery.themeswitcher.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jquery.dataTables.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./src/main/javascript/jquery.price-format.js" charset="utf-8"></script>
 
     <script type="text/javascript" src="./src/main/javascript/alpaca/alpaca/alpaca.js"></script>
 
@@ -129,6 +130,13 @@
                         "datum": {
                             "dateFormatRegex": "/(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19|20)\d\d$/",
                             "dateFormat":"dd.mm.yy"
+                        },
+                        "betrag":{
+                            "type": "currency",
+                             "centsSeparator": ",",
+                            "prefix": "",
+                            "suffix": " €",
+                            "thousandsSeparator": "."
                         }
 
                     }
@@ -137,7 +145,8 @@
                     "name": "1234.pdf",
                     "steuer": false,
                     "datum": getCurrentDate("dd.m.YYYY"),
-                    "person": "Klaus"
+                    "person": "Klaus",
+                    "betrag":"25,00 €"
                 },
                 "view": {
                     "parent": "VIEW_WEB_EDIT",

@@ -79,6 +79,7 @@ function startSettingsDialog() {
         changeCss('.grid', 'max-width: 100%; min-width:100%');
         changeCss('input', 'width:100%');
         changeCss('h2', 'background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
+        $('head').append('<link href="./src/main/resource/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
         $('<div id="settingsDialog">').append(Alpaca($('<div id="form">'), dialogSettings)).dialog({
             autoOpen: true,
             modal: true,
@@ -106,6 +107,7 @@ function startSettingsDialog() {
                             $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
                             fillMessageBox("Einstellungen gesichert");
                             $('#settingsDialog').dialog("destroy");
+                            jQuery('#simpleGrid').remove();
                             init();
                             loadAlfrescoTree();
                         } catch (e) {
@@ -131,7 +133,7 @@ function startSettingsDialog() {
     /**
      * startet den Detaildialog für Documente
      */
-    function startDocumentDialog(name, titel, beschreibung, person, betrag, datum, schluessel, steuer) {
+    function startDocumentDialog(id, name, titel, beschreibung, person, betrag, datum, schluessel, steuer) {
         try {
             var dialogSettings = { "id": "detailDialog",
                 "schema": {
@@ -185,6 +187,13 @@ function startSettingsDialog() {
                             "type": "boolean",
                             "title":"Steuern",
                             "required": false
+                        },
+                        "betrag":{
+                            "type": "currency",
+                            "centsSeparator": ",",
+                            "prefix": "",
+                            "suffix": " €",
+                            "thousandsSeparator": "."
                         }
                     }
                 },
@@ -266,13 +275,27 @@ function startSettingsDialog() {
                             if (form.isFormValid()) {
                                 try {
                                     //TODO
-                                    var server = $("[name='server']").val(),
-                                        user = $("[name='user']").val(),
-                                        password = $("[name='password']").val();
-                                    if (!server.endsWith("/"))
-                                        server = server + "/";
+                                    var titel = $("[name='titel']").val(),
+                                        beschreibung = $("[name='beschreibung']").val(),
+                                        person = $("[name='person']").val(),
+                                        datum = $("[name='datum']").val(),
+                                        betrag = $("[name='betrag']").val(),
+                                        schluessel = $("[name='schluessel']").val(),
+                                        steuer = $("[name='steuer']").val();
+
+                                    var extraProperties = [
+                                        {'aspect':'cm:titled','cm:title':titel},
+                                        {'aspect':'cm:titled','cm:description':beschreibung},
+                                        {'my:documentDate':datum},
+                                        {'my:person':person},
+                                        {'aspect':'my:amountable','my:amount':betrag},
+                                        {'aspect':'my:idable','my:idvalue':schluessel}
+                                    ];
+                                    erg = executeService("updateDocument", [
+                                        {"name": "documentId", "value": id}
+                                    ], null, true);
                                     $('#dialogBox').dialog("destroy");
-                                    alert(server + "\n" + user+ "\n" + password);
+                                    jQuery('#simpleGrid').remove();
                                 } catch (e) {
                                     errorHandler(e);
                                 }
@@ -290,7 +313,7 @@ function startSettingsDialog() {
             changeCss('.alpaca-controlfield-checkbox input', 'margin-top:-1px');
             changeCss("input[type='checkbox']", 'width:10px;float:left');
             changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
-
+            $('head').append('<link href="./src/main/resource/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
             $('<div id="dialogBox">').append(Alpaca($('<div id="form" class="grid grid-pad">'), dialogSettings)).dialog({
                 autoOpen: true,
                 width: 420,

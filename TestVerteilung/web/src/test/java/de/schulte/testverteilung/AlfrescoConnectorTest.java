@@ -11,7 +11,9 @@ import org.junit.Test;
 import java.io.File;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -123,6 +125,47 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         assertTrue(document instanceof Document);
         assertEquals("TestDocument.txt", document.getName());
         assertEquals("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", IOUtils.toString(document.getContentStream().getStream(), "UTF-8"));
+        document.delete(true);
+    }
+
+    @Test
+    public void testUpdateProperties() throws Exception {
+        CmisObject folder = con.getNode("/Archiv");
+        assertNotNull(folder);
+        assertTrue(folder instanceof Folder);
+        String content = "";
+        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.NONE);
+        assertNotNull(document);
+        assertTrue(document instanceof Document);
+        assertEquals("TestDocument.txt", document.getName());
+        content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        con.updateDocument(document, content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null, false, null);
+        byte[] cont = con.getDocumentContent(document );
+        assertNotNull(cont);
+        assertTrue(cont instanceof byte[]);
+        assertEquals(content, new String(cont));
+        document.delete(true);
+        document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MAJOR);
+        assertEquals("1.0", document.getVersionLabel());
+        assertEquals("Initial Version", document.getCheckinComment());
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> titledMap = new HashMap<>();
+        Map<String, Object> standardMap = new HashMap<>();
+        Map<String, Object> amountMap = new HashMap<>();
+        Map<String, Object> archivModelMap = new HashMap<>();
+        titledMap.put("cm:description","Testdokument");
+        standardMap.put("cmis:name", "Hallo.txt");
+        amountMap.put("my:amount","25.33");
+        archivModelMap.put("my:person", "Klaus");
+        archivModelMap.put("my:documentDate", "24.05.2014");
+        //properties.put("P:cm:titled", titledMap);
+        //properties.put("P:my:amountable", amountMap);
+        properties.put("D:my:archivContent", archivModelMap);
+        //properties.put("", standardMap);
+        document = con.updateProperties(document, properties, true, "neuer Versionskommentar");
+        assertNotNull(document);
+        assertEquals("2.0", document.getVersionLabel());
+        assertEquals("neuer Versionskommentar", document.getCheckinComment());
         document.delete(true);
     }
 

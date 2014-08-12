@@ -440,12 +440,12 @@ function alfrescoAktionFieldFormatter(o) {
 
 /**
  * führt die Aktualisierungen für eine Verzeichniswechsel im Alfresco durch
- * @param id  die Objectid des ausgewählten Folders
+ * @param objectId  die Objectid des ausgewählten Folders
  */
-function switchAlfrescoDirectory(id) {
+function switchAlfrescoDirectory(objectId) {
     try {
         var json = executeService("listFolderAsJSON", [
-            {"name": "filePath", "value": id},
+            {"name": "filePath", "value": objectId},
             {"name": "withFolder", "value": -1}
         ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
         if (json.success) {
@@ -459,7 +459,7 @@ function switchAlfrescoDirectory(id) {
             }
         }
         json = executeService("listFolderAsJSON", [
-            {"name": "filePath", "value": id},
+            {"name": "filePath", "value": objectId},
             {"name": "withFolder", "value": 1}
         ], "Dokumente konnten nicht aus dem Server gelesen werden:");
         if (json.success) {
@@ -533,7 +533,7 @@ function handleAlfrescoImageClicks() {
         try {
             var aPos = alfrescoTabelle.fnGetPosition(this.parentNode.parentNode);
             var row = alfrescoTabelle.fnGetData(aPos[0]);
-            startDocumentDialog(row[6], row[1], row[7], row[3], row[4], row[2], row[5], null);
+            startDocumentDialog(row[9], row[6], row[1], row[7], row[3], row[4], row[2], row[5], null);
         } catch (e) {
             errorHandler(e);
         }
@@ -609,6 +609,7 @@ function start() {
         handleAlfrescoFolderImageClicks();
         handleAlfrescoImageClicks();
         loadAlfrescoTree();
+        switchAlfrescoDirectory("-1");
     } catch(e) {
         errorHandler(e);
     }

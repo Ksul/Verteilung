@@ -1,5 +1,6 @@
 package de.schulte.testverteilung;
 
+import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.Ace;
@@ -273,6 +274,7 @@ public class AlfrescoConnector {
         properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         properties.put(PropertyIds.NAME, documentName);
 
+        //TODO überprüfen
         if (extraCMSProperties != null) {
             for (String key : extraCMSProperties.keySet()) {
                 if (key.equals("aspect")) {
@@ -343,22 +345,69 @@ public class AlfrescoConnector {
         InputStream stream = new ByteArrayInputStream(documentContent);
         ContentStream contentStream = new ContentStreamImpl(document.getName(), BigInteger.valueOf(documentContent.length), documentType, stream);
 
-        if (extraCMSProperties != null) {
-            for (String key : extraCMSProperties.keySet()) {
-                if (key.equals("aspect")) {
-                    if (!((String) properties.get(PropertyIds.OBJECT_TYPE_ID)).contains((String) extraCMSProperties.get("aspect")))
-                        properties.put(PropertyIds.OBJECT_TYPE_ID, (String) properties.get(PropertyIds.OBJECT_TYPE_ID) + ",P:" + extraCMSProperties.get("aspect"));
-                } else
-                    properties.put(key, extraCMSProperties.get(key));
-            }
-        }
         ObjectId id = checkOutDocument(document) ;
         if (id != null) {
             document = (Document) session.getObject(id);
+
+
+            if (extraCMSProperties != null) {
+
+                for (String key : extraCMSProperties.keySet()) {
+                    if (! key.isEmpty()) {
+                        ((AlfrescoDocument) document).addAspect(key, (Map<String, Object>) extraCMSProperties.get(key));
+                    } else
+                        properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
+                }
+            }
+
             id = document.checkIn(majorVersion, properties, contentStream, versionComment);
         }
         else
             id = document.setContentStream(contentStream, true, true);
+        return (Document) session.getObject(id);
+    }
+
+
+    /**
+     * aktualisiert die Metadaten eines Dokumentes
+     * @param  document                  das zu aktualisierende Dokument
+     * @param  extraCMSProperties        zusätzliche Properties
+     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
+     * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
+     * @return document                  das geänderte Dokument
+     */
+    public Document updateProperties(Document document,
+                                 Map<String, Object> extraCMSProperties,
+                                 boolean majorVersion,
+                                 String versionComment) {
+        Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+
+
+
+        ObjectId id = checkOutDocument(document) ;
+        if (id != null) {
+            document = (AlfrescoDocument) session.getObject(id);
+
+            if (extraCMSProperties != null) {
+
+                for (String key : extraCMSProperties.keySet()) {
+                    if (! key.isEmpty()) {
+                        if (key.startsWith("P:")) {
+                            ((AlfrescoDocument) document).addAspect(key, (Map<String, Object>) extraCMSProperties.get(key));
+                        } else {
+                            properties.put(PropertyIds.OBJECT_TYPE_ID, key);
+                            properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
+                        }
+                    } else
+                        properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
+                }
+            }
+            document.updateProperties(properties);
+            id = document.checkIn(majorVersion, null, document.getContentStream(), versionComment);
+        }
+        else
+            id = document.setContentStream(document.getContentStream(), true, true);
         return (Document) session.getObject(id);
     }
 
