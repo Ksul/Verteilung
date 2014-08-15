@@ -270,20 +270,9 @@ public class AlfrescoConnector {
 
         Document newDocument;
 
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+        Map<String, Object> properties = buildProperties(extraCMSProperties);
         properties.put(PropertyIds.NAME, documentName);
 
-        //TODO überprüfen
-        if (extraCMSProperties != null) {
-            for (String key : extraCMSProperties.keySet()) {
-                if (key.equals("aspect")) {
-                    if (!((String) properties.get(PropertyIds.OBJECT_TYPE_ID)).contains((String) extraCMSProperties.get("aspect")))
-                        properties.put(PropertyIds.OBJECT_TYPE_ID, (String) properties.get(PropertyIds.OBJECT_TYPE_ID) + ",P:" + extraCMSProperties.get("aspect"));
-                } else
-                    properties.put(key, extraCMSProperties.get(key));
-            }
-        }
         InputStream stream = new ByteArrayInputStream(documentContent);
         ContentStream contentStream = new ContentStreamImpl(documentName, BigInteger.valueOf(documentContent.length), documentType, stream);
 
@@ -292,6 +281,8 @@ public class AlfrescoConnector {
 
         return newDocument;
     }
+
+
 
     /**
      * verschiebt ein Dokument
@@ -379,36 +370,12 @@ public class AlfrescoConnector {
     public Document updateProperties(Document document,
                                  Map<String, Object> extraCMSProperties,
                                  boolean majorVersion,
-                                 String versionComment) {
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+                                 String versionComment) throws VerteilungException {
 
 
+        document.updateProperties(buildProperties(extraCMSProperties), true);
 
-        ObjectId id = checkOutDocument(document) ;
-        if (id != null) {
-            document = (AlfrescoDocument) session.getObject(id);
-
-            if (extraCMSProperties != null) {
-
-                for (String key : extraCMSProperties.keySet()) {
-                    if (! key.isEmpty()) {
-                        if (key.startsWith("P:")) {
-                            ((AlfrescoDocument) document).addAspect(key, (Map<String, Object>) extraCMSProperties.get(key));
-                        } else {
-                            properties.put(PropertyIds.OBJECT_TYPE_ID, key);
-                            properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
-                        }
-                    } else
-                        properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
-                }
-            }
-            document.updateProperties(properties);
-            id = document.checkIn(majorVersion, null, document.getContentStream(), versionComment);
-        }
-        else
-            id = document.setContentStream(document.getContentStream(), true, true);
-        return (Document) session.getObject(id);
+        return (Document) document;
     }
 
     /**
@@ -430,6 +397,30 @@ public class AlfrescoConnector {
             return document.checkOut();
         else
             return null;
+    }
+
+    /**
+     * baut die Properties für Alfresco auf
+     * @param  extraCMSProperties   die übergebenen Properties
+     * @return properties           die für Alfresco aufgearbeiteten Properties
+     */
+    private Map<String, Object> buildProperties(Map<String, Object> extraCMSProperties) {
+        Map<String, Object> properties = new HashMap<>();
+        if (extraCMSProperties != null) {
+
+            for (String key : extraCMSProperties.keySet()) {
+                if (! key.isEmpty()) {
+
+                    properties.put(PropertyIds.OBJECT_TYPE_ID, properties.containsKey(PropertyIds.OBJECT_TYPE_ID) ? properties.get(PropertyIds.OBJECT_TYPE_ID) + "," + key : key);
+                    properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
+
+                } else
+                    properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
+            }
+        }
+        if (!properties.containsKey(PropertyIds.OBJECT_TYPE_ID))
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+        return properties;
     }
 
 }

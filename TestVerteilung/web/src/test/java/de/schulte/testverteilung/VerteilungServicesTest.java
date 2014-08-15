@@ -149,6 +149,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
 
     @Test
     public void testCreateDocument() throws Exception {
+        //TODO Das läuft nicht mehr so
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         String extraProperties = "{'aspect':'cm:titled','cm:description':'Testdokument'}";
         JSONObject obj = services.createDocument("/",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, "none");
