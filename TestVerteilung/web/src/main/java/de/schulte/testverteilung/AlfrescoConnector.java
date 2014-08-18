@@ -5,9 +5,11 @@ import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.Ace;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.enums.Updatability;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.apache.chemistry.opencmis.commons.spi.Holder;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -363,19 +365,29 @@ public class AlfrescoConnector {
      * aktualisiert die Metadaten eines Dokumentes
      * @param  document                  das zu aktualisierende Dokument
      * @param  extraCMSProperties        zusätzliche Properties
-     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
-     * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return document                  das geänderte Dokument
      */
     public Document updateProperties(Document document,
-                                 Map<String, Object> extraCMSProperties,
-                                 boolean majorVersion,
-                                 String versionComment) throws VerteilungException {
+                                 Map<String, Object> extraCMSProperties) throws VerteilungException {
+
+        AlfrescoDocument alfDoc = (AlfrescoDocument) document;
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+
+        if (extraCMSProperties != null) {
+
+            for (String key : extraCMSProperties.keySet()) {
+                if (! key.isEmpty() && key.startsWith("P:")) {
+                    alfDoc = (AlfrescoDocument) alfDoc.addAspect(key, (Map<String, Object>) extraCMSProperties.get(key));
+                } else
+                    properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
+            }
+        }
 
 
-        document.updateProperties(buildProperties(extraCMSProperties), true);
+        ObjectId id = alfDoc.updateProperties(properties, true);
 
-        return (Document) document;
+        return (Document) session.getObject(id);
     }
 
     /**
@@ -390,7 +402,7 @@ public class AlfrescoConnector {
     /**
      * checked ein Dokument aus
      * @param  document                 das auszucheckende Dokument
-     * @return objectId                 die Id des Objectes, oder null falss es nicht auszuchecken ist.
+     * @return objectId                 die Id des Objectes, oder null falls es nicht auszuchecken ist.
      */
     public ObjectId checkOutDocument(Document document) {
         if (isDocumentVersionable(document))
