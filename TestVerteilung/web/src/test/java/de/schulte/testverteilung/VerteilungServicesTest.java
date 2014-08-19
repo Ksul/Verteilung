@@ -151,7 +151,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testCreateDocument() throws Exception {
         //TODO Das läuft nicht mehr so
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        String extraProperties = "{'aspect':'cm:titled','cm:description':'Testdokument'}";
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}}";
         JSONObject obj = services.createDocument("/",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, "none");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -241,7 +241,16 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(result);
         assertEquals("2.0", result.getString("versionLabel"));
         assertEquals("neuer Versionskommentar", result.getString("checkinComment"));
-
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'25.05.2014'}}";
+        obj = services.updateDocument(result.getString("objectId"), null, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, "true", "2. Versionskommentar");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        result = new JSONObject(obj.get("result").toString());
+        assertNotNull(result);
+        assertEquals("3.0", result.getString("versionLabel"));
+        assertEquals("2. Versionskommentar", result.getString("checkinComment"));
         obj = services.deleteDocument("/Archiv", "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);

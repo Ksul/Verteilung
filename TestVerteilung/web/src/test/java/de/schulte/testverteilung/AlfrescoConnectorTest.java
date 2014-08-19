@@ -39,8 +39,12 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         con = new AlfrescoConnector("admin", properties.getProperty("password"), properties.getProperty("bindingUrl") );
         assertNotNull(con);
         CmisObject cmisObject = con.getNode("/Archiv/TestDocument.txt");
-        if (cmisObject != null && cmisObject instanceof Document)
+
+        if (cmisObject != null && cmisObject instanceof AlfrescoDocument) {
+            if (((AlfrescoDocument) cmisObject).isVersionSeriesCheckedOut())
+                ((AlfrescoDocument) cmisObject).cancelCheckOut();
             cmisObject.delete(true);
+        }
         cmisObject = con.getNode("/Archiv/Fehler/TestDocument.txt");
         if (cmisObject != null && cmisObject instanceof Document)
             cmisObject.delete(true);
@@ -168,6 +172,8 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         properties.put("", standardMap);
         document = con.updateProperties(document, properties);
         assertNotNull(document);
+        // Die Überprüfung auf Aspekte funktioniert nicht
+        //assertTrue(((AlfrescoDocument) document).hasAspect("P:cm:titled"));
         assertEquals(new BigDecimal(25.33).doubleValue(), ((BigDecimal) document.getProperty("my:amount").getValue()).doubleValue(), 0);
         document.delete(true);
     }
@@ -200,6 +206,25 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         assertEquals(content, new String(cont));
         assertEquals("2.0", document.getVersionLabel());
         assertEquals("neuer Versionskommentar", document.getCheckinComment());
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> titledMap = new HashMap<>();
+        Map<String, Object> standardMap = new HashMap<>();
+        Map<String, Object> amountMap = new HashMap<>();
+        titledMap.put("cm:description","Testdokument");
+        amountMap.put("my:amount","25.33");
+        properties.put("P:cm:titled", titledMap);
+        properties.put("P:my:amountable", amountMap);
+        properties.put("", standardMap);
+        document = con.updateDocument(document, null, CMISConstants.DOCUMENT_TYPE_TEXT, properties, true, "2. Versionskommentar");
+        assertNotNull(document);
+        assertEquals("3.0", document.getVersionLabel());
+        assertEquals("2. Versionskommentar", document.getCheckinComment());
+        assertEquals(new BigDecimal(25.33).doubleValue(), ((BigDecimal) document.getProperty("my:amount").getValue()).doubleValue(), 0);
+        assertEquals("Testdokument", document.getProperty("cm:description").getValueAsString());
+        cont = con.getDocumentContent(document );
+        assertNotNull(cont);
+        assertTrue(cont instanceof byte[]);
+        assertEquals(content, new String(cont));
         document.delete(true);
     }
 
@@ -235,7 +260,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         folder = con.createFolder((Folder) folder, "TestFolder");
         assertNotNull(folder);
         assertTrue(folder instanceof Folder);
-        assertEquals("TestFolder", ((Folder) folder).getName());
+        assertEquals("TestFolder", folder.getName());
         ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
     }
 

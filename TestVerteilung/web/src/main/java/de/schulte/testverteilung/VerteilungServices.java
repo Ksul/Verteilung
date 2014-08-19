@@ -273,6 +273,8 @@ public class VerteilungServices {
             if (folderObject != null && folderObject instanceof Folder) {
                 document = con.getNode(((Folder) folderObject).getPath() + (((Folder) folderObject).isRootFolder() ? "" : "/") + documentName);
                 if (document != null && document instanceof Document) {
+                    if (((Document) document).isVersionSeriesCheckedOut())
+                        ((Document) document).cancelCheckOut();
                     document.delete(true);
                     obj.put("success", true);
                     obj.put("result", "");
@@ -317,18 +319,11 @@ public class VerteilungServices {
             if (versionState != null && versionState.length() > 0 && !versionState.equals("none") && !versionState.equals("major") && !versionState.equals("minor") && !versionState.equals("checkedout"))
                 throw new VerteilungException("ungültiger VersionsStatus");
             folderObject = con.getNode(folder);
+            Map<String, Object> outMap = null;
             if (folderObject != null && folderObject instanceof Folder) {
 
-                Map<String, Object> outMap = null;
-                if (extraCMSProperties != null && extraCMSProperties.length() > 0) {
-                    JSONObject props = new JSONObject(extraCMSProperties);
-                    Iterator nameItr = props.keys();
-                    outMap = new HashMap<>();
-                    while (nameItr.hasNext()) {
-                        String name = (String) nameItr.next();
-                        outMap.put(name, props.get(name));
-                    }
-                }
+                if (extraCMSProperties != null && extraCMSProperties.length() > 0)
+                  outMap = buildProperties(extraCMSProperties);
 
                 VersioningState vs = VersioningState.fromValue(versionState);
                 if (vs == null)
@@ -351,10 +346,11 @@ public class VerteilungServices {
         return obj;
     }
 
+
     /**
      * aktualisiert den Inhalt eines Dokumentes
      * @param  documentId                Die Id des zu aktualisierenden Dokumentes
-     * @param  documentContent           der neue Inhalt als Base64 decodierter String
+     * @param  documentContent           der neue Inhalt als Base64 decodierter String. Falls der Content <null> ist, dann werden nur die Properties upgedated.
      * @param  documentType              der Typ des Dokumentes
      * @param  extraCMSProperties        zusätzliche Properties
      * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
@@ -373,23 +369,17 @@ public class VerteilungServices {
         //TODO Content als String oder als Stream?
         JSONObject obj = new JSONObject();
         try {
-
+            Map<String, Object> outMap = null;
             if (majorVersion == null)
                 majorVersion = "false";
 
             CmisObject cmisObject = con.getNodeById(documentId);
             if (cmisObject != null && cmisObject instanceof Document) {
 
-                Map<String, Object> outMap = null;
-                if (extraCMSProperties != null && extraCMSProperties.length() > 0) {
-                    JSONObject props = new JSONObject(extraCMSProperties);
-                    Iterator nameItr = props.keys();
-                    outMap = new HashMap<>();
-                    while (nameItr.hasNext()) {
-                        String name = (String) nameItr.next();
-                        outMap.put(name, props.get(name));
-                    }
-                }
+
+                if (extraCMSProperties != null && extraCMSProperties.length() > 0)
+                    outMap = buildProperties(extraCMSProperties);
+
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, majorVersion.equalsIgnoreCase("true"), versionComment);
                 obj.put("success", true);
                 obj.put("result", convertCMISObjectToJSON(document).toString());
@@ -922,5 +912,30 @@ public class VerteilungServices {
     public Collection<FileEntry> getEntries() {
         return entries;
     }
+
+    /**
+     * bereitet die Properties auf
+     * @param extraCMSProperties    der String mit den Properties im JSON Format
+     * @throws JSONException
+     */
+    private Map<String, Object> buildProperties(String extraCMSProperties) throws JSONException {
+
+        Map<String, Object> outMap = null;
+        JSONObject props = new JSONObject(extraCMSProperties);
+        Iterator nameItr = props.keys();
+        outMap = new HashMap<>();
+        while (nameItr.hasNext()) {
+            String name = (String) nameItr.next();
+            Map<String, Object> inMap = new HashMap<>();
+            Iterator innerItr = ((JSONObject) props.get(name)).keys();
+            while (innerItr.hasNext()) {
+                String innerName = (String) innerItr.next();
+                inMap.put(innerName, ((JSONObject) props.get(name)).get(innerName));
+            }
+            outMap.put(name, inMap);
+        }
+        return outMap;
+    }
+
 
 }
