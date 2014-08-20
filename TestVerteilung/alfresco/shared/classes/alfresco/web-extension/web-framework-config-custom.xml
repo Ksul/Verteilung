@@ -1,34 +1,31 @@
 <alfresco-config>
-   <config evaluator="node-type" condition="my:archivContent">
-     <forms>
-        <form>
-           <field-visibility>
-              <!-- inherited from cm:content -->
-              <show id="cm:name" />
-              <show id="cm:title" force="true" />
-              <show id="cm:description" force="true" />
-
-              <show id="mimetype" />
-              <show id="cm:author" force="true" />
-              <show id="size" for-mode="view" />
-              <show id="cm:creator" for-mode="view" />
-              <show id="cm:created" for-mode="view" />
-              <show id="cm:modifier" for-mode="view" />
-              <show id="cm:modified" for-mode="view" />
-              <!--  aspect mm:colorAble -->
-              <show id="my:person" />
-
-            </field-visibility>
-           <appearance>
-              <field id="my:person" label="Person">
-                 <control template="controls/selectone.ftl">
-                    <control-param name="options">Klaus,Katja,Till,Kilian</control-param>
-                 </control>
-              </field>
-           </appearance>
-
-        </form>
-     </forms>
-  </config>
- </alfresco-config>
+    <config evaluator="node-type" condition="my:archivContent">
+        <forms>
+            <form>
+                <field-visibility>
+                    <!-- inherited from cm:content -->
+                    <show id="cm:name" />
+                    <show id="cm:title" force="true" />
+                    <show id="cm:description" force="true" />
+                    <show id="mimetype" />
+                    <show id="cm:author" force="true" />
+                    <show id="size" for-mode="view" />
+                    <show id="cm:creator" for-mode="view" />
+                    <show id="cm:created" for-mode="view" />
+                    <show id="cm:modifier" for-mode="view" />
+                    <show id="cm:modified" for-mode="view" />
+                    <!--  aspect mm:colorAble -->
+                    <show id="my:person" />
+                </field-visibility>
+                <appearance>
+                    <field id="my:person" label="Person">
+                        <control template="controls/selectone.ftl">
+                            <control-param name="options">Klaus,Katja,Till,Kilian</control-param>
+                        </control>
+                    </field>
+                </appearance>
+            </form>
+        </forms>
+    </config>
+</alfresco-config>
 

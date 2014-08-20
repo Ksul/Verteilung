@@ -1,0 +1,74 @@
+<alfresco-config>
+
+  <config evaluator="aspect-name" condition="my:idable">
+      <property-sheet>
+         <show-property name="my:idvalue" />
+      </property-sheet>
+   </config>
+  <config evaluator="aspect-name" condition="my:amountable">
+      <property-sheet>
+         <show-property name="my:amount"  />
+      </property-sheet>
+   </config>
+ <config evaluator="node-type" condition="my:archivContent">
+     <property-sheet>
+         <show-property name="mimetype" display-label-id="content_type" 
+                        component-generator="MimeTypeSelectorGenerator" />
+         <show-property name="size" display-label-id="size" 
+                        converter="org.alfresco.faces.ByteSizeConverter" 
+                        show-in-edit-mode="false" />               
+         <show-property name="my:documentDate" display-label-id="documentDate" />
+         <show-property name="my:person" display-label-id="person" />
+      </property-sheet>
+
+   </config>
+
+ <config evaluator="node-type" condition="my:archivContent">
+      <navigation>
+         <override from-view-id="/jsp/browse/browse.jsp" to-view-id="/jsp/browse/browsemod.jsp" />
+      </navigation>
+   </config>
+
+
+ <config evaluator="string-compare" condition="Content Wizards">
+      <content-types>
+         <type name="my:archivContent" display-label="Archiv" />
+      </content-types>
+ </config>
+
+
+ <config evaluator="string-compare" condition="Space Wizards">
+      <folder-types>
+   <type name="my:archivSpace" icon="/images/icons/wikiSpace_large.gif"
+               description-id="archivspace_desc" description="Archiv-Space erstellen" 
+               display-label="Archiv Space" display-label-id="archivspace" />
+   </folder-types>
+   </config>
+
+   <config evaluator="string-compare" condition="Action Wizards">
+     <aspects>
+        <aspect name="my:amountable" display-label="Summierbar"/>
+        <aspect name="my:idable" display-label="IDbar"/>
+   </aspects>
+ <content-types>
+         <type name="my:archivContent" display-label="Archiv" />
+      </content-types>
+
+   </config>
+
+<config evaluator="string-compare" condition="Views">
+  <views>
+    <view-defaults>
+      <browse>
+        <view>details</view>
+        <page-size>
+        <list>10</list>
+        <details>20</details>
+        <icons>9</icons>
+        </page-size>
+      </browse>
+    </view-defaults>
+  </views>
+</config>
+
+</alfresco-config>
