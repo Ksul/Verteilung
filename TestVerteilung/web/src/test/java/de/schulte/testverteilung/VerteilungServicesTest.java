@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -149,9 +150,8 @@ public class VerteilungServicesTest extends AlfrescoTest{
 
     @Test
     public void testCreateDocument() throws Exception {
-        //TODO Das läuft nicht mehr so
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}}";
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().toGMTString() +"'}, 'P:my:amountable':{'my:amount':'25.33'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().toGMTString() + "'}}";
         JSONObject obj = services.createDocument("/",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, "none");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -241,7 +241,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(result);
         assertEquals("2.0", result.getString("versionLabel"));
         assertEquals("neuer Versionskommentar", result.getString("checkinComment"));
-        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'25.05.2014'}}";
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().toGMTString() +"'}, 'P:my:amountable':{'my:amount':'25.33'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().toGMTString() + "'}}";
         obj = services.updateDocument(result.getString("objectId"), null, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, "true", "2. Versionskommentar");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -251,6 +251,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(result);
         assertEquals("3.0", result.getString("versionLabel"));
         assertEquals("2. Versionskommentar", result.getString("checkinComment"));
+        assertEquals("25.33", result.getString("amount"));
         obj = services.deleteDocument("/Archiv", "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);

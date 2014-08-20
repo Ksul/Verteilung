@@ -5,6 +5,9 @@ import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.Ace;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.definitions.PropertyDateTimeDefinition;
+import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
+import org.apache.chemistry.opencmis.commons.definitions.PropertyStringDefinition;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
@@ -12,6 +15,9 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -26,7 +32,7 @@ import java.util.logging.Logger;
 public class AlfrescoConnector {
 
     private static Logger logger = Logger.getLogger(AlfrescoConnector.class.getName());
-
+    private static final DateFormat DF = new SimpleDateFormat();
     private String user = null;
     private String password = null;
     private String bindingUrl = null;
@@ -412,10 +418,10 @@ public class AlfrescoConnector {
                 if (! key.isEmpty()) {
 
                     properties.put(PropertyIds.OBJECT_TYPE_ID, properties.containsKey(PropertyIds.OBJECT_TYPE_ID) ? properties.get(PropertyIds.OBJECT_TYPE_ID) + "," + key : key);
-                    properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
+                    properties.putAll(convertProperties((Map<String, Object>) extraCMSProperties.get(key), key));
 
                 } else
-                    properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
+                    properties.putAll(convertProperties((Map<String, Object>) extraCMSProperties.get(key), key));
             }
         }
         if (properties.containsKey(PropertyIds.OBJECT_TYPE_ID) && !properties.get(PropertyIds.OBJECT_TYPE_ID).toString().contains("D:"))
@@ -432,15 +438,42 @@ public class AlfrescoConnector {
      * @param  doc                  das zu aktualisierende Document
      * @return properties           die für Alfresco aufgearbeiteten Properties
      */
-    private Map<String, Object> buildPropertiesForUpdate(Map<String, Object> extraCMSProperties, Document doc) {
+    private Map<String, Object> buildPropertiesForUpdate(Map<String, Object> extraCMSProperties,
+                                                         Document doc)  {
+
         HashMap<String, Object> properties = new HashMap<>();
         for (String key : extraCMSProperties.keySet()) {
             if (! key.isEmpty() && key.startsWith("P:")) {
-                ((AlfrescoDocument) doc).addAspect(key, (Map<String, Object>) extraCMSProperties.get(key));
+                ((AlfrescoDocument) doc).addAspect(key, convertProperties((Map<String, Object>) extraCMSProperties.get(key), key));
             } else
-                properties.putAll((Map<String, Object>) extraCMSProperties.get(key));
+                properties.putAll(convertProperties((Map<String, Object>) extraCMSProperties.get(key), key));
         }
         return properties;
     }
+
+    /**
+     * bereitet die Typen der Properties auf
+     * @param properties  die Property Werte
+     * @param type        der verwendete Typ
+     * @return
+     */
+    private Map<String, Object> convertProperties(Map<String, Object> properties,
+                                                         String type)  {
+        HashMap<String, Object> props = new HashMap<>();
+        Map<String, PropertyDefinition<?>> definitions = this.session.getTypeDefinition(type).getPropertyDefinitions();
+        for (String key : properties.keySet()) {
+            PropertyDefinition<?> definition = definitions.get(key);
+            if (definition instanceof PropertyDateTimeDefinition) {
+                GregorianCalendar gc = new GregorianCalendar();
+                gc.setTime(new Date((String) properties.get(key)));
+                props.put(key, gc);
+
+            } else {
+                props.put(key, properties.get(key));
+            }
+        }
+        return props;
+    }
+
 
 }
