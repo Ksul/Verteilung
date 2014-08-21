@@ -325,7 +325,7 @@ public class AlfrescoConnector {
      * @param  documentContent           der neue Inhalt. Falls der Content <null> ist, dann werden nur die Properties upgedated.
      * @param  documentType              der Typ des Dokumentes
      * @param  extraCMSProperties        zusätzliche Properties
-     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
+     * @param  versionState              bestimmt die Versionierung @seeVersionState
      * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return document                  das geänderte Dokument
      */
@@ -333,31 +333,38 @@ public class AlfrescoConnector {
                                    byte documentContent[],
                                    String documentType,
                                    Map<String, Object> extraCMSProperties,
-                                   boolean majorVersion,
+                                   String versionState,
                                    String versionComment) {
 
         ContentStream contentStream = null;
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
 
         if (documentContent != null) {
             InputStream stream = new ByteArrayInputStream(documentContent);
             contentStream = new ContentStreamImpl(document.getName(), BigInteger.valueOf(documentContent.length), documentType, stream);
         }
+        Map<String, Object> properties = null;
 
-        ObjectId id = checkOutDocument(document) ;
-        if (id != null) {
-            document = (Document) session.getObject(id);
+        if (extraCMSProperties != null)
+            properties = buildPropertiesForCreate(extraCMSProperties);
 
-            if (extraCMSProperties != null) {
+        ObjectId id = null;
+        if (versionState.equalsIgnoreCase(VersioningState.MAJOR.value()) || versionState.equalsIgnoreCase(VersioningState.MINOR.value())) {
+            id = checkOutDocument(document);
+            if (id != null) {
+                id = createAspectsFromProperties(extraCMSProperties, (Document) session.getObject(id));
+                document = (Document) session.getObject(id);
 
-                properties = buildPropertiesForUpdate(extraCMSProperties, document);
+                id = document.checkIn(versionState.equalsIgnoreCase(VersioningState.MAJOR.value()), properties, contentStream, versionComment);
+            } else {
+                id = document.setContentStream(contentStream, true, true);
+                id = createAspectsFromProperties(extraCMSProperties, id==null ? document : (Document) session.getObject(id));
+                id = (Document) session.getObject(id).updateProperties(properties, true);
             }
-
-            id = document.checkIn(majorVersion, properties, contentStream, versionComment);
-        }
-        else
+        } else {
             id = document.setContentStream(contentStream, true, true);
+            id = createAspectsFromProperties(extraCMSProperties, id==null ? document : (Document) session.getObject(id));
+            id = (Document) session.getObject(id).updateProperties(properties, true);
+        }
         return (Document) session.getObject(id);
     }
 
@@ -371,8 +378,7 @@ public class AlfrescoConnector {
                                      Map<String, Object> extraCMSProperties) throws VerteilungException {
 
 
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+        Map<String, Object> properties = null;
 
         if (extraCMSProperties != null) {
 
@@ -444,10 +450,14 @@ public class AlfrescoConnector {
         HashMap<String, Object> properties = new HashMap<>();
         for (String key : extraCMSProperties.keySet()) {
             if (! key.isEmpty() && key.startsWith("P:")) {
-                ((AlfrescoDocument) doc).addAspect(key, convertProperties((Map<String, Object>) extraCMSProperties.get(key), key));
-            } else
-                properties.putAll(convertProperties((Map<String, Object>) extraCMSProperties.get(key), key));
+                ((AlfrescoDocument) doc).addAspect(key);
+            }
+            properties.putAll(convertProperties((Map<String, Object>) extraCMSProperties.get(key), key));
         }
+        if (properties.containsKey(PropertyIds.OBJECT_TYPE_ID) && !properties.get(PropertyIds.OBJECT_TYPE_ID).toString().contains("D:"))
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document," + properties.get(PropertyIds.OBJECT_TYPE_ID));
+        if (!properties.containsKey(PropertyIds.OBJECT_TYPE_ID))
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
         return properties;
     }
 
@@ -463,6 +473,7 @@ public class AlfrescoConnector {
         Map<String, PropertyDefinition<?>> definitions = this.session.getTypeDefinition(type).getPropertyDefinitions();
         for (String key : properties.keySet()) {
             PropertyDefinition<?> definition = definitions.get(key);
+            //TODO Hier fehlt noch das parsen auf die anderen Datentypen
             if (definition instanceof PropertyDateTimeDefinition) {
                 GregorianCalendar gc = new GregorianCalendar();
                 gc.setTime(new Date((String) properties.get(key)));
@@ -473,6 +484,17 @@ public class AlfrescoConnector {
             }
         }
         return props;
+    }
+
+    private ObjectId createAspectsFromProperties(Map<String, Object> Properties,
+                                                 Document doc) {
+        ObjectId id = null;
+        for (String key : Properties.keySet()) {
+            if (!key.isEmpty() && key.startsWith("P:")) {
+                id = ((AlfrescoDocument) doc).addAspect(key);
+            }
+        }
+        return id;
     }
 
 

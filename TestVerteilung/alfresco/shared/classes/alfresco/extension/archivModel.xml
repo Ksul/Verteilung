@@ -94,6 +94,11 @@
                     <description>Amount of document</description>
                     <type>d:double</type>
                 </property>
+                <property name="my:tax">
+                    <title>Amount</title>
+                    <description>Relevant for tax</description>
+                    <type>d:boolean</type>
+                </property>
             </properties>
         </aspect>
         <aspect name="my:idable">

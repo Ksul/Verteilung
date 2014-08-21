@@ -428,6 +428,32 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
+     * aktualisiert die Properties eines Dokumentes
+     * @param  documentId                Die Id des zu aktualisierenden Dokumentes
+     * @param  extraCMSProperties        zusätzliche Properties
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     */
+    public JSONObject updateProperties(final String documentId,
+                                       final String extraCMSProperties)  {
+
+        JSONObject obj;
+        try {
+            final String content = getParameter();
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    return services.updateProperties(documentId, extraCMSProperties);
+                }
+            });
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
      * verschiebt ein Dokument
      * @param  documentId                das zu verschiebende Dokument
      * @param  oldFolderId               der alte Folder in dem das Dokument liegt

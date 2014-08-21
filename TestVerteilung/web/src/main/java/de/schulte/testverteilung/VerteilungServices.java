@@ -370,8 +370,6 @@ public class VerteilungServices {
         JSONObject obj = new JSONObject();
         try {
             Map<String, Object> outMap = null;
-            if (majorVersion == null)
-                majorVersion = "false";
 
             CmisObject cmisObject = con.getNodeById(documentId);
             if (cmisObject != null && cmisObject instanceof Document) {
@@ -380,7 +378,44 @@ public class VerteilungServices {
                 if (extraCMSProperties != null && extraCMSProperties.length() > 0)
                     outMap = buildProperties(extraCMSProperties);
 
-                Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, majorVersion.equalsIgnoreCase("true"), versionComment);
+                Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, majorVersion, versionComment);
+                obj.put("success", true);
+                obj.put("result", convertCMISObjectToJSON(document).toString());
+            } else {
+                obj.put("success", false);
+                obj.put("result", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
+            }
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * aktualisiert die Properties eines Dokumentes
+     * @param  documentId                Die Id des zu aktualisierenden Dokumentes
+     * @param  extraCMSProperties        zusätzliche Properties
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg das Document als JSON Object, ansonsten der Fehler
+     */
+    public JSONObject updateProperties(String documentId,
+                                       String extraCMSProperties) {
+        JSONObject obj = new JSONObject();
+        try {
+            Map<String, Object> outMap = null;
+            CmisObject cmisObject = con.getNodeById(documentId);
+            if (cmisObject != null && cmisObject instanceof Document) {
+
+
+                if (extraCMSProperties != null && extraCMSProperties.length() > 0)
+                    outMap = buildProperties(extraCMSProperties);
+                else {
+                    obj.put("success", false);
+                    obj.put("result", "keine Properties vorhanden!");
+                }
+
+                Document document = con.updateProperties((Document) cmisObject, outMap);
                 obj.put("success", true);
                 obj.put("result", convertCMISObjectToJSON(document).toString());
             } else {

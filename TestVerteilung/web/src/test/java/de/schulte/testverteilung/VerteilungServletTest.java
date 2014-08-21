@@ -1,5 +1,6 @@
 package de.schulte.testverteilung;
 
+import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.servlet.ServletContext;
@@ -7,6 +8,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -331,7 +333,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
-        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn("none");
+        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MAJOR.value());
         String content = " ";
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
         when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
@@ -346,6 +348,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject doc = new JSONObject(obj.getString("result"));
         assertNotNull(doc);
         assertNotNull(doc.getString("objectId"));
+        assertEquals("1.0", doc.getString("versionLabel"));
         sr.getBuffer().delete(0, 9999);
         // Dokument ändern
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_UPDATEDOCUMENT);
@@ -353,6 +356,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
         when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MAJOR.value());
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
@@ -361,6 +365,10 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        doc = new JSONObject(obj.getString("result"));
+        assertNotNull(doc);
+        assertNotNull(doc.getString("objectId"));
+        assertEquals("2.0", doc.getString("versionLabel"));
         sr.getBuffer().delete(0, 9999);
         // Inhalt lesen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETDOCUMENTCONTENT);
@@ -372,6 +380,31 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         assertEquals(content, obj.getString("result"));
+        sr.getBuffer().delete(0, 9999);
+
+        // Dokument ändern
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().toGMTString() +"'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().toGMTString() + "'}}";
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_UPDATEDOCUMENT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(null);
+        when(request.getParameter(VerteilungServlet.PARAMETER_EXTRAPROPERTIES)).thenReturn(extraProperties);
+        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
+        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONCOMMENT)).thenReturn("1. Versionskommentar");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        doc = new JSONObject(obj.getString("result"));
+        assertNotNull(doc);
+        assertEquals("2.1", doc.getString("versionLabel"));
+        assertEquals("1. Versionskommentar", doc.getString("checkinComment"));
+        assertEquals("25.33", doc.getString("amount"));
+        assertTrue(doc.getBoolean("tax"));
         sr.getBuffer().delete(0, 9999);
         // und das Dokument wieder löschen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);

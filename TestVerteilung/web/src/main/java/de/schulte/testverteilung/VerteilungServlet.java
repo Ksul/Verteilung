@@ -45,7 +45,6 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_WITHFOLDER = "withFolder";
     public static final String PARAMETER_EXTRACT = "extract";
     public static final String PARAMETER_VERSIONSTATE = "versionState";
-    public static final String PARAMETER_MAJORVERSION = "majorVersion";
     public static final String PARAMETER_VERSIONCOMMENT = "versionComment";
     public static final String PARAMETER_EXTRAPROPERTIES = "extraProperties";
 
@@ -72,6 +71,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_SETPARAMETER = "setParameter";
     public static final String FUNCTION_UPDATEDOCUMENT = "updateDocument";
     public static final String FUNCTION_UPLOADDOCUMENT = "uploadDocument";
+    public static final String FUNCTION_UPDATEPROPERTIES = "updateproperties";
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -188,7 +188,9 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_GETDOCUMENTCONTENT)) {
                     obj = getDocumentContent(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_EXTRACT, true).equalsIgnoreCase("true"));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPDATEDOCUMENT)) {
-                    obj = updateDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_DOCUMENTTEXT, true), getURLParameter(req, PARAMETER_MIMETYPE, false), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, false), getURLParameter(req, PARAMETER_MAJORVERSION, false), getURLParameter(req, PARAMETER_VERSIONCOMMENT, false));
+                    obj = updateDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_DOCUMENTTEXT, false), getURLParameter(req, PARAMETER_MIMETYPE, false), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, false), getURLParameter(req, PARAMETER_VERSIONSTATE, false), getURLParameter(req, PARAMETER_VERSIONCOMMENT, false));
+                } else if (value.equalsIgnoreCase(FUNCTION_UPDATEPROPERTIES)) {
+                    obj = updateProperties(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_MOVEDOCUMENT)) {
                     obj = moveDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_CURENTLOCATIONID, true), getURLParameter(req, PARAMETER_DESTINATIONID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_LISTFOLDERASJSON)) {
@@ -340,6 +342,21 @@ public class VerteilungServlet extends HttpServlet {
     }
 
     /**
+     * aktualisiert die Properties eines Dokumentes
+     * @param  documentId                Die Id des zu aktualisierenden Dokumentes
+     * @param  extraCMSProperties        zusätzliche Properties
+     * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                           false   ein Fehler ist aufgetreten
+     *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
+     * @throws VerteilungException
+     */
+    protected JSONObject updateProperties(String documentId,
+                                     String extraCMSProperties) throws VerteilungException {
+
+        return services.updateProperties(documentId, extraCMSProperties);
+    }
+
+    /**
      * aktualisiert den Inhalt eines Dokumentes
      * @param  documentId                Die Id des zu aktualisierenden Dokumentes
      * @param  documentContent           der neue Inhalt
@@ -353,11 +370,11 @@ public class VerteilungServlet extends HttpServlet {
      * @throws VerteilungException
      */
     protected JSONObject updateDocument(String documentId,
-                                     String documentContent,
-                                     String documentType,
-                                     String extraCMSProperties,
-                                     String majorVersion,
-                                     String versionComment) throws VerteilungException {
+                                        String documentContent,
+                                        String documentType,
+                                        String extraCMSProperties,
+                                        String majorVersion,
+                                        String versionComment) throws VerteilungException {
 
         return services.updateDocument(documentId, documentContent, documentType, extraCMSProperties, majorVersion, versionComment);
     }
