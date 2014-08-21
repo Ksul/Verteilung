@@ -1730,7 +1730,7 @@ function checkAndBuidAlfrescoEnvironment() {
     if (alfrescoServerAvailable) {
         var erg;
         erg = executeService("setParameter", [
-            {"name": "server", "value": getSettings("server") + "service/cmis"},
+            {"name": "binding", "value": getSettings("binding")},
             {"name": "user", "value": getSettings("user")},
             {"name": "password", "value": getSettings("password")}
         ], "Parameter für die Services konnten nicht gesetzt werden:");

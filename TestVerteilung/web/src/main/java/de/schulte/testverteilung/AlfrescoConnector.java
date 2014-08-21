@@ -8,6 +8,7 @@ import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDateTimeDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyStringDefinition;
+import org.apache.chemistry.opencmis.commons.enums.Action;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
@@ -282,7 +283,6 @@ public class AlfrescoConnector {
         InputStream stream = new ByteArrayInputStream(documentContent);
         ContentStream contentStream = new ContentStreamImpl(documentName, BigInteger.valueOf(documentContent.length), documentType, stream);
 
-        // create a major version
         newDocument = parentFolder.createDocument(properties, contentStream, versioningState);
 
         return newDocument;
@@ -334,7 +334,7 @@ public class AlfrescoConnector {
                                    String documentType,
                                    Map<String, Object> extraCMSProperties,
                                    String versionState,
-                                   String versionComment) {
+                                   String versionComment) throws VerteilungException {
 
         ContentStream contentStream = null;
 
@@ -361,9 +361,12 @@ public class AlfrescoConnector {
                 id = (Document) session.getObject(id).updateProperties(properties, true);
             }
         } else {
-            id = document.setContentStream(contentStream, true, true);
+            if (document.getAllowableActions().getAllowableActions().contains(Action.CAN_CHECK_OUT))
+                throw new VerteilungException("Dokument ist versionierbar und muss ausgecheckt werden!");
+
             id = createAspectsFromProperties(extraCMSProperties, id==null ? document : (Document) session.getObject(id));
-            id = (Document) session.getObject(id).updateProperties(properties, true);
+            id = ((Document) session.getObject(id)).updateProperties(properties, true);
+            id = document.setContentStream(contentStream, true, true);
         }
         return (Document) session.getObject(id);
     }
@@ -492,6 +495,8 @@ public class AlfrescoConnector {
         for (String key : Properties.keySet()) {
             if (!key.isEmpty() && key.startsWith("P:")) {
                 id = ((AlfrescoDocument) doc).addAspect(key);
+                doc = (Document) session.getObject(id);
+                doc.refresh();
             }
         }
         return id;
