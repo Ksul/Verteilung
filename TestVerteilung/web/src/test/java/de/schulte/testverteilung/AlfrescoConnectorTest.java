@@ -61,9 +61,9 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
     @Test
     public void testListFolder() throws Exception {
 
-        ItemIterable<CmisObject> list = con.listFolder(con.getNode("company_home/Archiv").getId());
+        ItemIterable<CmisObject> list = con.listFolder(con.getNode("/Archiv").getId());
         Assert.assertEquals(4, list.getTotalNumItems());
-        list = con.listFolder(con.getNode("company_home/Archiv/Fehler").getId());
+        list = con.listFolder(con.getNode("/Archiv/Fehler").getId());
         int count = 0;
         Iterator<CmisObject> it = list.iterator();
         while (it.hasNext()){
@@ -114,7 +114,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         CmisObject folder = con.getNode("/Archiv");
         assertNotNull(folder);
         assertTrue(folder instanceof Folder);
-        String id = con.uploadDocument(((Folder) folder), new File(System.getProperty("user.dir") + properties.getProperty("testPDF")), "application/pdf");
+        String id = con.uploadDocument(((Folder) folder), new File(System.getProperty("user.dir") + properties.getProperty("testPDF")), "application/pdf", VersioningState.MINOR);
         assertNotNull(id);
         CmisObject document = con.getNode("/Archiv/Test.pdf");
         assertNotNull(document);
@@ -139,7 +139,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         properties.put("P:cm:titled", titledMap);
         properties.put("P:my:amountable", amountMap);
         properties.put("D:my:archivContent", archivModelMap);
-        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.NONE);
+        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR);
         assertNotNull(document);
         assertTrue(document instanceof Document);
         assertEquals("TestDocument.txt", document.getName());
@@ -160,7 +160,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         properties.put("D:my:archivContent", archivModelMap);
         //Achtung: Wenn hier das Dokument noch nicht auf den Typ my:archivContent gesetzt würde, dann ist das mit dem nachfolgenden Update nicht mehr zu ändern.
         // Wird im Alfresco eine Regel verwendet, die den Typ automatisch setzt, so muss das Dokument neu gelesen werden, denn die Rückgabe des create wird nicht automatisch aktualisiert
-        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.NONE);
+        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR);
         assertNotNull(document);
         assertTrue(document instanceof Document);
         assertEquals("TestDocument.txt", document.getName());
@@ -194,7 +194,8 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         archivModelMap.put("my:person", "Klaus");
         archivModelMap.put("my:documentDate", new Date().toGMTString());
         properties.put("D:my:archivContent", archivModelMap);
-        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.NONE);
+
+        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR);   // NONE führt zu einem Fehler
         assertNotNull(document);
         assertTrue(document instanceof Document);
         assertEquals("TestDocument.txt", document.getName());
@@ -203,23 +204,29 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         Map<String, Object> amountMap = new HashMap<>();
         amountMap.put("my:amount","24.33");
         properties.put("P:my:amountable", amountMap);
-        document = con.updateDocument(document, content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.NONE.value(), null);
+
+        document = con.updateDocument(document, content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR, null);
         byte[] cont = con.getDocumentContent(document );
         assertNotNull(cont);
         assertTrue(cont instanceof byte[]);
         assertEquals(content, new String(cont));
+        assertEquals("0.2", document.getVersionLabel());
         properties = new HashMap<>();
         amountMap = new HashMap<>();
         amountMap.put("my:amount","23.33");
         properties.put("P:my:amountable", amountMap);
-        document = con.updateDocument(document, content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR.value(), null);
-        assertEquals("0.1", document.getVersionLabel());
+
+        document = con.updateDocument(document, content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR, null);
+        assertEquals("0.3", document.getVersionLabel());
+        assertEquals(new BigDecimal(23.33).doubleValue(), ((BigDecimal) document.getProperty("my:amount").getValue()).doubleValue(), 0);
         document.delete(true);
+
         document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MAJOR);
         assertEquals("1.0", document.getVersionLabel());
         assertEquals("Initial Version", document.getCheckinComment());
         content = "Dies ist ein neuer Inhalt";
-        document = con.updateDocument(document, content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MAJOR.value(), "neuer Versionskommentar");
+
+        document = con.updateDocument(document, content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MAJOR, "neuer Versionskommentar");
         cont = con.getDocumentContent(document );
         assertNotNull(cont);
         assertTrue(cont instanceof byte[]);
@@ -235,7 +242,8 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         properties.put("P:cm:titled", titledMap);
         properties.put("P:my:amountable", amountMap);
         properties.put("cmis:document", standardMap);
-        document = con.updateDocument(document, null, CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MAJOR.value(), "2. Versionskommentar");
+
+        document = con.updateDocument(document, null, CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MAJOR, "2. Versionskommentar");
         assertNotNull(document);
         assertEquals("3.0", document.getVersionLabel());
         assertEquals("2. Versionskommentar", document.getCheckinComment());
@@ -254,7 +262,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         assertNotNull(folder);
         assertTrue(folder instanceof Folder);
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.NONE);
+        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR);
         assertNotNull(document);
         assertTrue(document instanceof Document);
         assertEquals("TestDocument.txt", document.getName());

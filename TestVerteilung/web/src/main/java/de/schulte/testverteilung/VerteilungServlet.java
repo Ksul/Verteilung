@@ -176,7 +176,7 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
                     obj = findDocument(getURLParameter(req, PARAMETER_CMISQUERY, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPLOADDOCUMENT)) {
-                    obj = uploadDocument(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_FILENAME, true));
+                    obj = uploadDocument(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_FILENAME, true),  getURLParameter(req, PARAMETER_VERSIONSTATE, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_DELETEDOCUMENT)) {
                     obj = deleteDocument(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_FILENAME, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_CREATEDOCUMENT)) {
@@ -292,15 +292,17 @@ public class VerteilungServlet extends HttpServlet {
      * lädt ein Document in den Server
      * @param folder                  der Folder als String, in das Document geladen werden soll
      * @param fileName                der Dateiname ( mit Pfad) als String, die hochgeladen werden soll
+     * @param  versionState              der VersionsStatus ( none, major, minor, checkedout)
      * @return                        ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                        false    ein Fehler ist aufgetreten
      *                                                               result            Dokument als JSONObject
      * @throws VerteilungException
      */
     protected JSONObject uploadDocument(String folder,
-                                        String fileName) throws VerteilungException {
+                                        String fileName,
+                                        String versionState) throws VerteilungException {
 
-        return services.uploadDocument(folder, fileName);
+        return services.uploadDocument(folder, fileName, versionState);
     }
 
     /**

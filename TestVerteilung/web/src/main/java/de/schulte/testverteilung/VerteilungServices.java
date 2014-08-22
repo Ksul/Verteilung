@@ -112,7 +112,7 @@ public class VerteilungServices {
                             o.put("rel", "default");
                             o1.put("state", "");
                         }
-                        if (cmisObject instanceof AlfrescoDocument && ((AlfrescoDocument) cmisObject).hasAspect("P:cm:titled") && cmisObject.getPropertyValue("cm:title").toString().length() > 0)
+                        if (cmisObject instanceof AlfrescoDocument && ((AlfrescoDocument) cmisObject).hasAspect("P:cm:titled") && cmisObject.getPropertyValue("cm:title") != null && cmisObject.getPropertyValue("cm:title").toString().length() > 0)
                             o1.put("data", cmisObject.getPropertyValue("cm:title"));
                         else
                             o1.put("data", cmisObject.getName());
@@ -231,7 +231,8 @@ public class VerteilungServices {
      *                                                                 result          bei Erfolg die Id als String, ansonsten der Fehler
      */
     public JSONObject uploadDocument(String folder,
-                                     String fileName) {
+                                     String fileName,
+                                     String versionState) {
 
         JSONObject obj = new JSONObject();
         try {
@@ -241,7 +242,7 @@ public class VerteilungServices {
             File file = new File(fileName);
             CmisObject cmisObject = con.getNode(folder);
             if (cmisObject != null && cmisObject instanceof Folder) {
-                String id = con.uploadDocument(((Folder) cmisObject), file, typ);
+                String id = con.uploadDocument(((Folder) cmisObject), file, typ, createVersionState(versionState));
                 obj.put("success", true);
                 obj.put("result", id);
             } else {
@@ -299,7 +300,7 @@ public class VerteilungServices {
      * @param  documentContent      der Inhalt als Base64 decodierter String
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
-     * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
+     * @param  versionState         der VersionsStatus ( none, major, minor, checkedout)
      * @return obj                  ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                      false   ein Fehler ist aufgetreten
      *                                                             result           das Document als JSON Object
@@ -316,8 +317,7 @@ public class VerteilungServices {
         try {
             CmisObject document;
             CmisObject folderObject;
-            if (versionState != null && versionState.length() > 0 && !versionState.equals("none") && !versionState.equals("major") && !versionState.equals("minor") && !versionState.equals("checkedout"))
-                throw new VerteilungException("ungültiger VersionsStatus");
+
             folderObject = con.getNode(folder);
             Map<String, Object> outMap = null;
             if (folderObject != null && folderObject instanceof Folder) {
@@ -325,10 +325,7 @@ public class VerteilungServices {
                 if (extraCMSProperties != null && extraCMSProperties.length() > 0)
                   outMap = buildProperties(extraCMSProperties);
 
-                VersioningState vs = VersioningState.fromValue(versionState);
-                if (vs == null)
-                    vs = VersioningState.NONE;
-                document = con.createDocument((Folder) folderObject, documentName, Base64.decodeBase64(documentContent), documentType, outMap, vs);
+                document = con.createDocument((Folder) folderObject, documentName, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState));
                 if (document != null) {
                     obj.put("success", true);
                     obj.put("result", convertCMISObjectToJSON(document).toString());
@@ -353,7 +350,7 @@ public class VerteilungServices {
      * @param  documentContent           der neue Inhalt als Base64 decodierter String. Falls der Content <null> ist, dann werden nur die Properties upgedated.
      * @param  documentType              der Typ des Dokumentes
      * @param  extraCMSProperties        zusätzliche Properties
-     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
+     * @param  versionState              der VersionsStatus ( none, major, minor, checkedout)
      * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
@@ -363,7 +360,7 @@ public class VerteilungServices {
                                      String documentContent,
                                      String documentType,
                                      String extraCMSProperties,
-                                     String majorVersion,
+                                     String versionState,
                                      String versionComment) {
 
         //TODO Content als String oder als Stream?
@@ -378,7 +375,7 @@ public class VerteilungServices {
                 if (extraCMSProperties != null && extraCMSProperties.length() > 0)
                     outMap = buildProperties(extraCMSProperties);
 
-                Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, majorVersion, versionComment);
+                Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
                 obj.put("success", true);
                 obj.put("result", convertCMISObjectToJSON(document).toString());
             } else {
@@ -972,5 +969,17 @@ public class VerteilungServices {
         return outMap;
     }
 
-
+    /**
+     * baute den Versionstate aus dem String auf
+     * @param  versionState  der VersionsStatus ( none, major, minor, checkedout) als String
+     * @return               das VersionsState Object
+     */
+    private VersioningState createVersionState(String versionState) throws VerteilungException {
+        if (versionState != null && versionState.length() > 0 && !versionState.equals("none") && !versionState.equals("major") && !versionState.equals("minor") && !versionState.equals("checkedout"))
+            throw new VerteilungException("ungültiger VersionsStatus");
+        VersioningState vs = VersioningState.fromValue(versionState);
+        if (vs == null)
+            vs = VersioningState.NONE;
+        return vs;
+    }
 }

@@ -245,19 +245,21 @@ public class VerteilungApplet extends Applet {
      * lädt ein Document in den Server
      * @param folder                  der Folder als String, in das Document geladen werden soll
      * @param fileName                der Dateiname ( mit Pfad) als String, die hochgeladen werden soll
+     * @param  versionState           der VersionsStatus ( none, major, minor, checkedout)
      * @return                        ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                        false    ein Fehler ist aufgetreten
      *                                                               result            Dokument als JSONObject
      */
     public JSONObject uploadDocument(final String folder,
-                                     final String fileName) {
+                                     final String fileName,
+                                     final String versionState) {
 
         JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.uploadDocument(folder, fileName);
+                    return services.uploadDocument(folder, fileName, versionState);
                 }
             });
         } catch (PrivilegedActionException e) {

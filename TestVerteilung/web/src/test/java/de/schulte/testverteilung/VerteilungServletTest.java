@@ -92,7 +92,6 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
         assertTrue(obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith(("workspace")));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
@@ -163,7 +162,6 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
         assertTrue(obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith(("workspace")));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Datenverzeichnis/Skripte/recognition.js");
@@ -172,7 +170,6 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
         assertTrue(obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith(("workspace")));
     }
 
     @Test
@@ -233,6 +230,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_UPLOADDOCUMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn(System.getProperty("user.dir") + properties.getProperty("testPDF"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
@@ -261,7 +259,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
-        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn("none");
+        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
         when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
@@ -440,7 +438,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
-        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn("none");
+        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(content);
         when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
