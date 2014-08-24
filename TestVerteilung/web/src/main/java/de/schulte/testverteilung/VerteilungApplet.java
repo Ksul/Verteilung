@@ -368,7 +368,7 @@ public class VerteilungApplet extends Applet {
      * @param  documentId                Die Id des zu aktualisierenden Dokumentes
      * @param  documentType              der Typ des Dokumentes
      * @param  extraCMSProperties        zusätzliche Properties
-     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
+     * @param  versionState              der VersionsStatus ( none, major, minor, checkedout)
      * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
@@ -377,7 +377,7 @@ public class VerteilungApplet extends Applet {
     public JSONObject updateDocument(final String documentId,
                                      final String documentType,
                                      final String extraCMSProperties,
-                                     final String majorVersion,
+                                     final String versionState,
                                      final String versionComment)  {
 
         JSONObject obj;
@@ -386,7 +386,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.updateDocument(documentId, content, documentType, extraCMSProperties, majorVersion, versionComment);
+                    return services.updateDocument(documentId, content, documentType, extraCMSProperties, versionState, versionComment);
                 }
             });
         } catch (Exception e) {
@@ -401,7 +401,7 @@ public class VerteilungApplet extends Applet {
      * @param  documentContent           der neue Inhalt
      * @param  documentType              der Typ des Dokumentes
      * @param  extraCMSProperties        zusätzliche Properties
-     * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
+     * @param  versionState              der VersionsStatus ( none, major, minor, checkedout)
      * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
@@ -411,7 +411,7 @@ public class VerteilungApplet extends Applet {
                                      final String documentContent,
                                      final String documentType,
                                      final String extraCMSProperties,
-                                     final String majorVersion,
+                                     final String versionState,
                                      final String versionComment)  {
 
         JSONObject obj;
@@ -419,7 +419,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.updateDocument(documentId, documentContent, documentType, extraCMSProperties, majorVersion, versionComment);
+                    return services.updateDocument(documentId, documentContent, documentType, extraCMSProperties, versionState, versionComment);
                 }
             });
         } catch (PrivilegedActionException e) {

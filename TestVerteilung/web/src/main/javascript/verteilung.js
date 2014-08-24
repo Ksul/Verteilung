@@ -73,7 +73,6 @@ function isLocal() {
     return (location.href.startsWith("file"));
 }
 
-
 /**
  * Prüft, ob ein URL Parameter vorhanden ist
  * @returns {boolean}
@@ -90,7 +89,6 @@ function hasUrlParam(){
 function exist(val) {
     return typeof val != "undefined" && val != null;
 }
-
 
 /**
  * Globale Fehlerroutine
@@ -347,7 +345,6 @@ function manageControls() {
         document.getElementById('reloadScript').style.display = 'block';
         document.getElementById('beautifyScript').style.display = 'block';
     }
-
 }
 
 /**
@@ -821,7 +818,7 @@ function executeService(service, params, messages, ignoreError) {
                 if (exist(params[index].value) && typeof params[index].value =="string")
                     p = p + " : " + params[index].value.substr(0, 40) + "<br>";
                 else
-                    p = p + " : Parameter Value fehlt!";
+                    p = p + " : Parameter Value fehlt!<br>";
             }
         }
         if (exist(errorMessage))
@@ -1747,7 +1744,7 @@ function checkAndBuidAlfrescoEnvironment() {
                         {"name": "fileName", "value": "recognition.js"},
                         {"name": "documentText", "value": btoa(script)},
                         {"name": "mimeType", "value": "application/x-javascript"},
-                        {"name": "extraProperties", "value": "{'aspect':'cm:titled','cm:description':'Skript zum Verteilen der Dokumente'}"},
+                        {"name": "extraProperties", "value": "{P:cm:titled':{'cm:description':'Skript zum Verteilen der Dokumente'}}"},
                         {"name": "versionState", "value": "major"}
                     ], "Verteilungsskript konnte nicht erstellt werden!");
                     if (erg.success)
@@ -1769,7 +1766,7 @@ function checkAndBuidAlfrescoEnvironment() {
                             {"name": "fileName", "value": "doc.xml"},
                             {"name": "documentText", "value": btoa(doc)},
                             {"name": "mimeType", "value": "application/xml"},
-                            {"name": "extraProperties", "value": "{'aspect':'cm:titled','cm:description':'Dokument mit den Verteil-Regeln'}"},
+                            {"name": "extraProperties", "value": "{P:cm:titled':{'cm:description':'Dokument mit den Verteil-Regeln'}}"},
                             {"name": "versionState", "value": "major"}
 
                         ], "Verteilungsregeln konnten nicht erstellt werden!");
@@ -1924,6 +1921,8 @@ function init() {
                         settings.settings.push({"key": "user", "value": obj.result.user});
                     if (!exist(getSettings("password")))
                         settings.settings.push({"key": "password", "value": obj.result.password});
+                    if (!exist(getSettings("binding")))
+                        settings.settings.push({"key": "binding", "value": obj.result.bindingUrl});
                 }
             }
         }

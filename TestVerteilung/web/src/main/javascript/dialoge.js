@@ -24,6 +24,12 @@ function startSettingsDialog() {
                         "title": "Server",
                         "required": true,
                         "pattern": "^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-‌​\.\?\,\'\/\\\+&amp;%\$#_]*)?$"
+                    },
+                    "binding": {
+                        "type": "string",
+                        "title": "Binding",
+                        "required": true,
+                        "pattern": "^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-‌​\.\?\,\'\/\\\+&amp;%\$#_]*)?$"
                     }
                 }
             },
@@ -31,6 +37,9 @@ function startSettingsDialog() {
                 "fields": {
                     "server": {
                         "size": 60
+                    },
+                    "binding": {
+                        "size": 100
                     },
                     "user": {
                         "size": 30
@@ -47,6 +56,7 @@ function startSettingsDialog() {
                     "template": "columnGridLayout",
                     "bindings": {
                         "server": "column-1-1",
+                        "binding": "column-1-1",
                         "user": "column-1-7_12",
                         "password": "column-2-5_12"
                     }
@@ -63,6 +73,7 @@ function startSettingsDialog() {
             "ui": "jquery-ui",
             "data": {
                 "server": getSettings("server"),
+                "binding": getSettings("binding"),
                 "user": getSettings("user"),
                 "password": getSettings("password")
             },
@@ -83,7 +94,7 @@ function startSettingsDialog() {
         $('<div id="settingsDialog">').append(Alpaca($('<div id="form">'), dialogSettings)).dialog({
             autoOpen: true,
             modal: true,
-            width: 420,
+            width: 480,
             height: 'auto',
             open: function () {
                 $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
@@ -95,6 +106,7 @@ function startSettingsDialog() {
                     "click": function () {
                         try {
                             var server = $("[name='server']").val(),
+                                binding = $("[name='binding']").val(),
                                 user = $("[name='user']").val(),
                                 password = $("[name='password']").val();
                             if (!server.endsWith("/"))
@@ -102,7 +114,8 @@ function startSettingsDialog() {
                             settings = {"settings": [
                                 {"key": "server", "value": server},
                                 {"key": "user", "value": user},
-                                {"key": "password", "value": password}
+                                {"key": "password", "value": password},
+                                {"key": "binding", "value": binding}
                             ]};
                             $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
                             fillMessageBox("Einstellungen gesichert");
@@ -187,14 +200,8 @@ function startSettingsDialog() {
                             "type": "boolean",
                             "title":"Steuern",
                             "required": false
-                        },
-                        "betrag":{
-                            "type": "currency",
-                            "centsSeparator": ",",
-                            "prefix": "",
-                            "suffix": " €",
-                            "thousandsSeparator": "."
                         }
+
                     }
                 },
 
@@ -220,6 +227,13 @@ function startSettingsDialog() {
                             "type": "textarea",
                             "size": 150
                         },
+/*                        "betrag":{
+                            "type": "currency",
+                            "centsSeparator": ",",
+                            "prefix": "",
+                            "suffix": " €",
+                            "thousandsSeparator": "."
+                        },*/
                         "steuer": {
                             "rightLabel": "relevant"
                         },
@@ -284,16 +298,19 @@ function startSettingsDialog() {
                                         steuer = $("[name='steuer']").val();
 
                                     var extraProperties = [
-                                        {'aspect':'cm:titled','cm:title':titel},
-                                        {'aspect':'cm:titled','cm:description':beschreibung},
-                                        {'my:documentDate':datum},
-                                        {'my:person':person},
-                                        {'aspect':'my:amountable','my:amount':betrag},
-                                        {'aspect':'my:idable','my:idvalue':schluessel}
+                                        {'P:cm:titled':{'cm:title':titel,'cm:description':beschreibung}},
+                                        {'D:my:archivContent':{'my:documentDate':'datum','my:person':person}},
+                                        {'P:my:amountable':{'my:amount':betrag}},
+                                        {'P:my:idable':{'my:idvalue':schluessel}}
                                     ];
                                     erg = executeService("updateDocument", [
-                                        {"name": "documentId", "value": id}
-                                    ], null, true);
+                                        {"name": "documentId", "value": id},
+                                        {"name": "documentContent", "value":null},
+                                        {"name": "documentType", "value":"application/pdf"},
+                                        {"name": "extraProperties", "value": extraProperties.toString()},
+                                        {"name": "versionState", "value": "none"},
+                                        {"name": "versionComment", "value": ""}
+                                    ], null, false);
                                     $('#dialogBox').dialog("destroy");
                                     jQuery('#simpleGrid').remove();
                                 } catch (e) {
