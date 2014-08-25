@@ -442,8 +442,7 @@ public class VerteilungApplet extends Applet {
 
         JSONObject obj;
         try {
-            final String content = getParameter();
-            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+           obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
                     return services.updateProperties(documentId, extraCMSProperties);

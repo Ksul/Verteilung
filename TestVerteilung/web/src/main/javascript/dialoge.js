@@ -186,7 +186,7 @@ function startSettingsDialog() {
                             "required": false
                         },
                         "datum": {
-                            "type": "string",
+                            "type": "date",
                             "format":"date",
                             "title": "Datum",
                             "required": true
@@ -248,7 +248,7 @@ function startSettingsDialog() {
                     "name": exist(name)? name : "",
                     "titel": exist(titel)? titel : "",
                     "steuer": exist(steuer) ? steuer : false,
-                    "datum": exist(datum) ? datum : getCurrentDate("dd.m.YYYY"),
+                    "datum": exist(datum) ? datum : $.datepicker.formatDate( "dd.mm.yy", new Date()),
                     "person": exist(person) ? person : "Klaus",
                     "betrag": exist(betrag) ? betrag : "",
                     "schluessel": exist(schluessel)? schluessel : "",
@@ -297,19 +297,16 @@ function startSettingsDialog() {
                                         schluessel = $("[name='schluessel']").val(),
                                         steuer = $("[name='steuer']").val();
 
-                                    var extraProperties = [
-                                        {'P:cm:titled':{'cm:title':titel,'cm:description':beschreibung}},
-                                        {'D:my:archivContent':{'my:documentDate':'datum','my:person':person}},
-                                        {'P:my:amountable':{'my:amount':betrag}},
-                                        {'P:my:idable':{'my:idvalue':schluessel}}
-                                    ];
-                                    erg = executeService("updateDocument", [
+                                    var extraProperties = {
+                                        'P:cm:titled':{'cm:title':titel,'cm:description':beschreibung},
+                                        'D:my:archivContent':{'my:documentDate':$.datepicker.parseDate('dd.mm.yy', datum).toUTCString(),'my:person':person},
+                                        'P:my:amountable':{'my:amount':betrag},
+                                        'P:my:idable':{'my:idvalue':schluessel}
+                                        };
+
+                                    erg = executeService("updateProperties", [
                                         {"name": "documentId", "value": id},
-                                        {"name": "documentContent", "value":null},
-                                        {"name": "documentType", "value":"application/pdf"},
-                                        {"name": "extraProperties", "value": extraProperties.toString()},
-                                        {"name": "versionState", "value": "none"},
-                                        {"name": "versionComment", "value": ""}
+                                        {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                                     ], null, false);
                                     $('#dialogBox').dialog("destroy");
                                     jQuery('#simpleGrid').remove();

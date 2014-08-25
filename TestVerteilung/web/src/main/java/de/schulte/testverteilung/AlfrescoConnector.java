@@ -15,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.*;
 import java.math.BigInteger;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
@@ -30,7 +31,11 @@ import java.util.logging.Logger;
 public class AlfrescoConnector {
 
     private static Logger logger = Logger.getLogger(AlfrescoConnector.class.getName());
-    private static final DateFormat DF = new SimpleDateFormat();
+    private final static SimpleDateFormat DF;
+    static {
+        DF = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
+        DF.setTimeZone(TimeZone.getTimeZone("GMT"));
+    };
     private String user = null;
     private String password = null;
     private String bindingUrl = null;
@@ -274,7 +279,7 @@ public class AlfrescoConnector {
                                    byte documentContent[],
                                    String documentType,
                                    Map<String, Object> extraCMSProperties,
-                                   VersioningState versioningState) {
+                                   VersioningState versioningState) throws VerteilungException {
 
         Document newDocument;
 
@@ -358,14 +363,18 @@ public class AlfrescoConnector {
                     ((Document) session.getObject(id)).updateProperties(properties, true);
                 id = ((Document) session.getObject(id)).checkIn(versionState.equals(VersioningState.MAJOR), properties, contentStream, versionComment);
             } else {
-                id = document.setContentStream(contentStream, true, true);
+                if (contentStream != null) {
+                    id = document.setContentStream(contentStream, true, true);
+                    session.clear();
+                }
                 id = createAspectsFromProperties(extraCMSProperties, id == null ? document : (Document) session.getObject(id));
                 id = (Document) session.getObject(id).updateProperties(properties, true);
             }
         } else {
-
-            id = document.setContentStream(contentStream, true, true);
-            session.clear();
+            if (contentStream != null) {
+                id = document.setContentStream(contentStream, true, true);
+                session.clear();
+            }
             id = createAspectsFromProperties(extraCMSProperties, id == null ? document : (Document) session.getObject(id));
             id = ((Document) session.getObject(id)).updateProperties(properties, true);
 
@@ -423,7 +432,7 @@ public class AlfrescoConnector {
      * @param  extraCMSProperties   die übergebenen Properties
      * @return properties           die für Alfresco aufgearbeiteten Properties
      */
-    private Map<String, Object> buildProperties(Map<String, Object> extraCMSProperties) {
+    private Map<String, Object> buildProperties(Map<String, Object> extraCMSProperties) throws VerteilungException {
         Map<String, Object> properties = new HashMap<>();
         if (extraCMSProperties != null) {
 
@@ -451,7 +460,7 @@ public class AlfrescoConnector {
      * @return            die Properties mit den richtigen Typen
      */
     private Map<String, Object> convertProperties(Map<String, Object> properties,
-                                                         String type)  {
+                                                         String type) throws VerteilungException {
         HashMap<String, Object> props = new HashMap<>();
         Map<String, PropertyDefinition<?>> definitions = this.session.getTypeDefinition(type).getPropertyDefinitions();
         for (String key : properties.keySet()) {
@@ -459,7 +468,12 @@ public class AlfrescoConnector {
             //TODO Hier fehlt noch das parsen auf die anderen Datentypen
             if (definition instanceof PropertyDateTimeDefinition) {
                 GregorianCalendar gc = new GregorianCalendar();
-                gc.setTime(new Date((String) properties.get(key)));
+
+                try {
+                    gc.setTime(DF.parse((String) properties.get(key)));
+                } catch (ParseException e) {
+                    throw new VerteilungException("Datum kann nicht geparst werden!", e);
+                }
                 props.put(key, gc);
 
             } else {

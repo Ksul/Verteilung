@@ -151,7 +151,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     @Test
     public void testCreateDocument() throws Exception {
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().toGMTString() +"'}, 'P:my:amountable':{'my:amount':'25.33'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().toGMTString() + "'}}";
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + DF.format(new Date()) +"'}, 'P:my:amountable':{'my:amount':'25.33'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + DF.format(new Date()) + "'}}";
         JSONObject obj = services.createDocument("/",  "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -242,7 +242,8 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(result);
         assertEquals("2.0", result.getString("versionLabel"));
         assertEquals("neuer Versionskommentar", result.getString("checkinComment"));
-        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().toGMTString() +"'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().toGMTString() + "'}}";
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + DF.format(new Date()) +"'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + DF.format(new Date()) + "'}}";
+         extraProperties = "{\"P:cm:titled\":{\"cm:title\":\"Cafe Fausto\",\"cm:description\":\"Test123\"},\"D:my:archivContent\":{\"my:documentDate\":\"2010-12-13T23:00:00.000Z\",\"my:person\":\"Klaus\"},\"P:my:amountable\":{\"my:amount\":\"38.1\"},\"P:my:idable\":{\"my:idvalue\":\"37531\"}}";
         obj = services.updateDocument(result.getString("objectId"), null, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MAJOR.value(), "2. Versionskommentar");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -264,7 +265,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     @Test
     public void testUpdateProperties() throws Exception {
         String content = "";
-        String extraProperties = "{'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().toGMTString() + "'}}";
+        String extraProperties = "{'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + DF.format(new Date()) + "'}}";
         JSONObject obj = services.createDocument("/Archiv",  "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -274,7 +275,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(result);
         assertTrue(result.getString("name").equalsIgnoreCase("TestDocument.txt"));
         assertNotNull(result.getString("objectId"));
-        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().toGMTString() +"'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}}";
+        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + DF.format(new Date()) +"'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}}";
         obj = services.updateProperties(result.getString("objectId"), extraProperties);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);

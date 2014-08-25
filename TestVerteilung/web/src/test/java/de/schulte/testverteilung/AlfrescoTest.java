@@ -6,7 +6,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertNotNull;
 
@@ -19,6 +22,11 @@ import static junit.framework.TestCase.assertNotNull;
 public class AlfrescoTest {
 
     Properties properties;
+    final static SimpleDateFormat DF;
+     static {
+        DF = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
+        DF.setTimeZone(TimeZone.getTimeZone("GMT"));
+    };
 
     @Before
     public void setUp() throws Exception {
