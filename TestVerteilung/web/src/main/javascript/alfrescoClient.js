@@ -248,24 +248,24 @@ function loadAlfrescoTable() {
         "bLengthChange": false,
         "bFilter": false,
         // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
-        "aoColumns": [
-            { "mDataProp": null, "sClass": "control center", "sWidth": "12px"},
-            { "sTitle": "Titel", "sType": "string", "sClass": "alignLeft"  },
-            { "sTitle": "Datum", "sType": "date", "sClass": "alignLeft" },
-            { "sTitle": "Person", "sType": "string", "sClass": "alignLeft" },
-            { "sTitle": "Betrag", "sType": "numeric", "sClass": "alignLeft" },
-            { "sTitle": "Schlüssel", "sType": "string", "sClass": "alignLeft" },
-            { "sTitle": "Name", "sType": "string", "sClass": "alignLeft" },
-            { "sTitle": "Beschreibung", "sType": "string", "sClass": "alignLeft" },
-            { "sTitle": "Aktion", "sWidth": "102px", "sClass": "alignLeft" },
-            { "sTitle": "Id" }
+        "columns": [
+            { "dataProp": null, "class": "control center", "width": "12px"},
+            { "title": "Titel", "type": "string", "class": "alignLeft"  },
+            { "title": "Datum", "type": "date", "class": "alignLeft" },
+            { "title": "Person", "type": "string", "class": "alignLeft" },
+            { "title": "Betrag", "type": "numeric", "class": "alignLeft" },
+            { "title": "Schlüssel", "type": "string", "class": "alignLeft" },
+            { "title": "Name", "type": "string", "class": "alignLeft" },
+            { "title": "Beschreibung", "type": "string", "class": "alignLeft" },
+            { "title": "Aktion", "width": "102px", "class": "alignLeft" },
+            { "title": "Id" }
         ],
-        "aoColumnDefs": [
+        "columnDefs": [
             // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
-            { "aTargets": [1, 2, 3, 4, 5], "bVisible": true},
-            { "aTargets": [6, 7], "bVisible": false},
-            { "aTargets": [8], "fnRender": alfrescoAktionFieldFormatter, "bSortable": false},
-            { "aTargets": [9], "bVisible": false}
+            { "targets": [1, 2, 3, 4, 5], "visible": true},
+            { "targets": [6, 7], "visible": false},
+            { "targets": [8], "mRender": alfrescoAktionFieldFormatter, "sortable": false},
+            { "targets": [9], "visible": false}
         ],
         "oLanguage": {
             "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
@@ -289,18 +289,18 @@ function loadAlfrescoFolderTable() {
         "bLengthChange": false,
         "bFilter": false,
         // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
-        "aoColumns": [
-            { "mDataProp": null, "sClass": "control center", "sWidth": "12px"},
-            { "sTitle": "Name", "sType": "string", "sClass": "alignLeft"  },
-            { "sTitle": "Beschreibung", "sType": "string", "sClass": "alignLeft" },
-            { "sTitle": "Aktion", "sWidth": "102px", "sClass": "alignLeft" },
-            { "sTitle": "Id" }
+        "columns": [
+            { "dataProp": null, "class": "control center", "width": "12px"},
+            { "title": "Name", "type": "string", "class": "alignLeft"  },
+            { "title": "Beschreibung", "type": "string", "class": "alignLeft" },
+            { "title": "Aktion", "width": "102px", "class": "alignLeft" },
+            { "title": "Id" }
         ],
-        "aoColumnDefs": [
+        "columnDefs": [
             // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
-            { "aTargets": [1, 2], "bVisible": true},
-            { "aTargets": [3], "fnRender": alfrescoFolderAktionFieldFormatter, "bSortable": false},
-            { "aTargets": [4], "bVisible": false}
+            { "targets": [1, 2], "visible": true},
+            { "targets": [3], "mRender": alfrescoFolderAktionFieldFormatter, "sortable": false},
+            { "targets": [4], "visible": false}
         ],
         "oLanguage": {
             "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
@@ -331,19 +331,19 @@ function loadVerteilungTable() {
         "bLengthChange": false,
         "bFilter": false,
         "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
-        "aoColumns": [
-            { "mDataProp": null,"sClass": "control center", "sWidth": "12px"},
-            { "sTitle": "Name", "sType": "string", "sClass": "alignLeft"  },
-            { "sTitle": "Dokumenttyp", "sType": "string", "sClass": "alignLeft" },
-            { "sTitle": "Ergebnis", "sWidth": "102px", "sClass": "alignLeft" },
-            { "sTitle": "Id" },
-            { "sTitle": "Fehler" }
+        "columns": [
+            { "dataProp": null,"class": "control center", "width": "12px"},
+            { "title": "Name", "type": "string", "class": "alignLeft"  },
+            { "title": "Dokumenttyp", "type": "string", "class": "alignLeft" },
+            { "title": "Ergebnis", "width": "102px", "class": "alignLeft" },
+            { "title": "Id" },
+            { "title": "Fehler" }
         ],
-        "aoColumnDefs": [
-            { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
-            { "aTargets": [1,2,3], "bVisible": true},
-            { "aTargets": [3], "fnRender": imageFieldFormatter, "bSortable": false},
-            { "aTargets": [4,5], "bVisible": false}
+        "columnDefs": [
+            { "targets": [0], "fnRender": expandFieldFormatter, "sortable": false},
+            { "targets": [1,2,3], "visible": true},
+            { "targets": [3], "fnRender": imageFieldFormatter, "sortable": false},
+            { "targets": [4,5], "visible": false}
         ],
         "oLanguage": {
             "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
@@ -384,10 +384,10 @@ function calcDataTableHeight()  {
  * @param o
  * @returns {string}
  */
-function alfrescoFolderAktionFieldFormatter(o) {
-    if (o.iDataRow == 0) {
+function alfrescoFolderAktionFieldFormatter(data, type, full) {
+   // if (o.iDataRow == 0) {
         //	o.cell.setStyle('width', '102px');
-    }
+  //  }
     var container =  document.createElement("div");
     var image = document.createElement("div");
     image.href = "#";
@@ -419,10 +419,8 @@ function alfrescoFolderAktionFieldFormatter(o) {
  * @param o
  * @returns {string}
  */
-function alfrescoAktionFieldFormatter(o) {
-    if (o.iDataRow == 0) {
-        //	o.cell.setStyle('width', '102px');
-    }
+function alfrescoAktionFieldFormatter(data, type, full) {
+
     var container =  document.createElement("div");
     var image = document.createElement("div");
     image.href = "#";
