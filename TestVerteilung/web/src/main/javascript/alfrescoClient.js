@@ -340,9 +340,9 @@ function loadVerteilungTable() {
             { "title": "Fehler" }
         ],
         "columnDefs": [
-            { "targets": [0], "fnRender": expandFieldFormatter, "sortable": false},
+            { "targets": [0], "mRender": expandFieldFormatter, "sortable": false},
             { "targets": [1,2,3], "visible": true},
-            { "targets": [3], "fnRender": imageFieldFormatter, "sortable": false},
+            { "targets": [3], "mRender": imageFieldFormatter, "sortable": false},
             { "targets": [4,5], "visible": false}
         ],
         "oLanguage": {
@@ -434,6 +434,127 @@ function alfrescoAktionFieldFormatter(data, type, full) {
     image.style.marginRight = "5px";
     container.appendChild(image);
     return container.outerHTML;
+}
+
+/**
+ * tauscht das Icon bei fehlerhaften Sätzen in der Tabelle aus und ermöglicht damit das Aufklappen der Zeile
+ * @param data
+ * @param type
+ * @param full
+ * @return {string}
+ */
+function expandFieldFormatter(data, type, full){
+    if (full[3].error) {
+        return '<a class="control" href="#"><img src="../../../web/resource/Details_open.png" title="Details anzeigen" width="20px" height="20px" /></a>';
+    }
+    return '<a class="nothing"/>';
+}
+
+/**
+ * formatiert die Iconspalte in der Tabelle
+ * @param data
+ * @param type
+ * @param full
+ * @return {string}
+ */
+function imageFieldFormatter(data, type, full) {
+
+    var container =  document.createElement("div");
+    var image = document.createElement("div");
+    image.href = "#";
+    image.className = "run";
+    if (full[3].error) {
+        image.style.backgroundImage = "url(resource/error.png)";
+        image.title = "Verteilung fehlerhaft";
+    } else {
+        image.style.backgroundImage = "url(resource/ok.png)";
+        image.title = "Verteilung erfolgreich";
+    }
+    image.style.cursor = "pointer";
+    image.style.width = "16px";
+    image.style.height = "16px";
+    image.style.cssFloat = "left";
+    image.style.marginRight = "5px";
+    container.appendChild(image);
+    image = document.createElement("div");
+    image.href = "#";
+    image.className = "glass";
+    image.title = "Ergebnis anzeigen";
+    image.style.backgroundImage = "url(resource/glass.png)";
+    image.style.width = "16px";
+    image.style.height = "16px";
+    image.style.cursor = "pointer";
+    image.style.cssFloat = "left";
+    image.style.marginRight = "5px";
+    container.appendChild(image);
+    image = document.createElement("div");
+    image.href = "#";
+    image.className = "loeschen";
+    image.title = "Ergebnis löschen";
+    if (daten[full[1]]["notDeleteable"] != "true") {
+        image.style.backgroundImage = "url(resource/delete.png)";
+        image.style.cursor = "pointer";
+    }
+    else {
+        image.style.backgroundImage = "url(resource/delete-bw.png)";
+        image.style.cursor = "not-allowed";
+    }
+    image.style.width = "16px";
+    image.style.height = "16px";
+    image.style.cssFloat = "left";
+    image.style.marginRight = "5px";
+    container.appendChild(image);
+    image = document.createElement("div");
+    image.className = "pdf";
+    if (full[1].toLowerCase().endsWith(".pdf")) {
+        image.style.backgroundImage = "url(resource/pdf.png)";
+        image.style.cursor = "pointer";
+    } else {
+        image.style.backgroundImage = "url(resource/pdf-bw.png)";
+        image.style.cursor = "not-allowed";
+    }
+    image.style.cssFloat = "left";
+    image.style.width = "16px";
+    image.style.height = "16px";
+    image.style.marginRight = "5px";
+    image.title = "PDF anzeigen";
+    container.appendChild(image);
+    image = document.createElement("div");
+    image.className = "moveToInbox";
+    image.style.backgroundImage = "url(resource/move-file.png)";
+    image.style.cursor = "pointer";
+    image.style.cssFloat = "left";
+    image.style.width = "16px";
+    image.style.height = "16px";
+    // image.style.marginRight = "5px";
+    image.title = "Zur Inbox verschieben";
+    container.appendChild(image);
+    return container.outerHTML;
+}
+
+/**
+ * formatiert die Fehlerdetails in der zusätzlichen Zeile(n) der Tabelle
+ * @param oTable
+ * @param nTr
+ * @param tableid
+ * @returns {string}
+ */
+function formatDetails(oTable, nTr, tableid) {
+    var oData = oTable.fnGetData(nTr);
+    var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%; " ><table>' +
+        '<tr><tr style="height: 0px;" > '+
+        '<th style="width: 100px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
+        'colspan="1" rowspan="1" tabindex="0" class="control center">Fehler</th>' +
+        '<th style="width: auto; padding-left: 10px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
+        'colspan="1" rowspan="1" tabindex="0" class="alignLeft">Beschreibung</th></tr><td>';
+    var txt = "<tr>";
+    for ( var i = 0; i < oData[5].length; i++) {
+        txt = txt + "<td class='alignCenter' style='font-size: 11px; padding-top: 0px; padding-bottom: 0px'>" + (i+1) + "</td><td style='font-size: 11px; padding-top: 0px; padding-bottom: 0px'>" + oData[5][i] + "</td>";
+        txt = txt + "</tr>";
+    }
+    sOut = sOut + txt;
+    sOut += '</table></div>';
+    return sOut;
 }
 
 /**
