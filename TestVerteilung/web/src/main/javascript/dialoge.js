@@ -307,7 +307,7 @@ function startSettingsDialog() {
                                     erg = executeService("updateProperties", [
                                         {"name": "documentId", "value": id},
                                         {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                                    ], null, false);
+                                    ], "Dokument konnte nicht aktualisiert werden!", false);
                                     $('#dialogBox').dialog("destroy");
                                     jQuery('#simpleGrid').remove();
                                 } catch (e) {

@@ -822,7 +822,9 @@ function executeService(service, params, messages, ignoreError) {
             }
         }
         if (exist(errorMessage))
-            p = errorMessage + "<br>" + p;
+            p = errorMessage + "<br>" + e.toString() + "<br>" + p;
+        else
+            p = errorMessage + "<br>" + e.toString();
         if (!ignoreError)
             errorHandler(e, p);
         return {result: e, success: false};
