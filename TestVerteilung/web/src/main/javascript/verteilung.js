@@ -201,7 +201,7 @@ function loadApplet(level, bindingUrl, user, password) {
  */
 function checkServerStatus(url) {
 
-        var obj = executeService("isURLAvailable", [{"name":"server", "value":url}]);
+        var obj = executeService("isURLAvailable", [{"name":"server", "value":url}], null, true);
     return obj.result.toString() == "true";
 }
 
@@ -457,7 +457,7 @@ function loadMultiText(content, txt, name, typ,  notDeleteable, container) {
         var ergebnis = [];
         ergebnis["error"] = REC.errors.length > 0;
         var row = [ null,name,  REC.currXMLName.join(" : "), ergebnis, uuid(), REC.errors ];
-        tabelle.fnAddData(row);
+        tabelle.row.add(row).draw();
         manageControls();
     } catch (e) {
         errorHandler(e);
@@ -509,7 +509,7 @@ function readFiles(files) {
             rulesEditor.getSession().foldAll(1);
         }
         textEditor.getSession().setValue("");
-        tabelle.fnClearTable();
+        tabelle.clear();
         daten = [];
         var count = files.length;
         var maxLen = 1000000;

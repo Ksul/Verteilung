@@ -320,17 +320,17 @@ function loadAlfrescoFolderTable() {
  */
 function loadVerteilungTable() {
     $('#dtable').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="tabelle"></table>' );
-    tabelle = $('#tabelle').dataTable({
-        "bJQueryUI": true,
-        "sPaginationType": "full_numbers",
-        "aaData": [],
-        "sScrollX": "100%",
-        "sScrollXInner": "100%",
-        "sScrollY" : calcDataTableHeight(),
-        "bAutoWidth": true,
-        "bLengthChange": false,
-        "bFilter": false,
-        "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
+    tabelle = $('#tabelle').DataTable({
+        "jQueryUI": true,
+        "pagingType": "full_numbers",
+        "data": [],
+        "scrollX": "100%",
+        "scrollXInner": "100%",
+        "scrollY" : calcDataTableHeight(),
+        "autoWidth": true,
+        "lengthChange": false,
+        "searching": false,
+        "pageLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
         "columns": [
             { "dataProp": null,"class": "control center", "width": "12px"},
             { "title": "Name", "type": "string", "class": "alignLeft"  },
@@ -345,25 +345,25 @@ function loadVerteilungTable() {
             { "targets": [3], "mRender": imageFieldFormatter, "sortable": false},
             { "targets": [4,5], "visible": false}
         ],
-        "oLanguage": {
-            "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
+        "language": {
+            "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
         }
     });
     $(document).on('click', '#tabelle td.control', function () {
         var nTr = this.parentNode;
         var i = $.inArray(nTr, anOpen);
         if (i === -1) {
-            $('img', this).attr('src', "./resource/Details_close.png");
-            var nDetailsRow = tabelle.fnOpen(nTr, formatDetails(tabelle, nTr, 1), 'details');
+            $('img', this).attr('src', "src/main/resource/images/details_close.png");
+            var nDetailsRow = tabelle.row().child(nTr, formatDetails(tabelle, nTr, 1), 'details');
             $('div.innerDetails', nDetailsRow).slideDown('fast', function () {
                 $("div.dataTables_scrollBody").scrollTop(nTr.offsetTop);
             });
             anOpen.push(nTr);
         }
         else {
-            $('img', this).attr('src', "./resource/Details_open.png");
+            $('img', this).attr('src', "src/main/resource/images/details_open.png");
             $('div.innerDetails', $(nTr).next()[0]).slideUp(function () {
-                tabelle.fnClose(nTr);
+                tabelle.row().child.hide(nTr);
                 anOpen.splice(i, 1);
             });
         }
@@ -445,7 +445,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
  */
 function expandFieldFormatter(data, type, full){
     if (full[3].error) {
-        return '<a class="control" href="#"><img src="../../../web/resource/Details_open.png" title="Details anzeigen" width="20px" height="20px" /></a>';
+        return '<a class="control" href="#"><img src="src/main/resource/images/details_open.png" title="Details anzeigen" width="20px" height="20px" /></a>';
     }
     return '<a class="nothing"/>';
 }
@@ -464,10 +464,10 @@ function imageFieldFormatter(data, type, full) {
     image.href = "#";
     image.className = "run";
     if (full[3].error) {
-        image.style.backgroundImage = "url(resource/error.png)";
+        image.style.backgroundImage = "url(src/main/resource/images/error.png)";
         image.title = "Verteilung fehlerhaft";
     } else {
-        image.style.backgroundImage = "url(resource/ok.png)";
+        image.style.backgroundImage = "url(src/main/resource/images/ok.png)";
         image.title = "Verteilung erfolgreich";
     }
     image.style.cursor = "pointer";
@@ -480,7 +480,7 @@ function imageFieldFormatter(data, type, full) {
     image.href = "#";
     image.className = "glass";
     image.title = "Ergebnis anzeigen";
-    image.style.backgroundImage = "url(resource/glass.png)";
+    image.style.backgroundImage = "url(src/main/resource/images/glass.png)";
     image.style.width = "16px";
     image.style.height = "16px";
     image.style.cursor = "pointer";
@@ -492,11 +492,11 @@ function imageFieldFormatter(data, type, full) {
     image.className = "loeschen";
     image.title = "Ergebnis löschen";
     if (daten[full[1]]["notDeleteable"] != "true") {
-        image.style.backgroundImage = "url(resource/delete.png)";
+        image.style.backgroundImage = "url(src/main/resource/images/delete.png)";
         image.style.cursor = "pointer";
     }
     else {
-        image.style.backgroundImage = "url(resource/delete-bw.png)";
+        image.style.backgroundImage = "url(src/main/resource/images/delete-bw.png)";
         image.style.cursor = "not-allowed";
     }
     image.style.width = "16px";
@@ -507,10 +507,10 @@ function imageFieldFormatter(data, type, full) {
     image = document.createElement("div");
     image.className = "pdf";
     if (full[1].toLowerCase().endsWith(".pdf")) {
-        image.style.backgroundImage = "url(resource/pdf.png)";
+        image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
         image.style.cursor = "pointer";
     } else {
-        image.style.backgroundImage = "url(resource/pdf-bw.png)";
+        image.style.backgroundImage = "url(src/main/resource/images/pdf-bw.png)";
         image.style.cursor = "not-allowed";
     }
     image.style.cssFloat = "left";
@@ -521,7 +521,7 @@ function imageFieldFormatter(data, type, full) {
     container.appendChild(image);
     image = document.createElement("div");
     image.className = "moveToInbox";
-    image.style.backgroundImage = "url(resource/move-file.png)";
+    image.style.backgroundImage = "url(src/main/resource/images/move-file.png)";
     image.style.cursor = "pointer";
     image.style.cssFloat = "left";
     image.style.width = "16px";
@@ -540,7 +540,7 @@ function imageFieldFormatter(data, type, full) {
  * @returns {string}
  */
 function formatDetails(oTable, nTr, tableid) {
-    var oData = oTable.fnGetData(nTr);
+    var oData = oTable.row().data(nTr);
     var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%; " ><table>' +
         '<tr><tr style="height: 0px;" > '+
         '<th style="width: 100px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
@@ -632,6 +632,10 @@ function loadAlfrescoTree() {
     }).delegate("a", "click", function (event, data) {
         event.preventDefault();
     });
+
+    // Initiales Lesen
+    if (alfrescoServerAvailable)
+       switchAlfrescoDirectory("-1");
 }
 
 function handleAlfrescoFolderImageClicks() {
@@ -719,7 +723,6 @@ function start() {
 
         loadAlfrescoTable();
         loadAlfrescoFolderTable();
-        var anOpen = [];
         loadVerteilungTable();
 
         init();
@@ -728,7 +731,7 @@ function start() {
         handleAlfrescoFolderImageClicks();
         handleAlfrescoImageClicks();
         loadAlfrescoTree();
-        switchAlfrescoDirectory("-1");
+
     } catch(e) {
         errorHandler(e);
     }
