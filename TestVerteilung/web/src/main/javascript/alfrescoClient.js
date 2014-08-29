@@ -332,7 +332,13 @@ function loadVerteilungTable() {
         "searching": false,
         "pageLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
         "columns": [
-            { "dataProp": null,"class": "control center", "width": "12px"},
+            {
+                "class":          'details-control',
+                "orderable":      false,
+                "data":           null,
+                "defaultContent": '',
+                "width": "12px"
+            },
             { "title": "Name", "type": "string", "class": "alignLeft"  },
             { "title": "Dokumenttyp", "type": "string", "class": "alignLeft" },
             { "title": "Ergebnis", "width": "102px", "class": "alignLeft" },
@@ -340,7 +346,6 @@ function loadVerteilungTable() {
             { "title": "Fehler" }
         ],
         "columnDefs": [
-            { "targets": [0], "mRender": expandFieldFormatter, "sortable": false},
             { "targets": [1,2,3], "visible": true},
             { "targets": [3], "mRender": imageFieldFormatter, "sortable": false},
             { "targets": [4,5], "visible": false}
@@ -349,25 +354,22 @@ function loadVerteilungTable() {
             "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
         }
     });
-    $(document).on('click', '#tabelle td.control', function () {
-        var nTr = this.parentNode;
-        var i = $.inArray(nTr, anOpen);
-        if (i === -1) {
-            $('img', this).attr('src', "src/main/resource/images/details_close.png");
-            var nDetailsRow = tabelle.row().child(nTr, formatDetails(tabelle, nTr, 1), 'details');
-            $('div.innerDetails', nDetailsRow).slideDown('fast', function () {
-                $("div.dataTables_scrollBody").scrollTop(nTr.offsetTop);
-            });
-            anOpen.push(nTr);
+    // Add event listener for opening and closing details
+    $('#tabelle tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = tabelle.row( tr );
+
+        if ( row.child.isShown() ) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
         }
         else {
-            $('img', this).attr('src', "src/main/resource/images/details_open.png");
-            $('div.innerDetails', $(nTr).next()[0]).slideUp(function () {
-                tabelle.row().child.hide(nTr);
-                anOpen.splice(i, 1);
-            });
+            // Open this row
+            row.child( formatDetails(row.data()) ).show();
+            tr.addClass('shown');
         }
-    });
+    } );
 }
 
 /**
@@ -434,20 +436,6 @@ function alfrescoAktionFieldFormatter(data, type, full) {
     image.style.marginRight = "5px";
     container.appendChild(image);
     return container.outerHTML;
-}
-
-/**
- * tauscht das Icon bei fehlerhaften Sätzen in der Tabelle aus und ermöglicht damit das Aufklappen der Zeile
- * @param data
- * @param type
- * @param full
- * @return {string}
- */
-function expandFieldFormatter(data, type, full){
-    if (full[3].error) {
-        return '<a class="control" href="#"><img src="src/main/resource/images/details_open.png" title="Details anzeigen" width="20px" height="20px" /></a>';
-    }
-    return '<a class="nothing"/>';
 }
 
 /**
@@ -534,13 +522,10 @@ function imageFieldFormatter(data, type, full) {
 
 /**
  * formatiert die Fehlerdetails in der zusätzlichen Zeile(n) der Tabelle
- * @param oTable
- * @param nTr
- * @param tableid
- * @returns {string}
+ * @param data         Das Data Object der Zeile
+ * @returns {string}   HTML für die extra Zeile
  */
-function formatDetails(oTable, nTr, tableid) {
-    var oData = oTable.row().data(nTr);
+function formatDetails(data) {
     var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%; " ><table>' +
         '<tr><tr style="height: 0px;" > '+
         '<th style="width: 100px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
@@ -548,8 +533,8 @@ function formatDetails(oTable, nTr, tableid) {
         '<th style="width: auto; padding-left: 10px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
         'colspan="1" rowspan="1" tabindex="0" class="alignLeft">Beschreibung</th></tr><td>';
     var txt = "<tr>";
-    for ( var i = 0; i < oData[5].length; i++) {
-        txt = txt + "<td class='alignCenter' style='font-size: 11px; padding-top: 0px; padding-bottom: 0px'>" + (i+1) + "</td><td style='font-size: 11px; padding-top: 0px; padding-bottom: 0px'>" + oData[5][i] + "</td>";
+    for ( var i = 0; i < data[5].length; i++) {
+        txt = txt + "<td class='alignCenter' style='font-size: 11px; padding-top: 0px; padding-bottom: 0px'>" + (i+1) + "</td><td style='font-size: 11px; padding-top: 0px; padding-bottom: 0px'>" + data[5][i] + "</td>";
         txt = txt + "</tr>";
     }
     sOut = sOut + txt;
@@ -638,11 +623,14 @@ function loadAlfrescoTree() {
        switchAlfrescoDirectory("-1");
 }
 
+/**
+ * behandelt die Clicks auf die Icons in der AlfrescoFoldertabelle
+ */
 function handleAlfrescoFolderImageClicks() {
-    $(document).on("click", ".folderPpen", function () {
+    $(document).on("click", ".folderOpen", function () {
         try {
-            var aPos = alfrescoFolderTabelle.fnGetPosition(this.parentNode.parentNode);
-            var row = alfrescoFolderTabelle.fnGetData(aPos[0]);
+            var tr = $(this).closest('tr');
+            var row = tabelle.row( tr).data();
             switchAlfrescoDirectory(row[4]);
         } catch (e) {
             errorHandler(e);
@@ -650,16 +638,108 @@ function handleAlfrescoFolderImageClicks() {
      });
 }
 
-
+/**
+ * behandelt die Clicks auf die Icons in der Alfrescotabelle
+ */
 function handleAlfrescoImageClicks() {
     $(document).on("click", ".detailEdit", function () {
         try {
-            var aPos = alfrescoTabelle.fnGetPosition(this.parentNode.parentNode);
-            var row = alfrescoTabelle.fnGetData(aPos[0]);
+            var tr = $(this).closest('tr');
+            var row = tabelle.row( tr).data();
             startDocumentDialog(row[9], row[6], row[1], row[7], row[3], row[4], row[2], row[5], null);
         } catch (e) {
             errorHandler(e);
         }
+    });
+}
+
+/**
+ * behandelt die Clicks auf die Icons in der Verteilungstabelle
+ */
+function handleVerteilungImageClicks() {
+    $(document).on("click", ".run", function () {
+        var tr = $(this).closest('tr');
+        var row = tabelle.row( tr).data();
+        var name = row[1];
+        REC.currentDocument.setContent(daten[name]["text"]);
+        REC.testRules(rulesEditor.getSession().getValue());
+        daten[name].log = REC.mess;
+        daten[name].result = results;
+        daten[name].position = REC.positions;
+        daten[name].xml = REC.currXMLName;
+        daten[name].error = REC.errors;
+        var ergebnis = [];
+        ergebnis["error"] = REC.errors.length > 0;
+        row[2] = REC.currXMLName.join(" : ");
+        row[3] = ergebnis;
+        row[5] = REC.errors;
+        if (tabelle.fnUpdate(row, aPos[0]) > 0)
+            message("Fehler", "Tabelle konnte nicht aktualisiert werden!");
+    });
+    $(document).on("click", ".glass", function () {
+        var tr = $(this).closest('tr');
+        var row = tabelle.row( tr).data();
+        var name = row[1];
+        multiMode = false;
+        showMulti = true;
+        currentFile = daten[name]["file"];
+        document.getElementById('headerWest').textContent = currentFile;
+        setXMLPosition(daten[name]["xml"]);
+        removeMarkers(markers, textEditor);
+        markers = setMarkers(daten[name]["position"], textEditor);
+        textEditor.getSession().setValue(daten[name]["text"]);
+        propsEditor.getSession().setValue(printResults(daten[name]["result"]));
+        fillMessageBox(daten[name]["log"], true);
+        manageControls();
+    });
+    $(document).on("click", ".loeschen", function () {
+        var answer = confirm("Eintrag löschen?");
+        if (answer) {
+            var tr = $(this).closest('tr');
+            var row = tabelle.row( tr).data();
+            var name = row[1];
+            try {
+                netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+            } catch (e) {
+                message("Fehler", "Permission to delete file was denied.");
+            }
+            currentFile = daten[name]["file"];
+            textEditor.getSession().setValue("");
+            propsEditor.getSession().setValue("");
+            clearMessageBox();
+            rulesEditor.getSession().foldAll(1);
+            if (currentFile.length > 0) {
+                var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+                file.initWithPath(currentFile);
+                if (file.exists() == true)
+                    file.remove(false);
+            }
+            tabelle.fnDeleteRow(aPos[0]);
+        }
+    });
+    $(document).on("click", ".pdf", function (name) {
+        var tr = $(this).closest('tr');
+        var row = tabelle.row( tr).data();
+        var name = row[1];
+        if (typeof daten[name]["container"] != "undefined" && daten[name]["container"] != null) {
+            openPDF(daten[name]["container"], true);
+        } else {
+            openPDF(daten[name]["file"]);
+        }
+    });
+    $(document).on("click", ".moveToInbox", function () {
+        var tr = $(this).closest('tr');
+        var row = tabelle.row( tr).data();
+        var name = row[1];
+        var docId = "workspace:/SpacesStore/" + daten[name]["container"];
+        var json = executeService("createDocument", [
+            {"name": "folder", "value": "/Archiv/Inbox"},
+            { "name": "fileName", "value": name},
+            { "name": "documentContent", "value": daten[name].content, "type": "byte"},
+            { "name": "documentType", "value": "application/pdf"},
+            { "name": "extraCMSProperties", "value": ""},
+            { "name": "versionState", "value": "none"}
+        ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
     });
 }
 

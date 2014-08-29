@@ -56,6 +56,17 @@ th {
     font-size: 0.7em;
 }*/
 
+/*Child Rows*/
+td.details-control {
+    background: url('images/details_open.png') no-repeat center center;
+    cursor: pointer;
+
+}
+tr.shown td.details-control {
+    background: url('images/details_close.png') no-repeat center center;
+
+}
+
 /* remove padding & scrolling from panes that are 'containers' for nested layouts */
 .ui-layout-pane {
     border: 0; /* cosmetic */

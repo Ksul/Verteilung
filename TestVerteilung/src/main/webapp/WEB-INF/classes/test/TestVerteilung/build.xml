@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="create_jar" name="Create  Jar for Project TestVerteilung">
+  <!--this file was created by Eclipse Runnable JAR Export Wizard -->
+  <!--ANT 1.7 is required -->
+
+  <target name="create_jar">
+    <buildnumber file="build.num" />
+    <property name="version.num" value="1.${build.number}" />
+    <jar destfile="WebContent/WEB-INF/lib/vt.jar" filesetmanifest="mergewithoutmain">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Main-Class" value="PDFTestParser" />
+        <attribute name="Class-Path" value="." />
+        <attribute name="Implementation-Version" value="${version.num}" />
+      </manifest>
+      <fileset dir="WebContent/WEB-INF/classes" />
+      <!-- <zipfileset excludes="META-INF/*.SF" src="pdfbox-app-1.6.0.jar" /> -->
+    </jar>
+    <signjar destDir="WebContent/WEB-INF/lib" alias="Signer" storepass="Rethymon" >
+      <path>
+        <fileset dir="WebContent/WEB-INF/lib" includes="vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-httpclient-3.0.1.jar,abdera-1.1.2.jar,axiom.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar" />
+      </path>
+      <flattenmapper />
+    </signjar>
+  </target>
+</project>

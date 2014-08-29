@@ -565,7 +565,7 @@ function readFiles(files) {
                                                 if (count == 1)
                                                     loadText(atob(entry.data), entry.extractedData, entry.name, "application/zip", null);
                                                 else {
-                                                    // die originalen Bytes kommen decodiert, als encoden!
+                                                    // die originalen Bytes kommen decodiert, also encoden!
                                                     loadMultiText(atob(entry.data), entry.extractedData, entry.name, entry.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain", "true",  null);
                                                 }
                                             }
@@ -606,96 +606,6 @@ function readFiles(files) {
     } catch (e) {
         errorHandler(e);
     }
-}
-
-/**
- * handelt die Clicks auf die Icons in der Tabelle
- */
-function handleVerteilungImageClicks() {
-    $(document).on("click", ".run", function () {
-        var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
-        var row = tabelle.fnGetData(aPos[0]);
-        var name = row[1];
-        REC.currentDocument.setContent(daten[name]["text"]);
-        REC.testRules(rulesEditor.getSession().getValue());
-        daten[name].log = REC.mess;
-        daten[name].result = results;
-        daten[name].position = REC.positions;
-        daten[name].xml = REC.currXMLName;
-        daten[name].error = REC.errors;
-        var ergebnis = [];
-        ergebnis["error"] = REC.errors.length > 0;
-        row[2] = REC.currXMLName.join(" : ");
-        row[3] = ergebnis;
-        row[5] = REC.errors;
-        if (tabelle.fnUpdate(row, aPos[0]) > 0)
-            message("Fehler", "Tabelle konnte nicht aktualisiert werden!");
-    });
-    $(document).on("click", ".glass", function () {
-        var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
-        var row = tabelle.fnGetData(aPos[0]);
-        var name = row[1];
-        multiMode = false;
-        showMulti = true;
-        currentFile = daten[name]["file"];
-        document.getElementById('headerWest').textContent = currentFile;
-        setXMLPosition(daten[name]["xml"]);
-        removeMarkers(markers, textEditor);
-        markers = setMarkers(daten[name]["position"], textEditor);
-        textEditor.getSession().setValue(daten[name]["text"]);
-        propsEditor.getSession().setValue(printResults(daten[name]["result"]));
-        fillMessageBox(daten[name]["log"], true);
-        manageControls();
-    });
-    $(document).on("click", ".loeschen", function () {
-        var answer = confirm("Eintrag löschen?");
-        if (answer) {
-            var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
-            var row = tabelle.fngetData(aPos[0]);
-            var name = row[1];
-            try {
-                netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
-            } catch (e) {
-                message("Fehler", "Permission to delete file was denied.");
-            }
-            currentFile = daten[name]["file"];
-            textEditor.getSession().setValue("");
-            propsEditor.getSession().setValue("");
-            clearMessageBox();
-            rulesEditor.getSession().foldAll(1);
-            if (currentFile.length > 0) {
-                var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-                file.initWithPath(currentFile);
-                if (file.exists() == true)
-                    file.remove(false);
-            }
-            tabelle.fnDeleteRow(aPos[0]);
-        }
-    });
-    $(document).on("click", ".pdf", function (name) {
-        var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
-        var row = tabelle.fnGetData(aPos[0]);
-        var name = row[1];
-        if (typeof daten[name]["container"] != "undefined" && daten[name]["container"] != null) {
-            openPDF(daten[name]["container"], true);
-        } else {
-            openPDF(daten[name]["file"]);
-        }
-    });
-    $(document).on("click", ".moveToInbox", function () {
-        var aPos = tabelle.fnGetPosition(this.parentNode.parentNode);
-        var row = tabelle.fnGetData(aPos[0]);
-        var name = row[1];
-        var docId = "workspace:/SpacesStore/" + daten[name]["container"];
-        var json = executeService("createDocument", [
-            {"name": "folder", "value": "/Archiv/Inbox"},
-            { "name": "fileName", "value": name},
-            { "name": "documentContent", "value": daten[name].content, "type": "byte"},
-            { "name": "documentType", "value": "application/pdf"},
-            { "name": "extraCMSProperties", "value": ""},
-            { "name": "versionState", "value": "none"}
-        ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
-    });
 }
 
 /**
