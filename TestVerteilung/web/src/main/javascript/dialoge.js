@@ -150,8 +150,12 @@ function startSettingsDialog() {
         try {
             var data = tableRow.data().attr;
             // Konversion
-            if (exist(data.documentDate))
-                data.documentDate = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data.documentDate)));
+            if (exist(data.documentDate)) {
+                if (data.documentDate != "null")
+                    data.documentDate = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data.documentDate)));
+                else
+                    data.documentDate = $.datepicker.formatDate("dd.mm.yy", new Date());
+            }
             if (!exist(data.tax))
                 data.tax = false;
             var dialogSettings = { "id": "detailDialog",
@@ -248,21 +252,11 @@ function startSettingsDialog() {
                         "documentDate": {
                             "dateFormatRegex": "/(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19|20)\d\d$/",
                             "dateFormat": "dd.mm.yy"
-                                                 }
+                            }
 
                     }
                 },
                 "data": data,
-  /*              "data": {
-                    "name": exist(name)? name : "",
-                    "titel": exist(titel)? titel : "",
-                    "steuer": exist(steuer) ? steuer : false,
-                    "datum": exist(datum) ? datum : $.datepicker.formatDate( "dd.mm.yy", new Date()),
-                    "person": exist(person) ? person : "Klaus",
-                    "betrag": exist(betrag) ? betrag : "",
-                    "schluessel": exist(schluessel)? schluessel : "",
-                    "beschreibung": exist(beschreibung) ? beschreibung : ""
-                },*/
                 "view": {
                     "parent": "VIEW_WEB_EDIT",
                     "layout": {

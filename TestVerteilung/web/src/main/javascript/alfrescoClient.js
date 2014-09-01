@@ -256,6 +256,14 @@ function loadAlfrescoTable() {
                 "defaultContent": '',
                 "width": "12px"
             },
+            {
+                "data": "attr.contentStreamMimeType",
+                "title": "Typ",
+                "defaultContent": '',
+                "type": "string",
+                "class": "alignCenter",
+                "width": "12px"
+            },
              {
                 "data": "attr.title",
                 "title": "Titel",
@@ -300,11 +308,43 @@ function loadAlfrescoTable() {
         ],
         "columnDefs": [
             {
-                "targets": [1, 2, 3, 4, 5],
+                "targets": [4, 5],
                 "visible": true
             },
             {
-                "targets": [6],
+                "targets":  [1],
+                "render": function ( data, type, row ) {
+                    if (exist(data)) {
+                        var container =  document.createElement("div");
+                        var image = document.createElement("div");
+                        image.href = "#";
+                        image.className = "pdf";
+                        image.title = "PDF Dokument";
+                        image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
+                        image.style.width = "16px";
+                        image.style.height = "16px";
+                        image.style.cursor = "pointer";
+                        image.style.cssFloat = "left";
+                        image.style.marginRight = "5px";
+                        container.appendChild(image);
+                        return container.outerHTML;
+                    }  else
+                        return "";
+                },
+                "visible": true
+            },
+            {
+                "targets":  [3],
+                "render": function ( data, type, row ) {
+                    if (data != "null")
+                        return $.datepicker.formatDate("dd.mm.yy", new Date(Number(data)));
+                    else
+                        return "";
+                },
+                "visible": true
+            },
+            {
+                "targets": [7],
                 "mRender": alfrescoAktionFieldFormatter,
                 "sortable": false
             }
@@ -312,6 +352,44 @@ function loadAlfrescoTable() {
         "language": {
             "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
         }
+    });
+
+    var start;
+    var end;
+
+    $("#dtable2 tbody").sortable({
+        cursor: "move",
+        start:function(event, ui){
+            // 0 based array, add one
+            start = ui.item.prevAll().length + 1;
+        },
+        helper: function (e,ui) {
+            return $(ui).clone().appendTo('body').show();
+        },
+        update: function(event, ui) {
+            // 0 based array, add one
+            end = ui.item.prevAll().length + 1;
+            alert('Start: ' + start + ' End: ' + end);
+            var id = ui.item.context.children[0].innerHTML;
+            alert(id);
+
+           /* $.getJSON('dao.cfc', {
+                    method:'methodName',
+                    returnFormat:'JSON'
+
+                },
+
+                // handle the response
+                function(data){
+                    if(data.intSuccess == 1){
+                        // success
+                    } else {
+                        // error
+                    }
+                });*/
+        }
+        // end of drag
+
     });
 }
 

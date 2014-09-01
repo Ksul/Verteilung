@@ -243,7 +243,6 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertEquals("2.0", result.getString("versionLabel"));
         assertEquals("neuer Versionskommentar", result.getString("checkinComment"));
         String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().getTime() +"'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
-         extraProperties = "{\"P:cm:titled\":{\"cm:title\":\"Cafe Fausto\",\"cm:description\":\"Test123\"},\"D:my:archivContent\":{\"my:documentDate\":\"2010-12-13T23:00:00.000Z\",\"my:person\":\"Klaus\"},\"P:my:amountable\":{\"my:amount\":\"38.1\"},\"P:my:idable\":{\"my:idvalue\":\"37531\"}}";
         obj = services.updateDocument(result.getString("objectId"), null, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MAJOR.value(), "2. Versionskommentar");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
