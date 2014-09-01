@@ -146,8 +146,14 @@ function startSettingsDialog() {
     /**
      * startet den Detaildialog für Documente
      */
-    function startDocumentDialog(id, name, titel, beschreibung, person, betrag, datum, schluessel, steuer) {
+    function startDocumentDialog(tableRow) {
         try {
+            var data = tableRow.data().attr;
+            // Konversion
+            if (exist(data.documentDate))
+                data.documentDate = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data.documentDate)));
+            if (!exist(data.tax))
+                data.tax = false;
             var dialogSettings = { "id": "detailDialog",
                 "schema": {
                     "type": "object",
@@ -158,13 +164,13 @@ function startSettingsDialog() {
                             "title": "Dateiname",
                             "required": false
                         },
-                        "titel": {
+                        "title": {
                             "type": "string",
                             "title": "Titel",
                             "required": true
                         },
 
-                        "beschreibung": {
+                        "description": {
                             "type": "string",
                             "title": "Beschreibung",
                             "required": false
@@ -178,28 +184,30 @@ function startSettingsDialog() {
                                 "Till",
                                 "Kilian"
                             ],
-                            "required": true
+                            "required": true,
+                            "default": "Klaus"
                         },
-                        "betrag": {
+                        "amount": {
                             "type": "number",
                             "title": "Betrag",
                             "required": false
                         },
-                        "datum": {
+                        "documentDate": {
                             "type": "date",
                             "format":"date",
                             "title": "Datum",
                             "required": true
                         },
-                        "schluessel": {
+                        "idvalue": {
                             "type": "string",
                             "title": "Id",
                             "required": false
                         },
-                        "steuer": {
+                        "tax": {
                             "type": "boolean",
                             "title":"Steuern",
-                            "required": false
+                            "required": false,
+                            "default": "false"
                         }
 
                     }
@@ -215,7 +223,7 @@ function startSettingsDialog() {
                     },
                     "fields": {
 
-                        "titel": {
+                        "title": {
                             "size": 30
 
                         },
@@ -223,28 +231,29 @@ function startSettingsDialog() {
                             "size": 30,
                             "readonly": true
                         },
-                        "beschreibung": {
+                        "description": {
                             "type": "textarea",
                             "size": 150
                         },
-/*                        "betrag":{
+/*                        "amount":{
                             "type": "currency",
                             "centsSeparator": ",",
                             "prefix": "",
                             "suffix": " €",
                             "thousandsSeparator": "."
                         },*/
-                        "steuer": {
+                        "tax": {
                             "rightLabel": "relevant"
                         },
-                        "datum": {
+                        "documentDate": {
                             "dateFormatRegex": "/(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19|20)\d\d$/",
-                            "dateFormat":"dd.mm.yy"
-                        }
+                            "dateFormat": "dd.mm.yy"
+                                                 }
 
                     }
                 },
-                "data": {
+                "data": data,
+  /*              "data": {
                     "name": exist(name)? name : "",
                     "titel": exist(titel)? titel : "",
                     "steuer": exist(steuer) ? steuer : false,
@@ -253,20 +262,19 @@ function startSettingsDialog() {
                     "betrag": exist(betrag) ? betrag : "",
                     "schluessel": exist(schluessel)? schluessel : "",
                     "beschreibung": exist(beschreibung) ? beschreibung : ""
-                },
+                },*/
                 "view": {
                     "parent": "VIEW_WEB_EDIT",
                     "layout": {
                         "template": "threeColumnGridLayout",
                         "bindings": {
                             "name":"column-1-1",
-                            "titel":"column-1-1",
-
-                            "beschreibung":"column-1-1",
+                            "title":"column-1-1",
+                            "description":"column-1-1",
                             "person":"column-1-2",
-                            "datum":"column-2-2",
-                            "betrag":"column-1-2",
-                            "schluessel":"column-2-2",
+                            "documentDate":"column-2-2",
+                            "amount":"column-1-2",
+                            "idvalue":"column-2-2",
                             "steuer":"column-1-2"
 
                         }
@@ -288,26 +296,36 @@ function startSettingsDialog() {
                         form.registerSubmitHandler(function(e) {
                             if (form.isFormValid()) {
                                 try {
-                                    //TODO
-                                    var titel = $("[name='titel']").val(),
-                                        beschreibung = $("[name='beschreibung']").val(),
+                                    var title = $("[name='title']").val(),
+                                        description = $("[name='description']").val(),
                                         person = $("[name='person']").val(),
-                                        datum = $("[name='datum']").val(),
-                                        betrag = $("[name='betrag']").val(),
-                                        schluessel = $("[name='schluessel']").val(),
-                                        steuer = $("[name='steuer']").val();
-
-                                    var extraProperties = {
-                                        'P:cm:titled':{'cm:title':titel,'cm:description':beschreibung},
-                                        'D:my:archivContent':{'my:documentDate':$.datepicker.parseDate('dd.mm.yy', datum).toUTCString(),'my:person':person},
-                                        'P:my:amountable':{'my:amount':betrag},
-                                        'P:my:idable':{'my:idvalue':schluessel}
+                                        documentDate = $("[name='documentDate']").val(),
+                                        amount = $("[name='amount']").val(),
+                                        idvalue = $("[name='idvalue']").val(),
+                                        tax = $("[name='tax']").val();
+                                    if (data.title != title || data.description != description || data.person != person || data.documentDate != documentDate
+                                        || data.amount != amount || data.tax != tax) {
+                                        data.title = title;
+                                        data.description = description;
+                                        data.person = person;
+                                        data.documentDate =  $.datepicker.parseDate("dd.mm.yy", documentDate).getTime();
+                                        data.amount = amount;
+                                        data.idvalue = idvalue;
+                                        data.tax =tax;
+                                        var extraProperties = {
+                                            'P:cm:titled': {'cm:title': title, 'cm:description': description},
+                                            'D:my:archivContent': {'my:documentDate': $.datepicker.parseDate("dd.mm.yy", documentDate).getTime(), 'my:person': person},
+                                            'P:my:amountable': {'my:amount': amount, "my:tax": tax},
+                                            'P:my:idable': {'my:idvalue': idvalue}
                                         };
 
-                                    erg = executeService("updateProperties", [
-                                        {"name": "documentId", "value": id},
-                                        {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                                    ], "Dokument konnte nicht aktualisiert werden!", false);
+                                        erg = executeService("updateProperties", [
+                                            {"name": "documentId", "value": data.objectId},
+                                            {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+                                        ], "Dokument konnte nicht aktualisiert werden!", false);
+
+                                    }
+                                    alfrescoTabelle.rows().invalidate();
                                     $('#dialogBox').dialog("destroy");
                                     jQuery('#simpleGrid').remove();
                                 } catch (e) {

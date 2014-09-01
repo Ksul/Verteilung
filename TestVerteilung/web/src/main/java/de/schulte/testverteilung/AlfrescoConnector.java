@@ -31,11 +31,6 @@ import java.util.logging.Logger;
 public class AlfrescoConnector {
 
     private static Logger logger = Logger.getLogger(AlfrescoConnector.class.getName());
-    private final static SimpleDateFormat DF;
-    static {
-        DF = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
-        DF.setTimeZone(TimeZone.getTimeZone("GMT"));
-    };
     private String user = null;
     private String password = null;
     private String bindingUrl = null;
@@ -460,7 +455,7 @@ public class AlfrescoConnector {
      * @return            die Properties mit den richtigen Typen
      */
     private Map<String, Object> convertProperties(Map<String, Object> properties,
-                                                         String type) throws VerteilungException {
+                                                         String type)  {
         HashMap<String, Object> props = new HashMap<>();
         Map<String, PropertyDefinition<?>> definitions = this.session.getTypeDefinition(type).getPropertyDefinitions();
         for (String key : properties.keySet()) {
@@ -468,14 +463,8 @@ public class AlfrescoConnector {
             //TODO Hier fehlt noch das parsen auf die anderen Datentypen
             if (definition instanceof PropertyDateTimeDefinition) {
                 GregorianCalendar gc = new GregorianCalendar();
-
-                try {
-                    gc.setTime(DF.parse((String) properties.get(key)));
-                } catch (ParseException e) {
-                    throw new VerteilungException("Datum kann nicht geparst werden!", e);
-                }
+                gc.setTime(new Date((Long) properties.get(key)));
                 props.put(key, gc);
-
             } else {
                 props.put(key, properties.get(key));
             }

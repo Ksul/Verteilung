@@ -237,38 +237,80 @@ function loadLayout() {
  */
 function loadAlfrescoTable() {
     $('#dtable2').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="alfrescoTabelle"></table>' );
-    alfrescoTabelle = $('#alfrescoTabelle').dataTable({
-        "bJQueryUI": true,
-        "sPaginationType": "full_numbers",
-        "aaData": [],
-        "sScrollX": "100%",
-        "sScrollXInner": "100%",
+    alfrescoTabelle = $('#alfrescoTabelle').DataTable({
+        "jQueryUI": true,
+        "pagingType": "full_numbers",
+        "data": [],
+        "scrollX": "100%",
+        "scrollXInner": "100%",
         // "sScrollY" : calcDataTableHeight(),
-        "bAutoWidth": true,
-        "bLengthChange": false,
-        "bFilter": false,
+        "autoWidth": true,
+        "lengthChange": false,
+        "searching": false,
         // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
         "columns": [
-            { "dataProp": null, "class": "control center", "width": "12px"},
-            { "title": "Titel", "type": "string", "class": "alignLeft"  },
-            { "title": "Datum", "type": "date", "class": "alignLeft" },
-            { "title": "Person", "type": "string", "class": "alignLeft" },
-            { "title": "Betrag", "type": "numeric", "class": "alignLeft" },
-            { "title": "Schlüssel", "type": "string", "class": "alignLeft" },
-            { "title": "Name", "type": "string", "class": "alignLeft" },
-            { "title": "Beschreibung", "type": "string", "class": "alignLeft" },
-            { "title": "Aktion", "width": "102px", "class": "alignLeft" },
-            { "title": "Id" }
+            {
+                "class": 'details-control',
+                "orderable": false,
+                "data": null,
+                "defaultContent": '',
+                "width": "12px"
+            },
+             {
+                "data": "attr.title",
+                "title": "Titel",
+                "defaultContent": '',
+                "type": "string",
+                "class": "alignLeft"
+            },
+            {
+                "data": "attr.documentDate",
+                "title": "Datum",
+                "defaultContent": '',
+                "type": "date",
+                "class": "alignLeft"
+            },
+            {
+                "data": "attr.person",
+                "title": "Person",
+                "defaultContent": '',
+                "type": "string",
+                "class": "alignLeft"
+            },
+            {
+                "data": "attr.amount",
+                "title": "Betrag",
+                "defaultContent": '',
+                "type": "numeric",
+                "class": "alignLeft"
+            },
+            {
+                "data": "attr.idvalue",
+                "title": "Schlüssel",
+                "defaultContent": '',
+                "type": "string",
+                "class": "alignLeft"
+            },
+            {
+                "data": null,
+                "title": "Aktion",
+                "width": "102px",
+                "class": "alignLeft"
+            }
         ],
         "columnDefs": [
-            // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
-            { "targets": [1, 2, 3, 4, 5], "visible": true},
-            { "targets": [6, 7], "visible": false},
-            { "targets": [8], "mRender": alfrescoAktionFieldFormatter, "sortable": false},
-            { "targets": [9], "visible": false}
+            {
+                "targets": [1, 2, 3, 4, 5],
+                "visible": true
+            },
+            {
+                "targets": [6],
+                "mRender": alfrescoAktionFieldFormatter,
+                "sortable": false
+            }
         ],
-        "oLanguage": {
-            "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
+        "language": {
+            "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
         }
     });
 }
@@ -277,39 +319,66 @@ function loadAlfrescoTable() {
  * baut die Alfresco Folder Tabelle auf.
  */
 function loadAlfrescoFolderTable() {
-    $('#dtable3').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="alfrescoFolderTabelle"></table>' );
-    alfrescoFolderTabelle = $('#alfrescoFolderTabelle').dataTable({
-        "bJQueryUI": true,
-        "sPaginationType": "full_numbers",
-        "aaData": [],
-        "sScrollX": "100%",
-        "sScrollXInner": "100%",
+    $('#dtable3').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="alfrescoFolderTabelle"></table>');
+    alfrescoFolderTabelle = $('#alfrescoFolderTabelle').DataTable({
+        "jQueryUI": true,
+        "pagingType": "full_numbers",
+        "data": [],
+        "scrollX": "100%",
+        "scrollXInner": "100%",
         // "sScrollY" : calcDataTableHeight(),
-        "bAutoWidth": true,
-        "bLengthChange": false,
-        "bFilter": false,
+        "autoWidth": true,
+        "lengthChange": false,
+        "searching": false,
         // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
         "columns": [
-            { "dataProp": null, "class": "control center", "width": "12px"},
-            { "title": "Name", "type": "string", "class": "alignLeft"  },
-            { "title": "Beschreibung", "type": "string", "class": "alignLeft" },
-            { "title": "Aktion", "width": "102px", "class": "alignLeft" },
-            { "title": "Id" }
+            {
+                "class": 'details-control',
+                "orderable": false,
+                "data": null,
+                "defaultContent": '',
+                "width": "12px"
+            },
+            {
+                "data": "attr.name",
+                "title": "Name",
+                "defaultContent": '',
+                "type": "string",
+                "class": "alignLeft"
+            },
+            {
+                "data": "attr.description",
+                "title": "Beschreibung",
+                "defaultContent": '',
+                "type": "string",
+                "class": "alignLeft"
+            },
+            {
+                "title": "Aktion",
+                "data": null,
+                "width": "102px",
+                "class": "alignLeft"
+            }
         ],
         "columnDefs": [
             // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
-            { "targets": [1, 2], "visible": true},
-            { "targets": [3], "mRender": alfrescoFolderAktionFieldFormatter, "sortable": false},
-            { "targets": [4], "visible": false}
+            {
+                "targets": [1, 2],
+                "visible": true
+            },
+            {
+                "targets": [3],
+                "mRender": alfrescoFolderAktionFieldFormatter,
+                "sortable": false
+            }
         ],
-        "oLanguage": {
-            "sInfo": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
-        } ,
-        "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+        "language": {
+            "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
+        },
+        "rowCallback": function( row, data ) {
             // Cell click
-            $('td', nRow).on('click', function() {
-               switchAlfrescoDirectory( aData[4]);
-
+            $('td', row).on('click', function () {
+                switchAlfrescoDirectory(data[4]);
             });
         }
     });
@@ -339,16 +408,42 @@ function loadVerteilungTable() {
                 "defaultContent": '',
                 "width": "12px"
             },
-            { "title": "Name", "type": "string", "class": "alignLeft"  },
-            { "title": "Dokumenttyp", "type": "string", "class": "alignLeft" },
-            { "title": "Ergebnis", "width": "102px", "class": "alignLeft" },
-            { "title": "Id" },
-            { "title": "Fehler" }
+            {
+                "title": "Name",
+                "type": "string",
+                "class": "alignLeft"
+            },
+            {
+                "title": "Dokumenttyp",
+                "type": "string",
+                "class": "alignLeft"
+            },
+            {
+                "title": "Ergebnis",
+                "width": "102px",
+                "class": "alignLeft"
+            },
+            {
+                "title": "Id"
+            },
+            {
+                "title": "Fehler"
+            }
         ],
         "columnDefs": [
-            { "targets": [1,2,3], "visible": true},
-            { "targets": [3], "mRender": imageFieldFormatter, "sortable": false},
-            { "targets": [4,5], "visible": false}
+            {
+                "targets": [1,2,3],
+                "visible": true
+            },
+            {
+                "targets": [3],
+                "mRender": imageFieldFormatter,
+                "sortable": false
+            },
+            {
+                "targets": [4,5],
+                "visible": false
+            }
         ],
         "language": {
             "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
@@ -553,22 +648,24 @@ function switchAlfrescoDirectory(objectId) {
             {"name": "withFolder", "value": -1}
         ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
         if (json.success) {
-            alfrescoFolderTabelle.fnClearTable();
-            for (var index = 0; index < json.result.length; ++index) {
+            alfrescoFolderTabelle.clear();
+            alfrescoFolderTabelle.rows.add(json.result).draw();
+  /*          for (var index = 0; index < json.result.length; ++index) {
                 var name = json.result[index].attr.name ? json.result[index].attr.name : "";
                 var description = json.result[index].attr.description ? json.result[index].attr.description : "";
                 var id = json.result[index].attr.objectId ? json.result[index].attr.objectId : "";
                 var row = [ null, name, description, null, id];
-                alfrescoFolderTabelle.fnAddData(row);
-            }
+                alfrescoFolderTabelle.row.add(row).draw();
+            }*/
         }
         json = executeService("listFolderAsJSON", [
             {"name": "filePath", "value": objectId},
             {"name": "withFolder", "value": 1}
         ], "Dokumente konnten nicht aus dem Server gelesen werden:");
         if (json.success) {
-            alfrescoTabelle.fnClearTable();
-            for (var index = 0; index < json.result.length; ++index) {
+            alfrescoTabelle.clear();
+            alfrescoTabelle.rows.add(json.result).draw();
+   /*         for (var index = 0; index < json.result.length; ++index) {
                 var titel = json.result[index].attr.title ? json.result[index].attr.title : json.result[index].attr.name ? json.result[index].attr.name : "";
                 var datum = json.result[index].attr.documentDate ? json.result[index].attr.documentDate : json.result[index].attr.creationDate ? json.result[index].attr.creationDate : "";
                 var date = parseDate(datum);
@@ -580,47 +677,13 @@ function switchAlfrescoDirectory(objectId) {
                 var name = json.result[index].attr.name ? json.result[index].attr.name : "";
                 var beschreibung = json.result[index].attr.description ? json.result[index].attr.description : "";
                 var row = [ null, titel, dateString, person, amount, schluessel, name, beschreibung, null, id];
-                alfrescoTabelle.fnAddData(row);
-            }
+                alfrescoTabelle.row.add(row).draw();
+            }*/
         }
 
     } catch (e) {
         errorHandler(e);
     }
-}
-/**
- * lädt den Alfresco Tree
- */
-function loadAlfrescoTree() {
-    tree = $("#tree").jstree({
-        "json_data": {
-            "data": function (aNode, aFunction) {
-                if (alfrescoServerAvailable) {
-                    var json = executeService("listFolderAsJSON", [
-                        {"name": "filePath", "value": aNode.attr ? aNode.attr("objectId") : "-1"},
-                        {"name": "withFolder", "value": -1}
-                    ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
-                    if (json.success)
-                        aFunction(json.result);
-                    else
-                        message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
-                }
-            }
-        },
-        "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "hotkeys", "themeroller"]
-    }).bind("select_node.jstree",function (event, data) {
-        if (data.rslt.obj.attr("rel") == "folder") {
-            if (alfrescoServerAvailable) {
-                switchAlfrescoDirectory(data.rslt.obj.attr("objectId"));
-            }
-        }
-    }).delegate("a", "click", function (event, data) {
-        event.preventDefault();
-    });
-
-    // Initiales Lesen
-    if (alfrescoServerAvailable)
-       switchAlfrescoDirectory("-1");
 }
 
 /**
@@ -630,7 +693,7 @@ function handleAlfrescoFolderImageClicks() {
     $(document).on("click", ".folderOpen", function () {
         try {
             var tr = $(this).closest('tr');
-            var row = tabelle.row( tr).data();
+            var row = alfrescoFolderTabelle.row( tr).data();
             switchAlfrescoDirectory(row[4]);
         } catch (e) {
             errorHandler(e);
@@ -645,8 +708,7 @@ function handleAlfrescoImageClicks() {
     $(document).on("click", ".detailEdit", function () {
         try {
             var tr = $(this).closest('tr');
-            var row = tabelle.row( tr).data();
-            startDocumentDialog(row[9], row[6], row[1], row[7], row[3], row[4], row[2], row[5], null);
+            startDocumentDialog(alfrescoTabelle.row(tr));
         } catch (e) {
             errorHandler(e);
         }
@@ -738,9 +800,45 @@ function handleVerteilungImageClicks() {
             { "name": "documentContent", "value": daten[name].content, "type": "byte"},
             { "name": "documentType", "value": "application/pdf"},
             { "name": "extraCMSProperties", "value": ""},
-            { "name": "versionState", "value": "none"}
+            { "name": "versionState", "value": "major"}
         ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
     });
+}
+
+
+/**
+ * lädt den Alfresco Tree
+ */
+function loadAlfrescoTree() {
+    tree = $("#tree").jstree({
+        "json_data": {
+            "data": function (aNode, aFunction) {
+                if (alfrescoServerAvailable) {
+                    var json = executeService("listFolderAsJSON", [
+                        {"name": "filePath", "value": aNode.attr ? aNode.attr("objectId") : "-1"},
+                        {"name": "withFolder", "value": -1}
+                    ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
+                    if (json.success)
+                        aFunction(json.result);
+                    else
+                        message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
+                }
+            }
+        },
+        "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "hotkeys", "themeroller"]
+    }).bind("select_node.jstree",function (event, data) {
+        if (data.rslt.obj.attr("rel") == "folder") {
+            if (alfrescoServerAvailable) {
+                switchAlfrescoDirectory(data.rslt.obj.attr("objectId"));
+            }
+        }
+    }).delegate("a", "click", function (event, data) {
+        event.preventDefault();
+    });
+
+    // Initiales Lesen
+    if (alfrescoServerAvailable)
+        switchAlfrescoDirectory("-1");
 }
 
 /**

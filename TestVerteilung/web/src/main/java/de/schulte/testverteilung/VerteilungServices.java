@@ -9,6 +9,7 @@ import java.util.zip.ZipInputStream;
 
 import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
+import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.commons.codec.binary.Base64;
@@ -183,7 +184,11 @@ public class VerteilungServices {
 
         JSONObject obj1 = new JSONObject();
         for (Property prop : doc.getProperties()){
-            obj1.put(prop.getLocalName(), prop.getValueAsString());
+            // falls Datumswert dann konvertieren
+            if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME))
+                obj1.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
+            else
+               obj1.put(prop.getLocalName(), prop.getValueAsString());
         }
         return obj1;
     }

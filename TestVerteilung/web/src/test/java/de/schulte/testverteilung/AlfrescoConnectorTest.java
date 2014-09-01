@@ -135,7 +135,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         titledMap.put("cm:description","Testdokument");
         amountMap.put("my:amount","25.33");
         archivModelMap.put("my:person", "Klaus");
-        archivModelMap.put("my:documentDate", DF.format(new Date()));
+        archivModelMap.put("my:documentDate", new Date().getTime());
         properties.put("P:cm:titled", titledMap);
         properties.put("P:my:amountable", amountMap);
         properties.put("D:my:archivContent", archivModelMap);
@@ -156,7 +156,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> archivModelMap = new HashMap<>();
         archivModelMap.put("my:person", "Klaus");
-        archivModelMap.put("my:documentDate", DF.format(new Date()));
+        archivModelMap.put("my:documentDate", new Date().getTime());
         properties.put("D:my:archivContent", archivModelMap);
         //Achtung: Wenn hier das Dokument noch nicht auf den Typ my:archivContent gesetzt würde, dann ist das mit dem nachfolgenden Update nicht mehr zu ändern.
         // Wird im Alfresco eine Regel verwendet, die den Typ automatisch setzt, so muss das Dokument neu gelesen werden, denn die Rückgabe des create wird nicht automatisch aktualisiert
@@ -192,7 +192,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> archivModelMap = new HashMap<>();
         archivModelMap.put("my:person", "Klaus");
-        archivModelMap.put("my:documentDate", DF.format(new Date()));
+        archivModelMap.put("my:documentDate", new Date().getTime());
         properties.put("D:my:archivContent", archivModelMap);
 
         Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR);   // NONE führt zu einem Fehler
