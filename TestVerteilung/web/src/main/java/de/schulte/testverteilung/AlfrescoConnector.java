@@ -448,7 +448,7 @@ public class AlfrescoConnector {
         return properties;
     }
 
-        /**
+    /**
      * bereitet die Typen der Properties auf
      * @param properties  die Property Werte
      * @param type        der verwendete Typ
@@ -462,9 +462,11 @@ public class AlfrescoConnector {
             PropertyDefinition<?> definition = definitions.get(key);
             //TODO Hier fehlt noch das parsen auf die anderen Datentypen
             if (definition instanceof PropertyDateTimeDefinition) {
-                GregorianCalendar gc = new GregorianCalendar();
-                gc.setTime(new Date((Long) properties.get(key)));
-                props.put(key, gc);
+                if (properties.get(key) instanceof Long) {
+                    GregorianCalendar gc = new GregorianCalendar();
+                    gc.setTime(new Date((Long) properties.get(key)));
+                    props.put(key, gc);
+                }
             } else {
                 props.put(key, properties.get(key));
             }

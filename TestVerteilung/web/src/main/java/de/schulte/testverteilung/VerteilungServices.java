@@ -183,12 +183,12 @@ public class VerteilungServices {
     private JSONObject convertCMISObjectToJSON(CmisObject doc) throws JSONException {
 
         JSONObject obj1 = new JSONObject();
-        for (Property prop : doc.getProperties()){
+        for (Property prop : doc.getProperties()) {
             // falls Datumswert dann konvertieren
-            if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME))
+            if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null)
                 obj1.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
             else
-               obj1.put(prop.getLocalName(), prop.getValueAsString());
+                obj1.put(prop.getLocalName(), prop.getValueAsString());
         }
         return obj1;
     }

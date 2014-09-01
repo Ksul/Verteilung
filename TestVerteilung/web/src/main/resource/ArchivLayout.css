@@ -525,3 +525,6 @@ a.ui-state-default  {
     margin-top: 5px;
     margin-left: 0px;
 }
+
+.droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
+.draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px; cursor: hand; cursor: pointer; border: 1px solid #000;}
