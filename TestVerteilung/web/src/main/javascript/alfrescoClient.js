@@ -856,47 +856,61 @@ function handleVerteilungImageClicks() {
  * lädt den Alfresco Tree
  */
 function loadAlfrescoTree() {
-    tree = $("#tree").jstree({
-        "core": {
-            "data": function (aNode, aFunction) {
-                if (alfrescoServerAvailable) {
-                    var json = executeService("listFolderAsJSON", [
-                        {"name": "filePath", "value": aNode.attr ? aNode.attr("objectId") : "-1"},
-                        {"name": "withFolder", "value": -1}
-                    ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
-                    if (json.success)
-                        aFunction(json.result);
-                    else
-                        message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
+    try {
+        tree = $("#tree").jstree({
+            "core": {
+                check_callback: true,
+                data: function (aNode, aFunction) {
+                    try {
+                        if (alfrescoServerAvailable) {
+                            var json = executeService("listFolderAsJSON", [
+                                {"name": "filePath", "value": aNode.attr ? aNode.attr("objectId") : "-1"},
+                                {"name": "withFolder", "value": -1}
+                            ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
+                            if (json.success)
+                                aFunction(this, json.result);
+                            else
+                                message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
+                        }
+                    } catch (e) {
+                        errorHandler(e);
+                    }
                 }
+            },
+            "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "hotkeys", "themeroller"]
+        }).on("select_node.jstree", function (event, data) {
+            try {
+                if (data.node.original.attr.baseTypeId == "cmis:folder") {
+                    if (alfrescoServerAvailable) {
+                        switchAlfrescoDirectory(data.node.original.attr.objectId);
+                    }
+                }
+            } catch (e) {
+                errorHandler(e);
             }
-        },
-        "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "hotkeys", "themeroller"]
-    }).on("select_node.jstree",function (event, data) {
-        if (data.node.original.attr.baseTypeId == "cmis:folder") {
-            if (alfrescoServerAvailable) {
-                switchAlfrescoDirectory(data.node.original.attr.objectId);
-            }
-        }
-    }).delegate("a", "click", function (event, data) {
-        event.preventDefault();
-    });
+        }).delegate("a", "click", function (event, data) {
+            event.preventDefault();
+        });
 
-    // Drag & Drop aus Tabelle
-    $('.jstree-icon').on("dragenter dragover drop", function (event) {
-        event.preventDefault();
-        if (event.type === 'drop') {
-            var data = event.originalEvent.dataTransfer.getData('Text',$(this).attr('id'));
-            if($(this).find('span').length===0){
-                de=$('#'+data).detach();
-                de.appendTo($(this));
-            }
+        // Drag & Drop aus Tabelle
+        $('.jstree-icon').on("dragenter dragover drop", function (event) {
+            event.preventDefault();
+            if (event.type === 'drop') {
+                var data = event.originalEvent.dataTransfer.getData('Text', $(this).attr('id'));
+                if ($(this).find('span').length === 0) {
+                    de = $('#' + data).detach();
+                    de.appendTo($(this));
+                }
 
-        };
-    });
-    // Initiales Lesen
-    if (alfrescoServerAvailable)
-        switchAlfrescoDirectory("-1");
+            }
+            ;
+        });
+        // Initiales Lesen
+        if (alfrescoServerAvailable)
+            switchAlfrescoDirectory("-1");
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 /**
