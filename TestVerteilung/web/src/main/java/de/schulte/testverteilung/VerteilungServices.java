@@ -83,17 +83,19 @@ public class VerteilungServices {
         JSONObject o1;
         JSONArray list = new JSONArray();
         JSONObject obj = new JSONObject();
+        JSONObject state;
         try {
+            state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
             // keine Parameter mit gegeben, also den Rooteintrag erzeugen
             if (filePath == null || filePath.length() == 0) {
                 o = new JSONObject();
                 o1 = new JSONObject();
                 o.put("id", filePath);
-                o.put("rel", "root");
-                o.put("state", "closed");
+                o.put("icon", "/");
+                o.put("state", state);
                 o1.put("attr", o);
-                o1.put("data", "Archiv");
-                o1.put("state", "closed");
+                o1.put("text", "Archiv");
+                o1.put("state", state);
                 list.put(o1);
             } else {
                 // das Root Object übergeben?
@@ -107,18 +109,18 @@ public class VerteilungServices {
                         o1 = new JSONObject();
                         o = convertCMISObjectToJSON(cmisObject);
                         if (cmisObject instanceof Folder) {
-                            o.put("rel", "folder");
-                            o1.put("state", "closed");
+                            o.put("icon", "/");
+                            o1.put("state", state);
                         } else {
-                            o.put("rel", "default");
+                            o.put("icon", "default");
                             o1.put("state", "");
                         }
+                        o1.put("object", o);
                         if (cmisObject instanceof AlfrescoDocument && ((AlfrescoDocument) cmisObject).hasAspect("P:cm:titled") && cmisObject.getPropertyValue("cm:title") != null && cmisObject.getPropertyValue("cm:title").toString().length() > 0)
-                            o1.put("data", cmisObject.getPropertyValue("cm:title"));
+                            o1.put("text", cmisObject.getPropertyValue("cm:title"));
                         else
-                            o1.put("data", cmisObject.getName());
+                            o1.put("text", cmisObject.getName());
                         o1.put("attr", o);
-
                         list.put(o1);
                     }
                 }

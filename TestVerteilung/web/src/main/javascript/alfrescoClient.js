@@ -314,11 +314,13 @@ function loadAlfrescoTable() {
             {
                 "targets":  [1],
                 "render": function ( data, type, row ) {
-                    if (exist(data)) {
-                        var container =  document.createElement("div");
-                        var image = document.createElement("div");
+                    if (exist(data) && data == "application/pdf") {
+
+                        var image = document.createElement("span");
+                        image.id = "alfrescoTable" + row.attr.objectId;
+                        image.className = "alfrescoTableEvent";
+                        image.draggable = true;
                         image.href = "#";
-                        image.className = "pdf";
                         image.title = "PDF Dokument";
                         image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
                         image.style.width = "16px";
@@ -326,8 +328,7 @@ function loadAlfrescoTable() {
                         image.style.cursor = "pointer";
                         image.style.cssFloat = "left";
                         image.style.marginRight = "5px";
-                        container.appendChild(image);
-                        return container.outerHTML;
+                        return image.outerHTML;
                     }  else
                         return "";
                 },
@@ -354,42 +355,9 @@ function loadAlfrescoTable() {
         }
     });
 
-    var start;
-    var end;
-
-    $("#dtable2 tbody").sortable({
-        cursor: "move",
-        start:function(event, ui){
-            // 0 based array, add one
-            start = ui.item.prevAll().length + 1;
-        },
-        helper: function (e,ui) {
-            return $(ui).clone().appendTo('body').show();
-        },
-        update: function(event, ui) {
-            // 0 based array, add one
-            end = ui.item.prevAll().length + 1;
-            alert('Start: ' + start + ' End: ' + end);
-            var id = ui.item.context.children[0].innerHTML;
-            alert(id);
-
-           /* $.getJSON('dao.cfc', {
-                    method:'methodName',
-                    returnFormat:'JSON'
-
-                },
-
-                // handle the response
-                function(data){
-                    if(data.intSuccess == 1){
-                        // success
-                    } else {
-                        // error
-                    }
-                });*/
-        }
-        // end of drag
-
+    $('.alfrescoTableEvent').on("dragstart", function (event) {
+        var dt = event.originalEvent.dataTransfer;
+        //dt.setData('Text', $(this).attr('id'));
     });
 }
 
@@ -889,7 +857,7 @@ function handleVerteilungImageClicks() {
  */
 function loadAlfrescoTree() {
     tree = $("#tree").jstree({
-        "json_data": {
+        "core": {
             "data": function (aNode, aFunction) {
                 if (alfrescoServerAvailable) {
                     var json = executeService("listFolderAsJSON", [
@@ -914,6 +882,18 @@ function loadAlfrescoTree() {
         event.preventDefault();
     });
 
+    // Drag & Drop aus Tabelle
+    $('.jstree-icon').on("dragenter dragover drop", function (event) {
+        event.preventDefault();
+        if (event.type === 'drop') {
+            var data = event.originalEvent.dataTransfer.getData('Text',$(this).attr('id'));
+            if($(this).find('span').length===0){
+                de=$('#'+data).detach();
+                de.appendTo($(this));
+            }
+
+        };
+    });
     // Initiales Lesen
     if (alfrescoServerAvailable)
         switchAlfrescoDirectory("-1");
