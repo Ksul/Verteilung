@@ -872,10 +872,10 @@ function loadAlfrescoTree() {
             }
         },
         "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "hotkeys", "themeroller"]
-    }).bind("select_node.jstree",function (event, data) {
-        if (data.rslt.obj.attr("rel") == "folder") {
+    }).on("select_node.jstree",function (event, data) {
+        if (data.node.original.attr.baseTypeId == "cmis:folder") {
             if (alfrescoServerAvailable) {
-                switchAlfrescoDirectory(data.rslt.obj.attr("objectId"));
+                switchAlfrescoDirectory(data.node.original.attr.objectId);
             }
         }
     }).delegate("a", "click", function (event, data) {
