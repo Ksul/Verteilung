@@ -76,8 +76,8 @@ public class VerteilungServices {
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
      */
-    public JSONObject listFolderAsJSON(String filePath,
-                                       int listFolder) {
+    public JSONObject listFolder(String filePath,
+                                 int listFolder) {
 
         JSONObject o;
         JSONObject o1;
@@ -86,43 +86,16 @@ public class VerteilungServices {
         JSONObject state;
         try {
             state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
-            // keine Parameter mit gegeben, also den Rooteintrag erzeugen
-            if (filePath == null || filePath.length() == 0) {
-                o = new JSONObject();
-                o1 = new JSONObject();
-                o.put("id", filePath);
-                o.put("icon", "/");
-                o.put("state", state);
-                o1.put("attr", o);
-                o1.put("text", "Archiv");
-                o1.put("state", state);
-                list.put(o1);
-            } else {
-                // das Root Object übergeben?
-                if (filePath.equals("-1"))
-                    filePath = con.getNode("/Archiv").getId();
+             // das Root Object übergeben?
+            if (filePath.equals("-1"))
+                filePath = con.getNode("/Archiv").getId();
 
-                for (CmisObject cmisObject : con.listFolder(filePath)) {
+            for (CmisObject cmisObject : con.listFolder(filePath)) {
 
-                    // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
-                    if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1)) {
-                        o1 = new JSONObject();
-                        o = convertCMISObjectToJSON(cmisObject);
-                        if (cmisObject instanceof Folder) {
-                            o.put("icon", "/");
-                            o1.put("state", state);
-                        } else {
-                            o.put("icon", "default");
-                            o1.put("state", "");
-                        }
-                        o1.put("object", o);
-                        if (cmisObject instanceof AlfrescoDocument && ((AlfrescoDocument) cmisObject).hasAspect("P:cm:titled") && cmisObject.getPropertyValue("cm:title") != null && cmisObject.getPropertyValue("cm:title").toString().length() > 0)
-                            o1.put("text", cmisObject.getPropertyValue("cm:title"));
-                        else
-                            o1.put("text", cmisObject.getName());
-                        o1.put("attr", o);
-                        list.put(o1);
-                    }
+                // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
+                if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1)) {
+                    o = convertCMISObjectToJSON(cmisObject);
+                    list.put(o);
                 }
             }
             obj.put("success", true);

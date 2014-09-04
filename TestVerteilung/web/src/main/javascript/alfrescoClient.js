@@ -257,7 +257,7 @@ function loadAlfrescoTable() {
                 "width": "12px"
             },
             {
-                "data": "attr.contentStreamMimeType",
+                "data": "contentStreamMimeType",
                 "title": "Typ",
                 "defaultContent": '',
                 "type": "string",
@@ -265,35 +265,35 @@ function loadAlfrescoTable() {
                 "width": "12px"
             },
              {
-                "data": "attr.title",
+                "data": "title",
                 "title": "Titel",
                 "defaultContent": '',
                 "type": "string",
                 "class": "alignLeft"
             },
             {
-                "data": "attr.documentDate",
+                "data": "documentDate",
                 "title": "Datum",
                 "defaultContent": '',
                 "type": "date",
                 "class": "alignLeft"
             },
             {
-                "data": "attr.person",
+                "data": "person",
                 "title": "Person",
                 "defaultContent": '',
                 "type": "string",
                 "class": "alignLeft"
             },
             {
-                "data": "attr.amount",
+                "data": "amount",
                 "title": "Betrag",
                 "defaultContent": '',
                 "type": "numeric",
                 "class": "alignLeft"
             },
             {
-                "data": "attr.idvalue",
+                "data": "idvalue",
                 "title": "Schlüssel",
                 "defaultContent": '',
                 "type": "string",
@@ -386,14 +386,14 @@ function loadAlfrescoFolderTable() {
                 "width": "12px"
             },
             {
-                "data": "attr.name",
+                "data": "name",
                 "title": "Name",
                 "defaultContent": '',
                 "type": "string",
                 "class": "alignLeft"
             },
             {
-                "data": "attr.description",
+                "data": "description",
                 "title": "Beschreibung",
                 "defaultContent": '',
                 "type": "string",
@@ -689,7 +689,7 @@ function formatDetails(data) {
  */
 function switchAlfrescoDirectory(objectId) {
     try {
-        var json = executeService("listFolderAsJSON", [
+        var json = executeService("listFolder", [
             {"name": "filePath", "value": objectId},
             {"name": "withFolder", "value": -1}
         ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
@@ -704,7 +704,7 @@ function switchAlfrescoDirectory(objectId) {
                 alfrescoFolderTabelle.row.add(row).draw();
             }*/
         }
-        json = executeService("listFolderAsJSON", [
+        json = executeService("listFolder", [
             {"name": "filePath", "value": objectId},
             {"name": "withFolder", "value": 1}
         ], "Dokumente konnten nicht aus dem Server gelesen werden:");
@@ -851,6 +851,53 @@ function handleVerteilungImageClicks() {
     });
 }
 
+/**
+ * lädt und kobertiert die Daten für den Tree
+ * @param aNode      der ausgeählte Knoten
+ * @return obj      die Daten als jstree kompatible JSON Objekte
+ */
+function loadDataForTree(aNode) {
+    var obj = {};
+    var state = {"opened": false, "disabled": false, "selected": false};
+    try {
+        // keine Parameter mit gegeben, also den Rooteintrag erzeugen
+        if (!exist(aNode)) {
+            obj = {"text": "/", "state": state, "children":true};
+        } else {
+            if (alfrescoServerAvailable) {
+                var json = executeService("listFolder", [
+                    {"name": "filePath", "value": aNode.attr ? aNode.attr("objectId") : "-1"},
+                    {"name": "withFolder", "value": -1}
+                ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
+                if (json.success) {
+                    var obj = [];
+                    for (var index = 0; index < json.result.length; index++) {
+                         var item = {};
+                        var o = json.result[index];
+                        if (o.baseTypeId == "cmis:folder") {
+                            item["icon"] = "/";
+                            item["state"] = state;
+                        } else {
+                            item["icon"] = "default";
+                            item["state"] = "";
+                        }
+                        item["text"] = o.name;
+                        item["data"] = o;
+                        obj.push(item);
+                    }
+
+                   return obj;
+                }
+                else {
+                    message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
+                    return null;
+                }
+            }
+        }
+    } catch(e) {
+        errorHandler(e);
+    }
+}
 
 /**
  * lädt den Alfresco Tree
@@ -859,30 +906,25 @@ function loadAlfrescoTree() {
     try {
         tree = $("#tree").jstree({
             "core": {
-                check_callback: true,
-                data: function (aNode, aFunction) {
-                    try {
-                        if (alfrescoServerAvailable) {
-                            var json = executeService("listFolderAsJSON", [
-                                {"name": "filePath", "value": aNode.attr ? aNode.attr("objectId") : "-1"},
-                                {"name": "withFolder", "value": -1}
-                            ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
-                            if (json.success)
-                                aFunction(this, json.result);
-                            else
-                                message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
-                        }
-                    } catch (e) {
-                        errorHandler(e);
+                "check_callback": true,
+                'data': {
+                    'url':function(node){
+                    return loadDataForTree(node);
+                    // CallBack ausführen
+                    //if (exist(obj))
+                    //    aFunction(this, obj);
+                },
+                    'data' : function (node) {
+                        return { 'id' : node.id };
                     }
-                }
+            }
             },
-            "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "search", "hotkeys", "themeroller"]
+            "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "state", "types", "wholerow", "hotkeys", "themeroller"]
         }).on("select_node.jstree", function (event, data) {
             try {
-                if (data.node.original.attr.baseTypeId == "cmis:folder") {
+                if (data.node.data.baseTypeId == "cmis:folder") {
                     if (alfrescoServerAvailable) {
-                        switchAlfrescoDirectory(data.node.original.attr.objectId);
+                        switchAlfrescoDirectory(data.node.data.objectId);
                     }
                 }
             } catch (e) {

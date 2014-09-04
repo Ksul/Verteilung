@@ -41,7 +41,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
 
     @Test
     public void testListFolderAsJSON() throws Exception {
-        JSONObject obj = applet.listFolderAsJSON("", "0");
+        JSONObject obj = applet.listFolder("", "0");
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));

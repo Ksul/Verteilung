@@ -150,7 +150,7 @@ public class VerteilungApplet extends Applet {
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
      */
-    public JSONObject listFolderAsJSON(final String filePath,
+    public JSONObject listFolder(final String filePath,
                                        final String listFolder)  {
 
         JSONObject obj;
@@ -158,7 +158,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws VerteilungException, IOException, JSONException {
-                    return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
+                    return services.listFolder(filePath, Integer.parseInt(listFolder));
                 }
             });
         } catch (PrivilegedActionException e) {

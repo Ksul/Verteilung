@@ -64,7 +64,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_GETDOCUMENTCONTENT = "getDocumentContent";
     public static final String FUNCTION_GETNODEID = "getNodeId";
     public static final String FUNCTION_ISURLAVAILABLE = "isURLAvailable";
-    public static final String FUNCTION_LISTFOLDERASJSON = "listFolderAsJSON";
+    public static final String FUNCTION_LISTFOLDERASJSON = "listFolder";
     public static final String FUNCTION_MOVEDOCUMENT = "moveDocument";
     public static final String FUNCTION_OPENFILE = "openFile";
     public static final String FUNCTION_OPENPDF = "openPDF";
@@ -194,7 +194,7 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_MOVEDOCUMENT)) {
                     obj = moveDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_CURENTLOCATIONID, true), getURLParameter(req, PARAMETER_DESTINATIONID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_LISTFOLDERASJSON)) {
-                    obj = listFolderAsJSON(getURLParameter(req, PARAMETER_FILEPATH, true), getURLParameter(req, PARAMETER_WITHFOLDER, true));
+                    obj = listFolder(getURLParameter(req, PARAMETER_FILEPATH, true), getURLParameter(req, PARAMETER_WITHFOLDER, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_EXTRACTPDFCONTENT)) {
                     obj = extractPDFContent(getURLParameter(req, PARAMETER_DOCUMENTTEXT, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_EXTRACTPDFFILE)) {
@@ -446,10 +446,10 @@ public class VerteilungServlet extends HttpServlet {
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
      */
-    protected JSONObject listFolderAsJSON(String filePath,
+    protected JSONObject listFolder(String filePath,
                                           String listFolder) throws VerteilungException {
 
-        return services.listFolderAsJSON(filePath, Integer.parseInt(listFolder));
+        return services.listFolder(filePath, Integer.parseInt(listFolder));
     }
 
 

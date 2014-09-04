@@ -208,16 +208,16 @@ public class VerteilungServletTest extends AlfrescoTest {
     }
 
     @Test
-    public void testListFolderAsJSON() throws Exception {
+    public void testListFolder() throws Exception {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_LISTFOLDERASJSON);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("-1");
         when(request.getParameter(VerteilungServlet.PARAMETER_WITHFOLDER)).thenReturn("0"); // alles suchen
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
-        assertTrue(sr.toString().contains("{\"data\":\"Inbox\""));
-        assertTrue(sr.toString().contains("{\"data\":\"Fehler\""));
-        assertTrue(sr.toString().contains("{\"data\":\"Unbekannt\""));
-        assertTrue(sr.toString().contains("{\"data\":\"Archiv\""));
+        assertTrue(sr.toString().contains("\"name\":\"Inbox\""));
+        assertTrue(sr.toString().contains("\"name\":\"Fehler\""));
+        assertTrue(sr.toString().contains("\"name\":\"Unbekannt\""));
+        assertTrue(sr.toString().contains("\"name\":\"Archiv\""));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("8e6d4fbd-32f1-41ed-b0a2-b7ff8a9934ab");
         when(request.getParameter(VerteilungServlet.PARAMETER_WITHFOLDER)).thenReturn("1");

@@ -38,47 +38,33 @@ public class VerteilungServicesTest extends AlfrescoTest{
     }
 
     @Test
-    public void testListFolderAsJSON() throws Exception {
-        JSONObject obj = services.listFolderAsJSON(null, 0);
-        assertTrue(obj.length() >= 2);
-        assertNotNull(obj.get("result"));
-        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        assertTrue(obj.get("result") instanceof JSONArray);
-        assertTrue(((JSONArray) obj.get("result")).length() == 1);
-        assertTrue(((JSONArray) obj.get("result")).get(0) instanceof JSONObject);
-        assertTrue(((JSONObject) ((JSONArray) obj.get("result")).get(0)).length() == 3);
-        assertEquals("closed", ((JSONObject) ((JSONArray) obj.get("result")).get(0)).getString("state"));
-        assertEquals("Archiv", ((JSONObject) ((JSONArray) obj.get("result")).get(0)).getString("data"));
-        obj = services.listFolderAsJSON("-1", 0);
+    public void testListFolder() throws Exception {
+        JSONObject obj = services.listFolder("-1", 0);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         assertTrue(obj.get("result") instanceof JSONArray);
         assertEquals(4, ((JSONArray) obj.get("result")).length());
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++){
-            assertEquals("closed", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("state"));
-            assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("data"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
-            assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("objectId"));
-            assertEquals("folder", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("rel"));
-        }
+            assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
+            assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("objectId"));
+          }
         obj = services.uploadDocument("/Archiv", System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        obj = services.listFolderAsJSON("-1", -1);
+        obj = services.listFolder("-1", -1);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         assertTrue(obj.get("result") instanceof JSONArray);
         assertEquals(4, ((JSONArray) obj.get("result")).length());
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++){
-            assertEquals("closed", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("state"));
-            assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("data"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
-            assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("objectId"));
-            assertEquals("folder", ((JSONObject) ((JSONArray) obj.get("result")).get(i)).getJSONObject("attr").getString("rel"));
+            assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
+            assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("objectId"));
         }
-        obj = services.listFolderAsJSON("-1", 1);
+        obj = services.listFolder("-1", 1);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
@@ -89,7 +75,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        obj = services.listFolderAsJSON(services.getNodeId("/Archiv/Inbox").getString("result"), 0);
+        obj = services.listFolder(services.getNodeId("/Archiv/Inbox").getString("result"), 0);
         System.out.println(obj);
     }
 
