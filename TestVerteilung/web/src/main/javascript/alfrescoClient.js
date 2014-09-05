@@ -858,11 +858,12 @@ function handleVerteilungImageClicks() {
  */
 function loadDataForTree(aNode) {
     var obj = {};
-    var state = {"opened": false, "disabled": false, "selected": false};
+    var state = {"opened": false, "disabled": false, "selected": true};
+    var state1 = {"opened": false, "disabled": false, "selected": false};
     try {
         // keine Parameter mit gegeben, also den Rooteintrag erzeugen
         if (!exist(aNode)) {
-            obj = {"text": "/", "state": state, "children":true};
+            obj = {"text": "Root", "state": state};
         } else {
             if (alfrescoServerAvailable) {
                 var json = executeService("listFolder", [
@@ -872,15 +873,17 @@ function loadDataForTree(aNode) {
                 if (json.success) {
                     var obj = [];
                     for (var index = 0; index < json.result.length; index++) {
-                         var item = {};
+                        var item = {};
                         var o = json.result[index];
                         if (o.baseTypeId == "cmis:folder") {
-                            item["icon"] = "/";
-                            item["state"] = state;
+                            item["icon"] = "";
+                            item["state"] = state1;
                         } else {
-                            item["icon"] = "default";
+                            item["icon"] = "";
                             item["state"] = "";
                         }
+                        item["id"] = o.objectId;
+                        item["parent"] = aNode.id;
                         item["text"] = o.name;
                         item["data"] = o;
                         obj.push(item);
@@ -906,18 +909,18 @@ function loadAlfrescoTree() {
     try {
         tree = $("#tree").jstree({
             "core": {
-                "check_callback": true,
-                'data': {
-                    'url':function(node){
-                    return loadDataForTree(node);
-                    // CallBack ausführen
-                    //if (exist(obj))
-                    //    aFunction(this, obj);
+                    'data':function(node, aFunction){
+                     var obj = loadDataForTree(node);
+                     // CallBack ausführen
+                     if (exist(obj))
+                        aFunction.call(this, obj);
                 },
-                    'data' : function (node) {
-                        return { 'id' : node.id };
-                    }
-            }
+                'themes' : {
+                    'responsive' : false,
+                    'variant' : 'small',
+                    'stripes' : true
+                }
+
             },
             "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "state", "types", "wholerow", "hotkeys", "themeroller"]
         }).on("select_node.jstree", function (event, data) {
