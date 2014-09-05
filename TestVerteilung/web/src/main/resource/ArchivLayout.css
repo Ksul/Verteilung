@@ -479,7 +479,7 @@ DIV#verteilungSouth {
     padding: 0 0.2em 0;
 }
 
-
+/*
 .jstree-icon {
     background:url("./images/d.png") -90px 0px no-repeat !important;
 }
@@ -492,9 +492,9 @@ DIV#verteilungSouth {
     background:url("./images/d.png") -54px 0px no-repeat !important;
 }
 
-/*li[rel="root"] ins.ui-icon-triangle-1-se  {
+*//*li[rel="root"] ins.ui-icon-triangle-1-se  {
     background:url("./images/d.png") -54px -54px no-repeat !important;
-}*/
+}*//*
 
 .ui-icon-triangle-1-se {
     background:url("./images/d.png") -72px 0px no-repeat !important;
@@ -515,7 +515,7 @@ a.ui-state-default  {
     background: none !important ;
     color: inherit !important;
     border: none !important;
-}
+}*/
 
 .grid-pad {
     padding: 0px 0px 0px 0px;

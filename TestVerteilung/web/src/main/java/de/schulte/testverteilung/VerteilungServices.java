@@ -95,6 +95,25 @@ public class VerteilungServices {
                 // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
                 if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1)) {
                     o = convertCMISObjectToJSON(cmisObject);
+                    // prüfen, ob Children vorhanden sind
+                    if (cmisObject instanceof Folder) {
+                        ItemIterable<CmisObject> children = con.listFolder(cmisObject.getId());
+                        o.put("hasChildren", children.getTotalNumItems() > 0);
+                        boolean hasChildFolder = false;
+                        boolean hasChildDocuments = false;
+                        for (CmisObject childObject : con.listFolder(cmisObject.getId())) {
+                            if (childObject instanceof Folder) {
+                                hasChildFolder = true;
+                            }
+                            if (childObject instanceof Document) {
+                                hasChildDocuments = true;
+                            }
+                            if (hasChildDocuments && hasChildFolder)
+                                break;
+                        }
+                        o.put("hasChildFolder", hasChildFolder);
+                        o.put("hasChildDocuments", hasChildDocuments);
+                    }
                     list.put(o);
                 }
             }

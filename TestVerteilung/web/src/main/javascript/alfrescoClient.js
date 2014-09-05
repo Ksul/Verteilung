@@ -317,7 +317,7 @@ function loadAlfrescoTable() {
                     if (exist(data) && data == "application/pdf") {
 
                         var image = document.createElement("span");
-                        image.id = "alfrescoTable" + row.attr.objectId;
+                        image.id = "alfrescoTable" + row.objectId;
                         image.className = "alfrescoTableEvent";
                         image.draggable = true;
                         image.href = "#";
@@ -867,7 +867,7 @@ function loadDataForTree(aNode) {
         } else {
             if (alfrescoServerAvailable) {
                 var json = executeService("listFolder", [
-                    {"name": "filePath", "value": aNode.attr ? aNode.attr("objectId") : "-1"},
+                    {"name": "filePath", "value": aNode.id != "#" ? aNode.id : "-1"},
                     {"name": "withFolder", "value": -1}
                 ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
                 if (json.success) {
@@ -883,7 +883,7 @@ function loadDataForTree(aNode) {
                             item["state"] = "";
                         }
                         item["id"] = o.objectId;
-                        item["parent"] = aNode.id;
+                        item["children"] = o.hasChildFolder;
                         item["text"] = o.name;
                         item["data"] = o;
                         obj.push(item);
@@ -908,7 +908,7 @@ function loadDataForTree(aNode) {
 function loadAlfrescoTree() {
     try {
         tree = $("#tree").jstree({
-            "core": {
+            'core': {
                     'data':function(node, aFunction){
                      var obj = loadDataForTree(node);
                      // CallBack ausführen
@@ -917,12 +917,15 @@ function loadAlfrescoTree() {
                 },
                 'themes' : {
                     'responsive' : false,
-                    'variant' : 'small',
-                    'stripes' : true
+                    'variant' : 'big',
+                    'stripes' : true,
+                    'dots'    : true,
+                    'icons'   : true
+
                 }
 
             },
-            "plugins": [ "themes", "json_data", "ui", "crrm", "dnd", "state", "types", "wholerow", "hotkeys", "themeroller"]
+            'plugins': [  "dnd",  "types"]
         }).on("select_node.jstree", function (event, data) {
             try {
                 if (data.node.data.baseTypeId == "cmis:folder") {
@@ -933,8 +936,6 @@ function loadAlfrescoTree() {
             } catch (e) {
                 errorHandler(e);
             }
-        }).delegate("a", "click", function (event, data) {
-            event.preventDefault();
         });
 
         // Drag & Drop aus Tabelle

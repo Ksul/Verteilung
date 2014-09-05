@@ -34,6 +34,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         services.deleteDocument("/Archiv", "Test.pdf");
         services.deleteDocument("/Archiv", "TestDocument.txt");
         services.deleteDocument("/Archiv/Fehler", "TestDocument.txt");
+        services.deleteDocument("/Archiv/Fehler", "Test.pdf");
         services.deleteFolder("/Archiv/TestFolder");
     }
 
@@ -47,9 +48,11 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertEquals(4, ((JSONArray) obj.get("result")).length());
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++){
             assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
+            if (((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name").equalsIgnoreCase("Fehler"))
+                assertTrue(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getBoolean("hasChildFolder"));
             assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("objectId"));
           }
-        obj = services.uploadDocument("/Archiv", System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
+        obj = services.uploadDocument("/Archiv/Fehler", System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -64,13 +67,29 @@ public class VerteilungServicesTest extends AlfrescoTest{
             assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name"), anyOf(is ("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
             assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("objectId"));
         }
-        obj = services.listFolder("-1", 1);
+        obj = services.getNodeId("/Archiv");
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        String id = obj.getString("result");
+        obj = services.listFolder(id, 1);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         assertTrue(obj.get("result") instanceof JSONArray);
-        assertEquals(1, ((JSONArray) obj.get("result")).length());
-        obj = services.deleteDocument("/Archiv", "Test.pdf");
+        assertEquals(0, ((JSONArray) obj.get("result")).length());
+        obj = services.listFolder(id, 0);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++){
+            if (((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name").equalsIgnoreCase("Fehler")) {
+                assertTrue(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getBoolean("hasChildFolder"));
+                assertTrue(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getBoolean("hasChildren"));
+            }
+        }
+        assertEquals(4, ((JSONArray) obj.get("result")).length());
+        obj = services.deleteDocument("/Archiv/Fehler", "Test.pdf");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));

@@ -85,19 +85,20 @@
                 "animation" : 0,
                 "check_callback" : true,
                 "themes" : { "stripes" : true },
-                'data' : {
-                    'url' : function (node) {
-                        return node.id === '#' ?
-                                [{ "text" : "Root 1", "children" : true }, { "text" : "Root 2", "children" : true } ]:["Child 1", { "text" : "Child 2", "children" : ["One more"] }];
-                    },
-                    'data' : function (node) {
-                        return { 'id' : node.id };
+                'data' :  function (node, cb) {
+                        var obj;
+                        if ( node.id === '#')
+                               obj = [{ "id": "1", "text" : "Root 1", "children" : true}, {"id": "2", "text" : "Root 2", "children" : true } ];
+                        if (node.id == "1")
+                            obj = [{ "id": "11", "text" : "Child 1", "children" : false }, {"id": "12", "text" : "Child 2",  "children" : false } ];
+                        if (node.id == "2")
+                            obj = [{ "id": "21", "text" : "Child 3",  "children" : true}, {"id": "22", "text" : "Child 4",  "children" : false} ];
+                        cb.call(this, obj);
                     }
-                }
             },
             "types" : {
                 "#" : {
-                    "max_children" : 1,
+                    "max_children" : 2,
                     "max_depth" : 4,
                     "valid_children" : ["root"]
                 },
