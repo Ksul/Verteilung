@@ -236,281 +236,302 @@ function loadLayout() {
  * baut die Alfresco Tabelle auf.
  */
 function loadAlfrescoTable() {
-    $('#dtable2').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="alfrescoTabelle"></table>' );
-    alfrescoTabelle = $('#alfrescoTabelle').DataTable({
-        "jQueryUI": true,
-        "pagingType": "full_numbers",
-        "data": [],
-        "scrollX": "100%",
-        "scrollXInner": "100%",
-        // "sScrollY" : calcDataTableHeight(),
-        "autoWidth": true,
-        "lengthChange": false,
-        "searching": false,
-        // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
-        "columns": [
-            {
-                "class": 'details-control',
-                "orderable": false,
-                "data": null,
-                "defaultContent": '',
-                "width": "12px"
-            },
-            {
-                "data": "contentStreamMimeType",
-                "title": "Typ",
-                "defaultContent": '',
-                "type": "string",
-                "class": "alignCenter",
-                "width": "12px"
-            },
-             {
-                "data": "title",
-                "title": "Titel",
-                "defaultContent": '',
-                "type": "string",
-                "class": "alignLeft"
-            },
-            {
-                "data": "documentDate",
-                "title": "Datum",
-                "defaultContent": '',
-                "type": "date",
-                "class": "alignLeft"
-            },
-            {
-                "data": "person",
-                "title": "Person",
-                "defaultContent": '',
-                "type": "string",
-                "class": "alignLeft"
-            },
-            {
-                "data": "amount",
-                "title": "Betrag",
-                "defaultContent": '',
-                "type": "numeric",
-                "class": "alignLeft"
-            },
-            {
-                "data": "idvalue",
-                "title": "Schlüssel",
-                "defaultContent": '',
-                "type": "string",
-                "class": "alignLeft"
-            },
-            {
-                "data": null,
-                "title": "Aktion",
-                "width": "102px",
-                "class": "alignLeft"
-            }
-        ],
-        "columnDefs": [
-            {
-                "targets": [4, 5],
-                "visible": true
-            },
-            {
-                "targets":  [1],
-                "render": function ( data, type, row ) {
-                    if (exist(data) && data == "application/pdf") {
+    try {
 
-                        var image = document.createElement("span");
-                        image.id = "alfrescoTable" + row.objectId;
-                        image.className = "alfrescoTableEvent";
-                        image.draggable = true;
-                        image.href = "#";
-                        image.title = "PDF Dokument";
-                        image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
-                        image.style.width = "16px";
-                        image.style.height = "16px";
-                        image.style.cursor = "pointer";
-                        image.style.cssFloat = "left";
-                        image.style.marginRight = "5px";
-                        return image.outerHTML;
-                    }  else
-                        return "";
+        $('#dtable2').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="alfrescoTabelle"></table>');
+        alfrescoTabelle = $('#alfrescoTabelle').DataTable({
+            "jQueryUI": true,
+            "pagingType": "full_numbers",
+            "data": [],
+            "scrollX": "100%",
+            "scrollXInner": "100%",
+            // "sScrollY" : calcDataTableHeight(),
+            "autoWidth": true,
+            "lengthChange": false,
+            "searching": false,
+            // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
+            "columns": [
+                {
+                    "class": 'details-control',
+                    "orderable": false,
+                    "data": null,
+                    "defaultContent": '',
+                    "width": "12px"
                 },
-                "visible": true
-            },
-            {
-                "targets":  [3],
-                "render": function ( data, type, row ) {
-                    if (data != "null")
-                        return $.datepicker.formatDate("dd.mm.yy", new Date(Number(data)));
-                    else
-                        return "";
+                {
+                    "data": "contentStreamMimeType",
+                    "title": "Typ",
+                    "defaultContent": '',
+                    "type": "string",
+                    "class": "alignCenter"
                 },
-                "visible": true
-            },
-            {
-                "targets": [7],
-                "mRender": alfrescoAktionFieldFormatter,
-                "sortable": false
-            }
-        ],
-        "language": {
-            "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
-        }
-    });
+                {
+                    "data": "title",
+                    "title": "Titel",
+                    "defaultContent": '',
+                    "type": "string",
+                    "class": "alignLeft"
+                },
+                {
+                    "data": "documentDate",
+                    "title": "Datum",
+                    "defaultContent": '',
+                    "type": "date",
+                    "class": "alignLeft"
+                },
+                {
+                    "data": "person",
+                    "title": "Person",
+                    "defaultContent": '',
+                    "type": "string",
+                    "class": "alignLeft"
+                },
+                {
+                    "data": "amount",
+                    "title": "Betrag",
+                    "defaultContent": '',
+                    "type": "numeric",
+                    "class": "alignLeft"
+                },
+                {
+                    "data": "idvalue",
+                    "title": "Schlüssel",
+                    "defaultContent": '',
+                    "type": "string",
+                    "class": "alignLeft"
+                },
+                {
+                    "data": null,
+                    "title": "Aktion",
+                    "width": "102px",
+                    "class": "alignLeft"
+                }
+            ],
+            "columnDefs": [
+                {
+                    "targets": [4, 5],
+                    "visible": true
+                },
+                {
+                    "targets": [1],
+                    "render": function (data, type, row) {
+                        if (exist(data) && data == "application/pdf") {
 
-    $('.alfrescoTableEvent').on("dragstart", function (event) {
-        var dt = event.originalEvent.dataTransfer;
-        //dt.setData('Text', $(this).attr('id'));
-    });
+                            var image = document.createElement("span");
+                            image.id = "alfrescoTable" + row.objectId;
+                            image.className = "alfrescoTableEvent";
+                            image.draggable = true;
+                            image.href = "#";
+                            image.title = "PDF Dokument";
+                            image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
+                            image.style.width = "16px";
+                            image.style.height = "16px";
+                            image.style.cursor = "pointer";
+                            image.style.cssFloat = "left";
+                            image.style.marginRight = "5px";
+                            return image.outerHTML;
+                        } else
+                            return "";
+                    },
+                    "visible": true
+                },
+                {
+                    "targets": [2],
+                    "render": function (data, type, row) {
+                        if (exist(data))
+                            return data;
+                        else if (exist(row.name))
+                            return row.name;
+                        else
+                            return "";
+                    },
+                    "visible": true
+                },
+                {
+                    "targets": [3],
+                    "render": function (data, type, row) {
+                        if (exist(data))
+                            return $.datepicker.formatDate("dd.mm.yy", new Date(Number(data)));
+                        else if (exist(row.creationDate))
+                            return $.datepicker.formatDate("dd.mm.yy", new Date(Number(row.creationDate)));
+                        else
+                            return "";
+                    },
+                    "visible": true
+                },
+                {
+                    "targets": [7],
+                    "mRender": alfrescoAktionFieldFormatter,
+                    "sortable": false
+                }
+            ],
+            "language": {
+                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
+            }
+        });
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 /**
  * baut die Alfresco Folder Tabelle auf.
  */
 function loadAlfrescoFolderTable() {
-    $('#dtable3').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="alfrescoFolderTabelle"></table>');
-    alfrescoFolderTabelle = $('#alfrescoFolderTabelle').DataTable({
-        "jQueryUI": true,
-        "pagingType": "full_numbers",
-        "data": [],
-        "scrollX": "100%",
-        "scrollXInner": "100%",
-        // "sScrollY" : calcDataTableHeight(),
-        "autoWidth": true,
-        "lengthChange": false,
-        "searching": false,
-        // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
-        "columns": [
-            {
-                "class": 'details-control',
-                "orderable": false,
-                "data": null,
-                "defaultContent": '',
-                "width": "12px"
+    try {
+        $('#dtable3').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="alfrescoFolderTabelle"></table>');
+        alfrescoFolderTabelle = $('#alfrescoFolderTabelle').DataTable({
+            "jQueryUI": true,
+            "pagingType": "full_numbers",
+            "data": [],
+            "scrollX": "100%",
+            "scrollXInner": "100%",
+            // "sScrollY" : calcDataTableHeight(),
+            "autoWidth": true,
+            "lengthChange": false,
+            "searching": false,
+            // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
+            "columns": [
+                {
+                    "class": 'details-control',
+                    "orderable": false,
+                    "data": null,
+                    "defaultContent": '',
+                    "width": "12px"
+                },
+                {
+                    "data": "name",
+                    "title": "Name",
+                    "defaultContent": '',
+                    "type": "string",
+                    "class": "alignLeft"
+                },
+                {
+                    "data": "description",
+                    "title": "Beschreibung",
+                    "defaultContent": '',
+                    "type": "string",
+                    "class": "alignLeft"
+                },
+                {
+                    "title": "Aktion",
+                    "data": null,
+                    "width": "102px",
+                    "class": "alignLeft"
+                }
+            ],
+            "columnDefs": [
+                // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
+                {
+                    "targets": [1, 2],
+                    "visible": true
+                },
+                {
+                    "targets": [3],
+                    "mRender": alfrescoFolderAktionFieldFormatter,
+                    "sortable": false
+                }
+            ],
+            "language": {
+                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
             },
-            {
-                "data": "name",
-                "title": "Name",
-                "defaultContent": '',
-                "type": "string",
-                "class": "alignLeft"
-            },
-            {
-                "data": "description",
-                "title": "Beschreibung",
-                "defaultContent": '',
-                "type": "string",
-                "class": "alignLeft"
-            },
-            {
-                "title": "Aktion",
-                "data": null,
-                "width": "102px",
-                "class": "alignLeft"
+            "rowCallback": function (row, data) {
+                // Cell click
+                $('td', row).on('click', function () {
+                    switchAlfrescoDirectory(data[4]);
+                });
             }
-        ],
-        "columnDefs": [
-            // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
-            {
-                "targets": [1, 2],
-                "visible": true
-            },
-            {
-                "targets": [3],
-                "mRender": alfrescoFolderAktionFieldFormatter,
-                "sortable": false
-            }
-        ],
-        "language": {
-            "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
-        },
-        "rowCallback": function( row, data ) {
-            // Cell click
-            $('td', row).on('click', function () {
-                switchAlfrescoDirectory(data[4]);
-            });
-        }
-    });
+        });
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 /**
  * lädt die Tabelle für den Verteilungstab
  */
 function loadVerteilungTable() {
-    $('#dtable').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="tabelle"></table>' );
-    tabelle = $('#tabelle').DataTable({
-        "jQueryUI": true,
-        "pagingType": "full_numbers",
-        "data": [],
-        "scrollX": "100%",
-        "scrollXInner": "100%",
-        "scrollY" : calcDataTableHeight(),
-        "autoWidth": true,
-        "lengthChange": false,
-        "searching": false,
-        "pageLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
-        "columns": [
-            {
-                "class":          'details-control',
-                "orderable":      false,
-                "data":           null,
-                "defaultContent": '',
-                "width": "12px"
-            },
-            {
-                "title": "Name",
-                "type": "string",
-                "class": "alignLeft"
-            },
-            {
-                "title": "Dokumenttyp",
-                "type": "string",
-                "class": "alignLeft"
-            },
-            {
-                "title": "Ergebnis",
-                "width": "102px",
-                "class": "alignLeft"
-            },
-            {
-                "title": "Id"
-            },
-            {
-                "title": "Fehler"
+    try {
+        $('#dtable').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="tabelle"></table>');
+        tabelle = $('#tabelle').DataTable({
+            "jQueryUI": true,
+            "pagingType": "full_numbers",
+            "data": [],
+            "scrollX": "100%",
+            "scrollXInner": "100%",
+            "scrollY": calcDataTableHeight(),
+            "autoWidth": true,
+            "lengthChange": false,
+            "searching": false,
+            "pageLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
+            "columns": [
+                {
+                    "class": 'details-control',
+                    "orderable": false,
+                    "data": null,
+                    "defaultContent": '',
+                    "width": "12px"
+                },
+                {
+                    "title": "Name",
+                    "type": "string",
+                    "class": "alignLeft"
+                },
+                {
+                    "title": "Dokumenttyp",
+                    "type": "string",
+                    "class": "alignLeft"
+                },
+                {
+                    "title": "Ergebnis",
+                    "width": "102px",
+                    "class": "alignLeft"
+                },
+                {
+                    "title": "Id"
+                },
+                {
+                    "title": "Fehler"
+                }
+            ],
+            "columnDefs": [
+                {
+                    "targets": [1, 2, 3],
+                    "visible": true
+                },
+                {
+                    "targets": [3],
+                    "mRender": imageFieldFormatter,
+                    "sortable": false
+                },
+                {
+                    "targets": [4, 5],
+                    "visible": false
+                }
+            ],
+            "language": {
+                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
             }
-        ],
-        "columnDefs": [
-            {
-                "targets": [1,2,3],
-                "visible": true
-            },
-            {
-                "targets": [3],
-                "mRender": imageFieldFormatter,
-                "sortable": false
-            },
-            {
-                "targets": [4,5],
-                "visible": false
-            }
-        ],
-        "language": {
-            "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
-        }
-    });
-    // Add event listener for opening and closing details
-    $('#tabelle tbody').on('click', 'td.details-control', function () {
-        var tr = $(this).closest('tr');
-        var row = tabelle.row( tr );
+        });
+        // Add event listener for opening and closing details
+        $('#tabelle tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = tabelle.row(tr);
 
-        if ( row.child.isShown() ) {
-            // This row is already open - close it
-            row.child.hide();
-            tr.removeClass('shown');
-        }
-        else {
-            // Open this row
-            row.child( formatDetails(row.data()) ).show();
-            tr.addClass('shown');
-        }
-    } );
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                // Open this row
+                row.child(formatDetails(row.data())).show();
+                tr.addClass('shown');
+            }
+        });
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 /**
@@ -528,33 +549,37 @@ function calcDataTableHeight()  {
  * @returns {string}
  */
 function alfrescoFolderAktionFieldFormatter(data, type, full) {
-   // if (o.iDataRow == 0) {
+    try {
+        // if (o.iDataRow == 0) {
         //	o.cell.setStyle('width', '102px');
-  //  }
-    var container =  document.createElement("div");
-    var image = document.createElement("div");
-    image.href = "#";
-    image.className = "folderEdit";
-    image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
-    image.title = "Details bearbeiten";
-    image.style.cursor = "pointer";
-    image.style.width = "16px";
-    image.style.height = "16px";
-    image.style.cssFloat = "left";
-    image.style.marginRight = "5px";
-    container.appendChild(image);
-    image = document.createElement("div");
-    image.href = "#";
-    image.className = "folderOpen";
-    image.title = "Ordner öffnen";
-    image.style.backgroundImage = "url(src/main/resource/images/details_open.png)";
-    image.style.width = "16px";
-    image.style.height = "16px";
-    image.style.cursor = "pointer";
-    image.style.cssFloat = "left";
-    image.style.marginRight = "5px";
-    container.appendChild(image);
-    return container.outerHTML;
+        //  }
+        var container = document.createElement("div");
+        var image = document.createElement("div");
+        image.href = "#";
+        image.className = "folderEdit";
+        image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
+        image.title = "Details bearbeiten";
+        image.style.cursor = "pointer";
+        image.style.width = "16px";
+        image.style.height = "16px";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+        image = document.createElement("div");
+        image.href = "#";
+        image.className = "folderOpen";
+        image.title = "Ordner öffnen";
+        image.style.backgroundImage = "url(src/main/resource/images/details_open.png)";
+        image.style.width = "16px";
+        image.style.height = "16px";
+        image.style.cursor = "pointer";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+        return container.outerHTML;
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 /**
@@ -563,20 +588,23 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
  * @returns {string}
  */
 function alfrescoAktionFieldFormatter(data, type, full) {
-
-    var container =  document.createElement("div");
-    var image = document.createElement("div");
-    image.href = "#";
-    image.className = "detailEdit";
-    image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
-    image.title = "Details bearbeiten";
-    image.style.cursor = "pointer";
-    image.style.width = "16px";
-    image.style.height = "16px";
-    image.style.cssFloat = "left";
-    image.style.marginRight = "5px";
-    container.appendChild(image);
-    return container.outerHTML;
+    try {
+        var container = document.createElement("div");
+        var image = document.createElement("div");
+        image.href = "#";
+        image.className = "detailEdit";
+        image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
+        image.title = "Details bearbeiten";
+        image.style.cursor = "pointer";
+        image.style.width = "16px";
+        image.style.height = "16px";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+        return container.outerHTML;
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 /**
@@ -587,78 +615,81 @@ function alfrescoAktionFieldFormatter(data, type, full) {
  * @return {string}
  */
 function imageFieldFormatter(data, type, full) {
-
-    var container =  document.createElement("div");
-    var image = document.createElement("div");
-    image.href = "#";
-    image.className = "run";
-    if (full[3].error) {
-        image.style.backgroundImage = "url(src/main/resource/images/error.png)";
-        image.title = "Verteilung fehlerhaft";
-    } else {
-        image.style.backgroundImage = "url(src/main/resource/images/ok.png)";
-        image.title = "Verteilung erfolgreich";
-    }
-    image.style.cursor = "pointer";
-    image.style.width = "16px";
-    image.style.height = "16px";
-    image.style.cssFloat = "left";
-    image.style.marginRight = "5px";
-    container.appendChild(image);
-    image = document.createElement("div");
-    image.href = "#";
-    image.className = "glass";
-    image.title = "Ergebnis anzeigen";
-    image.style.backgroundImage = "url(src/main/resource/images/glass.png)";
-    image.style.width = "16px";
-    image.style.height = "16px";
-    image.style.cursor = "pointer";
-    image.style.cssFloat = "left";
-    image.style.marginRight = "5px";
-    container.appendChild(image);
-    image = document.createElement("div");
-    image.href = "#";
-    image.className = "loeschen";
-    image.title = "Ergebnis löschen";
-    if (daten[full[1]]["notDeleteable"] != "true") {
-        image.style.backgroundImage = "url(src/main/resource/images/delete.png)";
+    try {
+        var container = document.createElement("div");
+        var image = document.createElement("div");
+        image.href = "#";
+        image.className = "run";
+        if (full[3].error) {
+            image.style.backgroundImage = "url(src/main/resource/images/error.png)";
+            image.title = "Verteilung fehlerhaft";
+        } else {
+            image.style.backgroundImage = "url(src/main/resource/images/ok.png)";
+            image.title = "Verteilung erfolgreich";
+        }
         image.style.cursor = "pointer";
-    }
-    else {
-        image.style.backgroundImage = "url(src/main/resource/images/delete-bw.png)";
-        image.style.cursor = "not-allowed";
-    }
-    image.style.width = "16px";
-    image.style.height = "16px";
-    image.style.cssFloat = "left";
-    image.style.marginRight = "5px";
-    container.appendChild(image);
-    image = document.createElement("div");
-    image.className = "pdf";
-    if (full[1].toLowerCase().endsWith(".pdf")) {
-        image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
+        image.style.width = "16px";
+        image.style.height = "16px";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+        image = document.createElement("div");
+        image.href = "#";
+        image.className = "glass";
+        image.title = "Ergebnis anzeigen";
+        image.style.backgroundImage = "url(src/main/resource/images/glass.png)";
+        image.style.width = "16px";
+        image.style.height = "16px";
         image.style.cursor = "pointer";
-    } else {
-        image.style.backgroundImage = "url(src/main/resource/images/pdf-bw.png)";
-        image.style.cursor = "not-allowed";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+        image = document.createElement("div");
+        image.href = "#";
+        image.className = "loeschen";
+        image.title = "Ergebnis löschen";
+        if (daten[full[1]]["notDeleteable"] != "true") {
+            image.style.backgroundImage = "url(src/main/resource/images/delete.png)";
+            image.style.cursor = "pointer";
+        }
+        else {
+            image.style.backgroundImage = "url(src/main/resource/images/delete-bw.png)";
+            image.style.cursor = "not-allowed";
+        }
+        image.style.width = "16px";
+        image.style.height = "16px";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+        image = document.createElement("div");
+        image.className = "pdf";
+        if (full[1].toLowerCase().endsWith(".pdf")) {
+            image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
+            image.style.cursor = "pointer";
+        } else {
+            image.style.backgroundImage = "url(src/main/resource/images/pdf-bw.png)";
+            image.style.cursor = "not-allowed";
+        }
+        image.style.cssFloat = "left";
+        image.style.width = "16px";
+        image.style.height = "16px";
+        image.style.marginRight = "5px";
+        image.title = "PDF anzeigen";
+        container.appendChild(image);
+        image = document.createElement("div");
+        image.className = "moveToInbox";
+        image.style.backgroundImage = "url(src/main/resource/images/move-file.png)";
+        image.style.cursor = "pointer";
+        image.style.cssFloat = "left";
+        image.style.width = "16px";
+        image.style.height = "16px";
+        // image.style.marginRight = "5px";
+        image.title = "Zur Inbox verschieben";
+        container.appendChild(image);
+        return container.outerHTML;
+    } catch (e) {
+        errorHandler(e);
     }
-    image.style.cssFloat = "left";
-    image.style.width = "16px";
-    image.style.height = "16px";
-    image.style.marginRight = "5px";
-    image.title = "PDF anzeigen";
-    container.appendChild(image);
-    image = document.createElement("div");
-    image.className = "moveToInbox";
-    image.style.backgroundImage = "url(src/main/resource/images/move-file.png)";
-    image.style.cursor = "pointer";
-    image.style.cssFloat = "left";
-    image.style.width = "16px";
-    image.style.height = "16px";
-    // image.style.marginRight = "5px";
-    image.title = "Zur Inbox verschieben";
-    container.appendChild(image);
-    return container.outerHTML;
 }
 
 /**
@@ -696,14 +727,7 @@ function switchAlfrescoDirectory(objectId) {
         if (json.success) {
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
-  /*          for (var index = 0; index < json.result.length; ++index) {
-                var name = json.result[index].attr.name ? json.result[index].attr.name : "";
-                var description = json.result[index].attr.description ? json.result[index].attr.description : "";
-                var id = json.result[index].attr.objectId ? json.result[index].attr.objectId : "";
-                var row = [ null, name, description, null, id];
-                alfrescoFolderTabelle.row.add(row).draw();
-            }*/
-        }
+          }
         json = executeService("listFolder", [
             {"name": "filePath", "value": objectId},
             {"name": "withFolder", "value": 1}
@@ -711,22 +735,31 @@ function switchAlfrescoDirectory(objectId) {
         if (json.success) {
             alfrescoTabelle.clear();
             alfrescoTabelle.rows.add(json.result).draw();
-   /*         for (var index = 0; index < json.result.length; ++index) {
-                var titel = json.result[index].attr.title ? json.result[index].attr.title : json.result[index].attr.name ? json.result[index].attr.name : "";
-                var datum = json.result[index].attr.documentDate ? json.result[index].attr.documentDate : json.result[index].attr.creationDate ? json.result[index].attr.creationDate : "";
-                var date = parseDate(datum);
-                var dateString = date ? REC.dateFormat(date, "dd.MM.YYYY") : "";
-                var person = json.result[index].attr.person ? json.result[index].attr.person : "";
-                var amount = json.result[index].attr.amount ? json.result[index].attr.amount : "";
-                var schluessel = json.result[index].attr.idvalue ? json.result[index].attr.idvalue : "";
-                var id = json.result[index].attr.objectId ? json.result[index].attr.objectId : "";
-                var name = json.result[index].attr.name ? json.result[index].attr.name : "";
-                var beschreibung = json.result[index].attr.description ? json.result[index].attr.description : "";
-                var row = [ null, titel, dateString, person, amount, schluessel, name, beschreibung, null, id];
-                alfrescoTabelle.row.add(row).draw();
-            }*/
+            $('.alfrescoTableEvent').off("dragstart");
+            $('.alfrescoTableEvent').on("dragstart", function (event) {
+                try {
+                    var dt = event.originalEvent.dataTransfer;
+                    //wg alfresco Prefix
+                    var data = alfrescoTabelle.row(document.getElementById($(this).attr('id').substring(13))).data();
+                    dt.setData('Id', data.objectId);
+                    dt.setData('parentId', data.parentId);
+                } catch (e) {
+                    errorHandler(e);
+                }
+            });
+            $('.alfrescoTableEvent').off("dblclick");
+            $('.alfrescoTableEvent').on("dblclick", function (event) {
+                try {
+                    var dt = event.originalEvent.dataTransfer;
+                    //wg alfresco Prefix
+                    var data = alfrescoTabelle.row(document.getElementById($(this).attr('id').substring(13))).data();
+                    var url = getSettings("server").substr(0, getSettings("server").length - 5) + "/d/d/workspace/" + data.nodeRef.substr(12) + "/file.bin";
+                    window.open(url);
+                } catch (e) {
+                    errorHandler(e);
+                }
+            });
         }
-
     } catch (e) {
         errorHandler(e);
     }
@@ -766,88 +799,111 @@ function handleAlfrescoImageClicks() {
  */
 function handleVerteilungImageClicks() {
     $(document).on("click", ".run", function () {
-        var tr = $(this).closest('tr');
-        var row = tabelle.row( tr).data();
-        var name = row[1];
-        REC.currentDocument.setContent(daten[name]["text"]);
-        REC.testRules(rulesEditor.getSession().getValue());
-        daten[name].log = REC.mess;
-        daten[name].result = results;
-        daten[name].position = REC.positions;
-        daten[name].xml = REC.currXMLName;
-        daten[name].error = REC.errors;
-        var ergebnis = [];
-        ergebnis["error"] = REC.errors.length > 0;
-        row[2] = REC.currXMLName.join(" : ");
-        row[3] = ergebnis;
-        row[5] = REC.errors;
-        if (tabelle.fnUpdate(row, aPos[0]) > 0)
-            message("Fehler", "Tabelle konnte nicht aktualisiert werden!");
+        try {
+            var tr = $(this).closest('tr');
+            var row = tabelle.row(tr).data();
+            var name = row[1];
+            REC.currentDocument.setContent(daten[name]["text"]);
+            REC.testRules(rulesEditor.getSession().getValue());
+            daten[name].log = REC.mess;
+            daten[name].result = results;
+            daten[name].position = REC.positions;
+            daten[name].xml = REC.currXMLName;
+            daten[name].error = REC.errors;
+            var ergebnis = [];
+            ergebnis["error"] = REC.errors.length > 0;
+            row[2] = REC.currXMLName.join(" : ");
+            row[3] = ergebnis;
+            row[5] = REC.errors;
+            if (tabelle.fnUpdate(row, aPos[0]) > 0)
+                message("Fehler", "Tabelle konnte nicht aktualisiert werden!");
+        }
+        catch (e) {
+            errorHandler(e);
+        }
     });
     $(document).on("click", ".glass", function () {
-        var tr = $(this).closest('tr');
-        var row = tabelle.row( tr).data();
-        var name = row[1];
-        multiMode = false;
-        showMulti = true;
-        currentFile = daten[name]["file"];
-        document.getElementById('headerWest').textContent = currentFile;
-        setXMLPosition(daten[name]["xml"]);
-        removeMarkers(markers, textEditor);
-        markers = setMarkers(daten[name]["position"], textEditor);
-        textEditor.getSession().setValue(daten[name]["text"]);
-        propsEditor.getSession().setValue(printResults(daten[name]["result"]));
-        fillMessageBox(daten[name]["log"], true);
-        manageControls();
+        try {
+            var tr = $(this).closest('tr');
+            var row = tabelle.row(tr).data();
+            var name = row[1];
+            multiMode = false;
+            showMulti = true;
+            currentFile = daten[name]["file"];
+            document.getElementById('headerWest').textContent = currentFile;
+            setXMLPosition(daten[name]["xml"]);
+            removeMarkers(markers, textEditor);
+            markers = setMarkers(daten[name]["position"], textEditor);
+            textEditor.getSession().setValue(daten[name]["text"]);
+            propsEditor.getSession().setValue(printResults(daten[name]["result"]));
+            fillMessageBox(daten[name]["log"], true);
+            manageControls();
+
+        } catch (e) {
+            errorHandler(e);
+        }
     });
     $(document).on("click", ".loeschen", function () {
-        var answer = confirm("Eintrag löschen?");
-        if (answer) {
-            var tr = $(this).closest('tr');
-            var row = tabelle.row( tr).data();
-            var name = row[1];
-            try {
-                netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
-            } catch (e) {
-                message("Fehler", "Permission to delete file was denied.");
+        try {
+            var answer = confirm("Eintrag löschen?");
+            if (answer) {
+                var tr = $(this).closest('tr');
+                var row = tabelle.row(tr).data();
+                var name = row[1];
+                try {
+                    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+                } catch (e) {
+                    message("Fehler", "Permission to delete file was denied.");
+                }
+                currentFile = daten[name]["file"];
+                textEditor.getSession().setValue("");
+                propsEditor.getSession().setValue("");
+                clearMessageBox();
+                rulesEditor.getSession().foldAll(1);
+                if (currentFile.length > 0) {
+                    var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+                    file.initWithPath(currentFile);
+                    if (file.exists() == true)
+                        file.remove(false);
+                }
+                tabelle.fnDeleteRow(aPos[0]);
             }
-            currentFile = daten[name]["file"];
-            textEditor.getSession().setValue("");
-            propsEditor.getSession().setValue("");
-            clearMessageBox();
-            rulesEditor.getSession().foldAll(1);
-            if (currentFile.length > 0) {
-                var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-                file.initWithPath(currentFile);
-                if (file.exists() == true)
-                    file.remove(false);
-            }
-            tabelle.fnDeleteRow(aPos[0]);
+        } catch (e) {
+            errorHandler(e);
         }
     });
     $(document).on("click", ".pdf", function (name) {
-        var tr = $(this).closest('tr');
-        var row = tabelle.row( tr).data();
-        var name = row[1];
-        if (typeof daten[name]["container"] != "undefined" && daten[name]["container"] != null) {
-            openPDF(daten[name]["container"], true);
-        } else {
-            openPDF(daten[name]["file"]);
+        try {
+            var tr = $(this).closest('tr');
+            var row = tabelle.row(tr).data();
+            var name = row[1];
+            if (typeof daten[name]["container"] != "undefined" && daten[name]["container"] != null) {
+                openPDF(daten[name]["container"], true);
+            } else {
+                openPDF(daten[name]["file"]);
+
+            }
+        } catch (e) {
+            errorHandler(e);
         }
     });
     $(document).on("click", ".moveToInbox", function () {
-        var tr = $(this).closest('tr');
-        var row = tabelle.row( tr).data();
-        var name = row[1];
-        var docId = "workspace:/SpacesStore/" + daten[name]["container"];
-        var json = executeService("createDocument", [
-            {"name": "folder", "value": "/Archiv/Inbox"},
-            { "name": "fileName", "value": name},
-            { "name": "documentContent", "value": daten[name].content, "type": "byte"},
-            { "name": "documentType", "value": "application/pdf"},
-            { "name": "extraCMSProperties", "value": ""},
-            { "name": "versionState", "value": "major"}
-        ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
+        try {
+            var tr = $(this).closest('tr');
+            var row = tabelle.row(tr).data();
+            var name = row[1];
+            var docId = "workspace:/SpacesStore/" + daten[name]["container"];
+            var json = executeService("createDocument", [
+                {"name": "folder", "value": "/Archiv/Inbox"},
+                { "name": "fileName", "value": name},
+                { "name": "documentContent", "value": daten[name].content, "type": "byte"},
+                { "name": "documentType", "value": "application/pdf"},
+                { "name": "extraCMSProperties", "value": ""},
+                { "name": "versionState", "value": "major"}
+            ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
+        } catch (e) {
+            errorHandler(e);
+        }
     });
 }
 
@@ -886,9 +942,9 @@ function loadDataForTree(aNode) {
                         item["children"] = o.hasChildFolder;
                         item["text"] = o.name;
                         item["data"] = o;
+                        item["a_attr"] = "'class': 'drop'";
                         obj.push(item);
                     }
-
                    return obj;
                 }
                 else {
@@ -903,22 +959,72 @@ function loadDataForTree(aNode) {
 }
 
 /**
+ * verschiebt ein Dokument
+ * @param node
+ * @param destination
+ */
+function moveDocument(nodeId, parentId, destinationId) {
+    try {
+        var json = executeService("moveDocument", [
+            {"name": "documentId", "value": nodeId},
+            {"name": "currentLocationId", "value": parentId},
+            {"name": "destinationId", "value": destinationId}
+        ], "Dokument konnte nicht verschoben werden:");
+        return json.success;
+    } catch (e) {
+        errorHandler(e);
+    }
+}
+
+/**
+ * trägt den EventHandler für die Tree-Icons ein.
+ */
+function populateEventHandlerForTreeIcons() {
+    $('.jstree-icon').off("dragenter dragover drop");
+    $('.jstree-icon').on("dragenter dragover drop", function (event) {
+        try {
+            event.preventDefault();
+            if (event.type === 'drop') {
+                var nodeId = event.originalEvent.dataTransfer.getData('id', $(this).attr('id'));
+                var parentId = event.originalEvent.dataTransfer.getData('parentId', $(this).attr('id'));
+                var destinationId = this.parentElement.parentElement.id;
+                var erg = moveDocument(nodeId, parentId, destinationId);
+                if (erg) {
+                    alfrescoTabelle.row().remove();
+                    alfrescoTabelle.draw();
+                }
+            }
+        } catch (e) {
+            errorHandler(e);
+        }
+    });
+}
+
+/**
  * lädt den Alfresco Tree
  */
 function loadAlfrescoTree() {
+
     try {
+        $("#tree").jstree().destroy();
         tree = $("#tree").jstree({
             'core': {
-                    'data':function(node, aFunction){
-                     var obj = loadDataForTree(node);
-                     // CallBack ausführen
-                     if (exist(obj))
-                        aFunction.call(this, obj);
-                },
+                    'data': function (node, aFunction) {
+                        try {
+                            var obj = loadDataForTree(node);
+                            // CallBack ausführen
+                            if (exist(obj)) {
+                                aFunction.call(this, obj);
+                                populateEventHandlerForTreeIcons();
+                            }
+                        } catch (e) {
+                            errorHandler(e);
+                        }
+                    },
                 'themes' : {
                     'responsive' : false,
                     'variant' : 'big',
-                    'stripes' : true,
+                    'stripes' : false,
                     'dots'    : true,
                     'icons'   : true
 
@@ -939,18 +1045,6 @@ function loadAlfrescoTree() {
         });
 
         // Drag & Drop aus Tabelle
-        $('.jstree-icon').on("dragenter dragover drop", function (event) {
-            event.preventDefault();
-            if (event.type === 'drop') {
-                var data = event.originalEvent.dataTransfer.getData('Text', $(this).attr('id'));
-                if ($(this).find('span').length === 0) {
-                    de = $('#' + data).detach();
-                    de.appendTo($(this));
-                }
-
-            }
-            ;
-        });
         // Initiales Lesen
         if (alfrescoServerAvailable)
             switchAlfrescoDirectory("-1");

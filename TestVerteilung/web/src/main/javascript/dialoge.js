@@ -148,7 +148,7 @@ function startSettingsDialog() {
      */
     function startDocumentDialog(tableRow) {
         try {
-            var data = tableRow.data().attr;
+            var data = tableRow.data();
             // Konversion
             if (exist(data.documentDate)) {
                 if (data.documentDate != "null")

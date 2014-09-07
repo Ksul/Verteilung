@@ -114,6 +114,7 @@ public class VerteilungServices {
                         o.put("hasChildFolder", hasChildFolder);
                         o.put("hasChildDocuments", hasChildDocuments);
                     }
+                    o.put("parentId", filePath);
                     list.put(o);
                 }
             }
