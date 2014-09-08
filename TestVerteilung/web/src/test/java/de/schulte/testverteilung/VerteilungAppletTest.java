@@ -22,7 +22,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        JSONObject obj = applet.setParameter(properties.getProperty("server"), properties.getProperty("bindingUrl"), "admin", properties.getProperty("password"));
+        JSONObject obj = applet.setParameter(properties.getProperty("server"), properties.getProperty("bindingUrl"), properties.getProperty("user"), properties.getProperty("password"));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -147,20 +147,21 @@ public class VerteilungAppletTest extends AlfrescoTest {
 
     @Test
     public void testLoadProperties() throws Exception {
-        String file =  "TestVerteilung/test.properties";
-        String fullPath = "file://"+System.getProperty("user.dir").substring(0, System.getProperty("user.dir").lastIndexOf('/') +1)  + file;
+        String fileName =  "/test.properties";
+        String fullPath = "file:///" + System.getProperty("user.dir").replace("\\", "/") + fileName;
         JSONObject obj = applet.loadProperties(fullPath);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
     }
 
     @Test
     public void testFileOperations() throws Exception {
         String file =  "TestVerteilung/Test.test";
         String content = "abcde\näöüßÄÖÜ";
-        String fullPath = "file://"+System.getProperty("user.dir").substring(0, System.getProperty("user.dir").lastIndexOf('/') +1)  + file;
+        String dir = System.getProperty("user.dir").replace("\\", "/");
+        String fullPath = "file:///" + dir.substring(0, dir.lastIndexOf('/') +1)  + file;
         applet.deleteFile(fullPath);
         JSONObject obj = applet.saveToFile(fullPath, content);
         assertNotNull(obj);
@@ -196,7 +197,8 @@ public class VerteilungAppletTest extends AlfrescoTest {
     public void testExtractPDFFile() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
-        JSONObject obj = applet.extractPDFFile("file://" + System.getProperty("user.dir") + fileName);
+        String fullPath = "file:///" + System.getProperty("user.dir").replace("\\", "/") + fileName;
+        JSONObject obj = applet.extractPDFFile(fullPath);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
@@ -247,7 +249,8 @@ public class VerteilungAppletTest extends AlfrescoTest {
     public void testExtractZIPAndExtractPDFToInternalStorage() throws Exception {
         String fileName = properties.getProperty("testZIP");
         assertNotNull(fileName);
-        byte[] content = readFile(System.getProperty("user.dir") + fileName);
+        String fullPath = System.getProperty("user.dir").replace("\\", "/") + fileName;
+        byte[] content = readFile(fullPath);
         assertTrue(content.length > 0);
         String encodedContent =  Base64.encodeBase64String(content);
         for (int k = 0; k <= Math.ceil(encodedContent.length() / 1000); k++)
@@ -314,7 +317,8 @@ public class VerteilungAppletTest extends AlfrescoTest {
     public void testOpenFile() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
-        JSONObject obj = applet.openFile("file://" + System.getProperty("user.dir") + fileName);
+        String fullPath = "file:///" + System.getProperty("user.dir").replace("\\", "/") + fileName;
+        JSONObject obj = applet.openFile(fullPath);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));

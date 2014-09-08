@@ -29,7 +29,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        services = new VerteilungServices(properties.getProperty("server"), properties.getProperty("bindingUrl"), "admin", properties.getProperty("password"));
+        services = new VerteilungServices(properties.getProperty("server"), properties.getProperty("bindingUrl"), properties.getProperty("user"), properties.getProperty("password"));
         assertNotNull(services);
         services.deleteDocument("/Archiv", "Test.pdf");
         services.deleteDocument("/Archiv", "TestDocument.txt");
@@ -217,13 +217,13 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        JSONObject result = new JSONObject(obj.get("result").toString());
+        JSONObject result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertTrue(result.getString("name").equalsIgnoreCase("TestDocument.txt"));
         assertNotNull(result.getString("objectId"));
         content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         obj = services.updateDocument(result.getString("objectId"), Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR.value(), null);
-        result = new JSONObject(obj.get("result").toString());
+        result = new JSONObject(obj.getString("result"));
         obj = services.getDocumentContent(result.getString("objectId"), false);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -347,8 +347,8 @@ public class VerteilungServicesTest extends AlfrescoTest{
 
     @Test
     public void testLoadProperties() throws Exception {
-        String file =  "TestVerteilung/test.properties";
-        String fullPath = "file://"+System.getProperty("user.dir").substring(0, System.getProperty("user.dir").lastIndexOf('/') +1)  + file;
+        String fileName =  "/test.properties";
+        String fullPath = "file:///" + System.getProperty("user.dir").replace("\\", "/") + fileName;
         JSONObject obj = services.loadProperties(fullPath);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -397,7 +397,8 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testExtractPDFFile() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
-        JSONObject obj = services.extractPDFFile("file://" + System.getProperty("user.dir") + fileName);
+        String fullPath = "file:///" + System.getProperty("user.dir").replace("\\", "/") + fileName;
+        JSONObject obj = services.extractPDFFile(fullPath);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
@@ -529,7 +530,8 @@ public class VerteilungServicesTest extends AlfrescoTest{
     public void testOpenFile() throws Exception {
         String fileName = properties.getProperty("testPDF");
         assertNotNull(fileName);
-        JSONObject obj = services.openFile("file://" + System.getProperty("user.dir") + fileName);
+        String fullPath = "file:///" + System.getProperty("user.dir").replace("\\", "/") + fileName;
+        JSONObject obj = services.openFile(fullPath);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -556,7 +558,6 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        assertFalse(obj.getBoolean("result"));
+        assertFalse(obj.getBoolean("success"));
     }
 }

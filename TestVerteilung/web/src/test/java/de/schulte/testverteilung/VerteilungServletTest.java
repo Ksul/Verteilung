@@ -74,7 +74,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(response.getOutputStream()).thenReturn(servletOutputStream);
         when(request.getParameter(VerteilungServlet.PARAMETER_SERVER)).thenReturn(properties.getProperty("server"));
         when(request.getParameter(VerteilungServlet.PARAMETER_BINDING)).thenReturn(properties.getProperty("bindingUrl"));
-        when(request.getParameter(VerteilungServlet.PARAMETER_USERNAME)).thenReturn("admin");
+        when(request.getParameter(VerteilungServlet.PARAMETER_USERNAME)).thenReturn(properties.getProperty("user"));
         when(request.getParameter(VerteilungServlet.PARAMETER_PASSWORD)).thenReturn(properties.getProperty("password"));
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_SETPARAMETER);
         sr = new StringWriter();

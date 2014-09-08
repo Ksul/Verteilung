@@ -54,7 +54,7 @@ public class AlfrescoConnector {
         this.server = server;
         this.bindingUrl = bindingUrl;
         logger.info("Server: " + this.server);
-        logger.info("URL: " + this.bindingUrl);
+        logger.info("Binding: " + this.bindingUrl);
         logger.info("User: " + this.user);
         logger.info("Password: " + this.password);
     }

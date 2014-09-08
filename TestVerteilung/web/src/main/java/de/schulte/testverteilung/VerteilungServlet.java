@@ -591,7 +591,7 @@ public class VerteilungServlet extends HttpServlet {
      */
     protected JSONObject openFile(String fileName) throws VerteilungException {
 
-        return services.openFile(getServletContext().getRealPath(fileName));
+        return services.openFile(getServletContext().getRealPath(fileName).replace("\\", "/"));
     }
 
     /**

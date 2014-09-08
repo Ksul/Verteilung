@@ -131,13 +131,14 @@ function message(title, str) {
 
 /**
  * lädt das Applet
- * @param level         der Level für die Log AUsgaben
+ * @param level         der Level für die Log Ausgaben
+ * @param server        der Alfresco Server
  * @param bindingUrl    die Binding Url für den Alfresco Server (optional)
  * @param user          der User für den Alfresco Server (optional)
  * @param password      das Password für den Alfresco Server (optional)
  * @returns             true, wenn das Applet geladen werden konnte, ansonsten false
  */
-function loadApplet(level, bindingUrl, user, password) {
+function loadApplet(level, server, bindingUrl, user, password) {
     if (isLocal()) {
         var obj = document.createElement('applet');
         var param;
@@ -150,6 +151,12 @@ function loadApplet(level, bindingUrl, user, password) {
             param = document.createElement( "param" );
             param.setAttribute('name', 'debug');
             param.setAttribute('value', level);
+            obj.appendChild(param);
+        }
+        if (typeof server != "undefined" && server != null ){
+            param = document.createElement( "param" );
+            param.setAttribute('name', 'server');
+            param.setAttribute('value', server);
             obj.appendChild(param);
         }
         if (typeof bindingUrl != "undefined" && bindingUrl != null ){
@@ -1521,6 +1528,7 @@ function checkAndBuidAlfrescoEnvironment() {
     if (alfrescoServerAvailable) {
         var erg;
         erg = executeService("setParameter", [
+            {"name": "server", "value": getSettings("server")},
             {"name": "binding", "value": getSettings("binding")},
             {"name": "user", "value": getSettings("user")},
             {"name": "password", "value": getSettings("password")}
@@ -1693,7 +1701,7 @@ function checkAndBuidAlfrescoEnvironment() {
 function init() {
     try {
         // Settings schon vorhanden?
-        if (!exist(getSettings("server")) || !exist(getSettings("user")) || !exist(getSettings("password"))){
+        if (!exist(getSettings("server")) || !exist(getSettings("binding")) || !exist(getSettings("user")) || !exist(getSettings("password"))) {
             var cookie = $.cookie("settings");
             // prüfen, ob ein Cookie vorhanden ist
             if (REC.exist(cookie)) {

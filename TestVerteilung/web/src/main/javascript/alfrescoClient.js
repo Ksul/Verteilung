@@ -740,7 +740,7 @@ function switchAlfrescoDirectory(objectId) {
                 try {
                     var dt = event.originalEvent.dataTransfer;
                     //wg alfresco Prefix
-                    var data = alfrescoTabelle.row(document.getElementById($(this).attr('id').substring(13))).data();
+                    var data = alfrescoTabelle.row(document.getElementById($(this).attr('id').subString(13))).data();
                     dt.setData('Id', data.objectId);
                     dt.setData('parentId', data.parentId);
                 } catch (e) {
@@ -752,8 +752,11 @@ function switchAlfrescoDirectory(objectId) {
                 try {
                     var dt = event.originalEvent.dataTransfer;
                     //wg alfresco Prefix
-                    var data = alfrescoTabelle.row(document.getElementById($(this).attr('id').substring(13))).data();
-                    var url = getSettings("server").substr(0, getSettings("server").length - 5) + "/d/d/workspace/" + data.nodeRef.substr(12) + "/file.bin";
+                    var data = alfrescoTabelle.row(document.getElementById($(this).attr('id'))).data();
+                    var url = getSettings("server") + "d/d/workspace/" + data.nodeRef.substr(12) + "/file.bin";
+                    var obj = executeService("getTicket");
+                    if (obj.success)
+                        url = url + "?ticket=" + $.parseJSON(obj.result).data.ticket;
                     window.open(url);
                 } catch (e) {
                     errorHandler(e);
