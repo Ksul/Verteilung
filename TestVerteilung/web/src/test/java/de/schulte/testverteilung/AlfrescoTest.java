@@ -29,7 +29,7 @@ public class AlfrescoTest {
         FileInputStream fileInputStream = new FileInputStream("test.properties");
         assertNotNull(fileInputStream);
         properties.load(fileInputStream);
-        assertNotNull(properties.getProperty("host"));
+        assertNotNull(properties.getProperty("server"));
         assertNotNull(properties.getProperty("password"));
         assertNotNull(properties.getProperty("testPDF"));
         properties.put("bindingUrl", properties.getProperty("bindingUrl"));

@@ -42,30 +42,52 @@ public class VerteilungServices {
 
     /**
      * Konstruktor
-     * @param server         der Name des Alfresco Servers
+     * @param server         die URL des Alfresco Servers
+     * @param binding        der Binding Teil der URL
      * @param username       der verwendete Username
      * @param password       das Passwort
      */
     public VerteilungServices(String server,
+                              String binding,
                               String username,
                               String password)  {
 
         super();
-        this.con = new AlfrescoConnector(username, password, server);
+        this.con = new AlfrescoConnector(username, password, server, binding);
     }
 
     /**
      * über diese Methode können die Alfresco Parameter nachträglich gesetzt werden.
      * @param server         der Name des Alfresco Servers
+     * @param binding        der Binding teil der URL
      * @param username       der verwendete Username
      * @param password       das Passwort
      */
     public void setParameter(String server,
-                        String username,
-                        String password) {
-        this.con = new AlfrescoConnector(username, password, server);
+                             String binding,
+                             String username,
+                             String password) {
+        this.con = new AlfrescoConnector(username, password, server, binding);
     }
 
+
+    /**
+     * liefert ein Ticket zur Authentifizierung
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
+     */
+    public JSONObject getTicket() {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("success", true);
+            obj.put("result", con.getTicket());
+
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
 
     /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
@@ -189,7 +211,7 @@ public class VerteilungServices {
     }
 
     /**
-     * liefert den Inhalt eines Dokumentes
+     * liefert den Inhalt eines Dokumentes als String
      * @param  documentId            die Document Id als String
      * @param  extract               wenn gesetzt, wird der Inhalt als lesbarer String zuürckgegeben
      * @return obj                   ein JSONObject mit den Feldern success: true    die Operation war erfolgreich

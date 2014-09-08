@@ -81,7 +81,7 @@ public class VerteilungApplet extends Applet {
             for (Handler h : log.getHandlers()) {
                 h.setLevel(Level.parse(level));
             }
-            setParameter(getParameter("url"), getParameter("user"), getParameter("password"));
+            setParameter(getParameter("server"), getParameter("url"), getParameter("user"), getParameter("password"));
 			jsobject = JSObject.getWindow(this);
   		} catch (Exception jse) {
 			logger.severe(jse.getMessage());
@@ -91,6 +91,7 @@ public class VerteilungApplet extends Applet {
 
     /**
      * setzt die Parameter
+     * @param server        die URL des Servers
      * @param  bindingUrl   die Binding Url
      * @param  user         der Username
      * @param  password     das Password
@@ -98,14 +99,15 @@ public class VerteilungApplet extends Applet {
      *                                                              false    ein Fehler ist aufgetreten
      *                                                     result            die Parameter als String
      */
-    public JSONObject setParameter(String bindingUrl,
+    public JSONObject setParameter(String server,
+                                   String bindingUrl,
                                    String user,
                                    String password) {
 
         JSONObject obj = new JSONObject();
         try {
             if (bindingUrl != null && !bindingUrl.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
-                services.setParameter(bindingUrl, user, password);
+                services.setParameter(server, bindingUrl, user, password);
                 obj.put("success", true);
                 obj.put("result", "BindingUrl:" + bindingUrl + " User:" + user + " Password:" + password);
             } else {
@@ -118,6 +120,26 @@ public class VerteilungApplet extends Applet {
         return obj;
     }
 
+    /**
+     * liefert ein Alfresco Ticket zur Authentifizierung
+     * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                              false    ein Fehler ist aufgetreten
+     *                                                     result            das Ticket als String
+     */
+    public JSONObject getTicket() {
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    return services.getTicket();
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
 
     /**
      * prüft, ob eine Url verfügbar ist

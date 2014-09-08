@@ -22,11 +22,19 @@ public class VerteilungAppletTest extends AlfrescoTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        JSONObject obj = applet.setParameter(properties.getProperty("bindingUrl"), "admin", properties.getProperty("password"));
+        JSONObject obj = applet.setParameter(properties.getProperty("server"), properties.getProperty("bindingUrl"), "admin", properties.getProperty("password"));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+    }
+
+    @Test
+    public void testgetTicket() throws Exception {
+        JSONObject obj = applet.getTicket();
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
     }
 
     @Test

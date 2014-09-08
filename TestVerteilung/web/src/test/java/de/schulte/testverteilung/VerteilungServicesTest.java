@@ -29,13 +29,21 @@ public class VerteilungServicesTest extends AlfrescoTest{
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        services = new VerteilungServices(properties.getProperty("bindingUrl"), "admin", properties.getProperty("password"));
+        services = new VerteilungServices(properties.getProperty("server"), properties.getProperty("bindingUrl"), "admin", properties.getProperty("password"));
         assertNotNull(services);
         services.deleteDocument("/Archiv", "Test.pdf");
         services.deleteDocument("/Archiv", "TestDocument.txt");
         services.deleteDocument("/Archiv/Fehler", "TestDocument.txt");
         services.deleteDocument("/Archiv/Fehler", "Test.pdf");
         services.deleteFolder("/Archiv/TestFolder");
+    }
+
+    @Test
+    public void testGetTicket() throws Exception {
+        JSONObject obj = services.getTicket();
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
     }
 
     @Test

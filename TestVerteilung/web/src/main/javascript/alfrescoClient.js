@@ -1006,7 +1006,7 @@ function populateEventHandlerForTreeIcons() {
 function loadAlfrescoTree() {
 
     try {
-        $("#tree").jstree().destroy();
+        $("#tree").jstree('destroy');
         tree = $("#tree").jstree({
             'core': {
                     'data': function (node, aFunction) {

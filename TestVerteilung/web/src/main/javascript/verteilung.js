@@ -1710,7 +1710,7 @@ function init() {
                 if (obj.success) {
                     // Datei wurde gefunden. Settings setzen, aber nur wenn diese noch nicht über URL Parameter gesetzt worden sind.
                     if (!exist(getSettings("server")))
-                        settings.settings.push({"key": "server", "value": obj.result.host});
+                        settings.settings.push({"key": "server", "value": obj.result.server});
                     if (!exist(getSettings("user")))
                         settings.settings.push({"key": "user", "value": obj.result.user});
                     if (!exist(getSettings("password")))

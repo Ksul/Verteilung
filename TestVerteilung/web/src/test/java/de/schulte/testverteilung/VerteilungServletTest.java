@@ -72,7 +72,8 @@ public class VerteilungServletTest extends AlfrescoTest {
             }
         }).when(servletContext).getRealPath(anyString());
         when(response.getOutputStream()).thenReturn(servletOutputStream);
-        when(request.getParameter(VerteilungServlet.PARAMETER_SERVER)).thenReturn(properties.getProperty("bindingUrl"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_SERVER)).thenReturn(properties.getProperty("server"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_BINDING)).thenReturn(properties.getProperty("bindingUrl"));
         when(request.getParameter(VerteilungServlet.PARAMETER_USERNAME)).thenReturn("admin");
         when(request.getParameter(VerteilungServlet.PARAMETER_PASSWORD)).thenReturn(properties.getProperty("password"));
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_SETPARAMETER);
@@ -83,7 +84,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
@@ -91,7 +92,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
@@ -144,13 +145,24 @@ public class VerteilungServletTest extends AlfrescoTest {
     @Test
     public void testIsURLAvailable() throws Exception {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_ISURLAVAILABLE);
-        when(request.getParameter(VerteilungServlet.PARAMETER_SERVER)).thenReturn(properties.getProperty("host"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_SERVER)).thenReturn(properties.getProperty("server"));
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         assertTrue(obj.getBoolean("result"));
+    }
+
+    @Test
+    public void testGetTicket() throws Exception {
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETTICKET);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertTrue(obj.getString("result").length() > 0);
     }
 
     @Test
@@ -161,7 +173,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Datenverzeichnis/Skripte/recognition.js");
@@ -169,7 +181,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
     }
 
     @Test
@@ -180,7 +192,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         JSONObject doc = new JSONObject(obj.getString("result"));
         assertNotNull(doc);
         assertTrue(doc.getString("name").equalsIgnoreCase("doc.xml"));
@@ -194,7 +206,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETDOCUMENTCONTENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
@@ -203,7 +215,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertNotNull(sr);
         obj = new JSONObject(sr.toString());
-        assertTrue(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
         assertTrue(obj.getString("result").indexOf("xmlns:my=\"http://www.schulte.local/archiv\"") != -1);
     }
 

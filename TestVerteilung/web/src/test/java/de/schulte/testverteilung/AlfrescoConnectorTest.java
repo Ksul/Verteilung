@@ -37,7 +37,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        con = new AlfrescoConnector("admin", properties.getProperty("password"), properties.getProperty("bindingUrl") );
+        con = new AlfrescoConnector("admin", properties.getProperty("password"), properties.getProperty("server"), properties.getProperty("bindingUrl") );
         assertNotNull(con);
         CmisObject cmisObject = con.getNode("/Archiv/TestDocument.txt");
 
@@ -57,6 +57,11 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
             ((Folder) cmisObject).deleteTree(true, UnfileObject.DELETE, true);
     }
 
+    @Test
+    public void testGetTicket() throws Exception {
+        String ticket = con.getTicket();
+        assertNotNull(ticket);
+    }
 
     @Test
     public void testListFolder() throws Exception {

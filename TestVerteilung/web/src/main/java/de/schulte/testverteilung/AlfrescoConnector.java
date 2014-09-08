@@ -14,6 +14,8 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +36,7 @@ public class AlfrescoConnector {
     private String user = null;
     private String password = null;
     private String bindingUrl = null;
+    private String server = null;
 
 
     private Session session = null;
@@ -42,15 +45,71 @@ public class AlfrescoConnector {
      * Konstruktor
      * @param user        der Username
      * @param password    das Passwort
-     * @param bindingUrl  die CMIS AtomPUB BindingURL
+     * @param server      die Server URL
+     * @param bindingUrl  die CMIS AtomPUB Binding Teil der URL
      */
-    public AlfrescoConnector(String user, String password, String bindingUrl)  {
+    public AlfrescoConnector(String user, String password, String server, String bindingUrl)  {
         this.user = user;
         this.password = password;
+        this.server = server;
         this.bindingUrl = bindingUrl;
+        logger.info("Server: " + this.server);
         logger.info("URL: " + this.bindingUrl);
         logger.info("User: " + this.user);
         logger.info("Password: " + this.password);
+    }
+
+    /**
+     * liefert ein Ticket zur Authenfizierung als String
+     * @return             das Ticket als String
+     * @throws IOException
+     */
+    public String getTicket() throws IOException {
+
+        String _ticket = "";
+
+        URL url = null;
+        HttpURLConnection connection = null;
+        try {
+            url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + "service/api/login");
+            String urlParameters = "{ \"username\" : \"" + this.user + "\", \"password\" : \"" + this.password + "\" }";
+
+
+            connection = (HttpURLConnection) url.openConnection();
+
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+            connection.setRequestProperty("Content-Language", "en-US");
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+
+            // Send request
+            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+            wr.writeBytes(urlParameters);
+            wr.flush();
+            wr.close();
+
+            // Get Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append('\r');
+            }
+            rd.close();
+            return response.toString();
+
+        } finally {
+
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+
     }
 
     /**

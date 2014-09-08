@@ -40,6 +40,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_FOLDER = "folder";
     public static final String PARAMETER_MIMETYPE = "mimeType";
     public static final String PARAMETER_SERVER = "server";
+    public static final String PARAMETER_BINDING = "binding";
     public static final String PARAMETER_USERNAME = "user";
     public static final String PARAMETER_PASSWORD = "password";
     public static final String PARAMETER_WITHFOLDER = "withFolder";
@@ -72,6 +73,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_UPDATEDOCUMENT = "updateDocument";
     public static final String FUNCTION_UPLOADDOCUMENT = "uploadDocument";
     public static final String FUNCTION_UPDATEPROPERTIES = "updateproperties";
+    public static final String FUNCTION_GETTICKET = "getTicket";
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -95,21 +97,23 @@ public class VerteilungServlet extends HttpServlet {
 
     /**
      * setzt die Parameter
-     * @param bindingUrl   die Binding Url
+     * @param server       die Server URL
+     * @param bindingUrl   der Binding Teil der Url
      * @param user         der Username
      * @param password     das Password
-     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    ret               die Parameter als String
      */
-    public JSONObject setParameter(String bindingUrl,
+    public JSONObject setParameter(String server,
+                                   String bindingUrl,
                                    String user,
                                    String password) {
 
         JSONObject obj = new JSONObject();
         try {
-            if (bindingUrl != null && !bindingUrl.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
-                services.setParameter(bindingUrl, user, password);
+            if (server != null && !server.isEmpty() && bindingUrl != null && !bindingUrl.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
+                services.setParameter(server, bindingUrl, user, password);
                 obj.put("success", true);
                 obj.put("result", "BindingUrl:" + bindingUrl + " User:" + user + " Password:" + password);
             } else {
@@ -168,9 +172,11 @@ public class VerteilungServlet extends HttpServlet {
                     openPDF(getURLParameter(req, PARAMETER_FILENAME, true), resp);
                     return;
                 } else if (value.equalsIgnoreCase(FUNCTION_SETPARAMETER)) {
-                    obj = setParameter(getURLParameter(req, PARAMETER_SERVER, true), getURLParameter(req, PARAMETER_USERNAME, true), getURLParameter(req, PARAMETER_PASSWORD, true));
+                    obj = setParameter(getURLParameter(req, PARAMETER_SERVER, true), getURLParameter(req, PARAMETER_BINDING, true), getURLParameter(req, PARAMETER_USERNAME, true), getURLParameter(req, PARAMETER_PASSWORD, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_ISURLAVAILABLE)) {
                     obj = isURLAvailable(getURLParameter(req, PARAMETER_SERVER, true));
+                } else if (value.equalsIgnoreCase(FUNCTION_GETTICKET)) {
+                    obj = getTicket();
                 } else if (value.equalsIgnoreCase(FUNCTION_GETNODEID)) {
                     obj = getNodeId(getURLParameter(req, PARAMETER_FILEPATH, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
@@ -245,6 +251,18 @@ public class VerteilungServlet extends HttpServlet {
         if (param == null && neccesary)
             throw new VerteilungException("Parameter " + parameter + " fehlt");
         return param;
+    }
+
+    /**
+     * liefert ein Ticket zur Authentifizierung
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            das Ticket als String
+     */
+    protected JSONObject getTicket() {
+
+        return services.getTicket();
+
     }
 
     /**
