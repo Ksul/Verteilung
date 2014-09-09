@@ -443,12 +443,6 @@ function loadAlfrescoFolderTable() {
             ],
             "language": {
                 "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
-            },
-            "rowCallback": function (row, data) {
-                // Cell click
-                $('td', row).on('click', function () {
-                    switchAlfrescoDirectory(data[4]);
-                });
             }
         });
     } catch (e) {
@@ -576,7 +570,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
         container.appendChild(image);
         image = document.createElement("div");
         image.href = "#";
-        image.className = "folderOpen";
+        image.className = "folderSwitch";
         image.title = "Ordner öffnen";
         image.style.backgroundImage = "url(src/main/resource/images/details_open.png)";
         image.style.width = "16px";
@@ -751,6 +745,9 @@ function switchAlfrescoDirectory(objectId) {
                     var dt = event.originalEvent.dataTransfer;
                     var row = alfrescoTabelle.row($(this).closest(('tr')));
                     var data = row.data();
+                  //  $('#'+$('#tree').jstree('get_selected')).off("dragenter dragover drop");
+                  //  $('[id*=workspace\\:\\/\\/SpacesStore\\/e0548919-d0ab-4acd-b3db-b102f4215fbe]>a')
+                    //$('[id*='+data.objectId.replace(/\//g,"\\\\/").replace(/\:/g, "\\\\:").replace(/\;/g, "\\\\;").replace(/\./g, "\\\\.") + ']>a')
                     dt.setData('Id', data.objectID);
                     dt.setData('parentId', data.parentId);
                     dt.setData('rowIndex', row.index());
@@ -763,7 +760,7 @@ function switchAlfrescoDirectory(objectId) {
                 try {
                     var dt = event.originalEvent.dataTransfer;
                     //wg alfresco Prefix
-                    var data = alfrescoTabelle.row($(this).closest(('tr'))).data();
+                    var data = alfrescoTabelle.row($(this).clobsest(('tr'))).data();
                     var url = getSettings("server") + "d/d/workspace/" + data.nodeRef.substr(12) + "/file.bin";
                     var obj = executeService("getTicket");
                     if (obj.success)
@@ -783,11 +780,11 @@ function switchAlfrescoDirectory(objectId) {
  * behandelt die Clicks auf die Icons in der AlfrescoFoldertabelle
  */
 function handleAlfrescoFolderImageClicks() {
-    $(document).on("click", ".folderOpen", function () {
+    $(document).on("click", ".folderSwitch", function () {
         try {
-            var tr = $(this).closest('tr');
-            var row = alfrescoFolderTabelle.row( tr).data();
-            switchAlfrescoDirectory(row[4]);
+             var tr = $(this).closest('tr');
+             var row = alfrescoFolderTabelle.row( tr).data();
+             switchAlfrescoDirectory(row.objectID);
         } catch (e) {
             errorHandler(e);
         }
@@ -952,7 +949,7 @@ function loadDataForTree(aNode) {
                             item["icon"] = "";
                             item["state"] = "";
                         }
-                        item["id"] = o.objectID;
+                        item["id"] = o.objectId;
                         item["children"] = o.hasChildFolder;
                         item["text"] = o.name;
                         item["data"] = o;
@@ -994,8 +991,8 @@ function moveDocument(nodeId, parentId, destinationId) {
  * trägt den EventHandler für die Tree-Icons ein.
  */
 function populateEventHandlerForTreeIcons() {
-    $('.jstree-icon').off("dragenter dragover drop");
-    $('.jstree-icon').on("dragenter dragover drop", function (event) {
+    $('.jstree-anchor').off("dragenter dragover drop");
+    $('.jstree-anchor').on("dragenter dragover drop", function (event) {
         try {
             event.preventDefault();
             if (event.type === 'drop') {
@@ -1013,7 +1010,6 @@ function populateEventHandlerForTreeIcons() {
             errorHandler(e);
         }
     });
-    $('#'+$('#tree').jstree('get_selected')).off("dragenter dragover drop");
 }
 
 /**
@@ -1047,12 +1043,12 @@ function loadAlfrescoTree() {
                 }
 
             },
-            'plugins': ["dnd", "types"]
+            'plugins': ["dnd", "types", "search"]
         }).on("select_node.jstree", function (event, data) {
             try {
                 if (data.node.data.baseTypeId == "cmis:folder") {
                     if (alfrescoServerAvailable) {
-                        switchAlfrescoDirectory(data.node.data.objectID);
+                        switchAlfrescoDirectory(data.node.data.objectId);
                     }
                 }
             } catch (e) {

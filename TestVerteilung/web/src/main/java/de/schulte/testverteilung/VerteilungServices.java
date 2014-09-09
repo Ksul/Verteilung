@@ -202,14 +202,16 @@ public class VerteilungServices {
         JSONObject obj1 = new JSONObject();
         for (Property prop : doc.getProperties()) {
             // falls Datumswert dann konvertieren
-            if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null)
+            if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null) {
                 obj1.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
-            else if (prop.getLocalName().equals("objectId")) {
-                obj1.put(prop.getLocalName(), prop.getValueAsString());
-                if (prop.getValueAsString().contains(";"))
-                    obj1.put("objectID", prop.getValueAsString().substring(0, prop.getValueAsString().lastIndexOf(';')));
-                else
-                    obj1.put("objectID", prop.getValueAsString());
+            } else if (prop.getLocalName().equals("objectId")) {
+                String id = prop.getValueAsString();
+                obj1.put(prop.getLocalName(), id);
+                if (id.contains(";"))
+                    id = id.substring(0, id.lastIndexOf(';'));
+                if (id.startsWith("workspace://SpacesStore/"))
+                    id = id.substring(24);
+                obj1.put("objectID", id);
             } else
                 obj1.put(prop.getLocalName(), prop.getValueAsString());
         }
