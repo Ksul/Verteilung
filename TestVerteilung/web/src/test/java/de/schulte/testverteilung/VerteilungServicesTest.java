@@ -558,6 +558,7 @@ public class VerteilungServicesTest extends AlfrescoTest{
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertFalse(obj.getBoolean("success"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        assertFalse((obj.getBoolean("result")));
     }
 }
