@@ -263,7 +263,8 @@ function loadAlfrescoTable() {
                     "title": "Typ",
                     "defaultContent": '',
                     "type": "string",
-                    "class": "alignCenter"
+                    "class": "alignCenter",
+                    "width": "35px"
                 },
                 {
                     "data": "title",
@@ -305,6 +306,9 @@ function loadAlfrescoTable() {
                     "title": "Aktion",
                     "width": "102px",
                     "class": "alignLeft"
+                },
+                {
+                    "data": "objectID"
                 }
             ],
             "columnDefs": [
@@ -312,13 +316,18 @@ function loadAlfrescoTable() {
                     "targets": [4, 5],
                     "visible": true
                 },
+
+                {   "targets": [8],
+                    "visible": false
+                },
+
                 {
                     "targets": [1],
                     "render": function (data, type, row) {
                         if (exist(data) && data == "application/pdf") {
 
                             var image = document.createElement("span");
-                            image.id = "alfrescoTable" + row.objectId;
+                            image.id = "alfrescoTable" + row.objectID;
                             image.className = "alfrescoTableEvent";
                             image.draggable = true;
                             image.href = "#";
@@ -738,11 +747,13 @@ function switchAlfrescoDirectory(objectId) {
             $('.alfrescoTableEvent').off("dragstart");
             $('.alfrescoTableEvent').on("dragstart", function (event) {
                 try {
+                    populateEventHandlerForTreeIcons();
                     var dt = event.originalEvent.dataTransfer;
-                    //wg alfresco Prefix
-                    var data = alfrescoTabelle.row(document.getElementById($(this).attr('id').subString(13))).data();
-                    dt.setData('Id', data.objectId);
+                    var row = alfrescoTabelle.row($(this).closest(('tr')));
+                    var data = row.data();
+                    dt.setData('Id', data.objectID);
                     dt.setData('parentId', data.parentId);
+                    dt.setData('rowIndex', row.index());
                 } catch (e) {
                     errorHandler(e);
                 }
@@ -752,7 +763,7 @@ function switchAlfrescoDirectory(objectId) {
                 try {
                     var dt = event.originalEvent.dataTransfer;
                     //wg alfresco Prefix
-                    var data = alfrescoTabelle.row(document.getElementById($(this).attr('id'))).data();
+                    var data = alfrescoTabelle.row($(this).closest(('tr'))).data();
                     var url = getSettings("server") + "d/d/workspace/" + data.nodeRef.substr(12) + "/file.bin";
                     var obj = executeService("getTicket");
                     if (obj.success)
@@ -941,7 +952,7 @@ function loadDataForTree(aNode) {
                             item["icon"] = "";
                             item["state"] = "";
                         }
-                        item["id"] = o.objectId;
+                        item["id"] = o.objectID;
                         item["children"] = o.hasChildFolder;
                         item["text"] = o.name;
                         item["data"] = o;
@@ -990,10 +1001,11 @@ function populateEventHandlerForTreeIcons() {
             if (event.type === 'drop') {
                 var nodeId = event.originalEvent.dataTransfer.getData('id', $(this).attr('id'));
                 var parentId = event.originalEvent.dataTransfer.getData('parentId', $(this).attr('id'));
+                var rowIndex = event.originalEvent.dataTransfer.getData('rowIndex', $(this).attr('id'));
                 var destinationId = this.parentElement.parentElement.id;
                 var erg = moveDocument(nodeId, parentId, destinationId);
                 if (erg) {
-                    alfrescoTabelle.row().remove();
+                    alfrescoTabelle.row(rowIndex).remove();
                     alfrescoTabelle.draw();
                 }
             }
@@ -1001,6 +1013,7 @@ function populateEventHandlerForTreeIcons() {
             errorHandler(e);
         }
     });
+    $('#'+$('#tree').jstree('get_selected')).off("dragenter dragover drop");
 }
 
 /**
@@ -1018,7 +1031,7 @@ function loadAlfrescoTree() {
                             // CallBack ausführen
                             if (exist(obj)) {
                                 aFunction.call(this, obj);
-                                populateEventHandlerForTreeIcons();
+                               // populateEventHandlerForTreeIcons();
                             }
                         } catch (e) {
                             errorHandler(e);
@@ -1034,15 +1047,21 @@ function loadAlfrescoTree() {
                 }
 
             },
-            'plugins': [  "dnd",  "types"]
+            'plugins': ["dnd", "types"]
         }).on("select_node.jstree", function (event, data) {
             try {
                 if (data.node.data.baseTypeId == "cmis:folder") {
                     if (alfrescoServerAvailable) {
-                        switchAlfrescoDirectory(data.node.data.objectId);
+                        switchAlfrescoDirectory(data.node.data.objectID);
                     }
                 }
             } catch (e) {
+                errorHandler(e);
+            }
+        }).on('ready.jstree', function(e, data) {
+            try {
+                //populateEventHandlerForTreeIcons();
+            }  catch (e) {
                 errorHandler(e);
             }
         });
@@ -1051,6 +1070,7 @@ function loadAlfrescoTree() {
         // Initiales Lesen
         if (alfrescoServerAvailable)
             switchAlfrescoDirectory("-1");
+
     } catch (e) {
         errorHandler(e);
     }

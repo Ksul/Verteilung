@@ -204,7 +204,13 @@ public class VerteilungServices {
             // falls Datumswert dann konvertieren
             if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null)
                 obj1.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
-            else
+            else if (prop.getLocalName().equals("objectId")) {
+                obj1.put(prop.getLocalName(), prop.getValueAsString());
+                if (prop.getValueAsString().contains(";"))
+                    obj1.put("objectID", prop.getValueAsString().substring(0, prop.getValueAsString().lastIndexOf(';')));
+                else
+                    obj1.put("objectID", prop.getValueAsString());
+            } else
                 obj1.put(prop.getLocalName(), prop.getValueAsString());
         }
         return obj1;
