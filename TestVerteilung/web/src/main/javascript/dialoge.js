@@ -182,7 +182,7 @@ function startSettingsDialog() {
                         "person": {
                             "type": "string",
                             "title": "Person",
-                            "enum":[
+                            "enum": [
                                 "Klaus",
                                 "Katja",
                                 "Till",
@@ -198,7 +198,7 @@ function startSettingsDialog() {
                         },
                         "documentDate": {
                             "type": "date",
-                            "format":"date",
+                            "format": "date",
                             "title": "Datum",
                             "required": true
                         },
@@ -209,7 +209,7 @@ function startSettingsDialog() {
                         },
                         "tax": {
                             "type": "boolean",
-                            "title":"Steuern",
+                            "title": "Steuern",
                             "required": false,
                             "default": "false"
                         }
@@ -219,10 +219,10 @@ function startSettingsDialog() {
 
                 "options": {
                     "renderForm": true,
-                    "form":{
-                        "buttons":{
-                            "submit":{"value":"Sichern"},
-                            "reset":{"value":"Abbrechen"}
+                    "form": {
+                        "buttons": {
+                            "submit": {"value": "Sichern"},
+                            "reset": {"value": "Abbrechen"}
                         }
                     },
                     "fields": {
@@ -239,20 +239,20 @@ function startSettingsDialog() {
                             "type": "textarea",
                             "size": 150
                         },
-/*                        "amount":{
-                            "type": "currency",
-                            "centsSeparator": ",",
-                            "prefix": "",
-                            "suffix": " €",
-                            "thousandsSeparator": "."
-                        },*/
+                        /*                        "amount":{
+                         "type": "currency",
+                         "centsSeparator": ",",
+                         "prefix": "",
+                         "suffix": " €",
+                         "thousandsSeparator": "."
+                         },*/
                         "tax": {
                             "rightLabel": "relevant"
                         },
                         "documentDate": {
                             "dateFormatRegex": "/(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19|20)\d\d$/",
                             "dateFormat": "dd.mm.yy"
-                            }
+                        }
 
                     }
                 },
@@ -262,14 +262,14 @@ function startSettingsDialog() {
                     "layout": {
                         "template": "threeColumnGridLayout",
                         "bindings": {
-                            "name":"column-1-1",
-                            "title":"column-1-1",
-                            "description":"column-1-1",
-                            "person":"column-1-2",
-                            "documentDate":"column-2-2",
-                            "amount":"column-1-2",
-                            "idvalue":"column-2-2",
-                            "steuer":"column-1-2"
+                            "name": "column-1-1",
+                            "title": "column-1-1",
+                            "description": "column-1-1",
+                            "person": "column-1-2",
+                            "documentDate": "column-2-2",
+                            "amount": "column-1-2",
+                            "idvalue": "column-2-2",
+                            "steuer": "column-1-2"
 
                         }
                     },
@@ -283,11 +283,11 @@ function startSettingsDialog() {
                     }
 
                 },
-                "ui": "jquery-ui"  ,
-                "postRender": function(renderedField) {
+                "ui": "jquery-ui",
+                "postRender": function (renderedField) {
                     var form = renderedField.form;
                     if (form) {
-                        form.registerSubmitHandler(function(e) {
+                        form.registerSubmitHandler(function (e) {
                             if (form.isFormValid()) {
                                 try {
                                     var title = $("[name='title']").val(),
@@ -302,10 +302,10 @@ function startSettingsDialog() {
                                         data.title = title;
                                         data.description = description;
                                         data.person = person;
-                                        data.documentDate =  $.datepicker.parseDate("dd.mm.yy", documentDate).getTime();
+                                        data.documentDate = $.datepicker.parseDate("dd.mm.yy", documentDate).getTime();
                                         data.amount = amount;
                                         data.idvalue = idvalue;
-                                        data.tax =tax;
+                                        data.tax = tax;
                                         var extraProperties = {
                                             'P:cm:titled': {'cm:title': title, 'cm:description': description},
                                             'D:my:archivContent': {'my:documentDate': $.datepicker.parseDate("dd.mm.yy", documentDate).getTime(), 'my:person': person},
@@ -330,35 +330,176 @@ function startSettingsDialog() {
                     }
                 }
 
-            } ;
+            };
 
-            changeCss('.grid','max-width: 100%; min-width:100%');
+            changeCss('.grid', 'max-width: 100%; min-width:100%');
             changeCss('input', 'width:100%');
             changeCss('.ui-widget textarea', 'width:100%');
-            changeCss('select','max-width: 100%; min-width:10%');
+            changeCss('select', 'max-width: 100%; min-width:10%');
             changeCss('.alpaca-controlfield-checkbox input', 'margin-top:-1px');
             changeCss("input[type='checkbox']", 'width:10px;float:left');
-            changeCss('h2','background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
+            changeCss('h2', 'background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
             $('head').append('<link href="./src/main/resource/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
             $('<div id="dialogBox">').append(Alpaca($('<div id="form" class="grid grid-pad">'), dialogSettings)).dialog({
                 autoOpen: true,
                 width: 420,
-                height:'auto',
+                height: 'auto',
                 modal: true,
-                open: function(){
+                open: function () {
                     $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
                     $(".alpaca-form-button-submit").button();
-                    $(".alpaca-form-button-reset").button().click(function(){  $('#dialogBox').dialog("close"); });
-                    /*   $(".alpaca-form-button-submit").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
-                     $(".alpaca-form-button-submit").css({padding: "0.4em 1em 0.4em 1em"});
-                     $(".alpaca-form-button-reset").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
-                     $(".alpaca-form-button-reset").css({padding: "0.4em 1em 0.4em 1em"});
-                     $(".alpaca-form-button-reset").click(function(){  $('#dialogBox').dialog("close"); });
-                     $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");*/
+                    $(".alpaca-form-button-reset").button().click(function () {
+                        $('#dialogBox').dialog("close");
+                    });
                 }
             });
         } catch (e) {
             errorHandler(e);
         }
+    }
+
+    /**
+    * startet den Detaildialog für Folder
+    */
+    function startFolderDialog(tableRow) {
+    try {
+        var data = tableRow.data();
+
+        var dialogSettings = { "id": "detailDialog",
+            "schema": {
+                "type": "object",
+                "title": "Folder Eigenschaften",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "required": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Titel",
+                        "required": false
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Beschreibung",
+                        "required": false
+                    }
+
+                }
+            },
+
+            "options": {
+                "renderForm": true,
+                "form": {
+                    "buttons": {
+                        "submit": {"value": "Sichern"},
+                        "reset": {"value": "Abbrechen"}
+                    }
+                },
+                "fields": {
+
+                    "name": {
+                        "size": 30
+
+                    },
+                    "titel": {
+                        "size": 30
+
+                    },
+                    "description": {
+                        "type": "textarea",
+                        "size": 150
+                    }
+
+                }
+            },
+            "data": data,
+            "view": {
+                "parent": "VIEW_WEB_EDIT",
+                "layout": {
+                    "template": "threeColumnGridLayout",
+                    "bindings": {
+                        "name": "column-1-1",
+                        "titel": "column-1-1",
+                        "description": "column-1-1"
+
+                    }
+                },
+                "templates": {
+                    "threeColumnGridLayout": '<div class="filter-content">' + '{{if options.label}}<h2>${options.label}</h2><span></span>{{/if}}' + '{{if options.helper}}<p>${options.helper}</p>{{/if}}'
+                        + '<div id="column-1-1" class="col-1-1"> </div>'
+                        + '<div id="column-1-2" class="col-1-2"> </div> <div id="column-2-2" class="col-1-2"> </div>'
+                        + '<div id="column-1-7_12" class="col-7-12"> </div> <div id="column-2-5_12" class="col-5-12"> </div>'
+                        + '<div id="column-1-3" class="col-1-3"> </div> <div id="column-2-3" class="col-1-3"> </div> <div id="column-3-3" class="col-1-3"> </div>'
+                        + '</div>'
+                }
+
+            },
+            "ui": "jquery-ui",
+            "postRender": function (renderedField) {
+                var form = renderedField.form;
+                if (form) {
+                    form.registerSubmitHandler(function (e) {
+                        if (form.isFormValid()) {
+                            try {
+                                var name = $("[name='name']").val(),
+                                    description = $("[name='description']").val(),
+                                    title = $("[name='title']").val();
+
+                                if (data.name != name || data.title != title || data.description != description) {
+                                    data.name = name;
+                                    data.title = title;
+                                    data.description = description;
+
+                                    var extraProperties = {
+                                        'D:cm:content': {'cm:name': name},
+                                        'P:cm:titled': {'cm:title': title, 'cm:description': description}
+
+                                    };
+
+                                    erg = executeService("updateProperties", [
+                                        {"name": "documentId", "value": data.objectId},
+                                        {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+                                    ], "Dokument konnte nicht aktualisiert werden!", false);
+
+                                }
+                                alfrescoFolderTabelle.rows().invalidate();
+                                $('#dialogBox').dialog("destroy");
+                                jQuery('#simpleGrid').remove();
+                            } catch (e) {
+                                errorHandler(e);
+                            }
+                        }
+                    });
+                }
+            }
+
+        };
+
+        changeCss('.grid', 'max-width: 100%; min-width:100%');
+        changeCss('input', 'width:100%');
+        changeCss('.ui-widget textarea', 'width:100%');
+        changeCss('select', 'max-width: 100%; min-width:10%');
+        changeCss('.alpaca-controlfield-checkbox input', 'margin-top:-1px');
+        changeCss("input[type='checkbox']", 'width:10px;float:left');
+        changeCss('h2', 'background-color: transparent; background-image: url("./src/main/resource/images/alfresco.png"); background-repeat: no-repeat; background-position: left; height: 24px; border: 0; padding-left: 28px; padding-top: 4px');
+        $('head').append('<link href="./src/main/resource/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
+        $('<div id="dialogBox">').append(Alpaca($('<div id="form" class="grid grid-pad">'), dialogSettings)).dialog({
+            autoOpen: true,
+            width: 440,
+            height: 'auto',
+            modal: true,
+            open: function () {
+                $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
+                $(".alpaca-form-button-submit").button();
+                $(".alpaca-form-button-reset").button().click(function () {
+                    $('#dialogBox').dialog("close");
+                });
+            }
+        });
+    } catch (e) {
+        errorHandler(e);
+    }
 
 }

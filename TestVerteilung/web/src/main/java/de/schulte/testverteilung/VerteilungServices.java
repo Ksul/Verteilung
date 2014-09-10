@@ -419,12 +419,12 @@ public class VerteilungServices {
     }
 
     /**
-     * aktualisiert die Properties eines Dokumentes
-     * @param  documentId                Die Id des zu aktualisierenden Dokumentes
+     * aktualisiert die Properties eines Objectes
+     * @param  documentId                Die Id des zu aktualisierenden Objectes
      * @param  extraCMSProperties        zusätzliche Properties
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
-     *                                                                  result           bei Erfolg das Document als JSON Object, ansonsten der Fehler
+     *                                                                  result           bei Erfolg das CmisObject als JSON Object, ansonsten der Fehler
      */
     public JSONObject updateProperties(String documentId,
                                        String extraCMSProperties) {
@@ -432,7 +432,7 @@ public class VerteilungServices {
         try {
             Map<String, Object> outMap = null;
             CmisObject cmisObject = con.getNodeById(documentId);
-            if (cmisObject != null && cmisObject instanceof Document) {
+            if (cmisObject != null) {
 
 
                 if (extraCMSProperties != null && extraCMSProperties.length() > 0)
@@ -442,12 +442,12 @@ public class VerteilungServices {
                     obj.put("result", "keine Properties vorhanden!");
                 }
 
-                Document document = con.updateProperties((Document) cmisObject, outMap);
+                cmisObject = con.updateProperties(cmisObject, outMap);
                 obj.put("success", true);
-                obj.put("result", convertCMISObjectToJSON(document).toString());
+                obj.put("result", convertCMISObjectToJSON(cmisObject).toString());
             } else {
                 obj.put("success", false);
-                obj.put("result", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
+                obj.put("result","Ein Document mit der Id " + documentId + " ist nicht vorhanden!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);

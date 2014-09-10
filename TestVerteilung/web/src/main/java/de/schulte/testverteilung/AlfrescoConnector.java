@@ -439,11 +439,11 @@ public class AlfrescoConnector {
 
     /**
      * aktualisiert die Metadaten eines Dokumentes
-     * @param  document                  das zu aktualisierende Dokument
+     * @param  object                    das zu aktualisierende Objekt
      * @param  extraCMSProperties        zusätzliche Properties
-     * @return document                  das geänderte Dokument
+     * @return CmisObject                das geänderte Objekt
      */
-    public Document updateProperties(Document document,
+    public CmisObject updateProperties(CmisObject object,
                                      Map<String, Object> extraCMSProperties) throws VerteilungException {
 
 
@@ -454,10 +454,10 @@ public class AlfrescoConnector {
             properties = buildProperties(extraCMSProperties);
         }
         if (extraCMSProperties != null && extraCMSProperties.size() > 0)
-            id = createAspectsFromProperties(extraCMSProperties, document);
+            id = createAspectsFromProperties(extraCMSProperties, object);
         id = ((Document) session.getObject(id)).updateProperties(properties, true);
 
-        return (Document) session.getObject(id);
+        return session.getObject(id);
     }
 
     /**
@@ -534,13 +534,13 @@ public class AlfrescoConnector {
     }
 
     private ObjectId createAspectsFromProperties(Map<String, Object> Properties,
-                                                 Document doc) {
+                                                 CmisObject obj) {
         ObjectId id = null;
         for (String key : Properties.keySet()) {
             if (!key.isEmpty() && key.startsWith("P:")) {
-                id = ((AlfrescoDocument) doc).addAspect(key);
-                doc = (Document) session.getObject(id);
-                doc.refresh();
+                id = ((AlfrescoDocument) obj).addAspect(key);
+                obj =  session.getObject(id);
+                obj.refresh();
             }
         }
         return id;

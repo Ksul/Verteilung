@@ -741,16 +741,16 @@ function switchAlfrescoDirectory(objectId) {
             $('.alfrescoTableEvent').off("dragstart");
             $('.alfrescoTableEvent').on("dragstart", function (event) {
                 try {
-                    populateEventHandlerForTreeIcons();
                     var dt = event.originalEvent.dataTransfer;
                     var row = alfrescoTabelle.row($(this).closest(('tr')));
                     var data = row.data();
-                  //  $('#'+$('#tree').jstree('get_selected')).off("dragenter dragover drop");
-                  //  $('[id*=workspace\\:\\/\\/SpacesStore\\/e0548919-d0ab-4acd-b3db-b102f4215fbe]>a')
-                    //$('[id*='+data.objectId.replace(/\//g,"\\\\/").replace(/\:/g, "\\\\:").replace(/\;/g, "\\\\;").replace(/\./g, "\\\\.") + ']>a')
                     dt.setData('Id', data.objectID);
                     dt.setData('parentId', data.parentId);
                     dt.setData('rowIndex', row.index());
+                    // die Zielbereiche für den Drag festlegen
+                    populateEventHandlerForTreeIcons();
+                    // Den aktuellen Zweig wieder rausnehmen, damit nicht in das aktuelle Verzeichnis verschoben werden kann
+                    $('[id*='+data.parentId.replace(/\//g,"\\\\/").replace(/\:/g, "\\\\:").replace(/\;/g, "\\\\;").replace(/\./g, "\\\\.") + ']>a').off("dragenter dragover drop");
                 } catch (e) {
                     errorHandler(e);
                 }
@@ -760,7 +760,7 @@ function switchAlfrescoDirectory(objectId) {
                 try {
                     var dt = event.originalEvent.dataTransfer;
                     //wg alfresco Prefix
-                    var data = alfrescoTabelle.row($(this).clobsest(('tr'))).data();
+                    var data = alfrescoTabelle.row($(this).closest(('tr'))).data();
                     var url = getSettings("server") + "d/d/workspace/" + data.nodeRef.substr(12) + "/file.bin";
                     var obj = executeService("getTicket");
                     if (obj.success)
@@ -789,6 +789,14 @@ function handleAlfrescoFolderImageClicks() {
             errorHandler(e);
         }
      });
+    $(document).on("click", ".folderEdit", function () {
+        try {
+            var tr = $(this).closest('tr');
+            startFolderDialog(alfrescoFolderTabelle.row(tr));
+        } catch (e) {
+            errorHandler(e);
+        }
+    });
 }
 
 /**
@@ -1027,7 +1035,6 @@ function loadAlfrescoTree() {
                             // CallBack ausführen
                             if (exist(obj)) {
                                 aFunction.call(this, obj);
-                               // populateEventHandlerForTreeIcons();
                             }
                         } catch (e) {
                             errorHandler(e);
@@ -1052,12 +1059,6 @@ function loadAlfrescoTree() {
                     }
                 }
             } catch (e) {
-                errorHandler(e);
-            }
-        }).on('ready.jstree', function(e, data) {
-            try {
-                //populateEventHandlerForTreeIcons();
-            }  catch (e) {
                 errorHandler(e);
             }
         });

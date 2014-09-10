@@ -179,7 +179,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         properties.put("P:cm:titled", titledMap);
         properties.put("P:my:amountable", amountMap);
         properties.put("cmis:document", standardMap);
-        document = con.updateProperties(document, properties);
+        document = (Document) con.updateProperties(document, properties);
         assertNotNull(document);
         // Die Überprüfung auf Aspekte funktioniert nicht
         //assertTrue(((AlfrescoDocument) document).hasAspect("P:cm:titled"));
