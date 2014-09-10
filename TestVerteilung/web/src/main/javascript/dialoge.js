@@ -453,9 +453,16 @@ function startSettingsDialog() {
                                     data.description = description;
 
                                     var extraProperties = {
-                                        'D:cm:content': {'cm:name': name},
-                                        'P:cm:titled': {'cm:title': title, 'cm:description': description}
-
+                                        'cmis:folder':
+                                            {
+                                                'cmis:objectTypeId': 'cmis:folder',
+                                                'cmis:name': name
+                                            },
+                                     'P:cm:titled':
+                                            {
+                                                'cm:title': title,
+                                                'cm:description': description
+                                            }
                                     };
 
                                     erg = executeService("updateProperties", [

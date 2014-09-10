@@ -1,6 +1,7 @@
 package de.schulte.testverteilung;
 
 import org.alfresco.cmis.client.AlfrescoDocument;
+import org.alfresco.cmis.client.AlfrescoFolder;
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.Ace;
@@ -455,7 +456,7 @@ public class AlfrescoConnector {
         }
         if (extraCMSProperties != null && extraCMSProperties.size() > 0)
             id = createAspectsFromProperties(extraCMSProperties, object);
-        id = ((Document) session.getObject(id)).updateProperties(properties, true);
+        id = session.getObject(id).updateProperties(properties, true);
 
         return session.getObject(id);
     }
@@ -538,7 +539,10 @@ public class AlfrescoConnector {
         ObjectId id = null;
         for (String key : Properties.keySet()) {
             if (!key.isEmpty() && key.startsWith("P:")) {
-                id = ((AlfrescoDocument) obj).addAspect(key);
+                if (obj instanceof Folder)
+                    id = ((AlfrescoFolder) obj).addAspect(key);
+                if (obj instanceof Document)
+                    id = ((AlfrescoDocument) obj).addAspect(key);
                 obj =  session.getObject(id);
                 obj.refresh();
             }

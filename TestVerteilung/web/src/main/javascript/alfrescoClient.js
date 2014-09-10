@@ -750,7 +750,7 @@ function switchAlfrescoDirectory(objectId) {
                     // die Zielbereiche für den Drag festlegen
                     populateEventHandlerForTreeIcons();
                     // Den aktuellen Zweig wieder rausnehmen, damit nicht in das aktuelle Verzeichnis verschoben werden kann
-                    $('[id*='+data.parentId.replace(/\//g,"\\\\/").replace(/\:/g, "\\\\:").replace(/\;/g, "\\\\;").replace(/\./g, "\\\\.") + ']>a').off("dragenter dragover drop");
+                    $(document.getElementById(data.parentId)).children('a').off("dragenter dragover drop");
                 } catch (e) {
                     errorHandler(e);
                 }
