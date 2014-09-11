@@ -1029,6 +1029,7 @@ function loadAlfrescoTree() {
         $("#tree").jstree('destroy');
         tree = $("#tree").jstree({
             'core': {
+                    'check_callback': true,
                     'data': function (node, aFunction) {
                         try {
                             var obj = loadDataForTree(node);

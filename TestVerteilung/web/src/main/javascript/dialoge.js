@@ -472,6 +472,8 @@ function startSettingsDialog() {
 
                                 }
                                 alfrescoFolderTabelle.rows().invalidate();
+                                var node = $(document.getElementById(data.objectId));
+                                $("#tree").jstree('set_text', [node[0], name]);
                                 $('#dialogBox').dialog("destroy");
                                 jQuery('#simpleGrid').remove();
                             } catch (e) {
