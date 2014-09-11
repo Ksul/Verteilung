@@ -361,10 +361,9 @@ function startSettingsDialog() {
     /**
     * startet den Detaildialog für Folder
     */
-    function startFolderDialog(tableRow) {
+    function startFolderDialog(tableRow, modus) {
     try {
         var data = tableRow.data();
-
         var dialogSettings = { "id": "detailDialog",
             "schema": {
                 "type": "object",
@@ -385,10 +384,8 @@ function startSettingsDialog() {
                         "title": "Beschreibung",
                         "required": false
                     }
-
                 }
             },
-
             "options": {
                 "renderForm": true,
                 "form": {
@@ -401,22 +398,19 @@ function startSettingsDialog() {
 
                     "name": {
                         "size": 30
-
                     },
                     "titel": {
                         "size": 30
-
                     },
                     "description": {
                         "type": "textarea",
                         "size": 150
                     }
-
                 }
             },
             "data": data,
             "view": {
-                "parent": "VIEW_WEB_EDIT",
+                "parent": modus,
                 "layout": {
                     "template": "threeColumnGridLayout",
                     "bindings": {
@@ -464,16 +458,20 @@ function startSettingsDialog() {
                                                 'cm:description': description
                                             }
                                     };
-
+                                    if (modus == "VIEW_WEB_CREATE")
+                                        erg = executeService("createFolder", [
+                                            {"name": "documentId", "value": data.objectId},
+                                            {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+                                        ], "Dokument konnte nicht aktualisiert werden!", false);
+                                    else
                                     erg = executeService("updateProperties", [
                                         {"name": "documentId", "value": data.objectId},
                                         {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                                     ], "Dokument konnte nicht aktualisiert werden!", false);
-
                                 }
                                 alfrescoFolderTabelle.rows().invalidate();
                                 var node = $(document.getElementById(data.objectId));
-                                $("#tree").jstree('set_text', [node[0], name]);
+                                $("#tree").jstree('rename_node', node[0], name);
                                 $('#dialogBox').dialog("destroy");
                                 jQuery('#simpleGrid').remove();
                             } catch (e) {

@@ -553,11 +553,20 @@ function calcDataTableHeight()  {
  */
 function alfrescoFolderAktionFieldFormatter(data, type, full) {
     try {
-        // if (o.iDataRow == 0) {
-        //	o.cell.setStyle('width', '102px');
-        //  }
+
         var container = document.createElement("div");
         var image = document.createElement("div");
+        image.href = "#";
+        image.className = "folderCreate";
+        image.style.backgroundImage = "url(src/main/resource/images/folder_add.png)";
+        image.title = "neuen Folder anlegen";
+        image.style.cursor = "pointer";
+        image.style.width = "16px";
+        image.style.height = "16px";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+        image = document.createElement("div");
         image.href = "#";
         image.className = "folderEdit";
         image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
@@ -789,10 +798,18 @@ function handleAlfrescoFolderImageClicks() {
             errorHandler(e);
         }
      });
+    $(document).on("click", ".folderCreate", function () {
+        try {
+            var tr = $(this).closest('tr');
+            startFolderDialog(alfrescoFolderTabelle.row(tr), "VIEW_WEB_CREATE");
+        } catch (e) {
+            errorHandler(e);
+        }
+    });
     $(document).on("click", ".folderEdit", function () {
         try {
             var tr = $(this).closest('tr');
-            startFolderDialog(alfrescoFolderTabelle.row(tr));
+            startFolderDialog(alfrescoFolderTabelle.row(tr), "VIEW_WEB_EDIT");
         } catch (e) {
             errorHandler(e);
         }

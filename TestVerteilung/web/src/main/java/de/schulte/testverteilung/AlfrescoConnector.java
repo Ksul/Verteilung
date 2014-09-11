@@ -370,14 +370,16 @@ public class AlfrescoConnector {
      * erstellt einen Folder
      *
      * @param targetFolder              der Folder, in dem der neue Folder angelegt werden soll.
-     * @param newFolderName             der Name des neuen Folder
+     * @param extraCMSProperties        Map mit den Properties
      * @return                          der neue Folder
      */
-    public Folder createFolder(Folder targetFolder, String newFolderName) {
-        Map<String, String> props = new HashMap<>();
-        props.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
-        props.put(PropertyIds.NAME, newFolderName);
-        return targetFolder.createFolder(props);
+    public Folder createFolder(Folder targetFolder,
+                               Map<String, Object> extraCMSProperties ) throws VerteilungException {
+
+        Map<String, Object> properties = buildProperties(extraCMSProperties);
+        if (!properties.containsKey(PropertyIds.OBJECT_TYPE_ID))
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
+        return targetFolder.createFolder(properties);
     }
 
     /**

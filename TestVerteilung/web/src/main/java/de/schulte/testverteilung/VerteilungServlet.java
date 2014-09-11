@@ -188,7 +188,7 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_CREATEDOCUMENT)) {
                     obj = createDocument(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_FILENAME, true), getURLParameter(req, PARAMETER_DOCUMENTTEXT, true), getURLParameter(req, PARAMETER_MIMETYPE, false), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, false), getURLParameter(req, PARAMETER_VERSIONSTATE, false));
                 } else if (value.equalsIgnoreCase(FUNCTION_CREATEFOLDER)) {
-                    obj = createFolder(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_FILENAME, true));
+                    obj = createFolder(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_DELETEFOLDER)) {
                     obj = deleteFolder(getURLParameter(req, PARAMETER_FOLDER, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_GETDOCUMENTCONTENT)) {
@@ -419,16 +419,16 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * erzeugt einen Pfad
      * @param  folder               der Name des Folders in dem der Folder erstellt werden soll als String
-     * @param  fileName             der Name des neuen Pfades als String
+     * @param  extraProperties      die Prperties des neuen Folders
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result            Folder als JSONObject
      * @throws VerteilungException
      */
     protected JSONObject createFolder(String folder,
-                                      String fileName) throws  VerteilungException {
+                                      String extraProperties) throws  VerteilungException {
 
-        return services.createFolder(folder, fileName);
+        return services.createFolder(folder, extraProperties);
     }
 
     /**

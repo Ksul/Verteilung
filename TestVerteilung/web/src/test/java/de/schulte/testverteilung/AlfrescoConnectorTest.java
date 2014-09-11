@@ -290,7 +290,11 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         CmisObject folder = con.getNode("/Archiv");
         assertNotNull(folder);
         assertTrue(folder instanceof Folder);
-        folder = con.createFolder((Folder) folder, "TestFolder");
+        Map<String, Object> props = new HashMap<>();
+        Map<String, Object> standard = new HashMap<>();
+        standard.put(PropertyIds.NAME, "TestFolder");
+        props.put("cmis:folder", standard);
+        folder = con.createFolder((Folder) folder, props);
         assertNotNull(folder);
         assertTrue(folder instanceof Folder);
         assertEquals("TestFolder", folder.getName());

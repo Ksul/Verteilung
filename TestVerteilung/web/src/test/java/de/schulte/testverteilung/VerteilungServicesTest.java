@@ -44,7 +44,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         JSONObject obj = services.getTicket();
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         JSONObject obj = services.listFolder("-1", 0);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertTrue(obj.get("result") instanceof JSONArray);
         assertEquals(4, ((JSONArray) obj.get("result")).length());
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++) {
@@ -65,11 +65,11 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         obj = services.listFolder("-1", -1);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertTrue(obj.get("result") instanceof JSONArray);
         assertEquals(4, ((JSONArray) obj.get("result")).length());
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++) {
@@ -79,18 +79,18 @@ public class VerteilungServicesTest extends AlfrescoTest {
         obj = services.getNodeId("/Archiv");
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         String id = obj.getString("result");
         obj = services.listFolder(id, 1);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertTrue(obj.get("result") instanceof JSONArray);
         assertEquals(0, ((JSONArray) obj.get("result")).length());
         obj = services.listFolder(id, 0);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++) {
             if (((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name").equalsIgnoreCase("Fehler")) {
                 assertTrue(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getBoolean("hasChildFolder"));
@@ -102,7 +102,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         obj = services.listFolder(services.getNodeId("/Archiv/Inbox").getString("result"), 0);
         System.out.println(obj);
     }
@@ -113,16 +113,16 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         obj = services.getNodeId("/Datenverzeichnis/Skripte/recognition.js");
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         ;
         obj = services.getNodeId("/Datenverzeichnis/Skripte/doc.xml");
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         JSONObject result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertTrue(result.getString("name").equalsIgnoreCase("doc.xml"));
@@ -143,7 +143,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         String document = obj.getString("result");
         assertTrue(document.startsWith("<documentTypes"));
         assertTrue(document.indexOf("xmlns:my=\"http://www.schulte.local/archiv\"") != -1);
@@ -155,12 +155,12 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         obj = services.deleteDocument("/Archiv", "Test.pdf");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         JSONObject result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertTrue(result.getString("name").equalsIgnoreCase("TestDocument.txt"));
@@ -179,14 +179,14 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         String document = obj.getString("result");
         assertEquals("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", document);
         obj = services.deleteDocument("/", "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 
     @Test
@@ -195,12 +195,13 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        obj = services.createFolder("/Archiv", "TestFolder");
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        String extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Testfolder'}, 'P:cm:titled':{'cm:title': 'Testtitel', 'cm:description':'Dies ist ein Test Folder'}}";
+        obj = services.createFolder("/Archiv", extraProperties);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         JSONObject result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertTrue(result.getString("name").equalsIgnoreCase("TestFolder"));
@@ -208,7 +209,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 
     @Test
@@ -218,7 +219,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         JSONObject result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertTrue(result.getString("name").equalsIgnoreCase("TestDocument.txt"));
@@ -230,19 +231,19 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertEquals(content, obj.getString("result"));
         obj = services.deleteDocument("/Archiv", "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
 
         obj = services.createDocument("/Archiv", "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MAJOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertEquals("1.0", result.getString("versionLabel"));
@@ -252,7 +253,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertEquals("2.0", result.getString("versionLabel"));
@@ -262,7 +263,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertEquals("3.0", result.getString("versionLabel"));
@@ -273,7 +274,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 
     @Test
@@ -282,20 +283,20 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         String extraProperties = "{'cmis:folder':{'cmis:objectTypeId': 'cmis:folder','cmis:name': 'Fehler1'}, 'P:cm:titled': {'cm:title': 'Titel','cm:description': 'Beschreibung' }}";
         String id = obj.getString("result");
         obj = services.updateProperties(id, extraProperties);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         extraProperties = "{'cmis:folder':{'cmis:objectTypeId': 'cmis:folder','cmis:name': 'Fehler'}, 'P:cm:titled': {'cm:title': '','cm:description': '' }}";
         obj = services.updateProperties(id, extraProperties);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 
     @Test
@@ -306,7 +307,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         JSONObject result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertTrue(result.getString("name").equalsIgnoreCase("TestDocument.txt"));
@@ -316,7 +317,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertEquals("25.33", result.getString("amount"));
@@ -325,7 +326,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 
     @Test
@@ -356,17 +357,17 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         obj = services.getNodeId("/Archiv/Fehler/TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         obj = services.deleteDocument("/Archiv/Fehler", "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 
     @Test
@@ -377,8 +378,8 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        JSONObject props = new JSONObject(obj.getString("result"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        JSONObject props = new JSONObject(obj.get("result").toString());
         assertNotNull(props);
         assertTrue(props.length() > 0);
     }
@@ -393,7 +394,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertTrue(obj.getInt("result") == 1);
         assertTrue(services.getEntries().size() == 1);
         FileEntry entry = services.getEntries().iterator().next();
@@ -413,7 +414,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         JSONObject obj = services.extractPDFContent(Base64.encodeBase64String(content));
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
     }
 
@@ -425,7 +426,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         JSONObject obj = services.extractPDFFile(fullPath);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
     }
 
@@ -440,7 +441,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         JSONArray erg = obj.getJSONArray("result");
         assertNotNull(erg);
         assertTrue(erg.length() == 2);
@@ -460,7 +461,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertTrue(obj.getInt("result") == 2);
         assertTrue(services.getEntries().size() == 2);
         for (FileEntry entry : services.getEntries()) {
@@ -480,7 +481,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertTrue(obj.getInt("result") == 2);
         assertTrue(services.getEntries().size() == 2);
         for (FileEntry entry : services.getEntries()) {
@@ -504,7 +505,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         JSONObject result = (JSONObject) obj.get("result");
         assertNotNull(result);
         assertTrue(result.length() == 2);
@@ -522,7 +523,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         result = (JSONObject) obj.get("result");
         assertNotNull(result);
         assertTrue(result.length() == 1);
@@ -546,7 +547,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertTrue(services.getEntries().isEmpty());
     }
 
@@ -559,7 +560,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         byte[] content = readFile(System.getProperty("user.dir") + fileName);
         byte[] contentRead = Base64.decodeBase64(obj.getString("result"));
         assertTrue("Unterschiedliche Länge gelesen!", content.length == contentRead.length);
@@ -575,14 +576,12 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        assertTrue(obj.getBoolean("result"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         urlString = "http://www.spiegel.dumm";
         obj = services.isURLAvailable(urlString);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.getString("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        assertFalse((obj.getBoolean("result")));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), !obj.getBoolean("success"));
     }
 }

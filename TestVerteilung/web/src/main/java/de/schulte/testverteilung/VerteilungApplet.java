@@ -507,20 +507,20 @@ public class VerteilungApplet extends Applet {
     /**
      * erzeugt einen Pfad
      * @param  targetPath           der Name des Folders in dem der Folder erstellt werden soll als String
-     * @param  folderName           der Name des neuen Pfades als String
+     * @param  extraProperties      die Properties des neuen Folders als Json String
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result            Folder als JSONObject
      */
     public JSONObject createFolder(final String targetPath,
-                                   final String folderName) {
+                                   final String extraProperties) {
 
         JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.createFolder(targetPath, folderName);
+                    return services.createFolder(targetPath, extraProperties);
                 }
             });
         } catch (PrivilegedActionException e) {

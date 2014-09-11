@@ -502,27 +502,36 @@ public class VerteilungServices {
     /**
      * erstellt ein Dokument
      * @param  targetFolder           der Name des Folders in dem das Dokument erstellt werden soll als String
-     * @param  folderName             der Name des Folders als String
+     * @param  extraCMSProperties      zusätzliche Properties
      * @return obj                     ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                         false   ein Fehler ist aufgetreten
      *                                                                result           der Folder als JSON Object
      */
     public JSONObject createFolder(String targetFolder,
-                                   String folderName) {
+                                   String extraCMSProperties) {
 
         JSONObject obj = new JSONObject();
         try {
             Folder folder;
             CmisObject target;
+            Map<String, Object> outMap = null;
+
+            if (extraCMSProperties != null && extraCMSProperties.length() > 0)
+                outMap = buildProperties(extraCMSProperties);
+            else {
+                obj.put("success", false);
+                obj.put("result", "keine Properties vorhanden!");
+            }
+
             target = con.getNode(targetFolder);
             if (target != null && target instanceof Folder) {
-                folder = con.createFolder((Folder) target, folderName);
+                folder = con.createFolder((Folder) target, outMap);
                 if (folder != null ) {
                     obj.put("success", true);
                     obj.put("result", convertCMISObjectToJSON(folder).toString());
                 } else {
                     obj.put("success", false);
-                    obj.put("result", "Ein Folder mit dem Namen " + folderName + " ist nicht vorhanden!" );
+                    obj.put("result", "Ein Folder konnte nicht angelegt werden!" );
                 }
             } else {
                 obj.put("success", false);
