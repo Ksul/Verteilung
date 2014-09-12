@@ -293,13 +293,13 @@ public class VerteilungApplet extends Applet {
 
     /**
      * löscht ein Document
-     * @param folder         der Folder als String, in das Documentliegt
+     * @param documentId     die Id des Folder als String, in dem das Document liegt
      * @param fileName       der Name des Documentes
      * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            Dokument als JSONObject
      */
-    public JSONObject deleteDocument(final String folder,
+    public JSONObject deleteDocument(final String documentId,
                                      final String fileName) {
 
 
@@ -308,7 +308,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.deleteDocument(folder, fileName);
+                    return services.deleteDocument(documentId, fileName);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -320,7 +320,7 @@ public class VerteilungApplet extends Applet {
 
     /**
      * erzeugt ein Document
-     * @param  folder               der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  documentId           die Id des Folders in dem das Dokument erstellt werden soll als String
      * @param  fileName             der Name des Dokumentes als String
      * @param  documentContent      der Inhalt als String
      * @param  documentType         der Typ des Dokumentes
@@ -330,7 +330,7 @@ public class VerteilungApplet extends Applet {
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                                      result   Dokument als JSONObject
      */
-    public JSONObject createDocument(final String folder,
+    public JSONObject createDocument(final String documentId,
                                      final String fileName,
                                      final String documentContent,
                                      final String documentType,
@@ -343,7 +343,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.createDocument(folder, fileName, documentContent, documentType, extraCMSProperties, versionState);
+                    return services.createDocument(documentId, fileName, documentContent, documentType, extraCMSProperties, versionState);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -506,13 +506,13 @@ public class VerteilungApplet extends Applet {
 
     /**
      * erzeugt einen Pfad
-     * @param  targetPath           der Name des Folders in dem der Folder erstellt werden soll als String
+     * @param  documentId           die Id des Folders in dem der Folder erstellt werden soll als String
      * @param  extraProperties      die Properties des neuen Folders als Json String
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result            Folder als JSONObject
      */
-    public JSONObject createFolder(final String targetPath,
+    public JSONObject createFolder(final String documentId,
                                    final String extraProperties) {
 
         JSONObject obj;
@@ -520,7 +520,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.createFolder(targetPath, extraProperties);
+                    return services.createFolder(documentId, extraProperties);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -531,19 +531,19 @@ public class VerteilungApplet extends Applet {
 
     /**
      * löscht einen Pfad
-     * @param  folderPath           der Name des zu löschenden Pfades als String
+     * @param  documentId           die Id des zu löschenden Pfades als String
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result
      */
-    public JSONObject deleteFolder(final String folderPath) {
+    public JSONObject deleteFolder(final String documentId) {
 
         JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.deleteFolder(folderPath);
+                    return services.deleteFolder(documentId);
                 }
             });
         } catch (PrivilegedActionException e) {

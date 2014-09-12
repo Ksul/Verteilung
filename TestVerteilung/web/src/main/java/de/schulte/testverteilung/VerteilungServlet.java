@@ -182,15 +182,15 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
                     obj = findDocument(getURLParameter(req, PARAMETER_CMISQUERY, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPLOADDOCUMENT)) {
-                    obj = uploadDocument(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_FILENAME, true),  getURLParameter(req, PARAMETER_VERSIONSTATE, true));
+                    obj = uploadDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true),  getURLParameter(req, PARAMETER_VERSIONSTATE, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_DELETEDOCUMENT)) {
-                    obj = deleteDocument(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_FILENAME, true));
+                    obj = deleteDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_CREATEDOCUMENT)) {
-                    obj = createDocument(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_FILENAME, true), getURLParameter(req, PARAMETER_DOCUMENTTEXT, true), getURLParameter(req, PARAMETER_MIMETYPE, false), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, false), getURLParameter(req, PARAMETER_VERSIONSTATE, false));
+                    obj = createDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true), getURLParameter(req, PARAMETER_DOCUMENTTEXT, true), getURLParameter(req, PARAMETER_MIMETYPE, false), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, false), getURLParameter(req, PARAMETER_VERSIONSTATE, false));
                 } else if (value.equalsIgnoreCase(FUNCTION_CREATEFOLDER)) {
-                    obj = createFolder(getURLParameter(req, PARAMETER_FOLDER, true), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, true));
+                    obj = createFolder(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_DELETEFOLDER)) {
-                    obj = deleteFolder(getURLParameter(req, PARAMETER_FOLDER, true));
+                    obj = deleteFolder(getURLParameter(req, PARAMETER_DOCUMENTID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_GETDOCUMENTCONTENT)) {
                     obj = getDocumentContent(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_EXTRACT, true).equalsIgnoreCase("true"));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPDATEDOCUMENT)) {
@@ -308,7 +308,7 @@ public class VerteilungServlet extends HttpServlet {
 
     /**
      * lädt ein Document in den Server
-     * @param folder                  der Folder als String, in das Document geladen werden soll
+     * @param documentId              die Id des Folders als String, in das Document geladen werden soll
      * @param fileName                der Dateiname ( mit Pfad) als String, die hochgeladen werden soll
      * @param  versionState              der VersionsStatus ( none, major, minor, checkedout)
      * @return                        ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
@@ -316,11 +316,11 @@ public class VerteilungServlet extends HttpServlet {
      *                                                               result            Dokument als JSONObject
      * @throws VerteilungException
      */
-    protected JSONObject uploadDocument(String folder,
+    protected JSONObject uploadDocument(String documentId,
                                         String fileName,
                                         String versionState) throws VerteilungException {
 
-        return services.uploadDocument(folder, fileName, versionState);
+        return services.uploadDocument(documentId, fileName, versionState);
     }
 
     /**
@@ -340,7 +340,7 @@ public class VerteilungServlet extends HttpServlet {
 
     /**
      * erzeugt ein Document
-     * @param  folder               der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  documentId           die Id des Folders in dem das Dokument erstellt werden soll als String
      * @param  fileName             der Name des Dokumentes als String
      * @param  documentContent      der Inhalt als String
      * @param  documentType         der Typ des Dokumentes
@@ -351,14 +351,14 @@ public class VerteilungServlet extends HttpServlet {
      *                                                             result            Dokument als JSONObject
      * @throws VerteilungException
      */
-    protected JSONObject createDocument(String folder,
+    protected JSONObject createDocument(String documentId,
                                         String fileName,
                                         String documentContent,
                                         String documentType,
                                         String extraCMSProperties,
                                         String versionState) throws  VerteilungException {
 
-        return services.createDocument(folder, fileName, documentContent, documentType, extraCMSProperties, versionState);
+        return services.createDocument(documentId, fileName, documentContent, documentType, extraCMSProperties, versionState);
     }
 
     /**
@@ -418,30 +418,30 @@ public class VerteilungServlet extends HttpServlet {
 
     /**
      * erzeugt einen Pfad
-     * @param  folder               der Name des Folders in dem der Folder erstellt werden soll als String
+     * @param  documentId           die Id des Folders in dem der Folder erstellt werden soll als String
      * @param  extraProperties      die Prperties des neuen Folders
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result            Folder als JSONObject
      * @throws VerteilungException
      */
-    protected JSONObject createFolder(String folder,
+    protected JSONObject createFolder(String documentId,
                                       String extraProperties) throws  VerteilungException {
 
-        return services.createFolder(folder, extraProperties);
+        return services.createFolder(documentId, extraProperties);
     }
 
     /**
      * löscht einen Pfad
-     * @param  folderPath           der Name des zu löschenden Pfades als String
+     * @param  documentId           die Id des zu löschenden Pfades als String
      * @return                      ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                      false    ein Fehler ist aufgetreten
      *                                                             result
      * @throws VerteilungException
      */
-    protected JSONObject deleteFolder(String folderPath) throws  VerteilungException {
+    protected JSONObject deleteFolder(String documentId) throws  VerteilungException {
 
-        return services.deleteFolder(folderPath);
+        return services.deleteFolder(documentId);
     }
 
     /**

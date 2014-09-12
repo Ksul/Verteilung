@@ -463,15 +463,27 @@ function startSettingsDialog() {
                                             {"name": "documentId", "value": data.objectId},
                                             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                                         ], "Dokument konnte nicht aktualisiert werden!", false);
+                                    if (erg.success) {
+                                        var newFolder = $.parseJSON(erg.result);
+
+
+                                        $("#tree").jstree("refresh");
+                                        $(document.getElementById(data.objectId)).children("i").click();
+                                        $("#tree").jstree('open_node', newFolder.objectId)
+                                    }
                                     else
                                     erg = executeService("updateProperties", [
                                         {"name": "documentId", "value": data.objectId},
                                         {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                                     ], "Dokument konnte nicht aktualisiert werden!", false);
+                                    if (erg.success) {
+                                        alfrescoFolderTabelle.rows().invalidate();
+                                        var node = $(document.getElementById(data.objectId));
+                                        $("#tree").jstree('rename_node', node[0], name);
+                                    }
                                 }
-                                alfrescoFolderTabelle.rows().invalidate();
-                                var node = $(document.getElementById(data.objectId));
-                                $("#tree").jstree('rename_node', node[0], name);
+
+
                                 $('#dialogBox').dialog("destroy");
                                 jQuery('#simpleGrid').remove();
                             } catch (e) {

@@ -32,11 +32,11 @@ public class VerteilungServicesTest extends AlfrescoTest {
         super.setUp();
         services = new VerteilungServices(properties.getProperty("server"), properties.getProperty("bindingUrl"), properties.getProperty("user"), properties.getProperty("password"));
         assertNotNull(services);
-        services.deleteDocument("/Archiv", "Test.pdf");
-        services.deleteDocument("/Archiv", "TestDocument.txt");
-        services.deleteDocument("/Archiv/Fehler", "TestDocument.txt");
-        services.deleteDocument("/Archiv/Fehler", "Test.pdf");
-        services.deleteFolder("/Archiv/TestFolder");
+        services.deleteDocument(services.getNodeId("/Archiv").getString("result"), "Test.pdf");
+        services.deleteDocument(services.getNodeId("/Archiv").getString("result"), "TestDocument.txt");
+        services.deleteDocument(services.getNodeId("/Archiv/Fehler").getString("result"), "TestDocument.txt");
+        services.deleteDocument(services.getNodeId("/Archiv/Fehler").getString("result"), "Test.pdf");
+        services.deleteFolder(services.getNodeId("/Archiv/TestFolder").getString("result"));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
                 assertTrue(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getBoolean("hasChildFolder"));
             assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("objectId"));
         }
-        obj = services.uploadDocument("/Archiv/Fehler", System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
+        obj = services.uploadDocument(services.getNodeId("/Archiv/Fehler").getString("result"), System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -98,7 +98,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
             }
         }
         assertEquals(4, ((JSONArray) obj.get("result")).length());
-        obj = services.deleteDocument("/Archiv/Fehler", "Test.pdf");
+        obj = services.deleteDocument(services.getNodeId("/Archiv/Fehler").getString("result"), "Test.pdf");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -151,12 +151,12 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testUploadDocument() throws Exception {
-        JSONObject obj = services.uploadDocument("/Archiv", System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
+        JSONObject obj = services.uploadDocument(services.getNodeId("/Archiv").getString("result"), System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        obj = services.deleteDocument("/Archiv", "Test.pdf");
+        obj = services.deleteDocument(services.getNodeId("/Archiv").getString("result"), "Test.pdf");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -165,9 +165,14 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testCreateDocument() throws Exception {
+        JSONObject obj = services.getNodeId("/");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().getTime() + "'}, 'P:my:amountable':{'my:amount':'25.33'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
-        JSONObject obj = services.createDocument("/", "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
+        obj = services.createDocument(obj.getString("result"), "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -182,7 +187,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         String document = obj.getString("result");
         assertEquals("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", document);
-        obj = services.deleteDocument("/", "TestDocument.txt");
+        obj = services.deleteDocument(services.getNodeId("/").getString("result"), "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -197,7 +202,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         String extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Testfolder'}, 'P:cm:titled':{'cm:title': 'Testtitel', 'cm:description':'Dies ist ein Test Folder'}}";
-        obj = services.createFolder("/Archiv", extraProperties);
+        obj = services.createFolder(obj.getString("result"), extraProperties);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -205,7 +210,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         JSONObject result = new JSONObject(obj.getString("result"));
         assertNotNull(result);
         assertTrue(result.getString("name").equalsIgnoreCase("TestFolder"));
-        obj = services.deleteFolder("/Archiv/TestFolder");
+        obj = services.deleteFolder(result.getString("objectId"));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -214,8 +219,14 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testUpdateDocument() throws Exception {
+        JSONObject obj = services.getNodeId("/Archiv");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        String archivId = obj.getString("result");
         String content = "";
-        JSONObject obj = services.createDocument("/Archiv", "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR.value());
+        obj = services.createDocument(archivId, "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -233,13 +244,13 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         assertEquals(content, obj.getString("result"));
-        obj = services.deleteDocument("/Archiv", "TestDocument.txt");
+        obj = services.deleteDocument(archivId, "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
 
-        obj = services.createDocument("/Archiv", "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MAJOR.value());
+        obj = services.createDocument(archivId, "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MAJOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -270,7 +281,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertEquals("2. Versionskommentar", result.getString("checkinComment"));
         assertEquals("25.33", result.getString("amount"));
         assertTrue(result.getBoolean("tax"));
-        obj = services.deleteDocument("/Archiv", "TestDocument.txt");
+        obj = services.deleteDocument(archivId, "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -301,9 +312,15 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testUpdateProperties() throws Exception {
+        JSONObject obj = services.getNodeId("/Archiv");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+        String archivId = obj.getString("result");
         String content = "";
         String extraProperties = "{'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
-        JSONObject obj = services.createDocument("/Archiv", "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
+        obj = services.createDocument(archivId, "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -322,7 +339,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(result);
         assertEquals("25.33", result.getString("amount"));
         assertTrue(result.getBoolean("tax"));
-        obj = services.deleteDocument("/Archiv", "TestDocument.txt");
+        obj = services.deleteDocument(archivId, "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -343,9 +360,9 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(newFolder.get("result"));
         String newFolderId = newFolder.getString("result");
         assertTrue(newFolder.get("result").toString(), newFolder.getBoolean("success"));
-        services.deleteDocument("/Archiv", "TestDocument.txt");
+        services.deleteDocument(oldFolderId, "TestDocument.txt");
         String content = "";
-        JSONObject document = services.createDocument("/Archiv", "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR.value());
+        JSONObject document = services.createDocument(oldFolderId, "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR.value());
         assertNotNull(document);
         assertTrue(document.length() >= 2);
         assertNotNull(document.get("result"));
@@ -363,7 +380,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        obj = services.deleteDocument("/Archiv/Fehler", "TestDocument.txt");
+        obj = services.deleteDocument(newFolderId, "TestDocument.txt");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -582,6 +599,6 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
-        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), !obj.getBoolean("success"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
     }
 }

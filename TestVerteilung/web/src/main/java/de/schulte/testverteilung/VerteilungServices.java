@@ -254,13 +254,13 @@ public class VerteilungServices {
 
     /**
      * lädt ein Dokument hoch
-     * @param  folder                  der Pfad des Zielfolders als String
+     * @param  documentId              die Id des Zielfolders als String
      * @param  fileName                der Name der Datei als String
      * @return obj                     ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                         false   ein Fehler ist aufgetreten
      *                                                                 result          bei Erfolg die Id als String, ansonsten der Fehler
      */
-    public JSONObject uploadDocument(String folder,
+    public JSONObject uploadDocument(String documentId,
                                      String fileName,
                                      String versionState) {
 
@@ -270,14 +270,14 @@ public class VerteilungServices {
             if (fileName.toLowerCase().endsWith(".pdf"))
                 typ = "application/pdf";
             File file = new File(fileName);
-            CmisObject cmisObject = con.getNode(folder);
+            CmisObject cmisObject = con.getNodeById(documentId);
             if (cmisObject != null && cmisObject instanceof Folder) {
                 String id = con.uploadDocument(((Folder) cmisObject), file, typ, createVersionState(versionState));
                 obj.put("success", true);
                 obj.put("result", id);
             } else {
                 obj.put("success", false);
-                obj.put("result", "Der verwendete Pfad " + folder + " ist kein Folder!");
+                obj.put("result", "Der verwendete Pfad ist kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -287,20 +287,20 @@ public class VerteilungServices {
 
     /**
      * löscht ein Dokument
-     * @param  folder            der Name des Folders in dem sich das Dokument befindet als String
+     * @param  documentId        die Id des Folders in dem sich das Dokument befindet als String
      * @param  documentName      der Name des Dokumentes als String
      * @return obj               ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                   false   ein Fehler ist aufgetreten
      *                                                          result           bei Erfolg nichts, ansonsten der Fehler
      */
-    public JSONObject deleteDocument(String folder,
+    public JSONObject deleteDocument(String documentId,
                                      String documentName) {
 
         JSONObject obj = new JSONObject();
         try {
             CmisObject document;
             CmisObject folderObject;
-            folderObject = con.getNode(folder);
+            folderObject = con.getNodeById(documentId);
             if (folderObject != null && folderObject instanceof Folder) {
                 document = con.getNode(((Folder) folderObject).getPath() + (((Folder) folderObject).isRootFolder() ? "" : "/") + documentName);
                 if (document != null && document instanceof Document) {
@@ -315,7 +315,7 @@ public class VerteilungServices {
                 }
             } else {
                 obj.put("success", false);
-                obj.put("result", folder == null ? "Der Pfad " + folder + "  ist nicht vorhanden!" : "Der verwendete Pfad " + folder + " ist kein Folder!");
+                obj.put("result", folderObject == null ? "Der angegeben Pfad ist nicht vorhanden!" : "Der verwendete Pfad ist kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -325,7 +325,7 @@ public class VerteilungServices {
 
     /**
      * erstellt ein Dokument
-     * @param  folder               der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  documentId           die Id des Folders in dem das Dokument erstellt werden soll als String
      * @param  documentName         der Name des Dokumentes als String
      * @param  documentContent      der Inhalt als Base64 decodierter String
      * @param  documentType         der Typ des Dokumentes
@@ -335,7 +335,7 @@ public class VerteilungServices {
      *                                                                      false   ein Fehler ist aufgetreten
      *                                                             result           das Document als JSON Object
      */
-    public JSONObject createDocument(String folder,
+    public JSONObject createDocument(String documentId,
                                      String documentName,
                                      String documentContent,
                                      String documentType,
@@ -348,7 +348,7 @@ public class VerteilungServices {
             CmisObject document;
             CmisObject folderObject;
 
-            folderObject = con.getNode(folder);
+            folderObject = con.getNodeById(documentId);
             Map<String, Object> outMap = null;
             if (folderObject != null && folderObject instanceof Folder) {
 
@@ -365,7 +365,7 @@ public class VerteilungServices {
                 }
             } else {
                 obj.put("success", false);
-                obj.put("result", folder == null ? "Der Pfad " + folder + "  ist nicht vorhanden!" : "Der verwendete Pfad " + folder + " ist kein Folder!");
+                obj.put("result", folderObject == null ? "Der angegebene Pfad  ist nicht vorhanden!" : "Der verwendete Pfad ist kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -501,13 +501,13 @@ public class VerteilungServices {
 
     /**
      * erstellt ein Dokument
-     * @param  targetFolder           der Name des Folders in dem das Dokument erstellt werden soll als String
+     * @param  documentId              die Id des Folders in dem das Dokument erstellt werden soll als String
      * @param  extraCMSProperties      zusätzliche Properties
      * @return obj                     ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                         false   ein Fehler ist aufgetreten
      *                                                                result           der Folder als JSON Object
      */
-    public JSONObject createFolder(String targetFolder,
+    public JSONObject createFolder(String documentId,
                                    String extraCMSProperties) {
 
         JSONObject obj = new JSONObject();
@@ -523,7 +523,7 @@ public class VerteilungServices {
                 obj.put("result", "keine Properties vorhanden!");
             }
 
-            target = con.getNode(targetFolder);
+            target = con.getNodeById(documentId);
             if (target != null && target instanceof Folder) {
                 folder = con.createFolder((Folder) target, outMap);
                 if (folder != null ) {
@@ -535,7 +535,7 @@ public class VerteilungServices {
                 }
             } else {
                 obj.put("success", false);
-                obj.put("result", target == null ? "Der Pfad " + targetFolder + "  ist nicht vorhanden!" : "Der verwendete Pfad " + targetFolder + " ist kein Folder!");
+                obj.put("result", target == null ? "Der Pfad " + target + "  ist nicht vorhanden!" : "Der verwendete Pfad " + target + " ist kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -545,24 +545,24 @@ public class VerteilungServices {
 
     /**
      * löscht einen Folder
-     * @param  folderName        der Name des Folders
+     * @param  documentId        die Id des Folders, der gelöscht werden soll
      * @return obj               ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                   false   ein Fehler ist aufgetreten
      *                                                          result           bei Erfolg nichts, ansonsten der Fehler
      */
-    public JSONObject deleteFolder(String folderName) {
+    public JSONObject deleteFolder(String documentId) {
 
         JSONObject obj = new JSONObject();
         try {
             CmisObject folder;
-            folder = con.getNode(folderName);
+            folder = con.getNodeById(documentId);
             if (folder != null && folder instanceof Folder) {
                 List<String> list = ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
                     obj.put("success", true);
                     obj.put("result", new JSONObject(list).toString());
             } else {
                 obj.put("success", false);
-                obj.put("result", folder == null ? "Der Pfad " + folderName + "  ist nicht vorhanden!" : "Der verwendete Pfad " + folderName + " ist kein Folder!");
+                obj.put("result", folder == null ? "Der  angegebene Pfad ist nicht vorhanden!" : "Der verwendete Pfad st kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -1014,6 +1014,7 @@ public class VerteilungServices {
      * @return               das VersionsState Object
      */
     private VersioningState createVersionState(String versionState) throws VerteilungException {
+
         if (versionState != null && versionState.length() > 0 && !versionState.equals("none") && !versionState.equals("major") && !versionState.equals("minor") && !versionState.equals("checkedout"))
             throw new VerteilungException("ungültiger VersionsStatus");
         VersioningState vs = VersioningState.fromValue(versionState);
