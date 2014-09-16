@@ -470,7 +470,6 @@ function startSettingsDialog() {
                                         $("#tree").jstree("refresh");
                                         $(document.getElementById(data.objectId)).children("i").click();
                                         $("#tree").jstree('open_node', newFolder.objectId)
-                                        $("#tree").jstree('select_node', newFolder.objectId)
                                     }
                                     else
                                     erg = executeService("updateProperties", [
