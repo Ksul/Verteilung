@@ -32,27 +32,54 @@
 
     <script src="./src/main/javascript/vkbeautify.js" type="text/javascript" charset="utf-8"></script>
     <script src="./src/main/javascript/jsbeautify.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        $("#switcher").themeswitcher({
+            imgpath: "./themes/images/",
+            loadTheme: "Redmond" ,
+            additionalthemes: [{title:"Aristo",name:"aristo",icon:"Aristo.jpg",url:"./themes/redmond/jquery-ui.css"}],
+            jqueryuiversion: "1.10.1"
+        });
+    </script>
 
     <link type="text/css" href="./src/main/javascript/alpaca/alpaca/alpaca.css" rel="stylesheet"/>
+    <link type="text/css" href="./src/main/resource/style.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/simplegrid.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/ArchivLayout.css" rel="stylesheet"/>
-    <link type="text/css" href="./src/main/javascript/jquery-ui/css/cupertino/jquery-ui-1.10.4.custom.css" rel="stylesheet"/>
+
+    <!--<link type="text/css" href="./src/main/javascript/jquery-ui/css/cupertino/jquery-ui-1.10.4.custom.css" rel="stylesheet"/>-->
 
 
     <script>
 
 
-
     $(function() {
+
+
+
+
+            $( document ).tooltip();
+
+
+
+        $('#create-user').on('click', function () {
+            startDocumentDialog(new RowData() );
+        });
+        function RowData(){};
+        RowData.prototype.data = function(){
+            return  {"attr":{"title":"Test", "description":"fghjk", "documentDate":  new Date()}};
+        };
+
+
         settings = {};
         settings.settings = [];
             settings.settings.push({"key": "server", "value": "http://localhost:8080/alfresco/cmis"});
             settings.settings.push({"key": "user", "value": "admin"});
             settings.settings.push({"key": "password", "value": "dTa21.02G!"});
             settings.settings.push({"key": "binding", "value": "http://localhost:8080/alfresco/api/-default-/public/cmis/versions/1.0/atom"});
-        data = {"attr":{"title":"Test", "description":"fghjk", "documentDate": $.datepicker.formatDate("D M dd 00:00:00 CET yy", new Date())}};
-       startDocumentDialog(data );
+
+       startDocumentDialog(new RowData() );
         });
+
     </script></head><body>
 
 <button id="create-user">Create new user</button>

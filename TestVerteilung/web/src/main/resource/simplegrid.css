@@ -24,7 +24,7 @@ body {
 .grid {
 	width: 100%;
 	max-width: 1140px;
-	min-width: 755px;
+	min-width: 75px;
 	margin: 0 auto;
 	overflow: hidden;
 }
@@ -50,6 +50,7 @@ body {
 .col-1-1 {
 	width: 100%;
 }
+
 .col-2-3, .col-8-12 {
 	width: 66.66%;
 }
