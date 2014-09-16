@@ -568,6 +568,17 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
         container.appendChild(image);
         image = document.createElement("div");
         image.href = "#";
+        image.className = "folderRemove";
+        image.style.backgroundImage = "url(src/main/resource/images/folder_remove.png)";
+        image.title = "Folder löschen";
+        image.style.cursor = "pointer";
+        image.style.width = "16px";
+        image.style.height = "16px";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+        image = document.createElement("div");
+        image.href = "#";
         image.className = "folderEdit";
         image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
         image.title = "Details bearbeiten";
@@ -802,6 +813,21 @@ function handleAlfrescoFolderImageClicks() {
         try {
             var tr = $(this).closest('tr');
             startFolderDialog(alfrescoFolderTabelle.row(tr), "VIEW_WEB_CREATE");
+        } catch (e) {
+            errorHandler(e);
+        }
+    });
+    $(document).on("click", ".folderRemove", function () {
+        try {
+            var tr = $(this).closest('tr');
+            erg = executeService("deleteFolder", [
+                {"name": "documentId", "value": alfrescoFolderTabelle.row(tr).data().objectId}
+            ], "Folder konnte nicht gelöscht werden!", false);
+            if (erg.success) {
+                var node = $(document.getElementById(data.objectId));
+                $("#tree").jstree('remove', node[0]);
+                alfrescoFolderTabelle.rows().invalidate();
+            }
         } catch (e) {
             errorHandler(e);
         }
