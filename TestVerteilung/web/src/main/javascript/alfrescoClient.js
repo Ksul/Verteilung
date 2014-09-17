@@ -256,7 +256,7 @@ function loadAlfrescoTable() {
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
-                    "width": "12px"
+                    "width": "35px"
                 },
                 {
                     "data": "contentStreamMimeType",
@@ -312,6 +312,10 @@ function loadAlfrescoTable() {
                 }
             ],
             "columnDefs": [
+                {
+                    "targets": [0],
+                    "orderable": false
+                },
                 {
                     "targets": [4, 5],
                     "visible": true
@@ -406,7 +410,7 @@ function loadAlfrescoFolderTable() {
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
-                    "width": "12px"
+                    "width": "35px"
                 },
                 {
                     "data": "name",
@@ -425,20 +429,24 @@ function loadAlfrescoFolderTable() {
                 {
                     "title": "Aktion",
                     "data": null,
-                    "width": "102px",
+                    "width": "150px",
                     "class": "alignLeft"
                 }
             ],
             "columnDefs": [
-                // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
+                {
+                    "targets": [0],
+                    "orderable": false
+                },
                 {
                     "targets": [1, 2],
-                    "visible": true
+                    "visible": true,
+                    "orderable": true
                 },
                 {
                     "targets": [3],
                     "mRender": alfrescoFolderAktionFieldFormatter,
-                    "sortable": false
+                    "orderable": false
                 }
             ],
             "language": {
@@ -1122,6 +1130,7 @@ function loadAlfrescoTree() {
  */
 function start() {
     try {
+
         var erg = loadApplet();
         if (erg != null && !erg) {
             throw new Error("Applet konnte nicht geladen werden!");

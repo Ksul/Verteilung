@@ -34,14 +34,7 @@
 
 <script src="./src/main/javascript/vkbeautify.js" type="text/javascript" charset="utf-8"></script>
 <script src="./src/main/javascript/jsbeautify.js" type="text/javascript" charset="utf-8"></script>
-<script type="text/javascript">
-    $("#switcher").themeswitcher({
-        imgpath: "./themes/images/",
-        loadTheme: "Cupertino" ,
-        additionalthemes: [{title:"Aristo",name:"aristo",icon:"Aristo.jpg",url:"./themes/Aristo/jquery-ui.css"}],
-        jqueryuiversion: "1.10.4"
-    });
-</script>
+
 <link type="text/css" href="./src/main/javascript/alpaca/alpaca/alpaca.css" rel="stylesheet"/>
 <link type="text/css" href="./src/main/resource/style.css" rel="stylesheet"/>
 <link type="text/css" href="./src/main/resource/simplegrid.css" rel="stylesheet"/>
@@ -83,16 +76,18 @@ function toggleStateManagement(skipAlert, mode) {
 
 
 
-
 $(document).ready(function () {
 
     loadLayout();
     $( document ).tooltip();
-    $('.ui-dialog-titlebar-close').tooltip('disable');
 
-
+    $("#switcher").themeswitcher({
+        imgpath: "./themes/images/",
+        loadTheme: "Cupertino" ,
+        additionalthemes: [{title:"Aristo",name:"aristo",icon:"Aristo.jpg",url:"./themes/Aristo/jquery-ui.css"}],
+        jqueryuiversion: "1.10.1"
+    });
 });
-
 
 
 $.fn.dataTableExt.oPagination.listbox = {
@@ -165,7 +160,7 @@ $.fn.dataTableExt.oPagination.listbox = {
 };
 
 window.onload = function () {
- start();
+    start();
 };
 
 var rulesEditor;
