@@ -1057,7 +1057,7 @@ function populateEventHandlerForTreeIcons() {
                 var nodeId = event.originalEvent.dataTransfer.getData('id', $(this).attr('id'));
                 var parentId = event.originalEvent.dataTransfer.getData('parentId', $(this).attr('id'));
                 var rowIndex = event.originalEvent.dataTransfer.getData('rowIndex', $(this).attr('id'));
-                var destinationId = this.parentElement.parentElement.id;
+                var destinationId = this.parentElement.id;
                 var erg = moveDocument(nodeId, parentId, destinationId);
                 if (erg) {
                     alfrescoTabelle.row(rowIndex).remove();
