@@ -19,7 +19,7 @@
             rounded: true,
             imgpath: "",
             themepath: "https://ajax.googleapis.com/ajax/libs/jqueryui/",
-            jqueryuiversion: "1.8.10",
+            jqueryuiversion: "1.10.4",
             initialtext: "Switch Theme",
             buttonpretext: "Theme:",
             closeonselect: true,
@@ -340,7 +340,7 @@
             var currentStyle = new Array();
             var links = $("head link[rel='stylesheet']");
             $.each(links, function (k, v) {
-                if ($.inArray(v.attributes["href"].nodeValue, allUrls) != -1) {
+                if ($.inArray(v.attributes["href"].value, allUrls) != -1) {
                     currentStyle.push(v);
                     return false;
                 }
@@ -368,8 +368,11 @@
                     .attr("type", "text/css")
                     .attr("rel", "stylesheet")
                     .attr("href", url);
-
-                style.appendTo("head");
+                var dest = $('link');
+                if (typeof(dest) == "object" && dest.length > 0)
+                    style.insertBefore(dest[0]);
+                else
+                    style.appendTo("head");
             }
 
             $.cookie(settings.cookiename, data.name,

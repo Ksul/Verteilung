@@ -406,7 +406,7 @@ function loadAlfrescoFolderTable() {
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
-                    "width": "12px"
+                    "width": "40px"
                 },
                 {
                     "data": "name",
@@ -425,12 +425,15 @@ function loadAlfrescoFolderTable() {
                 {
                     "title": "Aktion",
                     "data": null,
-                    "width": "102px",
+                    "width": "120px",
                     "class": "alignLeft"
                 }
             ],
             "columnDefs": [
-                // { "aTargets": [0], "fnRender": expandFieldFormatter, "bSortable": false},
+                {
+                    "targets": [0],
+                    "sortable": false
+                },
                 {
                     "targets": [1, 2],
                     "visible": true
@@ -473,7 +476,7 @@ function loadVerteilungTable() {
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
-                    "width": "12px"
+                    "width": "35px"
                 },
                 {
                     "title": "Name",
@@ -498,6 +501,10 @@ function loadVerteilungTable() {
                 }
             ],
             "columnDefs": [
+                {
+                    "targets": [0],
+                    "sortable": false
+                },
                 {
                     "targets": [1, 2, 3],
                     "visible": true
