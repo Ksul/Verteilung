@@ -369,10 +369,10 @@
                     .attr("rel", "stylesheet")
                     .attr("href", url);
                 var dest = $('link');
-                if (typeof(dest) == 'object' && dest.length > 0)
+                if (typeof(dest) == "object" && dest.length > 0)
                     style.insertBefore(dest[0]);
                 else
-                    style.append('head');
+                    style.appendTo("head");
             }
 
             $.cookie(settings.cookiename, data.name,

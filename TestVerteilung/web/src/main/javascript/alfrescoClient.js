@@ -256,7 +256,7 @@ function loadAlfrescoTable() {
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
-                    "width": "35px"
+                    "width": "12px"
                 },
                 {
                     "data": "contentStreamMimeType",
@@ -312,10 +312,6 @@ function loadAlfrescoTable() {
                 }
             ],
             "columnDefs": [
-                {
-                    "targets": [0],
-                    "orderable": false
-                },
                 {
                     "targets": [4, 5],
                     "visible": true
@@ -410,7 +406,7 @@ function loadAlfrescoFolderTable() {
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
-                    "width": "35px"
+                    "width": "40px"
                 },
                 {
                     "data": "name",
@@ -429,24 +425,23 @@ function loadAlfrescoFolderTable() {
                 {
                     "title": "Aktion",
                     "data": null,
-                    "width": "150px",
+                    "width": "120px",
                     "class": "alignLeft"
                 }
             ],
             "columnDefs": [
                 {
                     "targets": [0],
-                    "orderable": false
+                    "sortable": false
                 },
                 {
                     "targets": [1, 2],
-                    "visible": true,
-                    "orderable": true
+                    "visible": true
                 },
                 {
                     "targets": [3],
                     "mRender": alfrescoFolderAktionFieldFormatter,
-                    "orderable": false
+                    "sortable": false
                 }
             ],
             "language": {
@@ -481,7 +476,7 @@ function loadVerteilungTable() {
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
-                    "width": "12px"
+                    "width": "35px"
                 },
                 {
                     "title": "Name",
@@ -506,6 +501,10 @@ function loadVerteilungTable() {
                 }
             ],
             "columnDefs": [
+                {
+                    "targets": [0],
+                    "sortable": false
+                },
                 {
                     "targets": [1, 2, 3],
                     "visible": true
@@ -1130,7 +1129,6 @@ function loadAlfrescoTree() {
  */
 function start() {
     try {
-
         var erg = loadApplet();
         if (erg != null && !erg) {
             throw new Error("Applet konnte nicht geladen werden!");
