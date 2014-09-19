@@ -827,14 +827,34 @@ function handleAlfrescoFolderImageClicks() {
     $(document).on("click", ".folderRemove", function () {
         try {
             var tr = $(this).closest('tr');
-            erg = executeService("deleteFolder", [
-                {"name": "documentId", "value": alfrescoFolderTabelle.row(tr).data().objectId}
-            ], "Folder konnte nicht gelöscht werden!", false);
-            if (erg.success) {
-                var node = $(document.getElementById(data.objectId));
-                $("#tree").jstree('remove', node[0]);
-                alfrescoFolderTabelle.rows().invalidate();
-            }
+            var id = alfrescoFolderTabelle.row(tr).data().objectId;
+            var $dialog = $('<div></div>').html("Ausgewählten Folder " + alfrescoFolderTabelle.row(tr).data().name + " löschen?").dialog({
+                autoOpen: true,
+                title: "Folder löschen",
+                modal: true,
+                height: 100,
+                width: 200,
+                buttons: {
+                    "Ok": function () {
+                        try {
+                            $(this).dialog("destroy");
+                            erg = executeService("deleteFolder", [
+                                {"name": "documentId", "value": id}
+                            ], "Folder konnte nicht gelöscht werden!", false);
+                            if (erg.success) {
+                                var node = $(document.getElementById(id));
+                                $("#tree").jstree('remove', node[0]);
+                                alfrescoFolderTabelle.rows().invalidate();
+                            }
+                        } catch (e) {
+                            errorHandler(e);
+                        }
+                    },
+                    "Abbrechen": function () {
+                        $(this).dialog("destroy");
+                    }
+                }
+            });
         } catch (e) {
             errorHandler(e);
         }
