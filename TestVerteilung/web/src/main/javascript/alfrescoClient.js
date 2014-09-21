@@ -99,7 +99,7 @@ function loadLayout() {
             size:                   .8,
             initClosed:             false,
             children: {
-                name: "alfrescoIinnerCenterLayout",
+                name: "alfrescoInnerCenterLayout",
                 contentSelector: ".ui-widget-content",
                 spacing_open: 8,
                 spacing_closed: 12,
@@ -107,6 +107,24 @@ function loadLayout() {
                     paneSelector: "#alfrescoCenterInnerNorth",
                     size: .44,
                     onresize: function () {
+                    },
+                    children: {
+                        name: "alfrescoInnerCenterNorthLayout",
+                        contentSelector: ".ui-widget-content",
+                        spacing_open: 8,
+                        spacing_closed: 12,
+                        north: {
+                            paneSelector: "#alfrescoCenterInnerNorthNorth",
+                            size: .1,
+                            resizable:			        false,
+                            closable:		    		false
+                        },
+                        center: {
+                            size: "auto",
+                            paneSelector: "#alfrescoCenterInnerNorthCenter",
+                            onresize: function () {
+                            }
+                        }
                     }
                 },
                 center: {
@@ -757,6 +775,7 @@ function switchAlfrescoDirectory(objectId) {
         if (json.success) {
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
+
           }
         json = executeService("listFolder", [
             {"name": "filePath", "value": objectId},
@@ -1003,12 +1022,14 @@ function handleVerteilungImageClicks() {
  */
 function loadDataForTree(aNode) {
     var obj = {};
-    var state = {"opened": false, "disabled": false, "selected": true};
+    var state = {"opened": true, "disabled": false, "selected": true};
     var state1 = {"opened": false, "disabled": false, "selected": false};
     try {
         // keine Parameter mit gegeben, also den Rooteintrag erzeugen
         if (!exist(aNode)) {
-            obj = {"text": "Root", "state": state};
+            return [
+                {"icon": "", "text": "Root", "state": state1, "children": true}
+            ];
         } else {
             if (alfrescoServerAvailable) {
                 var json = executeService("listFolder", [
@@ -1034,7 +1055,12 @@ function loadDataForTree(aNode) {
                         item["a_attr"] = "'class': 'drop'";
                         obj.push(item);
                     }
-                   return obj;
+                    if (aNode.id == "#")
+                        return [
+                            {"icon": "", "text": "Root", "state": state, "children": obj}
+                        ];
+                    else
+                        return obj;
                 }
                 else {
                     message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
@@ -1042,7 +1068,7 @@ function loadDataForTree(aNode) {
                 }
             }
         }
-    } catch(e) {
+    } catch (e) {
         errorHandler(e);
     }
 }
@@ -1124,9 +1150,14 @@ function loadAlfrescoTree() {
             'plugins': ["dnd", "types", "search"]
         }).on("select_node.jstree", function (event, data) {
             try {
-                if (data.node.data.baseTypeId == "cmis:folder") {
-                    if (alfrescoServerAvailable) {
-                        switchAlfrescoDirectory(data.node.data.objectId);
+                if (!exist(data.node.data))
+                    switchAlfrescoDirectory("-1");
+                else {
+                    if (data.node.data.baseTypeId == "cmis:folder") {
+                        if (alfrescoServerAvailable) {
+                            switchAlfrescoDirectory(data.node.data.objectId);
+                            $("#tree").jstree('open_node', data.node.id);
+                        }
                     }
                 }
             } catch (e) {
