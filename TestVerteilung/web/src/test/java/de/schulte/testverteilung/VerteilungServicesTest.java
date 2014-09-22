@@ -56,7 +56,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertTrue(obj.get("result") instanceof JSONArray);
         assertEquals(4, ((JSONArray) obj.get("result")).length());
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++) {
-            assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name"), anyOf(is("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
+            assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name"), anyOf(is("Dokumente"), is("Fehler"), is("Unbekannt"), is("Inbox")));
             if (((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name").equalsIgnoreCase("Fehler"))
                 assertTrue(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getBoolean("hasChildFolder"));
             assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("objectId"));
@@ -73,7 +73,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertTrue(obj.get("result") instanceof JSONArray);
         assertEquals(4, ((JSONArray) obj.get("result")).length());
         for (int i = 0; i < ((JSONArray) obj.get("result")).length(); i++) {
-            assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name"), anyOf(is("Archiv"), is("Fehler"), is("Unbekannt"), is("Inbox")));
+            assertThat(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("name"), anyOf(is("Dokumente"), is("Fehler"), is("Unbekannt"), is("Inbox")));
             assertNotNull(((JSONObject) ((JSONArray) obj.get("result")).get(i)).getString("objectId"));
         }
         obj = services.getNodeId("/Archiv");

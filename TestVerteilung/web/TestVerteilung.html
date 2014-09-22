@@ -29,14 +29,18 @@
 <script type="text/javascript" src="./src/main/javascript/jquery.themeswitcher.js" charset="utf-8"></script>
 <script type="text/javascript" src="./src/main/javascript/jquery.dataTables.js" charset="utf-8"></script>
 <script type="text/javascript" src="./src/main/javascript/jquery.price-format.js" charset="utf-8"></script>
+<script type="text/javascript" src="./src/main/javascript/jquery.easing.1.3.js" charset="utf-8"></script>
+<script type="text/javascript" src="./src/main/javascript/jquery.jBreadCrumb.1.1.js" charset="utf-8"></script>
 <script type="text/javascript" src="./src/main/javascript/alpaca/alpaca/alpaca.js"></script>
 <script src="./src/main/javascript/vkbeautify.js" type="text/javascript" charset="utf-8"></script>
 <script src="./src/main/javascript/jsbeautify.js" type="text/javascript" charset="utf-8"></script>
 
+
 <link type="text/css" href="./src/main/javascript/alpaca/alpaca/alpaca.css" rel="stylesheet"/>
 <link type="text/css" href="./src/main/resource/style.css" rel="stylesheet"/>
 <link type="text/css" href="./src/main/resource/ArchivLayout.css" rel="stylesheet"/>
-
+<link type="text/css" href="./src/main/resource/Base.css" rel="stylesheet"/>
+<link type="text/css" href="./src/main/resource/BreadCrumb.css" rel="stylesheet"/>
 
 
 <script type="text/javascript" charset="utf-8">
@@ -85,7 +89,7 @@ $(document).ready(function () {
         additionalthemes: [{title:"Aristo",name:"aristo",icon:"Aristo.jpg",url:"./themes/Aristo/jquery-ui.css"}],
         jqueryuiversion: "1.10.4"
     });
-
+    jQuery("#breadcrumb").jBreadCrumb();
 
 });
 
@@ -247,8 +251,9 @@ treeObject = $.jstree.reference('tree');
 
                     <div id="alfrescoCenterInnerNorth" class="inner-center container ui-widget-header hidden">
                         <div id="alfrescoCenterInnerNorthNorth" class="inner-center container ui-widget-header hidden">
-
-                            <div class="ui-widget-content">
+                            <div class="breadCrumbHolder module">
+                            <div id="breadcrumb" class="breadCrumb module">
+                             </div>
                             </div>
                         </div>
                         <div id="alfrescoCenterInnerNorthCenter" class="inner-center container ui-widget-header hidden">

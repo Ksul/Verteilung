@@ -1419,17 +1419,17 @@ function checkAndBuidAlfrescoEnvironment() {
                     if (erg.success) {
                         // Archiv Root prüfen
                         erg = executeService("getNodeId", [
-                            {"name": "filePath", "value": "/Archiv/Archiv"}
+                            {"name": "filePath", "value": "/Archiv/Dokumente"}
                         ], null, true);
                         if (!erg.success) {
-                            extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Archiv'}, 'P:cm:titled':{'cm:title': 'Archiv', 'cm:description':'Der Archiv Ordner'}}"
+                            extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Dokumente'}, 'P:cm:titled':{'cm:title': 'Dokumente', 'cm:description':'Der Ordner für die abgelegten Dokumente'}}"
                             erg = executeService("createFolder", [
                                 {"name": "folder", "value": archivFolderId},
                                 {"name": "fileName", "value": extraProperties}
                             ]);
                             if (erg.success) {
                                 erg = executeService("getNodeId", [
-                                    {"name": "filePath", "value": "/Archiv"}
+                                    {"name": "filePath", "value": "/Dokumente"}
                                 ], "Archiv Root konnte nicht gefunden werden:");
                                 if (erg.success)
                                     rootID = erg.result;

@@ -246,7 +246,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(sr.toString().contains("\"name\":\"Inbox\""));
         assertTrue(sr.toString().contains("\"name\":\"Fehler\""));
         assertTrue(sr.toString().contains("\"name\":\"Unbekannt\""));
-        assertTrue(sr.toString().contains("\"name\":\"Archiv\""));
+        assertTrue(sr.toString().contains("\"name\":\"Dokumente\""));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("8e6d4fbd-32f1-41ed-b0a2-b7ff8a9934ab");
         when(request.getParameter(VerteilungServlet.PARAMETER_WITHFOLDER)).thenReturn("1");

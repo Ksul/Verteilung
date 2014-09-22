@@ -5,10 +5,10 @@
     <!-- LVM Gehaltsabrechnung -->
     <archivTyp name="LVMGehalt" searchString="Verdienstabrechnung">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Gehalt/Gehalt LVM/{tmp}">
+        <archivPosition folder="Dokumente/Gehalt/Gehalt LVM/{tmp}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
-        <archivPosition link="true" folder="Archiv/LVM/Gehalt LVM">
+        <archivPosition link="true" folder="Dokumente/LVM/Gehalt LVM">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Gehalt" />
@@ -44,7 +44,7 @@
     <!-- Rechnung Zauberfrau -->
     <archivTyp name="Zauberfrau" searchString="ZAUBERFRAU">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Rechnungen/Rechnungen Zauberfrau/{tmp}">
+        <archivPosition folder="Dokumente/Rechnungen/Rechnungen Zauberfrau/{tmp}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Rechnung" />
@@ -75,7 +75,7 @@
     <!-- Rechnung Cafe Fausto -->
     <archivTyp name="Caffe Fausto" searchString="Fausto" unique="error">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Rechnungen/Sonstige Rechnungen/{tmp}">
+        <archivPosition folder="Dokumente/Rechnungen/Sonstige Rechnungen/{tmp}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Cafe Fausto" />
@@ -98,7 +98,7 @@
     <!-- Rechnung Solar Direct -->
     <archivTyp name="Solar Direct" searchString="SOLAR DIRECT">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Rechnungen/Rechnungen Haus">
+        <archivPosition folder="Dokumente/Rechnungen/Rechnungen Haus">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Heizung" />
@@ -121,10 +121,10 @@
     <!-- Rechnung O2 -->
     <archivTyp name="Rechnung O2" searchString="O2 Germany">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Kommunikation/O2/Rechnungen O2/{tmp}">
+        <archivPosition folder="Dokumente/Kommunikation/O2/Rechnungen O2/{tmp}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
-        <archivPosition link="true" folder="Archiv/Rechnungen/Telefon/Rechnungen O2">
+        <archivPosition link="true" folder="Dokumente/Rechnungen/Telefon/Rechnungen O2">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Telefon" />
@@ -166,7 +166,7 @@
     <!-- Renteninformation -->
     <archivTyp name="Renteninformation" searchString="Ihre Renteninformation">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Gehalt/BVA">
+        <archivPosition folder="Dokumente/Gehalt/BVA">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Rente" />
@@ -187,7 +187,7 @@
     <!-- Rechnung Kortenbrede -->
     <archivTyp name="Kortenbrede" searchString="Robert Kortenbrede">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Rechnungen/Sonstige Rechnungen/{tmp}">
+        <archivPosition folder="Dokumente/Rechnungen/Sonstige Rechnungen/{tmp}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <category name="Rechnung/Rechnung Kortenbrede" />
@@ -213,7 +213,7 @@
     <!-- Landesamt für Besoldung -->
     <archivTyp name="Landesamt für Besoldung" searchString="BESOLDUNG">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Gehalt/Landesamt für Besoldung/Bezügemitteilungen/{tmp}">
+        <archivPosition folder="Dokumente/Gehalt/Landesamt für Besoldung/Bezügemitteilungen/{tmp}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Gehalt" />
@@ -257,10 +257,10 @@
     <!-- Rechnung Telekom -->
     <archivTyp name="Rechnung Telekom" searchString="Telekom">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Kommunikation/Telekom/Rechnungen Telekom/{tmp}">
+        <archivPosition folder="Dokumente/Kommunikation/Telekom/Rechnungen Telekom/{tmp}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
-        <archivPosition link="true" folder="Archiv/Rechnungen/Telefon/Rechnungen Telekom">
+        <archivPosition link="true" folder="Dokumente/Rechnungen/Telefon/Rechnungen Telekom">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Telefon" />
@@ -284,7 +284,7 @@
     <!--Continentale -->
     <archivTyp name="Continentale" searchString="Continentale">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Versicherungen/Continentale">
+        <archivPosition folder="Dokumente/Versicherungen/Continentale">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <category name="Versicherung/Unfall" />
@@ -325,10 +325,10 @@
     <!-- Rechnung Musikschule Roxel -->
     <archivTyp name="Musikschule Roxel" searchString="Musikschule Roxel">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Rechnungen/Sonstige Rechnungen/{tmp2}">
+        <archivPosition folder="Dokumente/Rechnungen/Sonstige Rechnungen/{tmp2}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
-        <archivPosition link="true" folder="Archiv/Kinder/Rechnung Musikschule Roxel">
+        <archivPosition link="true" folder="Dokumente/Kinder/Rechnung Musikschule Roxel">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Musikschule" />
@@ -356,10 +356,10 @@
     <archivTyp name="Finanzamt" searchString="Finanzamt Münster-Außenstadt">
         <archivTyp name="Kraftfahrzeugsteuer" searchString="Kraftfahrzeugsteuer">
             <archivZiel type="my:archivContent" />
-            <archivPosition folder="Archiv/Auto/KFZ Steuern">
+            <archivPosition folder="Dokumente/Auto/KFZ Steuern">
                 <archivZiel type="my:archivFolder" />
             </archivPosition>
-            <archivPosition link="true" folder="Archiv/Steuern">
+            <archivPosition link="true" folder="Dokumente/Steuern">
                 <archivZiel type="my:archivFolder" />
             </archivPosition>
             <tags name="Auto" />
@@ -382,7 +382,7 @@
         </archivTyp>
         <archivTyp name="Einkommensteuer" searchString="Einkommensteuer">
             <archivZiel type="my:archivContent" />
-            <archivPosition folder="Archiv/Steuern/Einkommenssteuern">
+            <archivPosition folder="Dokumente/Steuern/Einkommenssteuern">
                 <archivZiel type="my:archivFolder" />
             </archivPosition>
             <tags name="Steuern" />
@@ -405,7 +405,7 @@
     <!--Gewinnschuldverschreibung -->
     <archivTyp name="LVM Gewinnschuldverschreibung" searchString="Gewinnschuldverschreibung" unique="error">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/LVM/Gewinnschuldverschreibungen/Gewinnschuldverschreibung {tmp2}" />
+        <archivPosition folder="Dokumente/LVM/Gewinnschuldverschreibungen/Gewinnschuldverschreibung {tmp2}" />
         <searchItem name="person" fix="Klaus" target="my:person" />
         <searchItem name="tmp2" objectTyp="date" value="datum">
             <format formatString="YYYY" />
@@ -444,7 +444,7 @@
     <archivTyp name="BW Bank" searchString="KUSA" unique="error">
         <archivTyp name="Zinsbescheinigung" searchString="Zinsbescheinigung">
             <archivZiel type="my:archivContent" />
-            <archivPosition folder="Archiv/Banken/LBBW/Konto {id}" />
+            <archivPosition folder="Dokumente/Banken/LBBW/Konto {id}" />
             <tags name="Zinsen" />
             <category name="Haus/Kredit" />
             <searchItem name="person" fix="Klaus" target="my:person" />
@@ -469,7 +469,7 @@
     <archivTyp name="HUK-Coburg" searchString="HUK-COBURG">
         <archivTyp name="Beitragsrechnung" searchString="Beitragsrechnung" unique="error">
             <archivZiel type="my:archivContent" />
-            <archivPosition folder="Archiv/Versicherungen/HUK-Coburg/830074295-T" />
+            <archivPosition folder="Dokumente/Versicherungen/HUK-Coburg/830074295-T" />
             <tags name="Haftpflichht" />
             <category name="Versicherung/Haftpflicht" />
             <searchItem name="person" fix="Katja" target="my:person" />
@@ -493,7 +493,7 @@
     </archivTyp>
     <!-- Nürnberger -->
     <archivTyp name="Nürnberger" searchString="NÜRNBERGER">
-        <archivPosition folder="Archiv/Versicherungen/Nürnberger/{id}" />
+        <archivPosition folder="Dokumente/Versicherungen/Nürnberger/{id}" />
         <searchItem name="datum" text="Nürnberg," objectTyp="date" target="my:documentDate">
             <check lowerValue="01/01/2005" upperValue="01/01/2020" />
         </searchItem>
@@ -556,7 +556,7 @@
     <!-- Deka Fonds -->
     <archivTyp name="Deka Fonds" searchString="Deka">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Banken/Deka/{fol}" />
+        <archivPosition folder="Dokumente/Banken/Deka/{fol}" />
         <tags name="Wertpapier" />
         <category name="Kinder/Till/Geldanlage Opa Otto" />
         <searchItem name="person" fix="Till" target="my:person" />
@@ -614,7 +614,7 @@
     <!-- LVM Versicherungen -->
     <archivTyp name="LVM Versicherungen" searchString="LVM ">
         <archivTyp name="Krankenversicherung" searchString="77.228.294.0">
-            <archivPosition folder="Archiv/Versicherungen/LVM/Kranken/" />
+            <archivPosition folder="Dokumente/Versicherungen/LVM/Kranken/" />
             <category name="Versicherung/Kranken" />
             <searchItem name="person" fix="Klaus" target="my:person" />
             <searchItem name="id" fix="77.228.294.0" target="my:idvalue">
@@ -642,7 +642,7 @@
         </archivTyp>
         <archivTyp name="Kraftfahrtversicherung" searchString="Kraftfahrtversicherung">
             <archivZiel type="my:archivContent" />
-            <archivPosition folder="Archiv/Versicherungen/LVM/Kraftfahrt/" />
+            <archivPosition folder="Dokumente/Versicherungen/LVM/Kraftfahrt/" />
             <category name="Versicherung/Kraftfahrt" />
             <searchItem name="person" fix="Katja" target="my:person" />
             <searchItem name="datum" text="Münster," objectTyp="date" readOverReturn="true" word="2,2" target="my:documentDate">
@@ -663,7 +663,7 @@
         </archivTyp>
         <archivTyp name="Wohngebäude" searchString="Verbundene Wohngebäudeversicherung">
             <archivZiel type="my:archivContent" />
-            <archivPosition folder="Archiv/Versicherungen/LVM/Wohngebäude/" />
+            <archivPosition folder="Dokumente/Versicherungen/LVM/Wohngebäude/" />
             <category name="Haus/Versicherung/Wohngebäude" />
             <searchItem name="person" fix="Klaus" target="my:person" />
             <searchItem name="datum" kind="date" objectTyp="date" target="my:documentDate">
@@ -685,7 +685,7 @@
         </archivTyp>
         <archivTyp name="Hausrat" searchString="99.233.620.0">
             <archivZiel type="my:archivContent" />
-            <archivPosition folder="Archiv/Versicherungen/LVM/Hausrat/{fol}" />
+            <archivPosition folder="Dokumente/Versicherungen/LVM/Hausrat/{fol}" />
             <category name="Haus/Versicherung/Hausrat" />
             <searchItem name="person" fix="Klaus" target="my:person" />
             <searchItem name="datum" kind="date" objectTyp="date" target="my:documentDate">
@@ -716,7 +716,7 @@
         </searchItem>
         <searchItem name="person" fix="Katja" target="my:person" />
         <archivTyp name="Beitragsanpassung" searchString="Beitragsänderung">
-            <archivPosition folder="Archiv/Versicherungen/DKV/" />
+            <archivPosition folder="Dokumente/Versicherungen/DKV/" />
             <searchItem name="datum" text="Mobilfunknetz" objectTyp="date" word="1,2" target="my:documentDate">
                 <check lowerValue="01/01/2000" upperValue="01/01/2020" />
             </searchItem>
@@ -731,7 +731,7 @@
             </searchItem>
         </archivTyp>
         <archivTyp name="Leistungsabrechnung" searchString="Leistungsabrechnung">
-            <archivPosition folder="Archiv/Versicherungen/DKV/Leistungsabrechnungen/" />
+            <archivPosition folder="Dokumente/Versicherungen/DKV/Leistungsabrechnungen/" />
             <category name="Gesundheit/Leistungsabrechnung" />
             <searchItem name="datum" kind="date" objectTyp="date" target="my:documentDate">
                 <check lowerValue="01/01/2000" upperValue="01/01/2020" />
@@ -746,7 +746,7 @@
             </searchItem>
         </archivTyp>
         <archivTyp name="Bescheinigung nach $10" searchString="nach § 10">
-            <archivPosition folder="Archiv/Versicherungen/DKV/" />
+            <archivPosition folder="Dokumente/Versicherungen/DKV/" />
             <searchItem name="datum" kind="date" objectTyp="date" target="my:documentDate">
                 <check lowerValue="01/01/2000" upperValue="01/01/2020" />
             </searchItem>
@@ -757,7 +757,7 @@
     <archivTyp name="Stadtwerke" searchString="stadtwerke">
         <archivTyp name="Jahresrechnung" searchString="Abschlag">
             <archivZiel type="my:archivContent" />
-            <archivPosition folder="Archiv/Rechnungen/Rechnungen Stadtwerke/Konto 9000330068/" />
+            <archivPosition folder="Dokumente/Rechnungen/Rechnungen Stadtwerke/Konto 9000330068/" />
             <tags name="Stadtwerke" />
             <category name="Haus/Verbrauch" />
             <searchItem name="person" fix="Klaus" target="my:person" />
@@ -780,7 +780,7 @@
     <!-- DWS -->
     <archivTyp name="DWS" searchString="DWS">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Banken/DWS/Depot T460753901/" />
+        <archivPosition folder="Dokumente/Banken/DWS/Depot T460753901/" />
         <tags name="Riester" />
         <category name="Versicherung/Riester" />
         <searchItem name="person" fix="Klaus" target="my:person" />
@@ -819,7 +819,7 @@
     <!-- Deutscher Ring -->
     <archivTyp name="Deutscher Ring" searchString="Deutscher Ring">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Versicherungen/Deutscher Ring/{id}" />
+        <archivPosition folder="Dokumente/Versicherungen/Deutscher Ring/{id}" />
         <category name="Versicherung/Kranken" />
         <searchItem name="person" fix="Klaus" target="my:person" />
         <searchItem name="datum" kind="date" target="my:documentDate">
@@ -846,7 +846,7 @@
     <!-- Volkswohlbund -->
     <archivTyp name="Volkswohlbund" searchString="VOLKSWOHL">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Versicherungen/Volkswohlbund/{id}" />
+        <archivPosition folder="Dokumente/Versicherungen/Volkswohlbund/{id}" />
         <searchItem name="datum" kind="date" target="my:documentDate">
             <check lowerValue="01/01/2003" />
         </searchItem>
@@ -876,7 +876,7 @@
     <!-- Provinzial -->
     <archivTyp name="Provinzial" searchString="Provinzial">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Versicherungen/Provinzial/" />
+        <archivPosition folder="Dokumente/Versicherungen/Provinzial/" />
         <searchItem name="datum" kind="date" target="my:documentDate">
             <check lowerValue="01/01/2002" upperValue="01/04/2010" />
         </searchItem>
@@ -888,7 +888,7 @@
                 <archivZiel aspect="my:idable" />
             </searchItem>
             <archivTyp name="Beitragsrechnung" searchString="Beitragsrechnung">
-                <archivPosition folder="Archiv/Versicherungen/Provinzial/Rechnungen Provinzial" />
+                <archivPosition folder="Dokumente/Versicherungen/Provinzial/Rechnungen Provinzial" />
                 <tags name="Rechnung" />
                 <searchItem name="bet" text="incl" word="1" objectTyp="float" />
                 <searchItem name="betrag" eval="Math.round(({bet}/19)*11900)/100" objectTyp="float" target="my:amount">
@@ -906,7 +906,7 @@
     <!-- Gothaer -->
     <archivTyp name="Gothaer" searchString="Gothaer">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Versicherungen/Gothaer/{id}" />
+        <archivPosition folder="Dokumente/Versicherungen/Gothaer/{id}" />
         <category name="Versicherung/Unfall" />
         <searchItem name="person" fix="Katja" target="my:person" />
         <searchItem name="datum" kind="date" target="my:documentDate">
@@ -922,7 +922,7 @@
     <!-- Allianz -->
     <archivTyp name="Allianz" searchString="Allianz">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Versicherungen/Allianz/{id}" />
+        <archivPosition folder="Dokumente/Versicherungen/Allianz/{id}" />
         <searchItem name="datum" kind="date" target="my:documentDate" />
         <searchItem name="tmp" objectTyp="date" value="datum">
             <format formatString="YYYY" />
@@ -939,7 +939,7 @@
     <!-- DBV -->
     <archivTyp name="DBV" searchString="DBV">
         <archivZiel type="my:archivContent" />
-        <archivPosition folder="Archiv/Versicherungen/DBV/{id}" />
+        <archivPosition folder="Dokumente/Versicherungen/DBV/{id}" />
         <searchItem name="person" fix="Katja" target="my:person" />
         <searchItem name="datum" kind="date" target="my:documentDate">
             <check lowerValue="01/10/2011" />
@@ -968,5 +968,5 @@
         </archivTyp>
     </archivTyp>
     <!-- Sparda Bank -->
-    <!-- <archivTyp name="Sparda" searchString="Sparda-Bank"><archivZiel type="my:archivContent" /><archivPosition folder="Archiv/Banken/Sparda Bank/{ordner}" /><category     name="Banken/Aktien" /><archivTyp name="Jahresbescheinigung für Kapitalerträge" searchString="24c EStG"><archivZiel type="my:archivContent" /><searchItem name="person"     fix="Klaus" target="my:person" /><searchItem name="ordner" fix="Aktiendepot"/><searchItem name="tmp" text="Seite"/><searchItem name="datum" value="tmp" kind="date"     target="my:documentDate"><check lowerValue="01/01/2002" /><check upperValue="01/01/2007" /></searchItem><searchItem name="tmp1" objectTyp="date" value="datum"><format     formatString="YYYY" /></searchItem><searchItem name="tmp2" eval="{tmp1} - 1" /><searchItem name="title" fix="Jahresbescheinigung über Kapitalerträge und Veräußerungsgeschäfte     aus Finanzanlagen {tmp2}" target="cm:title" /></archivTyp></archivTyp> -->
+    <!-- <archivTyp name="Sparda" searchString="Sparda-Bank"><archivZiel type="my:archivContent" /><archivPosition folder="Dokumente/Banken/Sparda Bank/{ordner}" /><category     name="Banken/Aktien" /><archivTyp name="Jahresbescheinigung für Kapitalerträge" searchString="24c EStG"><archivZiel type="my:archivContent" /><searchItem name="person"     fix="Klaus" target="my:person" /><searchItem name="ordner" fix="Aktiendepot"/><searchItem name="tmp" text="Seite"/><searchItem name="datum" value="tmp" kind="date"     target="my:documentDate"><check lowerValue="01/01/2002" /><check upperValue="01/01/2007" /></searchItem><searchItem name="tmp1" objectTyp="date" value="datum"><format     formatString="YYYY" /></searchItem><searchItem name="tmp2" eval="{tmp1} - 1" /><searchItem name="title" fix="Jahresbescheinigung über Kapitalerträge und Veräußerungsgeschäfte     aus Finanzanlagen {tmp2}" target="cm:title" /></archivTyp></archivTyp> -->
 </documentTypes>

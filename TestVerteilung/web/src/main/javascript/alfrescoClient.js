@@ -762,12 +762,19 @@ function formatDetails(data) {
     return sOut;
 }
 
+
+
 /**
  * führt die Aktualisierungen für eine Verzeichniswechsel im Alfresco durch
- * @param objectId  die Objectid des ausgewählten Folders
+ * @param data      das Datenobjekt des ausgewählten Folders
  */
-function switchAlfrescoDirectory(objectId) {
+function switchAlfrescoDirectory(data) {
     try {
+        var objectId;
+        if (exist(data))
+            objectId = data.objectId;
+        else
+            objectId = -1;
         var json = executeService("listFolder", [
             {"name": "filePath", "value": objectId},
             {"name": "withFolder", "value": -1}
@@ -775,7 +782,39 @@ function switchAlfrescoDirectory(objectId) {
         if (json.success) {
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
+            var object;
+            var id;
+            if (!exist(data)) {
+                object = ["Archiv"];
+                id = "treeRoot";
+            }
+            else {
+                object = data.path.split('/');
+                id = data.objectId;
+            }
+            var oldLi = $('#breadcrumblist');
+            if (exist(oldLi))
+                oldLi.remove();
+            var container = $('#breadcrumb');
+            var ul = document.createElement('ul');
+            ul.id = 'breadcrumblist';
+            for (var i = object.length; i > 0; i--)  {
 
+                var li = document.createElement('li');
+                var jsonData = {'objectId': id};
+                li.click(function(){switchAlfrescoDirectory(jsonData);});
+                data =  $("#tree").jstree('get_json', $(document.getElementById(id))).data;
+                if (data == null)
+                    id = "null";
+                else
+                    id = data.parentId;
+                var a =  document.createElement('a');
+                a.href = '#';
+                a.text = object[i-1];
+                li.appendChild(a);
+                ul.insertBefore(li, ul.firstChild);
+            }
+            container.append(ul);
           }
         json = executeService("listFolder", [
             {"name": "filePath", "value": objectId},
@@ -830,7 +869,7 @@ function handleAlfrescoFolderImageClicks() {
         try {
              var tr = $(this).closest('tr');
              var row = alfrescoFolderTabelle.row( tr).data();
-             switchAlfrescoDirectory(row.objectID);
+             switchAlfrescoDirectory(row);
         } catch (e) {
             errorHandler(e);
         }
@@ -1028,7 +1067,7 @@ function loadDataForTree(aNode) {
         // keine Parameter mit gegeben, also den Rooteintrag erzeugen
         if (!exist(aNode)) {
             return [
-                {"icon": "", "text": "Root", "state": state1, "children": true}
+                {"icon": "", "text": "Archiv", "state": state1, "children": true}
             ];
         } else {
             if (alfrescoServerAvailable) {
@@ -1057,7 +1096,7 @@ function loadDataForTree(aNode) {
                     }
                     if (aNode.id == "#")
                         return [
-                            {"icon": "", "text": "Root", "state": state, "children": obj}
+                            {"icon": "", "text": "Archiv", "state": state, "children": obj, "id": "treeRoot"}
                         ];
                     else
                         return obj;
@@ -1151,11 +1190,11 @@ function loadAlfrescoTree() {
         }).on("select_node.jstree", function (event, data) {
             try {
                 if (!exist(data.node.data))
-                    switchAlfrescoDirectory("-1");
+                    switchAlfrescoDirectory(null);
                 else {
                     if (data.node.data.baseTypeId == "cmis:folder") {
                         if (alfrescoServerAvailable) {
-                            switchAlfrescoDirectory(data.node.data.objectId);
+                            switchAlfrescoDirectory(data.node.data);
                             $("#tree").jstree('open_node', data.node.id);
                         }
                     }
@@ -1168,7 +1207,7 @@ function loadAlfrescoTree() {
         // Drag & Drop aus Tabelle
         // Initiales Lesen
         if (alfrescoServerAvailable)
-            switchAlfrescoDirectory("-1");
+            switchAlfrescoDirectory(null);
 
     } catch (e) {
         errorHandler(e);
