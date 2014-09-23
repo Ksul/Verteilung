@@ -417,6 +417,26 @@ function loadAlfrescoFolderTable() {
             "autoWidth": true,
             "lengthChange": false,
             "searching": false,
+            "rowCallback": function( row, data ) {
+                try {
+                    // Cell click
+
+                       // row.cells[1].css( 'cursor', 'hand' );
+                        $('td', row).on('click', function () {
+                            try {
+                                if (this.cellIndex == 1) {
+                                $("#tree").jstree('deselect_all', true);
+                                switchAlfrescoDirectory(data);
+                                }
+                            } catch (e) {
+                                errorHandler(e);
+                            }
+                        });
+
+                } catch(e){
+                    errorHandler(e);
+                }
+            },
             // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
             "columns": [
                 {
@@ -800,6 +820,7 @@ function fillBreadCrumb(data) {
         };
         li.data = jsonData;
         li.onclick = function () {
+            $("#tree").jstree('deselect_all', false);
             switchAlfrescoDirectory(this.data);
         };
         var a = document.createElement('a');
@@ -835,7 +856,7 @@ function switchAlfrescoDirectory(data) {
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
             fillBreadCrumb(data);
-            $("#tree").jstree('deselect_all', true);
+
             $("#tree").jstree('select_node', objectId);
         }
         json = executeService("listFolder", [
@@ -891,6 +912,7 @@ function handleAlfrescoFolderImageClicks() {
         try {
              var tr = $(this).closest('tr');
              var row = alfrescoFolderTabelle.row( tr).data();
+             $("#tree").jstree('deselect_all', true);
              switchAlfrescoDirectory(row);
         } catch (e) {
             errorHandler(e);
