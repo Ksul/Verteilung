@@ -32,10 +32,10 @@
 	padding: 0;
 	float: left;
 	display: block;
-	height: 21px;
+
 	overflow: hidden;
-	width: 990px;
-	padding:5px;
+	width: 100%;
+	padding:0px 0px 0px 5px;
 	border:solid 1px #dedede;
 	background:#fff;
 }
@@ -43,7 +43,7 @@
 {
 	margin: 0;
 	padding: 0;
-	height: 21px;
+
 	display: block;
 }
 .breadCrumb ul li
@@ -51,7 +51,7 @@
 	display: block;
 	float: left;
 	position: relative;
-	height: 21px;
+
 	overflow: hidden;
 	line-height: 21px;
 	margin: 0px 6px 0px 0;

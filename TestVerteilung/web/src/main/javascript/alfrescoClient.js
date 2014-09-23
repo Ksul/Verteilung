@@ -762,7 +762,59 @@ function formatDetails(data) {
     return sOut;
 }
 
+/**
+ * füllt die BreadCrumb Leiste
+ * @param data          der aktuelle Folder
 
+ */
+function fillBreadCrumb(data) {
+    var object;
+    var id;
+    var parentObj;
+    var fill = true;
+    var oldLi = $('#breadcrumblist');
+    if (exist(oldLi))
+        oldLi.remove();
+    var container = $('#breadcrumb');
+    var ul = document.createElement('ul');
+    ul.id = 'breadcrumblist';
+    do {
+        if (!exist(data)) {
+            object = ["Archiv"];
+            id = "-1";
+            parentObj = null;
+            name = "Archiv";
+        }
+        else {
+            object = data.path.split('/');
+            id = data.objectId;
+            parentObj = data.parentId;
+            name = data.name;
+        }
+        var li = document.createElement('li');
+        var jsonData = {
+            'objectId': id,
+            'path': object.join('/'),
+            'name': name,
+            'parentId': parentObj
+        };
+        li.data = jsonData;
+        li.onclick = function () {
+            switchAlfrescoDirectory(this.data);
+        };
+        var a = document.createElement('a');
+        a.href = '#';
+        a.text = name;
+        li.appendChild(a);
+        if (parentObj == null)
+            fill = false;
+        else
+            data = $("#tree").jstree('get_json', $(document.getElementById(parentObj))).data;
+        ul.insertBefore(li, ul.firstChild);
+    } while (fill);
+    container.append(ul);
+    return;
+}
 
 /**
  * führt die Aktualisierungen für eine Verzeichniswechsel im Alfresco durch
@@ -782,43 +834,8 @@ function switchAlfrescoDirectory(data) {
         if (json.success) {
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
-            var object;
-            var id;
-            var parentObj;
-            var oldLi = $('#breadcrumblist');
-            if (exist(oldLi))
-                oldLi.remove();
-            var container = $('#breadcrumb');
-            var ul = document.createElement('ul');
-            ul.id = 'breadcrumblist';
-            while (exist(data))  {
-                if (!exist(data)) {
-                    object = ["Archiv"];
-                    id = "treeRoot";
-                    parentObj = null;
-                }
-                else {
-                    object = data.path.split('/');
-                    id = data.objectId;
-                    parentObj = data.parentId;
-                }
-                var li = document.createElement('li');
-                var jsonData = {
-                    'objectId': id,
-                    'path': object.join('/')
-                };
-                li.data = jsonData;
-                li.onclick = function(){switchAlfrescoDirectory(this.data);};
-                var a =  document.createElement('a');
-                a.href = '#';
-                a.text = data.name;
-                li.appendChild(a);
-                if (exist(parentObj))
-                    data =  $("#tree").jstree('get_json', $(document.getElementById(parentObj))).data;
-
-                ul.insertBefore(li, ul.firstChild);
-            }
-          }
+            fillBreadCrumb(data);
+        }
         json = executeService("listFolder", [
             {"name": "filePath", "value": objectId},
             {"name": "withFolder", "value": 1}

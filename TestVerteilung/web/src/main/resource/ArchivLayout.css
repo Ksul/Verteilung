@@ -75,9 +75,9 @@ tr.shown td.details-control {
 }
 
 .header {
-    height: 12px;
+    height: 20px;
     text-align: center;
-    padding-bottom: 2px;
+    padding-bottom: 0px;
     /*   background: #80ade5 url(./images/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
        border-bottom: 1px solid #777;
 
