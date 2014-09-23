@@ -835,6 +835,8 @@ function switchAlfrescoDirectory(data) {
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
             fillBreadCrumb(data);
+            $("#tree").jstree('deselect_all', true);
+            $("#tree").jstree('select_node', objectId);
         }
         json = executeService("listFolder", [
             {"name": "filePath", "value": objectId},
@@ -1116,7 +1118,7 @@ function loadDataForTree(aNode) {
                     }
                     if (aNode.id == "#")
                         return [
-                            {"icon": "", "text": "Archiv", "state": state, "children": obj, "id": "treeRoot"}
+                            {"icon": "", "text": "Archiv", "state": state, "children": obj, "id": "-1"}
                         ];
                     else
                         return obj;

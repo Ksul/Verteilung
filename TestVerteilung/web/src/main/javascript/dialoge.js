@@ -1,8 +1,4 @@
 
-
-
-
-
 /**
  * Öffnet den Einstellungsdialog für die Alfresco Server Settings
  */
@@ -85,7 +81,7 @@ function startSettingsDialog() {
                         + '</div>'                }
 
             },
-            "data": null,
+            "data": data,
             "ui": "jquery-ui",
 
             "postRender": function (control) {
