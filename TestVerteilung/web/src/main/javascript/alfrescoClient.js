@@ -420,20 +420,25 @@ function loadAlfrescoFolderTable() {
             "rowCallback": function( row, data ) {
                 try {
                     // Cell click
-
-                       // row.cells[1].css( 'cursor', 'hand' );
-                        $('td', row).on('click', function () {
-                            try {
-                                if (this.cellIndex == 1) {
+                    $('td', row).on('click', function () {
+                        try {
+                            if (this.cellIndex == 1) {
                                 $("#tree").jstree('deselect_all', true);
                                 switchAlfrescoDirectory(data);
-                                }
-                            } catch (e) {
-                                errorHandler(e);
                             }
-                        });
+                        } catch (e) {
+                            errorHandler(e);
+                        }
+                    });
+                    // Cursor
+                    $('td', row).hover(function () {
+                        if (this.cellIndex == 1)
+                            $(this).css('cursor', 'pointer');
+                    }, function () {
+                        $(this).css('cursor', 'auto');
 
-                } catch(e){
+                    });
+                } catch (e) {
                     errorHandler(e);
                 }
             },
