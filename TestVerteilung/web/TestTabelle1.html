@@ -8,7 +8,7 @@
 
     <script type="text/javascript" src="./src/main/javascript/jquery.dataTables.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jquery.jeditable.js" charset="utf-8"></script>
-    <script type="text/javascript" src="src/main/javascript/jquery.DataTables.editable.js"></script>
+    <script type="text/javascript" src="src/main/javascript/jquery.DataTables.editable.original.js"></script>
     <link type="text/css" href="./src/main/resource/ArchivLayout.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/javascript/jquery-ui/css/cupertino/jquery-ui-1.10.4.custom.css" rel="stylesheet"/>
 
@@ -34,30 +34,29 @@
         }
     ];
 
-
     $(document).ready(function() {
-        $('#dynamic').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>' );
-        var tabelle = $('#example').DataTable( {
+
+        $('#dynamic1').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="example1"></table>' );
+        var tabelle1 = $('#example1').dataTable( {
             data: data,
-             columns: [
+            columns: [
                 { data: 'name' },
                 { data: 'position' },
                 { data: 'salary' },
                 { data: 'office' }
             ]
-        }).toJQuery().makeEditable({
-                    sUpdateURL: function(value, settings)
-                    {
-                        alert(value);
-                    }
-                });
+        }).makeEditable({
+            sUpdateURL: function(value, settings)
+            {
+                alert(value);
+            }
+        });
 
     } );
 </script>
 </head>
 <body id="dt_example">
 
-<div id="dynamic"></div>
-
+<div id="dynamic1"></div>
 </body>
 </html>

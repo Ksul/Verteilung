@@ -171,7 +171,7 @@
             ///Function that starts "Processing" mode i.e. shows "Processing..." dialog while some action is executing(Default function)
             ///</summary>
 
-            if (oTable.settings().oFeatures.bProcessing) {
+            if (oTable.fnSettings().oFeatures.bProcessing) {
                 $(".dataTables_processing").css('visibility', 'visible');
             }
         }
@@ -182,7 +182,7 @@
             ///It shows processing message only if bProcessing setting is set to true
             ///</summary>
 
-            if (oTable.settings().oFeatures.bProcessing) {
+            if (oTable.fnSettings().oFeatures.bProcessing) {
                 $(".dataTables_processing").css('visibility', 'hidden');
             }
         }
@@ -249,9 +249,9 @@
                     var rowId = oTable.fnGetPosition(this)[0];
                     var columnPosition = oTable.fnGetPosition(this)[1];
                     var columnId = oTable.fnGetPosition(this)[2];
-                    var sColumnName = oTable.settings().aoColumns[columnId].sName;
+                    var sColumnName = oTable.fnSettings().aoColumns[columnId].sName;
                     if (sColumnName == null || sColumnName == "")
-                        sColumnName = oTable.settings().aoColumns[columnId].sTitle;
+                        sColumnName = oTable.fnSettings().aoColumns[columnId].sTitle;
                     var updateData = null;
                     if (properties.aoColumns == null || properties.aoColumns[columnId] == null) {
                         updateData = $.extend({},
@@ -462,7 +462,7 @@
 
             if (properties.fnOnNewRowPosted(data)) {
 
-                var oSettings = oTable.settings();
+                var oSettings = oTable.fnSettings();
                 if (!oSettings.oFeatures.bServerSide) {
                     jQuery.data(oAddNewRowForm, 'DT_RowId', data);
                     var values = fnTakeRowDataFromFormElements(oAddNewRowForm);
@@ -774,7 +774,7 @@
             $("input.ROWID", $(oForm)).val(iRowID);
 
 
-            var oSettings = oTable.settings();
+            var oSettings = oTable.fnSettings();
             var iColumnCount = oSettings.aoColumns.length;
 
 
@@ -964,7 +964,7 @@
             var values = fnTakeRowDataFromFormElements(nActionForm);
 
             var iRowID = jQuery.data(nActionForm, 'ROWID');
-            var oSettings = oTable.settings();
+            var oSettings = oTable.fnSettings();
             var iColumnCount = oSettings.aoColumns.length;
             for (var rel = 0; rel < iColumnCount; rel++) {
                 if (oSettings.aoColumns != null
@@ -985,7 +985,7 @@
         }
 
 
-        oTable = this.dataTable().api();
+        oTable = this;
 
         var defaults = {
 
@@ -1039,7 +1039,7 @@
         };
 
         properties = $.extend(defaults, options);
-        oSettings = oTable.settings();
+        oSettings = oTable.fnSettings();
         properties.bUseKeyTable = (properties.oKeyTable != null);
 
         return this.each(function () {
@@ -1071,8 +1071,8 @@
 
             //KEYTABLE
 
-            if (oTable.settings().sAjaxSource != null) {
-                oTable.settings().aoDrawCallback.push({
+            if (oTable.fnSettings().sAjaxSource != null) {
+                oTable.fnSettings().aoDrawCallback.push({
                     "fn": function () {
                         //Apply jEditable plugin on the table cells
                         fnApplyEditable(oTable.fnGetNodes());
@@ -1096,7 +1096,7 @@
             if (oAddNewRowForm.length != 0) {
 
                 ///Check does the add new form has all nessecary fields
-                var oSettings = oTable.settings();
+                var oSettings = oTable.fnSettings();
                 var iColumnCount = oSettings.aoColumns.length;
                 for (i = 0; i < iColumnCount; i++) {
                     if ($("[rel=" + i + "]", oAddNewRowForm).length == 0)
@@ -1269,7 +1269,7 @@
                             fnDisableDeleteButton();
                         }
                     } else {
-                        $(oTable.settings().aoData).each(function () {
+                        $(oTable.fnSettings().aoData).each(function () {
                             $(this.nTr).removeClass(properties.sSelectedRowClass);
                         });
                         $(event.target.parentNode).addClass(properties.sSelectedRowClass);
@@ -1379,4 +1379,5 @@
         });
     };
 })(jQuery);
+
 
