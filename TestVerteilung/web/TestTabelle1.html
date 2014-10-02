@@ -37,7 +37,7 @@
     $(document).ready(function() {
 
         $('#dynamic1').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="example1"></table>' );
-        var tabelle1 = $('#example1').dataTable( {
+        var tabelle = $('#example1').dataTable( {
             data: data,
             columns: [
                 { data: 'name' },
@@ -45,7 +45,8 @@
                 { data: 'salary' },
                 { data: 'office' }
             ]
-        }).makeEditable({
+        });
+        tabelle.makeEditable({
             sUpdateURL: function(value, settings)
             {
                 alert(value);

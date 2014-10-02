@@ -45,12 +45,14 @@
                 { data: 'salary' },
                 { data: 'office' }
             ]
-        }).toJQuery().makeEditable({
+        });
+        $.fn.dataTable.makeEditable( tabelle );
+/*        tabelle.toJQuery().makeEditable({
                     sUpdateURL: function(value, settings)
                     {
                         alert(value);
                     }
-                });
+                });*/
 
     } );
 </script>
