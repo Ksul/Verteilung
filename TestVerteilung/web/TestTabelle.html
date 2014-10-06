@@ -46,13 +46,13 @@
                 { data: 'office' }
             ]
         });
-        $.fn.dataTable.makeEditable( tabelle );
-/*        tabelle.toJQuery().makeEditable({
-                    sUpdateURL: function(value, settings)
-                    {
-                        alert(value);
-                    }
-                });*/
+        $.fn.dataTable.makeEditable( tabelle,  {
+            sUpdateURL: function(value, settings)
+            {
+                alert(value);
+            }
+        } );
+
 
     } );
 </script>

@@ -179,7 +179,7 @@ var makeEditable;
                 ///Function that starts "Processing" mode i.e. shows "Processing..." dialog while some action is executing(Default function)
                 ///</summary>
 
-                if (oTable.settings().oFeatures.bProcessing) {
+                if (oTable.settings().context[0].oFeatures.bProcessing) {
                     $(".dataTables_processing").css('visibility', 'visible');
                 }
             }
@@ -190,7 +190,7 @@ var makeEditable;
                 ///It shows processing message only if bProcessing setting is set to true
                 ///</summary>
 
-                if (oTable.settings().oFeatures.bProcessing) {
+                if (oTable.settings().context[0].oFeatures.bProcessing) {
                     $(".dataTables_processing").css('visibility', 'hidden');
                 }
             }
@@ -253,12 +253,12 @@ var makeEditable;
                         //iDisplayStart = fnGetDisplayStart();
                         //properties.fnStartProcessingMode();
                         var id = fnGetCellID(this);
-                        var rowId = oTable.fnGetPosition(this)[0];
-                        var columnPosition = oTable.fnGetPosition(this)[1];
-                        var columnId = oTable.fnGetPosition(this)[2];
-                        var sColumnName = oTable.settings().aoColumns[columnId].sName;
+                        var rowId = oTable.cell(this).index().row;
+                        var columnPosition = oTable.cell(this).index().columnVisible;
+                        var columnId = oTable.cell(this).index().column;
+                        var sColumnName = oTable.settings().context[0].aoColumns[columnId].sName;
                         if (sColumnName == null || sColumnName == "")
-                            sColumnName = oTable.settings().aoColumns[columnId].sTitle;
+                            sColumnName = oTable.settings().context[0].aoColumns[columnId].sTitle;
                         var updateData = null;
                         if (properties.aoColumns == null || properties.aoColumns[columnId] == null) {
                             updateData = $.extend({},
@@ -288,10 +288,10 @@ var makeEditable;
                     "callback": function (sValue, settings) {
                         properties.fnEndProcessingMode();
                         var status = "";
-                        var aPos = oTable.fnGetPosition(this);
+                        var aPos = oTable.cell(this).index();
 
-                        var bRefreshTable = !oSettings.oFeatures.bServerSide;
-                        $("td.last-updated-cell", oTable.fnGetNodes()).removeClass("last-updated-cell");
+                        var bRefreshTable = !oSettings.context[0].oFeatures.bServerSide;
+                        $("td.last-updated-cell", oTable.rows().nodes()).removeClass("last-updated-cell");
                         if (sValue.indexOf(properties.sFailureResponsePrefix) > -1) {
                             oTable.fnUpdate(sOldValue, aPos[0], aPos[2], bRefreshTable);
                             $("td.last-updated-cell", oTable).removeClass("last-updated-cell");
@@ -316,7 +316,8 @@ var makeEditable;
                                 $(this).addClass("last-updated-cell");
                                 status = "success";
                             } else {
-                                oTable.fnUpdate(sOldValue, aPos[0], aPos[2], bRefreshTable);
+                                oTable.cell( aPos[0], aPos[2] ).data( sOldValue );
+                                oTable.draw();
                                 properties.fnShowError(sValue, "update");
                                 status = "failure";
                             }
@@ -1103,7 +1104,7 @@ var makeEditable;
 
                 } else {
                     //Apply jEditable plugin on the table cells
-                    fnApplyEditable(oTable.rows());
+                    fnApplyEditable(oTable.rows().nodes());
                 }
 
                 //Setup form to open in dialog
