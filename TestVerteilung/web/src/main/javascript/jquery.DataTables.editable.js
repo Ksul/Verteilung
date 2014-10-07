@@ -202,6 +202,7 @@ var makeEditable;
                 ///Function that applies editable plugin to the array of table rows
                 ///</summary>
                 ///<param name="aoNodes" type="Array[TR]">Aray of table rows &lt;TR&gt; that should be initialized with editable plugin</param>
+                var sNewCellDisplayValue;
 
                 if (properties.bDisableEditing)
                     return;
@@ -211,7 +212,7 @@ var makeEditable;
                     "onsubmit": function (settings, original) {
                         sOldValue = original.revert;
                         sNewCellValue = null;
-                        var sNewCellDisplayValue = null;
+                        sNewCellDisplayValue = null;
                         iDisplayStart = fnGetDisplayStart();
 
                         if (settings.type == "text" || settings.type == "select" || settings.type == "textarea") {
@@ -290,10 +291,10 @@ var makeEditable;
                         var status = "";
                         var aPos = oTable.cell(this).index();
 
-                        var bRefreshTable = !oSettings.context[0].oFeatures.bServerSide;
+                        var bRefreshTable = !oSettings.oFeatures.bServerSide;
                         $("td.last-updated-cell", oTable.rows().nodes()).removeClass("last-updated-cell");
                         if (sValue.indexOf(properties.sFailureResponsePrefix) > -1) {
-                            oTable.fnUpdate(sOldValue, aPos[0], aPos[2], bRefreshTable);
+                            oTable.cell( aPos.row, aPos.column ).data( sOldValue).draw();
                             $("td.last-updated-cell", oTable).removeClass("last-updated-cell");
                             $(this).addClass("last-updated-cell");
                             properties.fnShowError(sValue.replace(properties.sFailureResponsePrefix, "").trim(), "update");
@@ -302,30 +303,29 @@ var makeEditable;
 
                             if (properties.sSuccessResponse == "IGNORE" ||
                                 (     properties.aoColumns != null
-                                    && properties.aoColumns[aPos[2]] != null
-                                    && properties.aoColumns[aPos[2]].sSuccessResponse == "IGNORE") ||
+                                    && properties.aoColumns[aPos.column] != null
+                                    && properties.aoColumns[aPos.column].sSuccessResponse == "IGNORE") ||
                                 (sNewCellValue == null) || (sNewCellValue == sValue) ||
                                 properties.sSuccessResponse == sValue) {
                                 if (sNewCellDisplayValue == null) {
                                     //sNewCellDisplayValue = sValue;
-                                    oTable.fnUpdate(sValue, aPos[0], aPos[2], bRefreshTable);
+                                    oTable.cell( aPos.row, aPos.column ).data( sValue).draw();
                                 } else {
-                                    oTable.fnUpdate(sNewCellDisplayValue, aPos[0], aPos[2], bRefreshTable);
+                                    oTable.cell( aPos.row, aPos.column ).data( sNewCellDisplayValue).draw();
                                 }
                                 $("td.last-updated-cell", oTable).removeClass("last-updated-cell");
                                 $(this).addClass("last-updated-cell");
                                 status = "success";
                             } else {
-                                oTable.cell( aPos[0], aPos[2] ).data( sOldValue );
-                                oTable.draw();
+                                oTable.cell( aPos.row, aPos.column ).data( sOldValue).draw();
                                 properties.fnShowError(sValue, "update");
                                 status = "failure";
                             }
                         }
 
-                        properties.fnOnEdited(status, sOldValue, sNewCellDisplayValue, aPos[0], aPos[1], aPos[2]);
+                        properties.fnOnEdited(status, sOldValue, sNewCellDisplayValue, aPos.row, aPos.columnVisible, aPos.column);
                         if (settings.fnOnCellUpdated != null) {
-                            settings.fnOnCellUpdated(status, sValue, aPos[0], aPos[2], settings);
+                            settings.fnOnCellUpdated(status, sValue, aPos.row, aPos.column, settings);
                         }
 
                         fnSetDisplayStart();
@@ -481,13 +481,13 @@ var makeEditable;
                         var rtn;
                         //Add values from the form into the table
                         if (oSettings.aoColumns != null && isNaN(parseInt(oSettings.aoColumns[0].mDataProp))) {
-                            rtn = oTable.fnAddData(rowData);
+                            rtn = oTable.row().add(rowData).draw().node();
                         }
                         else {
-                            rtn = oTable.fnAddData(values);
+                            rtn = oTable.row().add(values).draw().node();
                         }
 
-                        var oTRAdded = oTable.fnGetNodes(rtn);
+                        var oTRAdded = oTable.row(rtn).node();
                         //add id returned by server page as an TR id attribute
                         properties.fnSetRowID($(oTRAdded), data, true);
                         //Apply editable plugin on the cells of the table
@@ -648,7 +648,7 @@ var makeEditable;
                 ///<param name="fnDeleteRow" type="Function(id)">Function that will be called to delete a row. Default - fnDeleteRow(id)</param>
 
                 return confirm("Are you sure that you want to delete this record?");
-                ;
+
             }
 
 
@@ -695,7 +695,7 @@ var makeEditable;
                  }
                  */
                 if (response == properties.sSuccessResponse || response == "") {
-                    oTable.fnDeleteRow(oTRSelected);
+                    oTable.row(oTRSelected).remove().draw();
                     fnDisableDeleteButton();
                     fnSetDisplayStart();
                     if (properties.bUseKeyTable) {
@@ -784,7 +784,7 @@ var makeEditable;
                 ///<param name="oForm" type="DOM">Form used to enter data</param>
                 ///<param name="oTR" type="DOM">Table Row that will populate data</param>
 
-                var iRowID = oTable.fnGetPosition(oTR);
+                var iRowID = oTable.cell(oTR).index().row;
 
                 var id = properties.fnGetRowID($(oTR));
 
@@ -1057,7 +1057,7 @@ var makeEditable;
             };
 
             properties = $.extend(defaults, options);
-            oSettings = oTable.settings();
+            oSettings = oTable.settings().context[0];
             properties.bUseKeyTable = (properties.oKeyTable != null);
 
             return $(document.getElementById(oTable.toJQuery().context[0].sTableId)).each(function () {
@@ -1091,9 +1091,9 @@ var makeEditable;
                     oTable.settings().aoDrawCallback.push({
                         "fn": function () {
                             //Apply jEditable plugin on the table cells
-                            fnApplyEditable(oTable.fnGetNodes());
-                            $(oTable.fnGetNodes()).each(function () {
-                                    var position = oTable.fnGetPosition(this);
+                            fnApplyEditable(oTable.rows().nodes());
+                            $(oTable.oTable.rows().nodes()).each(function () {
+                                    var position = oTable.cell(this).index();
                                     var id = oTable.fnGetData(position)[0];
                                     properties.fnSetRowID($(this), id);
                                 }

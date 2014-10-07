@@ -491,7 +491,7 @@ function loadAlfrescoFolderTable() {
                 "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
             }
         });
-        $.fn.dataTable.MakeEditable( alfrescoFolderTabelle, {
+        $.fn.dataTable.makeEditable( alfrescoFolderTabelle, {
             sUpdateURL: function(value, settings)
             {
                 return(value);
