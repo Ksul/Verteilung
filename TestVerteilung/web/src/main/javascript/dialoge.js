@@ -444,22 +444,23 @@ function startFolderDialog(tableRow, modus) {
                                             'cm:description': description
                                         }
                                     };
-                                    if (modus == "VIEW_WEB_CREATE")
+                                    if (modus == "VIEW_WEB_CREATE") {
                                         erg = executeService("createFolder", [
                                             {"name": "documentId", "value": data.objectId},
                                             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                                         ], "Dokument konnte nicht aktualisiert werden!", false);
-                                    if (erg.success) {
-                                        var newFolder = $.parseJSON(erg.result);
-                                        $("#tree").jstree('open_node', newFolder.parentId);
-                                        switchAlfrescoDirectory(newFolder.parentId);
-                                        $("#tree").jstree('select_node', newFolder.parentId);
+                                        if (erg.success) {
+                                            var newFolder = $.parseJSON(erg.result);
+                                            $("#tree").jstree('open_node', newFolder.parentId);
+                                            switchAlfrescoDirectory(newFolder.parentId);
+                                            $("#tree").jstree('select_node', newFolder.parentId);
+                                        }
                                     }
                                     else {
                                         erg = executeService("updateProperties", [
                                             {"name": "documentId", "value": data.objectId},
                                             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                                        ], "Dokument konnte nicht aktualisiert werden!", false);
+                                        ], "Folder konnte nicht aktualisiert werden!", false);
                                         if (erg.success) {
                                             alfrescoFolderTabelle.rows().invalidate();
                                             var node = $(document.getElementById(data.objectId));

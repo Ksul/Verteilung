@@ -166,7 +166,7 @@ function errorHandler(e, description) {
  */
 function message(title, str) {
     var $dialog = $('<div></div>').html(str).dialog({
-        autoOpen: true,
+        autoOpen: false,
         title: title,
         modal: true,
         height:200,
@@ -176,7 +176,8 @@ function message(title, str) {
                 $(this).dialog("destroy");
             }
         }
-    }).css({height:"100px", width:"800px", overflow:"auto"});
+    }).css({height:"200px", width:"800px", overflow:"auto"});
+    $dialog.dialog('open');
 }
 
 /**

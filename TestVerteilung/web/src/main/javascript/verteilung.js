@@ -519,12 +519,12 @@ function executeService(service, params, messages, ignoreError) {
         }
         if (!json.success) {
             if (exist(errorMessage))
-                errorString = errorMessage + " " + json.result;
+                errorString = errorMessage + "<br>" + json.result;
             else
                 errorString = json.result;
             // gibt es eine Fehlermeldung aus dem Service?
             if (exist(json.error))
-                errorString = errorString + json.error;
+                errorString = errorString + "<br>" + json.error;
             throw new Error(errorString);
         } else {
             if (exist(successMessage))

@@ -59,12 +59,15 @@ th {
 td.details-control {
     background: url('images/details_open.png') no-repeat center center;
     cursor: pointer;
-
 }
 
 tr.shown td.details-control {
     background: url('images/details_close.png') no-repeat center center;
+}
 
+td.folder-control {
+    background: url('images/folder1.png') no-repeat center center;
+    cursor: pointer;
 }
 
 /* remove padding & scrolling from panes that are 'containers' for nested layouts */
