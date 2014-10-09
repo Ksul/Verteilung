@@ -873,40 +873,44 @@ function switchAlfrescoDirectory(data) {
                     },
                     null
                     ],
-                sUpdateURL: function(value, settings)
-                {
-                    var extraProperties;
-                    var data = alfrescoFolderTabelle.row($(this).closest('tr')).data();
-                    if (this.cellIndex == 1) {
-                        // Name geändert
-                        data.name = value
-                    } else {
-                        // Beschreibung geändert
-                        data.description = value;
-                    }
-                    extraProperties = {
-                        'cmis:folder': {
-                            'cmis:objectTypeId': 'cmis:folder',
-                            'cmis:name': data.name
-                        },
-                        'P:cm:titled': {
-                            'cm:title': data.title,
-                            'cm:description': data.description
+                sUpdateURL: function (value, settings) {
+                    try {
+                        var extraProperties;
+                        var data = alfrescoFolderTabelle.row($(this).closest('tr')).data();
+                        if (this.cellIndex == 1) {
+                            // Name geändert
+                            data.name = value
+                        } else {
+                            // Beschreibung geändert
+                            data.description = value;
                         }
-                    };
-                    erg = executeService("updateProperties", [
-                        {"name": "documentId", "value": data.objectId},
-                        {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                    ], null, true);
-                    if (erg.success) {
-                        var node = $(document.getElementById(data.objectId));
-                        $("#tree").jstree('rename_node', node[0], value);
-                        return(value);
+                        extraProperties = {
+                            'cmis:folder': {
+                                'cmis:objectTypeId': 'cmis:folder',
+                                'cmis:name': data.name
+                            },
+                            'P:cm:titled': {
+                                'cm:title': data.title,
+                                'cm:description': data.description
+                            }
+                        };
+                        erg = executeService("updateProperties", [
+                            {"name": "documentId", "value": data.objectId},
+                            {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+                        ], null, true);
+                        if (erg.success) {
+                            var node = $(document.getElementById(data.objectId));
+                            $("#tree").jstree('rename_node', node[0], value);
+                            return(value);
+                        }
+                        else
+                            return "Folder konnte nicht aktualisiert werden!" + "<br>" + erg.result;
+
+                    } catch (e) {
+                        errorHandler(e);
                     }
-                    else
-                        return "Folder konnte nicht aktualisiert werden!" + "<br>" + erg.result;
                 }
-            } );
+            });
             fillBreadCrumb(data);
 
             $("#tree").jstree('select_node', objectId);
@@ -942,34 +946,46 @@ function switchAlfrescoDirectory(data) {
                     },
                     null
                 ],
-                sUpdateURL: function(value, settings)
-                {
-                    var extraProperties;
-                    var data = alfrescoTabelle.row($(this).closest('tr')).data();
-                    if (this.cellIndex == 1) {
-                        // Name geändert
-                        data.title = value
-                    } else {
-                        // Beschreibung geändert
-                        data.description = value;
+                sUpdateURL: function (value, settings) {
+                    try {
+                        var extraProperties;
+                        var data = alfrescoTabelle.row($(this).closest('tr')).data();
+                        if (this.cellIndex == 2) {
+                            // Titel geändert
+                            data.title = value
+                        } else if (this.cellIndex == 3) {
+                            // Datum geändert
+                            data.documentDate = $.datepicker.parseDate("dd.mm.yy", value).getTime();
+                        } else if (this.cellIndex == 4) {
+                            // Person geändert
+                            data.person = value;
+                        } else if (this.cellIndex == 5) {
+                            // Betrag geändert
+                            data.amount = value;
+                        } else if (this.cellIndex == 6) {
+                            // Id geändert
+                            data.idvalue = value;
+                        }
+                        var extraProperties = {
+                            'P:cm:titled': {'cm:title': data.title, 'cm:description': data.description},
+                            'D:my:archivContent': {'my:documentDate': $.datepicker.formatDate("dd.mm.yy", new Date(Number(data))), 'my:person': data.person},
+                            'P:my:amountable': {'my:amount': data.amount, "my:tax": data.tax},
+                            'P:my:idable': {'my:idvalue': data.idvalue}
+                        };
+                        erg = executeService("updateProperties", [
+                            {"name": "documentId", "value": data.objectId},
+                            {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+                        ], null, true);
+                        if (erg.success) {
+                            return(value);
+                        }
+                        else
+                            return "Dokument konnte nicht aktualisiert werden!" + "<br>" + erg.result;
+                    } catch (e) {
+                        errorHandler(e);
                     }
-                    var extraProperties = {
-                        'P:cm:titled': {'cm:title': data.title, 'cm:description': data.description},
-                        'D:my:archivContent': {'my:documentDate': $.datepicker.formatDate("dd.mm.yy", new Date(Number(data))), 'my:person': data.person},
-                        'P:my:amountable': {'my:amount': data.amount, "my:tax": data.tax},
-                        'P:my:idable': {'my:idvalue': data.idvalue}
-                    };
-                    erg = executeService("updateProperties", [
-                        {"name": "documentId", "value": data.objectId},
-                        {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                    ], null, true);
-                    if (erg.success) {
-                        return(value);
-                    }
-                    else
-                        return "Dokument konnte nicht aktualisiert werden!" + "<br>" + erg.result;
                 }
-            } );
+            });
             $('.alfrescoTableEvent').off("dragstart");
             $('.alfrescoTableEvent').on("dragstart", function (event) {
                 try {
