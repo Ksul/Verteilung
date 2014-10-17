@@ -377,8 +377,15 @@ function loadAlfrescoTable() {
                 {
                     "targets": [3],
                     "render": function (data, type, row) {
-                        if (exist(data))
-                            return $.datepicker.formatDate("dd.mm.yy", new Date(Number(data)));
+                        if (exist(data)) {
+                            var datum;
+                            try {
+                                // editierte Datumwerte haben das falsche Format, deshalb werden sie erstmal wieder geparst
+                                data = $.datepicker.parseDate("dd.mm.yy", data).getTime();
+                            } catch(e){}
+                            datum = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data)));
+                            return datum
+                        }
                         else if (exist(row.creationDate))
                             return $.datepicker.formatDate("dd.mm.yy", new Date(Number(row.creationDate)));
                         else
@@ -968,7 +975,7 @@ function switchAlfrescoDirectory(data) {
                         }
                         var extraProperties = {
                             'P:cm:titled': {'cm:title': data.title, 'cm:description': data.description},
-                            'D:my:archivContent': {'my:documentDate': $.datepicker.formatDate("dd.mm.yy", new Date(Number(data))), 'my:person': data.person},
+                            'D:my:archivContent': {'my:documentDate':data.documentDate, 'my:person': data.person},
                             'P:my:amountable': {'my:amount': data.amount, "my:tax": data.tax},
                             'P:my:idable': {'my:idvalue': data.idvalue}
                         };
