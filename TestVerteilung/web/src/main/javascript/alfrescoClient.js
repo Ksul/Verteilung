@@ -1010,8 +1010,8 @@ function switchAlfrescoDirectory(data) {
                     errorHandler(e);
                 }
             });
-            $('.alfrescoTableEvent').off("dblclick");
-            $('.alfrescoTableEvent').on("dblclick", function (event) {
+            $('.alfrescoTableEvent').off("click");
+            $('.alfrescoTableEvent').on("click", function (event) {
                 try {
                     var dt = event.originalEvent.dataTransfer;
                     //wg alfresco Prefix
