@@ -77,6 +77,10 @@ td.folder-control {
     overflow: hidden;
 }
 
+#alfrescoWest {
+    overflow: auto !important;
+}
+
 .header {
     height: 20px;
     text-align: center;
