@@ -1380,12 +1380,7 @@ function loadAlfrescoTree() {
                             if (exist(obj)) {
                                 aFunction.call(this, obj);
                             }
-                            var res = searchJson(obj, "name", "Inbox");
-                            if (res.length == 1) {
-                                var zone = document.getElementById(res[0].objectId);
-                                zone.addEventListener('dragover', handleDragOver, false);
-                                zone.addEventListener('drop', handleDropInbox, false);
-                            }
+
                         } catch (e) {
                             errorHandler(e);
                         }
@@ -1416,9 +1411,19 @@ function loadAlfrescoTree() {
             } catch (e) {
                 errorHandler(e);
             }
+        }).on("loaded.jstree", function (event, data) {
+            try {
+                // Eventlistner für Drop in Inbox
+                var zone = document.getElementById(inboxID);
+                zone.addEventListener('dragover', handleDragOver, false);
+                zone.addEventListener('drop', handleDropInbox, false);
+            } catch (e) {
+                errorHandler(e);
+            }
         });
 
-        // Drag & Drop aus Tabelle
+
+
         // Initiales Lesen
         if (alfrescoServerAvailable)
             switchAlfrescoDirectory(null);
