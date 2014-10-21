@@ -19,6 +19,43 @@ function changeCss(className, classValue) {
 };
 
 /**
+ * Eventhandler der für die Verarbeitung von fallen gelassen Dateien auf die Inbox zuständig ist
+ * @param evt  das Event
+ */
+function handleDropInbox(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    var files = evt.dataTransfer.files;
+    for ( var i = 0; i < files.length; i++) {
+        var f = files[i];
+        if (f) {
+            var reader = new FileReader();
+            reader.onloadend = (function (f) {
+                return function (evt) {
+                    if (evt.target.readyState == FileReader.DONE) {
+                        var content = evt.target.result;
+                        var json = executeService("createDocument", [
+                            {"name": "folder", "value":inboxID},
+                            {"name": "fileName", "value": f.name},
+                            {"name": "documentText", "value": btoa(content)},
+                            {"name": "mimeType", "value": "application/pdf"},
+                            {"name": "extraProperties", "value": "{}"},
+                            {"name": "versionState", "value": "major"}
+
+                        ], "Dokument konnten nicht im Alfresco angelegt werden!");
+                    }
+
+                }  })(f);
+            blob = f.slice(0, f.size + 1);
+            reader.readAsBinaryString(blob);
+        } else {
+            message("Fehler", "Failed to load file!");
+        }
+    }
+}
+
+
+/**
  * baut das Layout der Anwendung auf
  */
 function loadLayout() {
@@ -1342,6 +1379,12 @@ function loadAlfrescoTree() {
                             // CallBack ausführen
                             if (exist(obj)) {
                                 aFunction.call(this, obj);
+                            }
+                            var res = searchJson(obj, "name", "Inbox");
+                            if (res.length == 1) {
+                                var zone = document.getElementById(res[0].objectId);
+                                zone.addEventListener('dragover', handleDragOver, false);
+                                zone.addEventListener('drop', handleDropInbox, false);
                             }
                         } catch (e) {
                             errorHandler(e);
