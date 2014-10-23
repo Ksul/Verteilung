@@ -12,6 +12,8 @@ import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -513,6 +515,7 @@ public class AlfrescoConnector {
             }
             rd.close();
             return response.toString();
+            // ((JSONObject) ((JSONArray) new JSONObject(response.toString()).get("items")).get(0)).getString("content");
         } finally {
 
             if (connection != null) {

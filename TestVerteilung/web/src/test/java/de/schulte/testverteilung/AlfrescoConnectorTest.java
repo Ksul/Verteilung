@@ -304,7 +304,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testGetComments() throws Exception {
-        CmisObject obj = con.getNode("/Archiv/Fehler/00000B6A.pdf");
+        CmisObject obj = con.getNode("/Archiv/Fehler/20130717204617.pdf");
         assertNotNull(obj);
         assertTrue(obj instanceof Document);
         String ticket = con.getTicket();
