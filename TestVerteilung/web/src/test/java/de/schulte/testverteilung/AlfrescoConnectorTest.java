@@ -7,6 +7,7 @@ import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -301,6 +302,16 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
     }
 
-
+    @Test
+    public void testGetComments() throws Exception {
+        CmisObject obj = con.getNode("/Archiv/Fehler/00000B6A.pdf");
+        assertNotNull(obj);
+        assertTrue(obj instanceof Document);
+        String ticket = con.getTicket();
+        assertNotNull(ticket);
+        JSONObject jso = new JSONObject(ticket);
+        String result =  con.getComments(obj, ((JSONObject) new JSONObject(ticket).get("data")).getString("ticket"));
+        System.out.println(result) ;
+    }
 
 }

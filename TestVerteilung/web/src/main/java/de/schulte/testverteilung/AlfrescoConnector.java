@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -33,6 +34,9 @@ import java.util.logging.Logger;
  */
 public class AlfrescoConnector {
 
+
+    private static final String NODES_URL = "service/api/node/workspace/SpacesStore/";
+    private static final String LOGIN_URL = "service/api/login";
     private static Logger logger = Logger.getLogger(AlfrescoConnector.class.getName());
     private String user = null;
     private String password = null;
@@ -72,7 +76,7 @@ public class AlfrescoConnector {
         URL url = null;
         HttpURLConnection connection = null;
         try {
-            url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + "service/api/login");
+            url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + LOGIN_URL);
             String urlParameters = "{ \"username\" : \"" + this.user + "\", \"password\" : \"" + this.password + "\" }";
 
 
@@ -110,7 +114,6 @@ public class AlfrescoConnector {
                 connection.disconnect();
             }
         }
-
     }
 
     /**
@@ -484,6 +487,40 @@ public class AlfrescoConnector {
             return null;
     }
 
+    public String getComments(CmisObject obj, String ticket) throws IOException {
+
+        String id = obj.getId();
+        if (id.contains(";"))
+            id = id.substring(0, id.lastIndexOf(';'));
+        if (id.startsWith("workspace://SpacesStore/"))
+            id = id.substring(24);
+        URL url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + NODES_URL + id + "/comments?alf_ticket=" +ticket);
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) url.openConnection();
+
+            connection.setRequestMethod("GET");
+
+
+            // Get Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append('\r');
+            }
+            rd.close();
+            return response.toString();
+        } finally {
+
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
     /**
      * baut die Properties für Alfresco auf.
      * @param  extraCMSProperties   die übergebenen Properties
@@ -552,5 +589,48 @@ public class AlfrescoConnector {
         return id;
     }
 
+    /**
+     * startet einen Http Request
+     * @param url               die aufzurufende URL
+     * @param urlParameters     die Parameter für den Aufruf
+     * @return                  den Response als String
+     * @throws IOException
+     */
+    private String startRequest(URL url, String urlParameters) throws IOException {
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) url.openConnection();
 
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+            connection.setRequestProperty("Content-Language", "en-US");
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+
+            // Send request
+            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+            wr.writeBytes(urlParameters);
+            wr.flush();
+            wr.close();
+
+            // Get Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append('\r');
+            }
+            rd.close();
+            return response.toString();
+        } finally {
+
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
 }
