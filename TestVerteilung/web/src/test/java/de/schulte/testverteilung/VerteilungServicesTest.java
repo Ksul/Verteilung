@@ -45,6 +45,8 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        JSONObject ticket = (JSONObject) obj.get("result");
+        assertTrue(((JSONObject) ticket.get("data")).getString("ticket").startsWith("TICKET_"));
     }
 
     @Test

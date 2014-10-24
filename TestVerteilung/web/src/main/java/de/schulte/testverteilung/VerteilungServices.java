@@ -75,7 +75,7 @@ public class VerteilungServices {
      * liefert ein Ticket zur Authentifizierung
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
+     *                                                          result            das Ticket als JSON Objekt
      */
     public JSONObject getTicket() {
         JSONObject obj = new JSONObject();
@@ -83,6 +83,27 @@ public class VerteilungServices {
             obj.put("success", true);
             obj.put("result", con.getTicket());
 
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * liefert die Kommentare zu einem Knoten
+     * @param documentId    die Id des Knoten/Folder
+     * @param ticket        das Ticket zur Identifizierung
+     * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                              false    ein Fehler ist aufgetreten
+     *                                                     result            die Kommentare  als JSON Objekt
+     */
+    public JSONObject getComments(String documentId, String ticket) {
+
+        JSONObject obj = new JSONObject();
+        try {
+            CmisObject cmisObject = con.getNodeById(documentId);
+            obj.put("success", true);
+            obj.put("result", con.getComments(cmisObject, ticket));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -231,8 +252,9 @@ public class VerteilungServices {
 
         JSONObject obj = new JSONObject();
         try {
+            Document document = (Document) con.getNodeById(documentId);
             obj.put("success", true);
-            obj.put("result", con.getDocumentContent(documentId));
+            obj.put("result", con.getDocumentContent(document));
             if (obj.getBoolean("success")) {
                 if (extract) {
                     PDFConnector con = new PDFConnector();

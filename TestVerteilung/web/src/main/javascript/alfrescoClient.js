@@ -1056,7 +1056,7 @@ function switchAlfrescoDirectory(data) {
                     var url = getSettings("server") + "d/d/workspace/" + data.nodeRef.substr(12) + "/file.bin";
                     var obj = executeService("getTicket");
                     if (obj.success)
-                        url = url + "?ticket=" + $.parseJSON(obj.result).data.ticket;
+                        url = url + "?alf_ticket=" + obj.result.data.ticket;
                     window.open(url);
                 } catch (e) {
                     errorHandler(e);

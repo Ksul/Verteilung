@@ -13,8 +13,10 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundExcept
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
@@ -44,7 +46,18 @@ public class AlfrescoConnector {
     private String password = null;
     private String bindingUrl = null;
     private String server = null;
+    private static enum RequestType {
+        POST("POST"),
+        GET("GET");
 
+        private final String name;
+        RequestType(String name) {
+            this.name = name;
+        }
+        String getName() {
+            return this.name;
+        }
+    }
 
     private Session session = null;
 
@@ -67,55 +80,15 @@ public class AlfrescoConnector {
     }
 
     /**
-     * liefert ein Ticket zur Authenfizierung als String
-     * @return             das Ticket als String
+     * liefert ein Ticket zur Authenfizierung
+     * @return             das Ticket als JSON Objekt
      * @throws IOException
      */
-    public String getTicket() throws IOException {
+    public JSONObject getTicket() throws IOException, JSONException{
 
-        String _ticket = "";
-
-        URL url = null;
-        HttpURLConnection connection = null;
-        try {
-            url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + LOGIN_URL);
-            String urlParameters = "{ \"username\" : \"" + this.user + "\", \"password\" : \"" + this.password + "\" }";
-
-
-            connection = (HttpURLConnection) url.openConnection();
-
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
-            connection.setRequestProperty("Content-Language", "en-US");
-            connection.setUseCaches(false);
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-
-            // Send request
-            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
-
-            // Get Response
-            InputStream is = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-            String line;
-            StringBuffer response = new StringBuffer();
-            while ((line = rd.readLine()) != null) {
-                response.append(line);
-                response.append('\r');
-            }
-            rd.close();
-            return response.toString();
-
-        } finally {
-
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
+        URL url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + LOGIN_URL);
+        String urlParameters = "{ \"username\" : \"" + this.user + "\", \"password\" : \"" + this.password + "\" }";
+        return new JSONObject(startRequest(url, RequestType.POST, urlParameters));
     }
 
     /**
@@ -240,32 +213,6 @@ public class AlfrescoConnector {
 
         }
         return null;
-    }
-
-    /**
-     * liefert den Inhalt eines Dokumentes
-     * @param documentId            die Id des Dokumentes
-     * @throws IOException
-     * @return                      der Inhalt als Bytearray
-     */
-    public byte[] getDocumentContent(String documentId) throws VerteilungException, IOException {
-        CmisObject object = getSession().getObject(getSession().createObjectId(documentId));
-        Document document = (Document) object;
-
-        return getDocumentContent(document);
-    }
-
-    /**
-     * liefert den Inhalt eines Dokumentes als String
-     * @param documentId            die Id des Dokumentes
-     * @throws IOException
-     * @return                      der Inhalt als String
-     */
-    public String getDocumentContentAsString(String documentId) throws VerteilungException, IOException {
-        CmisObject object = getSession().getObject(getSession().createObjectId(documentId));
-        Document document = (Document) object;
-
-        return getDocumentContentAsString(document);
     }
 
     /**
@@ -489,7 +436,15 @@ public class AlfrescoConnector {
             return null;
     }
 
-    public String getComments(CmisObject obj, String ticket) throws IOException {
+    /**
+     * liefert die Kommentare zu einem Knoten
+     * @param obj           der Knoten/Folder als Cmis Objekt
+     * @param ticket        das Ticket zur Identifizierung
+     * @return              ein JSON Objekt mit den Kommentaren
+     * @throws IOException
+     * @throws JSONException
+     */
+    public JSONObject getComments(CmisObject obj, String ticket) throws IOException, JSONException {
 
         String id = obj.getId();
         if (id.contains(";"))
@@ -497,31 +452,19 @@ public class AlfrescoConnector {
         if (id.startsWith("workspace://SpacesStore/"))
             id = id.substring(24);
         URL url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + NODES_URL + id + "/comments?alf_ticket=" +ticket);
-        HttpURLConnection connection = null;
-        try {
-            connection = (HttpURLConnection) url.openConnection();
+        return new JSONObject(startRequest(url, RequestType.GET, null));
+    }
 
-            connection.setRequestMethod("GET");
-
-
-            // Get Response
-            InputStream is = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-            String line;
-            StringBuffer response = new StringBuffer();
-            while ((line = rd.readLine()) != null) {
-                response.append(line);
-                response.append('\r');
-            }
-            rd.close();
-            return response.toString();
-            // ((JSONObject) ((JSONArray) new JSONObject(response.toString()).get("items")).get(0)).getString("content");
-        } finally {
-
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
+    public void addComment(CmisObject obj, String ticket, String comment) throws IOException, JSONException {
+        String id = obj.getId();
+        if (id.contains(";"))
+            id = id.substring(0, id.lastIndexOf(';'));
+        if (id.startsWith("workspace://SpacesStore/"))
+            id = id.substring(24);
+        URL url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + NODES_URL + id + "/comments?alf_ticket=" +ticket);
+        String urlParameters = "{\"content\": \"" + comment + "\"}";
+        startRequest(url, RequestType.POST, urlParameters);
+        return;
     }
 
     /**
@@ -595,29 +538,32 @@ public class AlfrescoConnector {
     /**
      * startet einen Http Request
      * @param url               die aufzurufende URL
+     * @param type              der Typ des Aufrufs, entweder POST oder GET
      * @param urlParameters     die Parameter für den Aufruf
      * @return                  den Response als String
      * @throws IOException
      */
-    private String startRequest(URL url, String urlParameters) throws IOException {
+    private String startRequest(URL url, RequestType type, String urlParameters) throws IOException {
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) url.openConnection();
 
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
-            connection.setRequestProperty("Content-Language", "en-US");
+            connection.setRequestMethod(type.getName());
+
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
 
             // Send request
-            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
-
+            if (urlParameters != null) {
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+                connection.setRequestProperty("Content-Language", "en-US");
+                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+            }
             // Get Response
             InputStream is = connection.getInputStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is));

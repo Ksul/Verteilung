@@ -15,6 +15,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -179,7 +180,68 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        assertTrue(obj.getString("result").length() > 0);
+        JSONObject ticket = (JSONObject) obj.get("result");
+        assertTrue(((JSONObject) ticket.get("data")).getString("ticket").startsWith("TICKET_"));
+    }
+
+    @Test
+    public void testGetComments() throws Exception {
+
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
+        servlet.doPost(request, response);
+        writer.flush(); // it may not have been flushed yet...
+        assertNotNull(sr);
+        JSONObject obj = new JSONObject(sr.toString());
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        sr.getBuffer().delete(0, 9999);
+        // Dokument erstellen
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
+        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
+        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        sr.getBuffer().delete(0, 9999);
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        JSONObject doc = new JSONObject(obj.getString("result"));
+
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETTICKET);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        sr.getBuffer().delete(0, 9999);
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        JSONObject ticket = (JSONObject) obj.get("result");
+
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETCOMMENTS);
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_TICKET)).thenReturn(((JSONObject) ticket.get("data")).getString("ticket"));
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        sr.getBuffer().delete(0, 9999);
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        JSONObject comment = (JSONObject) obj.get("result");
+        assertEquals("Testkommentar", ((JSONObject) ((JSONArray) comment.get("items")).get(0)).getString("content"));
+
+        // und das Dokument wieder löschen
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
+        servlet.doPost(request, response);
+        writer.flush();
+        sr.getBuffer().delete(0, 9999);
     }
 
     @Test

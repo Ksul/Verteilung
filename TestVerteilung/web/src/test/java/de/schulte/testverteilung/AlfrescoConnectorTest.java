@@ -7,6 +7,7 @@ import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,8 +61,9 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testGetTicket() throws Exception {
-        String ticket = con.getTicket();
+        JSONObject ticket = con.getTicket();
         assertNotNull(ticket);
+        assertTrue(((JSONObject) ticket.get("data")).getString("ticket").startsWith("TICKET_"));
     }
 
     @Test
@@ -107,7 +109,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testGetDocumentContent() throws Exception{
-        byte[] content = con.getDocumentContent(con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'").getId());
+        byte[] content = con.getDocumentContent(con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'"));
         assertNotNull(content);
         assertTrue(content.length > 0);
         String document =  new String(content, Charset.forName("UTF-8"));
@@ -304,14 +306,20 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testGetComments() throws Exception {
-        CmisObject obj = con.getNode("/Archiv/Fehler/20130717204617.pdf");
-        assertNotNull(obj);
-        assertTrue(obj instanceof Document);
-        String ticket = con.getTicket();
+        CmisObject folder = con.getNode("/Archiv");
+        assertNotNull(folder);
+        assertTrue(folder instanceof Folder);
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR);
+        assertNotNull(document);
+        assertTrue(document instanceof Document);
+        assertEquals("TestDocument.txt", document.getName());
+        JSONObject ticket = con.getTicket();
         assertNotNull(ticket);
-        JSONObject jso = new JSONObject(ticket);
-        String result =  con.getComments(obj, ((JSONObject) new JSONObject(ticket).get("data")).getString("ticket"));
-        System.out.println(result) ;
+        con.addComment(document, ((JSONObject) ticket.get("data")).getString("ticket"), "Testkommentar");
+        JSONObject result =  con.getComments(document, ((JSONObject) ticket.get("data")).getString("ticket"));
+        assertEquals("Testkommentar", ((JSONObject) ((JSONArray) result.get("items")).get(0)).getString("content"));
+        document.delete(true);
     }
 
 }

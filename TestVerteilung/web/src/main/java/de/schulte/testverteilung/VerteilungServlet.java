@@ -48,6 +48,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_VERSIONSTATE = "versionState";
     public static final String PARAMETER_VERSIONCOMMENT = "versionComment";
     public static final String PARAMETER_EXTRAPROPERTIES = "extraProperties";
+    public static final String PARAMETER_TICKET = "ticket";
 
     public static final String FUNCTION_CLEARINTERNALSTORAGE = "clearInternalStorage";
     public static final String FUNCTION_CREATEDOCUMENT = "createDocument";
@@ -74,6 +75,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_UPLOADDOCUMENT = "uploadDocument";
     public static final String FUNCTION_UPDATEPROPERTIES = "updateproperties";
     public static final String FUNCTION_GETTICKET = "getTicket";
+    public static final String FUNCTION_GETCOMMENTS = "getComments";
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -177,6 +179,8 @@ public class VerteilungServlet extends HttpServlet {
                     obj = isURLAvailable(getURLParameter(req, PARAMETER_SERVER, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_GETTICKET)) {
                     obj = getTicket();
+                } else if (value.equalsIgnoreCase(FUNCTION_GETCOMMENTS)) {
+                    obj = getComments(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_TICKET, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_GETNODEID)) {
                     obj = getNodeId(getURLParameter(req, PARAMETER_FILEPATH, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
@@ -262,6 +266,20 @@ public class VerteilungServlet extends HttpServlet {
     protected JSONObject getTicket() {
 
         return services.getTicket();
+
+    }
+
+    /**
+     * liefert die Kommentare zu einem Knoten
+     * @param documentId   die Id des Knoten
+     * @param ticket       das Ticket zur Identifizierung am Alfresco
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            die Kommentare als JSON Objekt
+     */
+    protected JSONObject getComments(String documentId, String ticket) {
+
+        return services.getComments(documentId, ticket);
 
     }
 
