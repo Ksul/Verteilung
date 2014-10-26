@@ -38,6 +38,22 @@ public class VerteilungAppletTest extends AlfrescoTest {
     }
 
     @Test
+    public void tesGgetComments() throws Exception {
+        JSONObject obj = applet.getComments("a", "b");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+    }
+
+    @Test
+    public void testAddComment() throws Exception {
+        JSONObject obj = applet.addComment("a", "b", "c");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+    }
+
+    @Test
     public void testIsURLAvailable() throws Exception {
         String urlString = "http://www.spiegel.de";
         JSONObject obj = applet.isURLAvailable(urlString);
@@ -93,7 +109,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
 
     @Test
     public void testDeleteDocument() throws Exception {
-        JSONObject obj = applet.deleteDocument("/Archiv", "abcde");
+        JSONObject obj = applet.deleteDocument("/Archiv/abcde");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));

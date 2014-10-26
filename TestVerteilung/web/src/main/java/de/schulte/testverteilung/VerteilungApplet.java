@@ -142,6 +142,58 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
+     * liefert die Kommentare zu einem Knoten
+     * @param documentId   die Id des Knoten
+     * @param ticket       das Ticket zur Identifizierung am Alfresco
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            die Kommentare als JSON Objekt
+     */
+    public JSONObject getComments(final String documentId,
+                                  final String ticket) {
+
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    return services.getComments(documentId, ticket);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * Fügt zu einem Knoten einen neuen Kommentar hinzu
+     * @param documentId    die Id des Knoten/Folder
+     * @param ticket        das Ticket zur Identifizierung
+     * @param comment       der Kommentar
+     * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                              false    ein Fehler ist aufgetreten
+     *                                                     result            der neue Kommentare  als JSON Objekt
+     */
+    public JSONObject addComment(final String documentId,
+                                 final String ticket,
+                                 final String comment) {
+
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    return services.addComment(documentId, ticket, comment);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
      * prüft, ob eine Url verfügbar ist
      * @param  urlString   URL des Servers
      * @return obj            ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
@@ -293,14 +345,12 @@ public class VerteilungApplet extends Applet {
 
     /**
      * löscht ein Document
-     * @param documentId     die Id des Folder als String, in dem das Document liegt
-     * @param fileName       der Name des Documentes
+     * @param documentId     die Id des Dokumentes welches gelöscht werden soll als String
      * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
      *                                                      result            Dokument als JSONObject
      */
-    public JSONObject deleteDocument(final String documentId,
-                                     final String fileName) {
+    public JSONObject deleteDocument(final String documentId) {
 
 
         JSONObject obj;
@@ -308,7 +358,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.deleteDocument(documentId, fileName);
+                    return services.deleteDocument(documentId);
                 }
             });
         } catch (PrivilegedActionException e) {

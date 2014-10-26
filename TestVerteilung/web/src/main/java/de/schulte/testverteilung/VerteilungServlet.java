@@ -28,7 +28,6 @@ public class VerteilungServlet extends HttpServlet {
 
     private Logger logger = Logger.getLogger(VerteilungApplet.class.getName());
 
-
     public static final String PARAMETER_FUNCTION = "function";
     public static final String PARAMETER_DOCUMENTID = "documentId";
     public static final String PARAMETER_DESTINATIONID = "destinationId";
@@ -37,7 +36,6 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_FILEPATH = "filePath";
     public static final String PARAMETER_FILENAME = "fileName";
     public static final String PARAMETER_CMISQUERY = "cmisQuery";
-    public static final String PARAMETER_FOLDER = "folder";
     public static final String PARAMETER_MIMETYPE = "mimeType";
     public static final String PARAMETER_SERVER = "server";
     public static final String PARAMETER_BINDING = "binding";
@@ -49,6 +47,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_VERSIONCOMMENT = "versionComment";
     public static final String PARAMETER_EXTRAPROPERTIES = "extraProperties";
     public static final String PARAMETER_TICKET = "ticket";
+    public static final String PARAMETER_COMMENT = "comment";
 
     public static final String FUNCTION_CLEARINTERNALSTORAGE = "clearInternalStorage";
     public static final String FUNCTION_CREATEDOCUMENT = "createDocument";
@@ -76,6 +75,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_UPDATEPROPERTIES = "updateproperties";
     public static final String FUNCTION_GETTICKET = "getTicket";
     public static final String FUNCTION_GETCOMMENTS = "getComments";
+    public static final String FUNCTION_ADDCOMMENT = "addComment";
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -181,6 +181,8 @@ public class VerteilungServlet extends HttpServlet {
                     obj = getTicket();
                 } else if (value.equalsIgnoreCase(FUNCTION_GETCOMMENTS)) {
                     obj = getComments(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_TICKET, true));
+                } else if (value.equalsIgnoreCase(FUNCTION_ADDCOMMENT)) {
+                    obj = addComment(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_TICKET, true), getURLParameter(req, PARAMETER_COMMENT, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_GETNODEID)) {
                     obj = getNodeId(getURLParameter(req, PARAMETER_FILEPATH, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
@@ -188,7 +190,7 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_UPLOADDOCUMENT)) {
                     obj = uploadDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true),  getURLParameter(req, PARAMETER_VERSIONSTATE, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_DELETEDOCUMENT)) {
-                    obj = deleteDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true));
+                    obj = deleteDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_CREATEDOCUMENT)) {
                     obj = createDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true), getURLParameter(req, PARAMETER_DOCUMENTTEXT, true), getURLParameter(req, PARAMETER_MIMETYPE, false), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, false), getURLParameter(req, PARAMETER_VERSIONSTATE, false));
                 } else if (value.equalsIgnoreCase(FUNCTION_CREATEFOLDER)) {
@@ -284,6 +286,21 @@ public class VerteilungServlet extends HttpServlet {
     }
 
     /**
+     * Fügt zu einem Knoten einen neuen Kommentar hinzu
+     * @param documentId    die Id des Knoten/Folder
+     * @param ticket        das Ticket zur Identifizierung
+     * @param comment       der Kommentar
+     * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                              false    ein Fehler ist aufgetreten
+     *                                                     result            der neue Kommentare  als JSON Objekt
+     */
+    protected JSONObject addComment(String documentId, String ticket, String comment) {
+
+        return services.addComment(documentId, ticket, comment);
+
+    }
+
+    /**
      * prüft, ob eine Url verfügbar ist
      * @param urlString    URL des Servers
      * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
@@ -343,17 +360,15 @@ public class VerteilungServlet extends HttpServlet {
 
     /**
      * löscht ein Document
-     * @param folder                  der Folder als String, in das Documentliegt
-     * @param fileName                der Name des Documentes
+     * @param documentId              die Id des Dokumentes das gelöscht werden soll als String
      * @return                        ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                        false    ein Fehler ist aufgetreten
      *                                                               result            Dokument als JSONObject
      * @throws VerteilungException
      */
-    protected JSONObject deleteDocument(String folder,
-                                        String fileName) throws  VerteilungException {
+    protected JSONObject deleteDocument(String documentId) throws  VerteilungException {
 
-        return services.deleteDocument(folder, fileName);
+        return services.deleteDocument(documentId);
     }
 
     /**

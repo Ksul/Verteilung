@@ -38,4 +38,18 @@ public class VerteilungHelper {
         }
         return obj;
     }
+
+    /**
+     * konvertiert die ObjectId in ein verwertbares Format
+     * das bedeudet, dass die Versionsinformation und die Store Information abgeschnitten wird
+     * @param id            die übergebene Id
+     * @return              die konvertirte Id
+     */
+    public static String normalizeObjectId(String id) {
+        if (id.contains(";"))
+            id = id.substring(0, id.lastIndexOf(';'));
+        if (id.startsWith("workspace://SpacesStore/"))
+            id = id.substring(24);
+        return id;
+    }
 }

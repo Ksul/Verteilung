@@ -39,7 +39,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        con = new AlfrescoConnector(properties.getProperty("user"), properties.getProperty("password"), properties.getProperty("server"), properties.getProperty("bindingUrl") );
+        con = new AlfrescoConnector(properties.getProperty("user"), properties.getProperty("password"), properties.getProperty("server"), properties.getProperty("bindingUrl"));
         assertNotNull(con);
         CmisObject cmisObject = con.getNode("/Archiv/TestDocument.txt");
 
@@ -316,7 +316,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         assertEquals("TestDocument.txt", document.getName());
         JSONObject ticket = con.getTicket();
         assertNotNull(ticket);
-        con.addComment(document, ((JSONObject) ticket.get("data")).getString("ticket"), "Testkommentar");
+        JSONObject abd = con.addComment(document, ((JSONObject) ticket.get("data")).getString("ticket"), "Testkommentar");
         JSONObject result =  con.getComments(document, ((JSONObject) ticket.get("data")).getString("ticket"));
         assertEquals("Testkommentar", ((JSONObject) ((JSONArray) result.get("items")).get(0)).getString("content"));
         document.delete(true);

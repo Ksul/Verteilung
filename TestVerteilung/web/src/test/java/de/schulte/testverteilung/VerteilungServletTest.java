@@ -70,7 +70,7 @@ public class VerteilungServletTest extends AlfrescoTest {
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
                 String theString = (String) invocation.getArguments()[0];
-                return "file://" + System.getProperty("user.dir") + theString;
+                return "file:///" + System.getProperty("user.dir").replace("\\", "/") + theString;
             }
         }).when(servletContext).getRealPath(anyString());
         when(response.getOutputStream()).thenReturn(servletOutputStream);
@@ -89,22 +89,6 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
-        servlet.doPost(request, response);
-        writer.flush();
-        assertNotNull(sr);
-        obj = new JSONObject(sr.toString());
-        String archivId = obj.getString("result");
-        sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Fehler");
-        servlet.doPost(request, response);
-        writer.flush();
-        assertNotNull(sr);
-        obj = new JSONObject(sr.toString());
-        String fehlerId = obj.getString("result");
-        sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/TestFolder");
         servlet.doPost(request, response);
         writer.flush();
@@ -112,24 +96,49 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         String testFolderId = obj.getString("result");
         sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(archivId);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("Test.pdf");
+
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Test.pdf");
         servlet.doPost(request, response);
-        writer.flush();
+        writer.flush(); // it may not have been flushed yet...
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(archivId);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
+        if (obj.getBoolean("success")) {
+            when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
+            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+            servlet.doPost(request, response);
+            writer.flush();
+            sr.getBuffer().delete(0, 9999);
+        }
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/TestDocument.txt");
         servlet.doPost(request, response);
-        writer.flush();
+        writer.flush(); // it may not have been flushed yet...
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(fehlerId);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
+        if (obj.getBoolean("success")) {
+            when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
+            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+            servlet.doPost(request, response);
+            writer.flush();
+            sr.getBuffer().delete(0, 9999);
+        }
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Fehler/TestDocument.txt");
         servlet.doPost(request, response);
-        writer.flush();
+        writer.flush(); // it may not have been flushed yet...
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
+        if (obj.getBoolean("success")) {
+            when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
+            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+            servlet.doPost(request, response);
+            writer.flush();
+            sr.getBuffer().delete(0, 9999);
+        }
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEFOLDER);
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(testFolderId);
         servlet.doPost(request, response);
@@ -212,7 +221,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        JSONObject doc = new JSONObject(obj.getString("result"));
+        JSONObject document = new JSONObject(obj.getString("result"));
 
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETTICKET);
         servlet.doPost(request, response);
@@ -223,8 +232,19 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         JSONObject ticket = (JSONObject) obj.get("result");
 
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_ADDCOMMENT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getString("objectId"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_TICKET)).thenReturn(((JSONObject) ticket.get("data")).getString("ticket"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_COMMENT)).thenReturn("Testkommentar");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertNotNull(sr);
+        obj = new JSONObject(sr.toString());
+        sr.getBuffer().delete(0, 9999);
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETCOMMENTS);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getString("objectId"));
         when(request.getParameter(VerteilungServlet.PARAMETER_TICKET)).thenReturn(((JSONObject) ticket.get("data")).getString("ticket"));
         servlet.doPost(request, response);
         writer.flush();
@@ -237,8 +257,7 @@ public class VerteilungServletTest extends AlfrescoTest {
 
         // und das Dokument wieder löschen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getString("objectId"));
         servlet.doPost(request, response);
         writer.flush();
         sr.getBuffer().delete(0, 9999);
@@ -340,8 +359,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(archivId);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("Test.pdf");
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
         servlet.doPost(request, response);
         writer.flush();
         assertNotNull(sr);
@@ -394,8 +412,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertEquals(content, obj.getString("result"));
         // und das Dokument wieder löschen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
         servlet.doPost(request, response);
         writer.flush();
         sr.getBuffer().delete(0, 9999);
@@ -530,8 +547,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         sr.getBuffer().delete(0, 9999);
         // und das Dokument wieder löschen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv");
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn("/Archiv/TestDocument.txt");
         servlet.doPost(request, response);
         writer.flush();
         sr.getBuffer().delete(0, 9999);
@@ -601,8 +617,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         // und das Dokument wieder löschen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FOLDER)).thenReturn("/Archiv/Fehler");
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
         servlet.doPost(request, response);
         writer.flush();
         sr.getBuffer().delete(0, 9999);

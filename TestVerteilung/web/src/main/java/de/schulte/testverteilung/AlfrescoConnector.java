@@ -64,7 +64,7 @@ public class AlfrescoConnector {
     /**
      * Konstruktor
      * @param user        der Username
-     * @param password    das Passwort
+     * @param password    das Password
      * @param server      die Server URL
      * @param bindingUrl  die CMIS AtomPUB Binding Teil der URL
      */
@@ -156,7 +156,7 @@ public class AlfrescoConnector {
      */
 
     public ItemIterable<CmisObject> listFolder(String folderId, int maxItemsPerPage, int pagesToSkip) throws VerteilungException{
-        CmisObject object = getSession().getObject(getSession().createObjectId(folderId));
+        CmisObject object = getSession().getObject(getSession().createObjectId(VerteilungHelper.normalizeObjectId(folderId)));
         Folder folder = (Folder) object;
         OperationContext operationContext = getSession().createOperationContext();
         operationContext.setMaxItemsPerPage(maxItemsPerPage);
@@ -194,7 +194,7 @@ public class AlfrescoConnector {
      * @throws VerteilungException
      */
     public CmisObject getNodeById(String nodeId) throws VerteilungException {
-        return getSession().getObject(getSession().createObjectId(nodeId));
+        return getSession().getObject(getSession().createObjectId(VerteilungHelper.normalizeObjectId(nodeId)));
     }
 
     /**
@@ -366,10 +366,12 @@ public class AlfrescoConnector {
         if (versionState.equals(VersioningState.MAJOR) || versionState.equals(VersioningState.MINOR)) {
             id = checkOutDocument(document);
             if (id != null) {
-                if (extraCMSProperties != null && extraCMSProperties.size() > 0)
+                if (extraCMSProperties != null && extraCMSProperties.size() > 0) {
                     id = createAspectsFromProperties(extraCMSProperties, (Document) session.getObject(id));
-                if (properties != null && properties.size() > 0)
-                    ((Document) session.getObject(id)).updateProperties(properties, true);
+                }
+                if (properties != null && properties.size() > 0) {
+                    session.getObject(id).updateProperties(properties, true);
+                }
                 id = ((Document) session.getObject(id)).checkIn(versionState.equals(VersioningState.MAJOR), properties, contentStream, versionComment);
             } else {
                 if (contentStream != null) {
@@ -446,25 +448,25 @@ public class AlfrescoConnector {
      */
     public JSONObject getComments(CmisObject obj, String ticket) throws IOException, JSONException {
 
-        String id = obj.getId();
-        if (id.contains(";"))
-            id = id.substring(0, id.lastIndexOf(';'));
-        if (id.startsWith("workspace://SpacesStore/"))
-            id = id.substring(24);
+        String id = VerteilungHelper.normalizeObjectId(obj.getId());
         URL url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + NODES_URL + id + "/comments?alf_ticket=" +ticket);
         return new JSONObject(startRequest(url, RequestType.GET, null));
     }
 
-    public void addComment(CmisObject obj, String ticket, String comment) throws IOException, JSONException {
-        String id = obj.getId();
-        if (id.contains(";"))
-            id = id.substring(0, id.lastIndexOf(';'));
-        if (id.startsWith("workspace://SpacesStore/"))
-            id = id.substring(24);
+    /**
+     * fügt einen Kommentar hinzu
+     * @param obj           der Knoten/Folder als Cmis Objekt
+     * @param ticket        das Ticket zur Identifizierung
+     * @param comment       der neue Kommentar
+     * @return              ein JSON Objekt mit dem neuen Kommentar
+     * @throws IOException
+     * @throws JSONException
+     */
+    public JSONObject addComment(CmisObject obj, String ticket, String comment) throws IOException, JSONException {
+        String id = VerteilungHelper.normalizeObjectId(obj.getId());
         URL url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + NODES_URL + id + "/comments?alf_ticket=" +ticket);
         String urlParameters = "{\"content\": \"" + comment + "\"}";
-        startRequest(url, RequestType.POST, urlParameters);
-        return;
+        return new JSONObject(startRequest(url, RequestType.POST, urlParameters));
     }
 
     /**
@@ -576,7 +578,6 @@ public class AlfrescoConnector {
             rd.close();
             return response.toString();
         } finally {
-
             if (connection != null) {
                 connection.disconnect();
             }

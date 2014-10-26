@@ -111,6 +111,27 @@ public class VerteilungServices {
     }
 
     /**
+     * Fügt zu einem Knoten einen neuen Kommentar hinzu
+     * @param documentId    die Id des Knoten/Folder
+     * @param ticket        das Ticket zur Identifizierung
+     * @param comment       der Kommentar
+     * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                              false    ein Fehler ist aufgetreten
+     *                                                     result            der neue Kommentare  als JSON Objekt
+     */
+    public JSONObject addComment(String documentId, String ticket, String comment){
+        JSONObject obj = new JSONObject();
+        try {
+            CmisObject cmisObject = con.getNodeById(documentId);
+            obj.put("success", true);
+            obj.put("result", con.addComment(cmisObject, ticket, comment));
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
      *
      * @param  filePath          der Pfad, der geliefert werden soll
@@ -310,34 +331,26 @@ public class VerteilungServices {
     /**
      * löscht ein Dokument
      * @param  documentId        die Id des Folders in dem sich das Dokument befindet als String
-     * @param  documentName      der Name des Dokumentes als String
      * @return obj               ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                   false   ein Fehler ist aufgetreten
      *                                                          result           bei Erfolg nichts, ansonsten der Fehler
      */
-    public JSONObject deleteDocument(String documentId,
-                                     String documentName) {
+    public JSONObject deleteDocument(String documentId) {
 
         JSONObject obj = new JSONObject();
         try {
             CmisObject document;
             CmisObject folderObject;
-            folderObject = con.getNodeById(documentId);
-            if (folderObject != null && folderObject instanceof Folder) {
-                document = con.getNode(((Folder) folderObject).getPath() + (((Folder) folderObject).isRootFolder() ? "" : "/") + documentName);
-                if (document != null && document instanceof Document) {
-                    if (((Document) document).isVersionSeriesCheckedOut())
-                        ((Document) document).cancelCheckOut();
-                    document.delete(true);
-                    obj.put("success", true);
-                    obj.put("result", "");
-                } else {
-                    obj.put("success", false);
-                    obj.put("result", document == null ? "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!" : "Das verwendete Document " + documentName + " ist nicht vom Typ Document!");
-                }
+            document = con.getNodeById(documentId);
+            if (document != null && document instanceof Document) {
+                if (((Document) document).isVersionSeriesCheckedOut())
+                    ((Document) document).cancelCheckOut();
+                document.delete(true);
+                obj.put("success", true);
+                obj.put("result", "");
             } else {
                 obj.put("success", false);
-                obj.put("result", folderObject == null ? "Der angegeben Pfad ist nicht vorhanden!" : "Der verwendete Pfad ist kein Folder!");
+                obj.put("result", document == null ? "Das Document ist nicht vorhanden!" : "Das Document ist nicht vom Typ Document!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -418,15 +431,13 @@ public class VerteilungServices {
         //TODO Content als String oder als Stream?
         JSONObject obj = new JSONObject();
         try {
-            Map<String, Object> outMap = null;
+            Map<String, Object> outMap = new HashMap<>();
 
             CmisObject cmisObject = con.getNodeById(documentId);
             if (cmisObject != null && cmisObject instanceof Document) {
-
-
-                if (extraCMSProperties != null && extraCMSProperties.length() > 0)
+                if (extraCMSProperties != null && extraCMSProperties.length() > 0) {
                     outMap = buildProperties(extraCMSProperties);
-
+                }
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
                 obj.put("success", true);
                 obj.put("result", convertCMISObjectToJSON(document).toString());
@@ -989,7 +1000,7 @@ public class VerteilungServices {
 
     private byte[] readFile(String filePath) throws URISyntaxException, IOException {
 
-        File sourceFile = new File(new URI(filePath));
+        File sourceFile = new File(new URI(filePath.replace("\\", "/")));
         InputStream inp = new FileInputStream(sourceFile);
         byte[] buffer = new byte[(int) sourceFile.length()];
         //noinspection ResultOfMethodCallIgnored
