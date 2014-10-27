@@ -7911,7 +7911,7 @@ var equiv = function () {
          *
          * @returns {String} Default field template id.
          */
-        getDefaultFieldTemplateId : function () {
+        getDefaultFieldTemplateId : function () {"VIEW_WEB_EDIT"
             return "controlField";
         },
 

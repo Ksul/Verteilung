@@ -484,6 +484,234 @@ function startFolderDialog(tableRow, modus) {
         errorHandler(e);
     }
 }
+
+
+/**
+ * startet den Detaildialog für Kommentare
+ */
+function startCommentsDialog(comments) {
+    try {
+        var data = comments.items[0];
+        // Einstellungen für den Folder Dialog
+        var folderDialogSettings = { "id": "detailDialog",
+            "schema": {
+                "type": "object",
+                "title": "Kommentare",
+                "properties": {
+                    "author.username": {
+                        "type": "string",
+                        "title": "Benutzer",
+                        "required": true
+                    },
+                    "modifiedOn": {
+                        "type": "date",
+                        "format": "date",
+                        "title": "Datum",
+                        "required": true
+                    },
+                    "content": {
+                        "type": "string",
+                        "title": "Kommentar",
+                        "required": false
+                    }
+                }
+            },
+            "options": {
+                "renderForm": true,
+                "form": {
+                    "buttons": {
+                        "submit": {"value": "Sichern"},
+                        "reset": {"value": "Abbrechen"}
+                    }
+                },
+                "fields": {
+
+                    "author.username": {
+                        "size": 30
+                    },
+                    "modifiedOn": {
+                        "size": 30
+                    },
+                    "content": {
+                        "type": "wysiwyg",
+                        "size" : 500,
+                        "wysiwyg": {
+                            "controls": {
+                                "html": {
+                                    "visible": false
+                                },
+                            "createLink": {
+                                "visible": false
+                            },
+                            "unLink": {
+                                "visible": false
+                            },
+                            "h1": {
+                                "visible": false
+                            },
+                            "h2": {
+                                "visible": false
+                            },
+                            "h3": {
+                                "visible": false
+                            },
+                            "indent": {
+                                "visible": false
+                            },
+                            "insertHorizontalRule": {
+                                "visible": false
+                            },
+                            "insertImage": {
+                                "visible": false
+                            },
+                            "insertOrderedList": {
+                                "visible": false
+                            },
+                            "insertTable": {
+                                "visible": false
+                            },
+                            "insertUnorderedList": {
+                                "visible": false
+                            },
+                            "justifyCenter": {
+                                "visible": false
+                            },
+                            "justifyFull": {
+                                "visible": false
+                            },
+                            "justifyLeft": {
+                                "visible": false
+                            },
+                            "justifyRight": {
+                                "visible": false
+                            },
+                            "outdent": {
+                                "visible": false
+                            },
+                            "redo": {
+                                "visible": false
+                            },
+                            "removeFormat": {
+                                "visible": false
+                            },
+                            "subscript": {
+                                "visible": false
+                            },
+                            "superscript": {
+                                "visible": false
+                            },
+                            "undo": {
+                                "visible": false
+                            },
+                            "code": {
+                                "visible": false
+                            },
+                            "strikeThrough": {
+                                "visible": false
+                            },
+                                "bold": {
+                                    "visible": false
+                                },
+                                "italic": {
+                                    "visible": false
+                                },
+                                "underline": {
+                                    "visible": false
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "data": data,
+            "view": {
+                "parent":  "VIEW_WEB_EDIT",
+                "displayReadonly": true,
+                "layout": {
+                    "template": "threeColumnGridLayout",
+                    "bindings": {
+                        "author.username": "column-1-1",
+                        "modifiedOn": "column-1-1",
+                        "content": "column-1-1"
+
+                    }
+                },
+                "templates": {
+                    "threeColumnGridLayout": '<div class="filter-content">' + '{{if options.label}}<h2>${options.label}</h2><span></span>{{/if}}' + '{{if options.helper}}<p>${options.helper}</p>{{/if}}'
+                        + '<div id="column-1-1" class="col-1-1"> </div>'
+                        + '<div id="column-1-2" class="col-1-2"> </div> <div id="column-2-2" class="col-1-2"> </div>'
+                        + '<div id="column-1-7_12" class="col-7-12"> </div> <div id="column-2-5_12" class="col-5-12"> </div>'
+                        + '<div id="column-1-3" class="col-1-3"> </div> <div id="column-2-3" class="col-1-3"> </div> <div id="column-3-3" class="col-1-3"> </div>'
+                        + '</div>'
+                }
+
+            },
+            "ui": "jquery-ui",
+            "postRender": function (renderedField) {
+                var form = renderedField.form;
+                if (form) {
+                    form.registerSubmitHandler(function (e) {
+                        if (form.isFormValid()) {
+                            try {
+                                var name = $("[name='name']").val(),
+                                    description = $("[name='description']").val(),
+                                    title = $("[name='title']").val();
+
+                                if (data.name != name || data.title != title || data.description != description) {
+                                    data.name = name;
+                                    data.title = title;
+                                    data.description = description;
+
+                                    var extraProperties = {
+                                        'cmis:folder': {
+                                            'cmis:objectTypeId': 'cmis:folder',
+                                            'cmis:name': name
+                                        },
+                                        'P:cm:titled': {
+                                            'cm:title': title,
+                                            'cm:description': description
+                                        }
+                                    };
+                                    if (modus == "VIEW_WEB_CREATE") {
+                                        erg = executeService("createFolder", [
+                                            {"name": "documentId", "value": data.objectId},
+                                            {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+                                        ], "Dokument konnte nicht aktualisiert werden!", false);
+                                        if (erg.success) {
+                                            var newFolder = $.parseJSON(erg.result);
+                                            $("#tree").jstree('open_node', newFolder.parentId);
+                                            switchAlfrescoDirectory(newFolder.parentId);
+                                            $("#tree").jstree('select_node', newFolder.parentId);
+                                        }
+                                    }
+                                    else {
+                                        erg = executeService("updateProperties", [
+                                            {"name": "documentId", "value": data.objectId},
+                                            {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+                                        ], "Folder konnte nicht aktualisiert werden!", false);
+                                        if (erg.success) {
+                                            alfrescoFolderTabelle.rows().invalidate();
+                                            var node = $(document.getElementById(data.objectId));
+                                            $("#tree").jstree('rename_node', node[0], name);
+                                        }
+                                    }
+                                }
+                                closeDialog();
+                            } catch (e) {
+                                errorHandler(e);
+                            }
+                        }
+                    });
+                }
+            }
+        };
+
+        //$('#wysiwyg').wysiwyg({iFrameClass: { "width: 400px; height: 250px "}});
+        startDialog(folderDialogSettings, 460);
+    } catch (e) {
+        errorHandler(e);
+    }
+}
 /**
  * schliesst den Dialog
  */

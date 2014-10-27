@@ -639,22 +639,21 @@ public class VerteilungServices {
         URL url;
         try {
             url = new URL(urlString);
-            logger.info("Umwandlung in URL " + url);
             HttpURLConnection httpUrlConn;
             httpUrlConn = (HttpURLConnection) url.openConnection();
-            logger.info("Open Connection " + httpUrlConn);
             httpUrlConn.setRequestMethod("HEAD");
-            logger.info("Set Request ");
             // Set timeouts in milliseconds
             httpUrlConn.setConnectTimeout(30000);
             httpUrlConn.setReadTimeout(30000);
 
             int erg = httpUrlConn.getResponseCode();
-            logger.info("ResponseCode " + erg);
-            logger.info(httpUrlConn.getResponseMessage());
-            obj.put("success", true);
-            obj.put("result", erg == HttpURLConnection.HTTP_OK);
-
+            if (erg == HttpURLConnection.HTTP_OK) {
+                obj.put("success", true);
+                obj.put("result", true);
+            } else {
+                obj.put("success", false);
+                obj.put("result", httpUrlConn.getResponseMessage());
+            }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }

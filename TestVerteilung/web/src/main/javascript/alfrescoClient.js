@@ -35,7 +35,7 @@ function handleDropInbox(evt) {
                     if (evt.target.readyState == FileReader.DONE) {
                         var content = evt.target.result;
                         var json = executeService("createDocument", [
-                            {"name": "folder", "value":inboxID},
+                            {"name": "documentId", "value":inboxID},
                             {"name": "fileName", "value": f.name},
                             {"name": "documentText", "value": btoa(content)},
                             {"name": "mimeType", "value": "application/pdf"},
@@ -718,6 +718,27 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);
+
+        var image = document.createElement("div");
+        image.href = "#";
+        image.className = "showComments";
+        if (data.commentCount > 0) {
+            image.style.backgroundImage = "url(src/main/resource/images/forum-16.gif)";
+            image.style.cursor = "pointer";
+        }
+        else {
+            image.style.backgroundImage = "url(src/main/resource/images/forum-16-bw.gif)";
+            image.style.cursor = "not-allowed";
+        }
+
+        image.title = "Kommentare";
+        image.style.cursor = "pointer";
+        image.style.width = "16px";
+        image.style.height = "16px";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+
         return container.outerHTML;
     } catch (e) {
         errorHandler(e);
@@ -1147,6 +1168,24 @@ function handleAlfrescoImageClicks() {
             errorHandler(e);
         }
     });
+    $(document).on("click", ".showComments", function () {
+        try {
+            var tr = $(this).closest('tr');
+            // Kommentare lesen
+            var obj = executeService("getTicket");
+            if (obj.success) {
+                var json = executeService("getComments", [
+                    {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId},
+                    {"name": "ticket", "value": obj.result.data.ticket}
+                ], ["Kommentare konnten nicht gelesen werden!"]);
+                if (json.success) {
+                    startCommentsDialog(json.result);
+                }
+            }
+        } catch (e) {
+            errorHandler(e);
+        }
+    });
 }
 
 /**
@@ -1249,7 +1288,7 @@ function handleVerteilungImageClicks() {
             var name = row[1];
             var docId = "workspace:/SpacesStore/" + daten[name]["container"];
             var json = executeService("createDocument", [
-                {"name": "folder", "value": "/Archiv/Inbox"},
+                {"name": "documentId", "value": inboxID},
                 { "name": "fileName", "value": name},
                 { "name": "documentContent", "value": daten[name].content, "type": "byte"},
                 { "name": "documentType", "value": "application/pdf"},
