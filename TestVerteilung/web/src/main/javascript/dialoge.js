@@ -485,7 +485,6 @@ function startFolderDialog(tableRow, modus) {
     }
 }
 
-
 /**
  * startet den Detaildialog für Kommentare
  */
@@ -498,16 +497,18 @@ function startCommentsDialog(comments) {
             title: "Kommentare",
             modal: true,
             height:200,
-            width:1000,
+            width:800,
             buttons: {
                 "Ok": function () {
                     $(this).dialog("destroy");
                 }
             }
-        }).css({height:"200px", width:"1000px", overflow:"auto"});
+        }).css({height:"200px", width:"800px", overflow:"auto"});
+
+        $dialog.dialog('open');
         $('#custTabelle').DataTable({
             "jQueryUI": true,
-            "pagingType": "full_numbers",
+            "paging": false,
             "data": data,
             "scrollX": "100%",
             "scrollXInner": "100%",
@@ -540,15 +541,21 @@ function startCommentsDialog(comments) {
             ],
             "columnDefs": [
                 {
-                    "targets": [0, 1, 2],
+                    "targets": [0, 2],
                     "visible": true
+                },
+                {
+                    "targets": [1],
+                    "visible": true,
+                    "render": function (data, type, row) {
+                        return  $.formatDateTime('dd.mm.yy hh:ii:ss', new Date(Date.parse(row.modifiedOnISO)));
+                    }
                 }
             ],
             "language": {
                 "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
             }
         });
-        $dialog.dialog('open');
     } catch (e) {
         errorHandler(e);
     }

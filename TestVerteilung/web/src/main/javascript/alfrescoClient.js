@@ -721,18 +721,17 @@ function alfrescoAktionFieldFormatter(data, type, full) {
 
         var image = document.createElement("div");
         image.href = "#";
-        image.className = "showComments";
+
         if (data.commentCount > 0) {
             image.style.backgroundImage = "url(src/main/resource/images/forum-16.gif)";
             image.style.cursor = "pointer";
+            image.className = "showComments";
         }
         else {
             image.style.backgroundImage = "url(src/main/resource/images/forum-16-bw.gif)";
-            image.style.cursor = "not-allowed";
+            image.style.cursor = "none";
         }
-
         image.title = "Kommentare";
-        image.style.cursor = "pointer";
         image.style.width = "16px";
         image.style.height = "16px";
         image.style.cssFloat = "left";
