@@ -738,6 +738,18 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image.style.marginRight = "5px";
         container.appendChild(image);
 
+        var image = document.createElement("div");
+        image.href = "#";
+        image.className = "deleteDocument";
+        image.style.backgroundImage = "url(src/main/resource/images/deleteDocument.gif)";
+        image.title = "Dokument löschen";
+        image.style.cursor = "pointer";
+        image.style.width = "13px";
+        image.style.height = "16px";
+        image.style.cssFloat = "left";
+        image.style.marginRight = "5px";
+        container.appendChild(image);
+
         return container.outerHTML;
     } catch (e) {
         errorHandler(e);
@@ -976,7 +988,7 @@ function switchAlfrescoDirectory(data) {
                 }
             });
             fillBreadCrumb(data);
-
+            //$("#tree").jstree(true).refresh_node(objectId);
             $("#tree").jstree('select_node', objectId);
         }
         json = executeService("listFolder", [
@@ -1118,7 +1130,7 @@ function handleAlfrescoFolderImageClicks() {
                 autoOpen: true,
                 title: "Folder löschen",
                 modal: true,
-                height: 100,
+                height: 150,
                 width: 200,
                 buttons: {
                     "Ok": function () {
@@ -1159,6 +1171,7 @@ function handleAlfrescoFolderImageClicks() {
  * behandelt die Clicks auf die Icons in der Alfrescotabelle
  */
 function handleAlfrescoImageClicks() {
+    // Details bearbeiten
     $(document).on("click", ".detailEdit", function () {
         try {
             var tr = $(this).closest('tr');
@@ -1167,20 +1180,53 @@ function handleAlfrescoImageClicks() {
             errorHandler(e);
         }
     });
+    // Kommentare lesen
     $(document).on("click", ".showComments", function () {
         try {
             var tr = $(this).closest('tr');
-            // Kommentare lesen
             var obj = executeService("getTicket");
             if (obj.success) {
                 var json = executeService("getComments", [
-                    {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId},
-                    {"name": "ticket", "value": obj.result.data.ticket}
-                ], ["Kommentare konnten nicht gelesen werden!"]);
+                    {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId}
+                ], ["Dokument konnten nicht gelöscht werden!"]);
                 if (json.success) {
-                    startCommentsDialog(json.result);
+
                 }
             }
+        } catch (e) {
+            errorHandler(e);
+        }
+    });
+    // Dokument löschen
+    $(document).on("click", ".deleteDocument", function () {
+        try {
+            var tr = $(this).closest('tr');
+            var id = alfrescoTabelle.row(tr).data().objectId;
+            var $dialog = $('<div></div>').html("Ausgewähltes Dokument " + alfrescoTabelle.row(tr).data().name + " löschen?").dialog({
+                autoOpen: true,
+                title: "Dokument löschen",
+                modal: true,
+                height: 150,
+                width: 400,
+                buttons: {
+                    "Ok": function () {
+                        try {
+                            $(this).dialog("destroy");
+                            var erg = executeService("deleteDocument", [
+                                {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId}
+                            ], ["Dokument konnte nicht gelöscht werden!"]);
+                            if (erg.success) {
+                                alfrescoTabelle.rows().invalidate();
+                            }
+                        } catch (e) {
+                            errorHandler(e);
+                        }
+                    },
+                    "Abbrechen": function () {
+                        $(this).dialog("destroy");
+                    }
+                }
+            });
         } catch (e) {
             errorHandler(e);
         }
