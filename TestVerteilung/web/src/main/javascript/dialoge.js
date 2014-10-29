@@ -496,14 +496,14 @@ function startCommentsDialog(comments) {
             autoOpen: false,
             title: "Kommentare",
             modal: true,
-            height:200,
+            height:300,
             width:800,
             buttons: {
                 "Ok": function () {
                     $(this).dialog("destroy");
                 }
             }
-        }).css({height:"200px", width:"800px", overflow:"auto"});
+        }).css({height:"300px", width:"800px", overflow:"auto"});
 
         $dialog.dialog('open');
         $('#custTabelle').DataTable({
@@ -552,9 +552,7 @@ function startCommentsDialog(comments) {
                     }
                 }
             ],
-            "language": {
-                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
-            }
+            "info": false
         });
     } catch (e) {
         errorHandler(e);
