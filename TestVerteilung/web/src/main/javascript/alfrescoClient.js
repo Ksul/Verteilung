@@ -440,6 +440,22 @@ function loadAlfrescoTable() {
                 "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
             }
         });
+        // Add event listener for opening and closing details
+        $('#dtable2 tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = alfrescoTabelle.row(tr);
+
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                // Open this row
+                row.child(formatAlfrescoTabelleDetailRow(row.data())).show();
+                tr.addClass('shown');
+            }
+        });
     } catch (e) {
         errorHandler(e);
     }
@@ -622,7 +638,7 @@ function loadVerteilungTable() {
             }
             else {
                 // Open this row
-                row.child(formatDetails(row.data())).show();
+                row.child(formatVerteilungTabelleDetailRow(row.data())).show();
                 tr.addClass('shown');
             }
         });
@@ -842,11 +858,11 @@ function imageFieldFormatter(data, type, full) {
 }
 
 /**
- * formatiert die Fehlerdetails in der zusätzlichen Zeile(n) der Tabelle
+ * formatiert die Fehlerdetails in der zusätzlichen Zeile(n) der VerteilungsTabelle
  * @param data         Das Data Object der Zeile
  * @returns {string}   HTML für die extra Zeile
  */
-function formatDetails(data) {
+function formatVerteilungTabelleDetailRow(data) {
     var sOut = '<div class="innerDetails" style="overflow: auto; width: 100%; " ><table>' +
         '<tr><tr style="height: 0px;" > '+
         '<th style="width: 100px; padding-top: 0px; padding-bottom: 0px; border-top-width: 0px; border-bottom-width: 0px; height: 0px; font-size: 12px"' +
@@ -861,6 +877,15 @@ function formatDetails(data) {
     sOut = sOut + txt;
     sOut += '</table></div>';
     return sOut;
+}
+
+/**
+ * formatiert die zusätzlichen Zeile(n) der AlfrescoTabelle
+ * @param data         Das Data Object der Zeile
+ * @returns {string}   HTML für die extra Zeile
+ */
+function formatAlfrescoTabelleDetailRow(data) {
+    return 'Name: ' + data.name + ' erstellt am: ' +  $.formatDateTime('dd.mm.yy', new Date(Number(data.creationDate))) + ' von: ' + data.createdBy + ' Version: ' + data.versionLabel + ' ' + data.checkinComment;
 }
 
 /**
@@ -1190,7 +1215,7 @@ function handleAlfrescoImageClicks() {
                     {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId}
                 ], ["Dokument konnten nicht gelöscht werden!"]);
                 if (json.success) {
-
+                    alfrescoTabelle.rows().invalidate();
                 }
             }
         } catch (e) {
