@@ -885,7 +885,7 @@ function formatVerteilungTabelleDetailRow(data) {
  * @returns {string}   HTML für die extra Zeile
  */
 function formatAlfrescoTabelleDetailRow(data) {
-    return 'Name: ' + data.name + ' erstellt am: ' +  $.formatDateTime('dd.mm.yy', new Date(Number(data.creationDate))) + ' von: ' + data.createdBy + ' Version: ' + data.versionLabel + ' ' + exist(data.checkinComment) ? data.checkinComment : '';
+    return 'Name: ' + data.name + ' erstellt am: ' + $.formatDateTime('dd.mm.yy', new Date(Number(data.creationDate))) + ' von: ' + data.createdBy + ' Version: ' + (data.lastModificationDate == data.creationDate ? '' : $.formatDateTime('dd.mm.yy', new Date(Number(data.lastModificationDate))) + ' von: ' + data.lastModifiedBy) + data.versionLabel + ' ' + (exist(data.checkinComment) ? data.checkinComment : '');
 }
 
 /**
