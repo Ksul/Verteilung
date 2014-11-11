@@ -1209,13 +1209,15 @@ function handleAlfrescoImageClicks() {
     $(document).on("click", ".showComments", function () {
         try {
             var tr = $(this).closest('tr');
+            // Kommentare lesen
             var obj = executeService("getTicket");
             if (obj.success) {
                 var json = executeService("getComments", [
-                    {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId}
-                ], ["Dokument konnten nicht gelöscht werden!"]);
+                    {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId},
+                    {"name": "ticket", "value": obj.result.data.ticket}
+                ], ["Kommentare konnten nicht gelesen werden!"]);
                 if (json.success) {
-                    alfrescoTabelle.rows().invalidate();
+                    startCommentsDialog(json.result);
                 }
             }
         } catch (e) {
