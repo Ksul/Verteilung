@@ -1018,7 +1018,7 @@ function switchAlfrescoDirectory(data) {
         }
         json = executeService("listFolder", [
             {"name": "filePath", "value": objectId},
-            {"name": "withFolder", "value": 1}
+            {"name": "withFolder", "value": "1"}
         ], "Dokumente konnten nicht aus dem Server gelesen werden:");
         if (json.success) {
             alfrescoTabelle.clear();

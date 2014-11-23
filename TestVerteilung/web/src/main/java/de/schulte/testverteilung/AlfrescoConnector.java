@@ -156,7 +156,7 @@ public class AlfrescoConnector {
      */
 
     public ItemIterable<CmisObject> listFolder(String folderId, int maxItemsPerPage, int pagesToSkip) throws VerteilungException{
-        CmisObject object = getSession().getObject(getSession().createObjectId(VerteilungHelper.normalizeObjectId(folderId)));
+        CmisObject object = getSession().getObject(getSession().createObjectId(folderId));
         Folder folder = (Folder) object;
         OperationContext operationContext = getSession().createOperationContext();
         operationContext.setMaxItemsPerPage(maxItemsPerPage);
@@ -194,7 +194,7 @@ public class AlfrescoConnector {
      * @throws VerteilungException
      */
     public CmisObject getNodeById(String nodeId) throws VerteilungException {
-        return getSession().getObject(getSession().createObjectId(VerteilungHelper.normalizeObjectId(nodeId)));
+        return getSession().getObject(getSession().createObjectId(nodeId));
     }
 
     /**
