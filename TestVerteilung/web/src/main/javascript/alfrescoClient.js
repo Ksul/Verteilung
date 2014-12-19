@@ -172,15 +172,6 @@ function loadLayout() {
                 }
             }
         },
-        south:{
-            paneSelector:           "#alfrescoSouth",
-            size:                   0.17,
-            contentSelector:	    ".ui-widget-content",
-            resizable:			    true,
-            slidable:			    true,
-            spacing_open:		    8,
-            spacing_closed:		    12
-        },
         //	enable state management
         stateManagement__enabled:	true,
         showDebugMessages:			true
