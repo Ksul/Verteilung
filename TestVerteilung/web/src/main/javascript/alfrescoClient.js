@@ -1110,7 +1110,7 @@ function switchAlfrescoDirectory(data) {
                     var dt = event.originalEvent.dataTransfer;
                     //wg alfresco Prefix
                     var data = alfrescoTabelle.row($(this).closest(('tr'))).data();
-                    var url = getSettings("server").replace("alfresco", "share") + "proxy/alfresco/api/node/content/workspace/" + data.nodeRef.substr(12) + "/" + data.contentStreamFileName;
+                    var url = getSettings("server") + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/" + data.contentStreamFileName;
                     var obj = executeService("getTicket");
                     if (obj.success)
                         url = url + "?alf_ticket=" + obj.result.data.ticket;
