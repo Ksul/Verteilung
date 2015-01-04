@@ -1,21 +1,9 @@
-/* @import "/media/css/site_jui.ccss"; */
-/*@import "./themes/cupertino/jquery-ui-1.10.3.custom.css";*/
-@import "./demo_table.css";
-
 .ace_scroller {
     overflow-x: auto !important;
 }
 
 .ace_sb {
     overflow-y: auto !important;
-}
-
-.dataTables_info {
-    padding-top: 0;
-}
-
-.dataTables_paginate {
-    padding-top: 0;
 }
 
 .css_right {
@@ -81,21 +69,7 @@ td.folder-control {
     overflow: auto !important;
 }
 
-.header {
-    height: 20px;
-    text-align: center;
-    padding-bottom: 0px;
-    /*   background: #80ade5 url(./images/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
-       border-bottom: 1px solid #777;
 
-       font-weight: normal;
-       font-size: 9pt;
-
-
-       position: relative;
-       overflow: hidden;
-   */
-}
 
 label, input {
     display: block;
@@ -599,3 +573,23 @@ h2 {
     padding-top: 4px
 }
 
+#alfrescoTableFooter {
+    position: absolute;
+    bottom: 0px;
+    height: 25px;
+    background-color: #ebebeb;
+}
+
+#alfrescoFolderTableFooter {
+    position: absolute;
+    bottom: 0px;
+    height: 25px;
+    background-color: #ebebeb;
+}
+
+.dataTables_paginate {
+    float: right;
+}
+.dataTables_info {
+    float: left;
+}

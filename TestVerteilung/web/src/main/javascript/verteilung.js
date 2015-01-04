@@ -1,10 +1,4 @@
 
-
-
-
-
-
-
 /**
  * Prüft, ob ein Alfresco Server antwortet
  * @param url         URL des Servers
@@ -1518,10 +1512,10 @@ function checkAndBuidAlfrescoEnvironment() {
                 }
             }
         }
-        $("#tabs").tabs("option", "active", 0);
+        globalLayout.tabs("option", "active", 0);
         ret = erg.success;
     } else {
-        $("#tabs").tabs({ disabled: [ 0 ] });
+        globalLayout.tabs({ disabled: [ 0 ] });
         ret = true;
     }
     return ret;

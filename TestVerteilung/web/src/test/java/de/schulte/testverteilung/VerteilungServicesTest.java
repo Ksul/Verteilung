@@ -334,7 +334,8 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(document);
         assertTrue(document.getString("name").equalsIgnoreCase("TestDocument.txt"));
         assertNotNull(document.getString("objectId"));
-        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().getTime() + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}}";
+        long time = new Date().getTime();
+        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" +time + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}}";
         obj = services.updateProperties(document.getString("objectId"), extraProperties);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -344,6 +345,16 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertNotNull(result);
         assertEquals("25.33", result.getString("amount"));
         assertTrue(result.getBoolean("tax"));
+        document = new JSONObject(obj.getString("result"));
+        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" +time + "'}, 'P:my:amountable':{'my:amount':'25.34', 'my:tax':'true'}}";
+        obj = services.updateProperties(document.getString("objectId"), extraProperties);
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        result = new JSONObject(obj.getString("result"));
+        assertNotNull(result);
+        assertEquals("25.34", result.getString("amount"));
         obj = services.deleteDocument(document.getString("objectId"));
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
