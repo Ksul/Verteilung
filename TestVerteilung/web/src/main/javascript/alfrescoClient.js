@@ -164,8 +164,6 @@ function loadLayout() {
                 north: {
                     paneSelector: "#alfrescoCenterInnerNorth",
                     size: .44,
-                    onresize: function () {
-                    },
                     children: {
                         name: "alfrescoInnerCenterNorthLayout",
                         contentSelector: ".ui-widget-content",
@@ -174,8 +172,19 @@ function loadLayout() {
                         north: {
                             paneSelector: "#alfrescoCenterInnerNorthNorth",
                             minHeight: 30,
-                            resizable:			        false,
-                            closable:		    		false
+                            resizable:			        true,
+                            closable:		    		false,
+                            children : {
+                                name: "alfrescoInnerCenterInnerNorthLayout",
+                                center: {
+                                    size: "auto",
+                                    paneSelector: "#alfrescoCenterInnerNorthNorthCenter"
+                                },
+                                east: {
+                                    size: 100,
+                                    paneSelector: "#alfrescoCenterInnerNorthNorthEast"
+                                }
+                            }
                         },
                         center: {
                             size: "auto",
@@ -1612,6 +1621,22 @@ function loadAlfrescoTree() {
 }
 
 /**
+ * lädt die Buttons
+ */
+function loadButtons() {
+    $("button:first").button({
+        icons: {
+            secondary: "ui-icon-triangle-1-s"
+        },
+        text: true
+    })
+        .click(function (event) {
+            event.preventDefault();
+            $( "#menu" ).menu();
+        });
+}
+
+/**
  * startet die Anwendung
  */
 function start() {
@@ -1680,7 +1705,7 @@ function start() {
         handleAlfrescoFolderImageClicks();
         handleAlfrescoImageClicks();
         loadAlfrescoTree();
-
+        loadButtons();
     } catch(e) {
         errorHandler(e);
     }
