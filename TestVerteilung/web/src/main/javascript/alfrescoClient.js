@@ -171,8 +171,8 @@ function loadLayout() {
                         spacing_closed: 12,
                         north: {
                             paneSelector: "#alfrescoCenterInnerNorthNorth",
-                            minHeight: 30,
-                            resizable:			        true,
+                            maxSize: 23,
+                            resizable:			        false,
                             closable:		    		false,
                             children : {
                                 name: "alfrescoInnerCenterInnerNorthLayout",
@@ -1705,7 +1705,8 @@ function start() {
         handleAlfrescoFolderImageClicks();
         handleAlfrescoImageClicks();
         loadAlfrescoTree();
-        loadButtons();
+        //loadButtons();
+        $('#menu-1').superfish();
     } catch(e) {
         errorHandler(e);
     }

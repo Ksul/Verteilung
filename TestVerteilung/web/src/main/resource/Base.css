@@ -152,10 +152,10 @@ ol
 {
 	list-style-type: decimal;
 }
-ul li, ol li
+/*ul li, ol li
 {
 	line-height: 1.5em;
-}
+}*/
 
 dt
 {

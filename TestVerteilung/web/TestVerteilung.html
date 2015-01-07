@@ -38,6 +38,8 @@
     <script type="text/javascript" src="./src/main/javascript/jquery.jBreadCrumb.1.1.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jquery.formatDateTime.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jquery.wysiwyg.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./src/main/javascript/superfish.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./src/main/javascript/hoverIntent.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/alpaca/alpaca/alpaca.js"></script>
     <script src="./src/main/javascript/vkbeautify.js" type="text/javascript" charset="utf-8"></script>
     <script src="./src/main/javascript/jsbeautify.js" type="text/javascript" charset="utf-8"></script>
@@ -45,6 +47,9 @@
     <link type="text/css" href="./src/main/resource/dataTables.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/Base.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/BreadCrumb.css" rel="stylesheet"/>
+    <link type="text/css" href="./src/main/resource/superfish.css" rel="stylesheet"/>
+    <link type="text/css" href="./src/main/resource/superfish-navbar.css" rel="stylesheet"/>
+    <link type="text/css" href="./src/main/resource/superfish-vertical.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/jquery.wysiwyg.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/javascript/alpaca/alpaca/alpaca.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/style.css" rel="stylesheet"/>
@@ -255,16 +260,29 @@
                         </div>
                     </div>
 
-                    <div id="alfrescoCenterInnerNorth" class="inner-center container ui-widget-header hidden">
-                        <div id="alfrescoCenterInnerNorthNorth" class="inner-center container ui-widget-header hidden">
-                            <div id="alfrescoCenterInnerNorthNorthCenter" class="inner-center container ui-widget-header hidden">
+                    <div id="alfrescoCenterInnerNorth"  class="inner-center container ui-widget-header hidden">
+                        <div id="alfrescoCenterInnerNorthNorth"   onmouseover="alfrescoLayout.allowOverflow(this);" class="inner-center container ui-widget-header hidden">
+                            <div id="alfrescoCenterInnerNorthNorthCenter"
+                                 class="inner-center container ui-widget-header hidden">
                                 <div class="breadCrumbHolder module">
-                                <div id="breadcrumb" class="breadCrumb module">
-                             </div>
-                             </div>
+                                    <div id="breadcrumb" class="breadCrumb module">
+                                    </div>
+                                </div>
                             </div>
-                            <div id="alfrescoCenterInnerNorthNorthEast" onmouseover="alfrescoLayout.allowOverflow(this);" class="inner-center container ui-widget-header hidden">
-                                <button>Ansicht</button>
+                            <div id="alfrescoCenterInnerNorthNorthEast"
+                                 class="inner-center container ui-widget-header hidden">
+                                <ul id="menu-1" class="sf-menu"  onmouseover="alfrescoLayout.allowOverflow(this);">
+                                    <li class="current" style="font-size: 0.9em;line-height: 0.25em">
+                                        <a href="#ansicht" >Ansicht</a>
+                                        <ul>
+                                            <li>
+                                                <a href="#normal">Normal</a>
+                                            </li>
+                                            <li>
+                                                <a href="#icons">Icons</a>
+                                            </li>
+                                        </ul>
+                                </ul>
                             </div>
                         </div>
                         <div id="alfrescoCenterInnerNorthCenter" class="inner-center container ui-widget-header hidden">

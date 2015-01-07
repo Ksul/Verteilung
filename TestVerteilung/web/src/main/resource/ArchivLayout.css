@@ -69,8 +69,6 @@ td.folder-control {
     overflow: auto !important;
 }
 
-
-
 label, input {
     display: block;
 }
@@ -458,12 +456,12 @@ DIV#verteilungSouth {
        overflow:	hidden;
    }
 */
-/*
-.ui-widget-content {
+
+/*.ui-widget-content {
 
     overflow: auto;
-}
-*/
+}*/
+
 
 #tabButtons {
     padding: 0 0.2em 0;
