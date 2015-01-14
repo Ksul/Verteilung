@@ -1512,10 +1512,10 @@ function checkAndBuidAlfrescoEnvironment() {
                 }
             }
         }
-        globalLayout.tabs("option", "active", 0);
+        tabLayout.tabs("option", "active", 0);
         ret = erg.success;
     } else {
-        globalLayout.tabs({ disabled: [ 0 ] });
+        tabLayout.tabs({ disabled: [ 0 ] });
         ret = true;
     }
     return ret;

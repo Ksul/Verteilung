@@ -81,236 +81,264 @@ function calculateTableHeight(panel, tabelle, divId, tabelleId,headerId, footerI
  * baut das Layout der Anwendung auf
  */
 function loadLayout() {
-    var clientPageLayoutSettings = {
-        name:                       "clientLayoutSettings",
-        center__paneSelector:       "#clientPage",
-        resizable:		    		false
-    };
+    try {
+        var clientPageLayoutSettings = {
+            name: "clientLayoutSettings",
+            center__paneSelector: "#clientPage",
+            resizable: false
+        };
 
-    var pageLayoutSettings = {
-        name:                       "pageLayout",
-        fxName:					    "slide",		// none, slide, drop, scale
-        fxSpeed_open:		    	800,
-        fxSpeed_close:		    	1000,
-        fxSettings_open:	    	{ easing: "easeInQuint" },
-        fxSettings_close:  		    { easing: "easeOutQuint" },
-        spacing_open:		        8,
-        spacing_closed:	           	12,
-        closable:		    		true,
-        resizable:		    		false,
-        north:  {
-            paneSelector:		    "#contentNorth",
-            minSize:                33
-        },
-        center: {
-            paneSelector:		    "#tabs"
-        }
-    };
-    var contentLayoutSettings = {
-        name:						"contentLayout",
-        spacing_open:		        0,
-        spacing_closed:		        12,
-        resizable:			        false,
-        closable:		    		false,
-        north:  {
-            paneSelector:		    "#tabButtons"
-        },
-        center: {
-            paneSelector:		    "#tabPanels",
-            //	center panel contains a Tabs widget, with a layout inside 1 or more tab-panels
-            onresize:			    $.layout.callbacks.resizeTabLayout
-        }
-        //activate:                   $.layout.callbacks.resizeTabLayout
-    };
+        var pageLayoutSettings = {
+            name: "pageLayout",
+            fxName: "slide",		// none, slide, drop, scale
+            fxSpeed_open: 800,
+            fxSpeed_close: 1000,
+            fxSettings_open: {easing: "easeInQuint"},
+            fxSettings_close: {easing: "easeOutQuint"},
+            spacing_open: 8,
+            spacing_closed: 12,
+            closable: true,
+            resizable: false,
+            north: {
+                paneSelector: "#contentNorth",
+                minSize: 33
+            },
+            center: {
+                paneSelector: "#tabs"
+            }
+        };
+        var contentLayoutSettings = {
+            name: "contentLayout",
+            spacing_open: 0,
+            spacing_closed: 12,
+            resizable: false,
+            closable: false,
+            north: {
+                paneSelector: "#tabButtons"
+            },
+            center: {
+                paneSelector: "#tabPanels",
+                //	center panel contains a Tabs widget, with a layout inside 1 or more tab-panels
+                onresize: $.layout.callbacks.resizeTabLayout
+            },
+            activate:                   $.layout.callbacks.resizeTabLayout
+        };
 
-    var alfrescoLayoutSettings = {
-        name:                      "alfrescoLayout" ,
-        size:					    "auto",
-        minSize:				    13,
-        initClosed:				    false,
-        initHidden:                 false,
-        resizerTip:				    "Resize This Pane",
-        fxName:					    "slide",
-        fxSpeed_open:		    	800,
-        fxSpeed_close:		    	1000,
-        fxSettings_open:	    	{ easing: "easeInQuint" },
-        fxSettings_close:  		    { easing: "easeOutQuint" },
-        closable:		    		true,
-        resizable:		    		true,
-        //slidable:				true,
-        livePaneResizing:	    	true,
-        spacing_open:		    	8,
-        spacing_closed:			    12,
-        initPanes:	    			true,
-        resizeWithWindow:			false,
-        contentSelector:			".ui-widget-content",
-        west: {
-            paneSelector:           "#alfrescoWest",
-            size:				    .2,
-            fxSettings_open:	    { easing: "easeOutBounce" },
-            closable:			    true,
-            resizable:			    true,
-            slidable:			    true
-        },
-        center: {
-            paneSelector:           "#alfrescoCenter",
-            minHeight:              80,
-            size:                   .8,
-            children: {
-                name: "alfrescoInnerCenterLayout",
-                contentSelector: ".ui-widget-content",
-                spacing_open: 8,
-                spacing_closed: 12,
-                north: {
-                    paneSelector: "#alfrescoCenterInnerNorth",
-                    size: .44,
-                    children: {
-                        name: "alfrescoInnerCenterNorthLayout",
-                        contentSelector: ".ui-widget-content",
-                        spacing_open: 8,
-                        spacing_closed: 12,
-                        north: {
-                            paneSelector: "#alfrescoCenterInnerNorthNorth",
-                            maxSize: 23,
-                            resizable:			        false,
-                            closable:		    		false,
-                            children : {
-                                name: "alfrescoInnerCenterInnerNorthLayout",
-                                center: {
-                                    size: "auto",
-                                    paneSelector: "#alfrescoCenterInnerNorthNorthCenter"
-                                },
-                                east: {
-                                    size: 100,
-                                    paneSelector: "#alfrescoCenterInnerNorthNorthEast"
-                                }
+        var alfrescoLayoutSettings = {
+            name: "alfrescoLayout",
+            size: "auto",
+            minSize: 13,
+            initClosed: false,
+            initHidden: false,
+            resizerTip: "Resize This Pane",
+            fxName: "slide",
+            fxSpeed_open: 800,
+            fxSpeed_close: 1000,
+            fxSettings_open: {easing: "easeInQuint"},
+            fxSettings_close: {easing: "easeOutQuint"},
+            closable: true,
+            resizable: true,
+            //slidable:				true,
+            livePaneResizing: true,
+            spacing_open: 8,
+            spacing_closed: 12,
+            initPanes: true,
+            resizeWithWindow: false,
+            contentSelector: ".ui-widget-content",
+            west: {
+                paneSelector: "#alfrescoWest",
+                name: "alfrescoWestLayout",
+                size: .2,
+                fxSettings_open: {easing: "easeOutBounce"},
+                closable: true,
+                resizable: true,
+                slidable: true
+            },
+            center: {
+                paneSelector: "#alfrescoCenter",
+                name: "alfrescoCenterLayout",
+                minHeight: 80,
+                size: .8,
+                children: {
+                    name: "alfrescoCenterInnerLayout",
+                    spacing_open: 8,
+                    spacing_closed: 12,
+                    north: {
+                        paneSelector: "#alfrescoCenterNorth",
+                        name: "alfrescoCenterNorthLayout",
+                        minSize: 25,
+                        maxSize: 25,
+                        resizable: false,
+                        closable: false,
+                        children: {
+                            name: "alfrescoCenterNorthInnerLayout",
+                            center: {
+                                size: "auto",
+                                name: "alfrescoCenterNorthCenterLayout",
+                                paneSelector: "#alfrescoCenterNorthCenter"
+                            },
+                            east: {
+                                size: 90,
+                                name: "alfrescoCenterNorthEastLayout",
+                                paneSelector: "#alfrescoCenterNorthEast"
                             }
-                        },
-                        center: {
-                            size: "auto",
-                            paneSelector: "#alfrescoCenterInnerNorthCenter",
-                            onresize:                   function() {
-                                calculateTableHeight("alfrescoCenterInnerNorthCenter",alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
-                                $('#alfrescoFolderTableFooter').width(alfrescoLayout.children.center.alfrescoInnerCenterLayout.children.north.alfrescoInnerCenterNorthLayout.state.center.innerWidth);
+                        }
+                    },
+                    center: {
+                        size: "auto",
+                        name: "alfrescoCenterCenterLayout",
+                        paneSelector: "#alfrescoCenterCenter",
+
+                        children: {
+                            resizable: true,
+                            closable: false,
+                            name: "alfrescoCenterCenterInnerLayout",
+                            north: {
+                                size: 225,
+                                paneSelector: "#alfrescoCenterCenterNorth",
+                                name: "alfrescoCenterCenterNorthLayout",
+                                onresize: function () {
+                                    try {
+                                        calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
+                                        $('#alfrescoFolderTableFooter').width(alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.north.alfrescoCenterNorthInnerLayout.state.container.innerWidth);
+                                    } catch (e) {
+                                        errorHandler(e);
+                                    }
+                                }
+                            },
+                            center: {
+                                size: "auto",
+                                paneSelector: "#alfrescoCenterCenterCenter",
+                                name: "alfrescoCenterCenterCenterLayout",
+                                onresize: function () {
+                                    try {
+                                        calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+                                        $('#alfrescoTableFooter').width(alfrescoLayout.center.children.alfrescoCenterInnerLayout.state.center.innerWidth);
+                                    } catch (e) {
+                                        errorHandler(e);
+                                    }
+                                }
                             }
                         }
                     }
-                },
-                center: {
-                    size: "auto",
-                    paneSelector: "#alfrescoCenterInnerCenter",
-                    onresize: function () {
-                        //alfrescoTabelle.page.len( Math.max(Math.floor(((alfrescoLayout.center.children.alfrescoInnerCenterLayout.state.center.innerHeight - $('.header').height() - $('.dataTables_scrollHeadInner').height()) - $('#alfrescoTableFooter').height()) / ($('tr.odd').height())), 1)).draw();
-                        calculateTableHeight("alfrescoCenterInnerCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
-                        $('#alfrescoTableFooter').width(alfrescoLayout.center.children.alfrescoInnerCenterLayout.state.center.innerWidth);
+                }
+            }
+        };
+
+
+        var verteilungLayoutSettings = {
+            name: "verteilungLayout",
+            size: "auto",
+            minSize: 13,
+            initClosed: false,
+            resizerTip: "Resize This Pane",
+            fxName: "slide",
+            fxSpeed_open: 800,
+            fxSpeed_close: 1000,
+            fxSettings_open: {easing: "easeInQuint"},
+            fxSettings_close: {easing: "easeOutQuint"},
+            closable: true,
+            resizable: true,
+            //slidable:				true,
+            livePaneResizing: true,
+            spacing_open: 8,
+            spacing_closed: 12,
+            initPanes: true,
+            resizeWithWindow: false,
+            contentSelector: ".ui-widget-content",
+
+            //	reference only - these options are NOT required because 'true' is the default
+
+            //	some pane-size settings
+            west: {
+                paneSelector: "#verteilungWest",
+                size: .6,
+                fxSettings_open: {easing: "easeOutBounce"},
+                closable: true,
+                resizable: true,
+                slidable: true,
+                onresize: function () {
+                    textEditor.resize();
+                    $('div.dataTables_scrollBody').css('height', calcDataTableHeight());
+                    tabelle.fnSettings()._iDisplayLength = Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1);
+                    tabelle.fnDraw();
+                    tabelle.fnAdjustColumnSizing();
+                }
+            },
+            center: {
+                paneSelector: "#verteilungCenter",
+                initHidden: false,
+                minHeight: 80,
+                size: .4,
+                initClosed: false,
+                onresize: function () {
+                    rulesEditor.resize();
+                }
+
+            },
+            south: {
+                paneSelector: "#verteilungSouth",
+                size: 0.17,
+                contentSelector: ".ui-widget-content",
+                resizable: true,
+                slidable: true,
+                children: {
+                    name: "innerLayout",
+                    contentSelector: ".ui-widget-content",
+                    spacing_open: 8,
+                    spacing_closed: 12,
+                    west: {
+                        paneSelector: "#verteilungSouthInnerWest",
+                        size: .74,
+                        onresize: function () {
+                            outputEditor.resize();
+                        }
+                    },
+                    center: {
+                        size: "auto",
+                        paneSelector: "#verteilungSouthInnerCenter",
+                        onresize: function () {
+                            propsEditor.resize();
+                        }
                     }
                 }
-            }
-        },
-        //	enable state management
-        stateManagement__enabled:	true,
-        showDebugMessages:			true
-    };
+            },
+            //	enable state management
+            stateManagement__enabled: false,
+            showDebugMessages: true
+        };
 
 
-    var verteilungLayoutSettings = {
-        name:                      "verteilungLayout" ,
-        size:					    "auto",
-        minSize:				    13,
-        initClosed:				false,
-        resizerTip:				"Resize This Pane",
-        fxName:					"slide",
-        fxSpeed_open:		    	800,
-        fxSpeed_close:		    	1000,
-        fxSettings_open:	    	{ easing: "easeInQuint" },
-        fxSettings_close:  		{ easing: "easeOutQuint" },
-        closable:		    		true,
-        resizable:		    		true,
-        //slidable:				true,
-        livePaneResizing:	    	true,
-        spacing_open:		    	8,
-        spacing_closed:			12,
-        initPanes:	    			true,
-        resizeWithWindow:			false,
-        contentSelector:			".ui-widget-content",
+        // create the tabs before the page layout because tabs will change the height of the north-pane
+        tabLayout = $("#tabs").tabs({
+            // using callback addon
+            activate: $.layout.callbacks.resizeTabLayout,
+            active: 1
 
-        //	reference only - these options are NOT required because 'true' is the default
+            /* OR with a custom callback
+             activate: function (evt, ui) {
+             $.layout.callbacks.resizeTabLayout( evt, ui );
+             // other code...
+             }
+             */
+        });
 
-        //	some pane-size settings
-        west: {
-            paneSelector:           "#verteilungWest",
-            size:				    .6,
-            fxSettings_open:	    { easing: "easeOutBounce" },
-            closable:			    true,
-            resizable:			    true,
-            slidable:			    true,
-            onresize:	            function () { textEditor.resize(); $('div.dataTables_scrollBody').css('height',calcDataTableHeight()); tabelle.fnSettings()._iDisplayLength = Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1); tabelle.fnDraw(); tabelle.fnAdjustColumnSizing(); }
-        },
-        center: {
-            paneSelector:           "#verteilungCenter",
-            initHidden:             false,
-            minHeight:              80,
-            size:                   .4,
-            initClosed:             false,
-            onresize:	            function () { rulesEditor.resize(); }
+        $('#tabs').layout(contentLayoutSettings);
 
-        },
-        south:{
-            paneSelector:           "#verteilungSouth",
-            size:                   0.17,
-            contentSelector:	    ".ui-widget-content",
-            resizable:			    true,
-            slidable:			    true,
-            children: {
-                name:				"innerLayout",
-                contentSelector:	".ui-widget-content",
-                spacing_open:		8,
-                spacing_closed:		12,
-                west:{
-                    paneSelector:	"#verteilungSouthInnerWest",
-                    size:           .74,
-                    onresize:	    function () { outputEditor.resize();}
-                },
-                center:{
-                    size:           "auto",
-                    paneSelector:	"#verteilungSouthInnerCenter",
-                    onresize:	    function () { propsEditor.resize();}
-                }
-            }
-        },
-        //	enable state management
-        stateManagement__enabled:	true,
-        showDebugMessages:			true
-    };
+        globalLayout = $('body').layout(clientPageLayoutSettings);
 
+        $('#clientPage').layout(pageLayoutSettings);
 
-    // create the tabs before the page layout because tabs will change the height of the north-pane
-    globalLayout = $("#tabs").tabs({
-        // using callback addon
-        activate: $.layout.callbacks.resizeTabLayout,
-        active: 1
-
-        /* OR with a custom callback
-         activate: function (evt, ui) {
-         $.layout.callbacks.resizeTabLayout( evt, ui );
-         // other code...
-         }
-         */
-    });
-
-    $('#tabs').layout( contentLayoutSettings);
-
-    $('body').layout(clientPageLayoutSettings);
-
-    $('#clientPage').layout(pageLayoutSettings);
-
-    verteilungLayout = $('#tab2').layout(verteilungLayoutSettings);
-    alfrescoLayout = $('#tab1').layout(alfrescoLayoutSettings);
-
-    // if there is no state-cookie, then DISABLE state management initially
-    var cookieExists = !$.isEmptyObject( verteilungLayout.readCookie() );
-    if (!cookieExists) toggleStateManagement( true, false );
-
+        verteilungLayout = $('#tab2').layout(verteilungLayoutSettings);
+        alfrescoLayout = $('#tab1').layout(alfrescoLayoutSettings);
+        globalLayout.deleteCookie();
+        globalLayout.options.stateManagement.autoSave = false
+        // if there is no state-cookie, then DISABLE state management initially
+        var cookieExists = !$.isEmptyObject(verteilungLayout.readCookie());
+        if (!cookieExists) toggleStateManagement(true, false);
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 /**
@@ -486,13 +514,13 @@ function loadAlfrescoTable() {
                 // This row is already open - close it
                 row.child.hide();
                 tr.removeClass('shown');
-                calculateTableHeight("alfrescoCenterInnerCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+                calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             }
             else {
                 // Open this row
                 row.child(formatAlfrescoTabelleDetailRow(row.data())).show();
                 tr.addClass('shown');
-                calculateTableHeight("alfrescoCenterInnerCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+                calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             }
         });
     } catch (e) {
@@ -1014,9 +1042,9 @@ function switchAlfrescoDirectory(data) {
         ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
         if (json.success) {
             alfrescoFolderTabelle.clear();
-            $('#alfrescoFolderTableFooter').width(alfrescoLayout.children.center.alfrescoInnerCenterLayout.children.north.alfrescoInnerCenterNorthLayout.state.center.innerWidth);
+            $('#alfrescoFolderTableFooter').width(alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.north.alfrescoCenterNorthInnerLayout.state.container.innerWidth);
             alfrescoFolderTabelle.rows.add(json.result).draw();
-            calculateTableHeight("alfrescoCenterInnerNorthCenter",alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
+            calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
             $.fn.dataTable.makeEditable( alfrescoFolderTabelle, {
                 "fnShowError" : function(text, aktion){
                     message("Fehler", text);
@@ -1078,9 +1106,9 @@ function switchAlfrescoDirectory(data) {
         ], "Dokumente konnten nicht aus dem Server gelesen werden:");
         if (json.success) {
             alfrescoTabelle.clear();
-            $('#alfrescoTableFooter').width(alfrescoLayout.center.children.alfrescoInnerCenterLayout.state.center.innerWidth);
+            $('#alfrescoTableFooter').width(alfrescoLayout.center.children.alfrescoCenterInnerLayout.state.center.innerWidth);
             alfrescoTabelle.rows.add(json.result).draw();
-            calculateTableHeight("alfrescoCenterInnerCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+            calculateTableHeight("alfrescoCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             $.fn.dataTable.makeEditable( alfrescoTabelle, {
                 "fnShowError" : function(text, aktion){
                     message("Fehler", text);
@@ -1327,7 +1355,7 @@ function handleAlfrescoImageClicks() {
                 ], ["Dokument konnten nicht gelesen werden!"]);
                 if (json.success) {
                     loadText(json.result, json.result, alfrescoTabelle.row(tr).data().name, alfrescoTabelle.row(tr).data().contentStreamMimeType, null);
-                    globalLayout.tabs("option", "active", 1);
+                    tabLayout.tabs("option", "active", 1);
                 }
             } catch (e) {
                 errorHandler(e);
