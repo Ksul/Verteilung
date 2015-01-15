@@ -19,6 +19,26 @@ function changeCss(className, classValue) {
 };
 
 /**
+ * startet den normalen Alfresco View
+ */
+function showAlfrescoNormalView(){
+    viewMenu.children('li:first').superfish('hide');
+    alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.show("north");
+    viewMode = 0;
+    alfrescoTabelle.draw();
+}
+
+/**
+ * startet den Alfresco Icon View
+ */
+function showAlfrescoIconView(){
+    viewMenu.children('li:first').superfish('hide');
+    alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.hide("north");
+    viewMode = 1;
+    alfrescoTabelle.draw();
+}
+
+/**
  * Eventhandler der für die Verarbeitung von fallen gelassen Dateien auf die Inbox zuständig ist
  * @param evt  das Event
  */
@@ -434,23 +454,34 @@ function loadAlfrescoTable() {
                 {
                     targets: [1],
                     render: function (data, type, row) {
-                        if (exist(data) && data == "application/pdf") {
-
+                        if (viewMode == 0) {
+                            if (exist(data) && data == "application/pdf") {
+                                var image = document.createElement("span");
+                                image.id = "alfrescoTable" + row.objectID;
+                                image.className = "alfrescoTableEvent";
+                                image.draggable = true;
+                                image.href = "#";
+                                image.title = "PDF Dokument";
+                                image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
+                                image.style.width = "16px";
+                                image.style.height = "16px";
+                                image.style.cursor = "pointer";
+                                image.style.cssFloat = "left";
+                                image.style.marginRight = "5px";
+                                return image.outerHTML;
+                            } else
+                                return "";
+                        } else {
                             var image = document.createElement("span");
                             image.id = "alfrescoTable" + row.objectID;
                             image.className = "alfrescoTableEvent";
                             image.draggable = true;
                             image.href = "#";
-                            image.title = "PDF Dokument";
-                            image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
-                            image.style.width = "16px";
-                            image.style.height = "16px";
-                            image.style.cursor = "pointer";
-                            image.style.cssFloat = "left";
-                            image.style.marginRight = "5px";
+                            var url = getSettings("server") + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue";
+
+                            image.style.backgroundImage = "url(" + url + ")";
                             return image.outerHTML;
-                        } else
-                            return "";
+                        }
                     },
                     visible: true
                 },
@@ -1734,7 +1765,7 @@ function start() {
         handleAlfrescoImageClicks();
         loadAlfrescoTree();
         //loadButtons();
-        $('#menu-1').superfish();
+        viewMenu = $('#menu-1').superfish();
     } catch(e) {
         errorHandler(e);
     }

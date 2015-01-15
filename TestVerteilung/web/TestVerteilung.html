@@ -202,6 +202,8 @@
         var tabelle;
         var alfrescoTabelle;
         var alfrescoFolderTabelle;
+        var viewMenu;
+        var viewMode = 0;
         var workDocument = null;
         var multiMode = false;
         var currentPDF = false;
@@ -284,10 +286,10 @@
                                     <a href="#ansicht">Ansicht</a>
                                     <ul>
                                         <li>
-                                            <a href="#normal" onclick="alert('Normal');">Normal</a>
+                                            <a href="#normal" onclick="showAlfrescoNormalView();">Normal</a>
                                         </li>
                                         <li>
-                                            <a href="#icons" onclick="alert('Icons');">Icons</a>
+                                            <a href="#icons" onclick="showAlfrescoIconView();">Icons</a>
                                         </li>
                                     </ul>
                             </ul>
