@@ -16,7 +16,16 @@ function changeCss(className, classValue) {
         classContainer.appendTo(cssMainContainer);
     }
     classContainer.html('<style>' + className + ' {' + classValue + '}</style>');
-};
+}
+
+function getAlfrescoTicket() {
+    if (!exist(alfrescoTicket)) {
+        var obj = executeService("getTicket");
+        if (obj.success)
+            alfrescoTicket = obj.result.data.ticket;
+    }
+    return alfrescoTicket;
+}
 
 /**
  * startet den normalen Alfresco View
@@ -24,8 +33,10 @@ function changeCss(className, classValue) {
 function showAlfrescoNormalView(){
     viewMenu.children('li:first').superfish('hide');
     alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.show("north");
-    viewMode = 0;
-    alfrescoTabelle.draw();
+    alfrescoTabelle.column(0).visible(true);
+    alfrescoTabelle.column(1).visible(true);
+    alfrescoTabelle.column(2).visible(false);
+    calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
 }
 
 /**
@@ -34,8 +45,10 @@ function showAlfrescoNormalView(){
 function showAlfrescoIconView(){
     viewMenu.children('li:first').superfish('hide');
     alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.hide("north");
-    viewMode = 1;
-    alfrescoTabelle.draw();
+    alfrescoTabelle.column(0).visible(false);
+    alfrescoTabelle.column(1).visible(false);
+    alfrescoTabelle.column(2).visible(true);
+    calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
 }
 
 /**
@@ -373,13 +386,10 @@ function loadAlfrescoTable() {
             data: [],
             scrollX: "100%",
             scrollXInner: "100%",
-            // "sScrollY" : calcDataTableHeight(),
             autoWidth: true,
             lengthChange: false,
             searching: false,
-            // "iDisplayLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
-
-            order: [[2, 'desc']],
+            order: [[3, 'desc']],
             columns: [
                 {
                     class: 'details-control',
@@ -395,6 +405,15 @@ function loadAlfrescoTable() {
                     type: "string",
                     class: "alignCenter",
                     width: "43px"
+                },
+                {
+                    data: null,
+                    title: "Vorschau",
+                    orderable: false,
+                    defaultContent: '',
+                    type: "string",
+                    class: "alignCenter",
+                    width: "120px"
                 },
                 {
                     data: "title",
@@ -443,50 +462,67 @@ function loadAlfrescoTable() {
             ],
             columnDefs: [
                 {
-                    targets: [4, 5],
+                    targets: [5, 6],
                     visible: true
                 },
 
-                {   targets: [8],
+                {   targets: [9],
                     visible: false
                 },
 
                 {
                     targets: [1],
                     render: function (data, type, row) {
-                        if (viewMode == 0) {
-                            if (exist(data) && data == "application/pdf") {
-                                var image = document.createElement("span");
-                                image.id = "alfrescoTable" + row.objectID;
-                                image.className = "alfrescoTableEvent";
-                                image.draggable = true;
-                                image.href = "#";
-                                image.title = "PDF Dokument";
-                                image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
-                                image.style.width = "16px";
-                                image.style.height = "16px";
-                                image.style.cursor = "pointer";
-                                image.style.cssFloat = "left";
-                                image.style.marginRight = "5px";
-                                return image.outerHTML;
-                            } else
-                                return "";
-                        } else {
-                            var image = document.createElement("span");
-                            image.id = "alfrescoTable" + row.objectID;
-                            image.className = "alfrescoTableEvent";
-                            image.draggable = true;
-                            image.href = "#";
-                            var url = getSettings("server") + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue";
-
-                            image.style.backgroundImage = "url(" + url + ")";
-                            return image.outerHTML;
+                        try {
+                                if (exist(data) && data == "application/pdf") {
+                                    var span = document.createElement("span");
+                                    span.id = "alfrescoTable" + row.objectID;
+                                    span.className = "alfrescoTableEvent";
+                                    span.draggable = true;
+                                    span.href = "#";
+                                    span.title = "PDF Dokument";
+                                    span.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
+                                    span.style.width = "16px";
+                                    span.style.height = "16px";
+                                    span.style.cursor = "pointer";
+                                    span.style.cssFloat = "left";
+                                    span.style.marginRight = "5px";
+                                    return span.outerHTML;
+                                } else
+                                    return "";
+                        } catch (e) {
+                            errorHandler(e);
                         }
                     },
                     visible: true
                 },
                 {
                     targets: [2],
+                    render: function (data, type, row) {
+                        try {
+                            if (exist(data)) {
+                                var span = document.createElement("span");
+                                span.id = "alfrescoTable" + row.objectID;
+                                span.className = "alfrescoTableEvent";
+                                span.draggable = true;
+                                span.href = "#";
+                                span.style.width = "100px";
+                                span.style.height = "100px";
+                                var url = getSettings("server") + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
+                                var image = document.createElement('img');
+                                image.src =url;
+                                span.appendChild(image)
+                                return span.outerHTML;
+                            } else
+                                return "";
+                        } catch (e) {
+                            errorHandler(e);
+                        }
+                    },
+                    visible: false
+                },
+                {
+                    targets: [3],
                     render: function (data, type, row) {
                         if (exist(data))
                             return data;
@@ -498,7 +534,7 @@ function loadAlfrescoTable() {
                     visible: true
                 },
                 {
-                    targets: [3],
+                    targets: [4],
                     render: function (data, type, row) {
                         if (exist(data)) {
                             var datum;
@@ -517,7 +553,7 @@ function loadAlfrescoTable() {
                     visible: true
                 },
                 {
-                    targets: [7],
+                    targets: [8],
                     mRender: alfrescoAktionFieldFormatter,
                     orderable: false
                 }
