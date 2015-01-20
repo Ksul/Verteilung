@@ -94,7 +94,7 @@ function startSettingsDialog() {
             }
         };
          $('head').append('<link href="./src/main/resource/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
-        $('<div id="settingsDialog">').append(Alpaca($('<div id="form">'), dialogSettings)).dialog({
+        $('<div id="dialogBox">').append(Alpaca($('<div id="form">'), dialogSettings)).dialog({
             autoOpen: true,
             modal: true,
             width: 480,
@@ -134,7 +134,7 @@ function startSettingsDialog() {
                     "id": "btn-cancel",
                     "text": "Cancel",
                     "click": function () {
-                        $(this).dialog("destroy");
+                       closeDialog();
                     }
                 }
             }
