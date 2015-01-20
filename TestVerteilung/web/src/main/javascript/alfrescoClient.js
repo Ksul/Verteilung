@@ -378,6 +378,37 @@ function loadLayout() {
  * baut die Alfresco Tabelle auf.
  */
 function loadAlfrescoTable() {
+    function openDocument() {
+        try {
+
+            var data = alfrescoTabelle.row($(this).closest(('tr'))).data();
+            var url = getSettings("server") + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/" + data.contentStreamFileName;
+            var obj = executeService("getTicket");
+            if (obj.success)
+                url = url + "?alf_ticket=" + obj.result.data.ticket;
+            window.open(url);
+        } catch (e) {
+            errorHandler(e);
+        }
+    }
+
+    function move(event) {
+        try {
+            var dt = event.originalEvent.dataTransfer;
+            var row = alfrescoTabelle.row($(this).closest(('tr')));
+            var data = row.data();
+            dt.setData('Id', data.objectID);
+            dt.setData('parentId', data.parentId);
+            dt.setData('rowIndex', row.index());
+            // die Zielbereiche für den Drag festlegen
+            populateEventHandlerForTreeIcons();
+            // Den aktuellen Zweig wieder rausnehmen, damit nicht in das aktuelle Verzeichnis verschoben werden kann
+            $(document.getElementById(data.parentId)).children('a').off("dragenter dragover drop");
+        } catch (e) {
+            errorHandler(e);
+        }
+    }
+
     try {
         $.fn.dataTable.moment('DD.MM.YYYY');
         alfrescoTabelle = $('#alfrescoTabelle').DataTable({
@@ -476,17 +507,21 @@ function loadAlfrescoTable() {
                         try {
                                 if (exist(data) && data == "application/pdf") {
                                     var span = document.createElement("span");
-                                    span.id = "alfrescoTable" + row.objectID;
-                                    span.className = "alfrescoTableEvent";
-                                    span.draggable = true;
-                                    span.href = "#";
-                                    span.title = "PDF Dokument";
-                                    span.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
-                                    span.style.width = "16px";
-                                    span.style.height = "16px";
-                                    span.style.cursor = "pointer";
-                                    span.style.cssFloat = "left";
-                                    span.style.marginRight = "5px";
+                                    var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/src/main/resource/images/pdf.png";
+                                    var image = document.createElement('img');
+                                    image.id = "alfrescoTable" + row.objectID;
+                                    image.className = "alfrescoTableEvent";
+                                    image.title = "PDF Dokument"
+                                    image.draggable = true;
+                                    image.style.cursor = "pointer";
+                                    image.src =url;
+                                    $('#' + image.id).click(function () {
+                                        openDocument.call(this);
+                                    });
+                                    $('#' + image.id).on("dragstart", function (event) {
+                                        move.call(this, event);
+                                    });
+                                    span.appendChild(image);
                                     return span.outerHTML;
                                 } else
                                     return "";
@@ -502,16 +537,24 @@ function loadAlfrescoTable() {
                         try {
                             if (exist(data)) {
                                 var span = document.createElement("span");
-                                span.id = "alfrescoTable" + row.objectID;
-                                span.className = "alfrescoTableEvent";
-                                span.draggable = true;
+
                                 span.href = "#";
                                 span.style.width = "100px";
                                 span.style.height = "100px";
                                 var url = getSettings("server") + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
                                 var image = document.createElement('img');
+                                image.id = "alfrescoTableIcon" + row.objectID;
+                                image.className = "alfrescoTableEvent";
+                                image.draggable = true;
+                                image.style.cursor = "pointer";
                                 image.src =url;
-                                span.appendChild(image)
+                                $('#' + image.id).click(function () {
+                                    openDocument.call(this);
+                                });
+                                $('#' + image.id).on("dragstart", function (event) {
+                                    move.call(this, event);
+                                });
+                                span.appendChild(image);
                                 return span.outerHTML;
                             } else
                                 return "";
@@ -1238,38 +1281,6 @@ function switchAlfrescoDirectory(data) {
                     } catch (e) {
                         errorHandler(e);
                     }
-                }
-            });
-            $('.alfrescoTableEvent').off("dragstart");
-            $('.alfrescoTableEvent').on("dragstart", function (event) {
-                try {
-                    var dt = event.originalEvent.dataTransfer;
-                    var row = alfrescoTabelle.row($(this).closest(('tr')));
-                    var data = row.data();
-                    dt.setData('Id', data.objectID);
-                    dt.setData('parentId', data.parentId);
-                    dt.setData('rowIndex', row.index());
-                    // die Zielbereiche für den Drag festlegen
-                    populateEventHandlerForTreeIcons();
-                    // Den aktuellen Zweig wieder rausnehmen, damit nicht in das aktuelle Verzeichnis verschoben werden kann
-                    $(document.getElementById(data.parentId)).children('a').off("dragenter dragover drop");
-                } catch (e) {
-                    errorHandler(e);
-                }
-            });
-            $('.alfrescoTableEvent').off("click");
-            $('.alfrescoTableEvent').on("click", function (event) {
-                try {
-                    var dt = event.originalEvent.dataTransfer;
-                    //wg alfresco Prefix
-                    var data = alfrescoTabelle.row($(this).closest(('tr'))).data();
-                    var url = getSettings("server") + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/" + data.contentStreamFileName;
-                    var obj = executeService("getTicket");
-                    if (obj.success)
-                        url = url + "?alf_ticket=" + obj.result.data.ticket;
-                    window.open(url);
-                } catch (e) {
-                    errorHandler(e);
                 }
             });
         }
