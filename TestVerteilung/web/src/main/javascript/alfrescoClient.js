@@ -225,6 +225,9 @@ function loadLayout() {
                         children: {
                             resizable: true,
                             closable: false,
+                            slidable: true,
+                            spacing_open: 8,
+                            spacing_closed: 12,
                             name: "alfrescoCenterCenterInnerLayout",
                             north: {
                                 size: 225,
