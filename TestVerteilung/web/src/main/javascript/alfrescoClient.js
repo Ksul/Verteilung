@@ -385,9 +385,10 @@ function loadAlfrescoTable() {
         try {
 
             var data = alfrescoTabelle.row($(this).closest(('tr'))).data();
+            var server = getSettings("server");
             if (!server.endsWith('/'))
                 server = server + '/';
-            var url = getSettings("server") + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/" + data.contentStreamFileName;
+            var url = server + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/" + data.contentStreamFileName;
             var obj = executeService("getTicket");
             if (obj.success)
                 url = url + "?alf_ticket=" + obj.result.data.ticket;
@@ -516,7 +517,7 @@ function loadAlfrescoTable() {
                                     var image = document.createElement('img');
                                     image.id = "alfrescoTable" + row.objectID;
                                     image.className = "alfrescoTableEvent";
-                                    image.title = "PDF Dokument"
+                                    image.title = "PDF Dokument";
                                     image.draggable = true;
                                     image.style.cursor = "pointer";
                                     image.src =url;
@@ -549,7 +550,7 @@ function loadAlfrescoTable() {
                                 var server = getSettings("server");
                                 if (!server.endsWith('/'))
                                     server = server + '/';
-                                var url = server +  + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
+                                var url = server + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
                                 var image = document.createElement('img');
                                 image.id = "alfrescoTableIcon" + row.objectID;
                                 image.className = "alfrescoTableEvent";
