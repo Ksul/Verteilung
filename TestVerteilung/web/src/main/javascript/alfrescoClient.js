@@ -516,15 +516,16 @@ function loadAlfrescoTable() {
                                     var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/src/main/resource/images/pdf.png";
                                     var image = document.createElement('img');
                                     image.id = "alfrescoTable" + row.objectID;
-                                    image.className = "alfrescoTableEvent";
+                                    image.className = "alfrescoTableIconEvent";
                                     image.title = "PDF Dokument";
                                     image.draggable = true;
                                     image.style.cursor = "pointer";
                                     image.src =url;
-                                    $('#' + image.id).click(function () {
+                                    $('#alfrescoTabelle tbody').on( 'click', '.alfrescoTableIconEvent', function () {
                                         openDocument.call(this);
                                     });
-                                    $('#' + image.id).on("dragstart", function (event) {
+
+                                    $('#alfrescoTabelle tbody').on("dragstart", '.alfrescoTableIconEvent', function (event) {
                                         move.call(this, event);
                                     });
                                     span.appendChild(image);
@@ -553,14 +554,15 @@ function loadAlfrescoTable() {
                                 var url = server + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
                                 var image = document.createElement('img');
                                 image.id = "alfrescoTableIcon" + row.objectID;
-                                image.className = "alfrescoTableEvent";
+                                image.className = "alfrescoTableThumbnailEvent";
                                 image.draggable = true;
                                 image.style.cursor = "pointer";
                                 image.src =url;
-                                $('#' + image.id).click(function () {
+                                $('#alfrescoTabelle tbody').on( 'click', '.alfrescoTableThumbnailEvent', function () {
                                     openDocument.call(this);
                                 });
-                                $('#' + image.id).on("dragstart", function (event) {
+
+                                $('#alfrescoTabelle tbody').on("dragstart", '.alfrescoTableThumbnailEvent', function (event) {
                                     move.call(this, event);
                                 });
                                 span.appendChild(image);
