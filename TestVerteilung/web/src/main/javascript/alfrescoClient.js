@@ -185,20 +185,7 @@ function loadLayout() {
                 fxSettings_open: {easing: "easeOutBounce"},
                 closable: false,
                 resizable: false,
-                slidable: false,
-                children: {
-                    name: "alfrescoSearchCenterNorthInnerLayout",
-                    center: {
-                        size: "auto",
-                        name: "alfrescoSearchCenterNorthCenterLayout",
-                        paneSelector: "#alfrescoSearchCenterNorthCenter"
-                    },
-                    east: {
-                        size: 90,
-                        name: "alfrescoSearchCenterNorthEastLayout",
-                        paneSelector: "#alfrescoSearchCenterNorthEast"
-                    }
-                }
+                slidable: false
             },
             center: {
                 paneSelector: "#searchCenter",
@@ -802,6 +789,256 @@ function loadAlfrescoFolderTable() {
     $("#alfrescoFolderTabelle_info").detach().appendTo('#alfrescoFolderTableFooter');
     $("#alfrescoFolderTabelle_paginate").detach().appendTo('#alfrescoFolderTableFooter');
 }
+
+/**
+ * baut die Suchergebnis Tabelle auf.
+ */
+function loadAlfrescoSearchTable() {
+    function openDocument(obj, event) {
+        try {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            var data = alfrescoSearchTabelle.row($(obj).closest(('tr'))).data();
+            var server = getSettings("server");
+            if (!server.endsWith('/'))
+                server = server + '/';
+            var url = server + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/" + data.contentStreamFileName;
+            var obj = executeService("getTicket");
+            if (obj.success)
+                url = url + "?alf_ticket=" + obj.result.data.ticket;
+            window.open(url);
+        } catch (e) {
+            errorHandler(e);
+        }
+    }
+
+
+    try {
+        $.fn.dataTable.moment('DD.MM.YYYY');
+        alfrescoSearchTabelle = $('#alfrescoSearchTabelle').DataTable({
+            jQueryUI: true,
+            pagingType: "paging_with_jqui_icons",
+            data: [],
+            scrollX: "100%",
+            scrollXInner: "100%",
+            autoWidth: true,
+            lengthChange: false,
+            searching: false,
+            order: [[3, 'desc']],
+            columns: [
+                {
+                    class: 'details-control',
+                    orderable: false,
+                    data: null,
+                    defaultContent: '',
+                    width: "12px"
+                },
+                {
+                    data: "contentStreamMimeType",
+                    title: "Typ",
+                    defaultContent: '',
+                    type: "string",
+                    class: "alignCenter",
+                    width: "43px"
+                },
+                {
+                    data: null,
+                    title: "Vorschau",
+                    orderable: false,
+                    defaultContent: '',
+                    type: "string",
+                    class: "alignCenter",
+                    width: "120px"
+                },
+                {
+                    data: "title",
+                    title: "Titel",
+                    defaultContent: '',
+                    type: "string",
+                    class: "alignLeft"
+                },
+                {
+                    data: "documentDate",
+                    title: "Datum",
+                    defaultContent: '',
+                    //type: "date",
+                    class: "alignLeft"
+                },
+                {
+                    data: "person",
+                    title: "Person",
+                    defaultContent: '',
+                    type: "string",
+                    class: "alignLeft"
+                },
+                {
+                    data: "amount",
+                    title: "Betrag",
+                    defaultContent: '',
+                    type: "numeric",
+                    class: "alignLeft"
+                },
+                {
+                    data: "idvalue",
+                    title: "Schlüssel",
+                    defaultContent: '',
+                    type: "string",
+                    class: "alignLeft"
+                },
+                {
+                    data: null,
+                    title: "Aktion",
+                    width: "102px",
+                    class: "alignLeft"
+                },
+                {
+                    data: "objectID"
+                }
+            ],
+            columnDefs: [
+                {
+                    targets: [5, 6],
+                    visible: true
+                },
+
+                {   targets: [9],
+                    visible: false
+                },
+
+                {
+                    targets: [1],
+                    render: function (data, type, row) {
+                        try {
+                            if (exist(data) && data == "application/pdf") {
+                                var span = document.createElement("span");
+                                var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/src/main/resource/images/pdf.png";
+                                var image = document.createElement('img');
+                                image.id = "alfrescoSearchTableIcon" + row.objectID;
+                                image.className = "alfrescoSearchTableIconEvent";
+                                image.title = "PDF Dokument";
+                                image.draggable = true;
+                                image.style.cursor = "pointer";
+                                image.src =url;
+                                $('#alfrescoSearchTabelle tbody').on( 'click', '#' + image.id, function (event) {
+                                    openDocument(this, event);
+                                });
+                                span.appendChild(image);
+                                return span.outerHTML;
+                            } else
+                                return "";
+                        } catch (e) {
+                            errorHandler(e);
+                        }
+                    },
+                    visible: true
+                },
+                {
+                    targets: [2],
+                    render: function (data, type, row) {
+                        try {
+                            if (exist(data)) {
+                                var span = document.createElement("span");
+
+                                span.href = "#";
+                                span.style.width = "100px";
+                                span.style.height = "100px";
+                                var server = getSettings("server");
+                                if (!server.endsWith('/'))
+                                    server = server + '/';
+                                var url = server + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
+                                var image = document.createElement('img');
+                                image.id = "alfrescoSearchTableThumbnail" + row.objectID;
+                                image.className = "alfrescoSearchTableThumbnailEvent";
+                                image.draggable = true;
+                                image.style.cursor = "pointer";
+                                image.src =url;
+                                $('#alfrescoSearchTabelle tbody').on( 'click', '#' + image.id, function (event) {
+                                    openDocument(this, event);
+                                });
+                                span.appendChild(image);
+                                return span.outerHTML;
+                            } else
+                                return "";
+                        } catch (e) {
+                            errorHandler(e);
+                        }
+                    },
+                    visible: false
+                },
+                {
+                    targets: [3],
+                    render: function (data, type, row) {
+                        if (exist(data))
+                            return data;
+                        else if (exist(row.name))
+                            return row.name;
+                        else
+                            return "";
+                    },
+                    visible: true
+                },
+                {
+                    targets: [4],
+                    render: function (data, type, row) {
+                        if (exist(data)) {
+                            var datum;
+                            try {
+                                // editierte Datumwerte haben das falsche Format, deshalb werden sie erstmal wieder geparst
+                                data = $.datepicker.parseDate("dd.mm.yy", data).getTime();
+                            } catch(e){}
+                            datum = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data)));
+                            return datum
+                        }
+                        else if (exist(row.creationDate))
+                            return $.datepicker.formatDate("dd.mm.yy", new Date(Number(row.creationDate)));
+                        else
+                            return "";
+                    },
+                    visible: true
+                },
+                {
+                    targets: [8],
+                    mRender: alfrescoAktionFieldFormatter,
+                    orderable: false
+                }
+            ],
+            language: {
+                info: "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_",
+                paginate: {
+                    first: "Erste ",
+                    last:  "Letzte ",
+                    next:  "Nächste ",
+                    previous: "Vorherige "
+                }
+            }
+        });
+
+        $("#alfrescoSearchTabelle_info").detach().appendTo('#alfrescoSearchTableFooter');
+        $("#alfrescoSearchTabelle_paginate").detach().appendTo('#alfrescoSearchTableFooter');
+
+        // Add event listener for opening and closing details
+        $('#dtable4 tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = alfrescoSearchTabelle.row(tr);
+
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+                calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+            }
+            else {
+                // Open this row
+                row.child(formatAlfrescoTabelleDetailRow(row.data())).show();
+                tr.addClass('shown');
+                calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+            }
+        });
+    } catch (e) {
+        errorHandler(e);
+    }
+}
+
 
 /**
  * lädt die Tabelle für den Verteilungstab
@@ -1871,6 +2108,7 @@ function start() {
 
         loadAlfrescoTable();
         loadAlfrescoFolderTable();
+        loadAlfrescoSearchTable();
         loadVerteilungTable();
 
         init();
