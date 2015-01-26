@@ -157,6 +157,45 @@ function loadLayout() {
             activate:                   $.layout.callbacks.resizeTabLayout
         };
 
+        var searchLayoutSettings = {
+            name: "searchLayout",
+            size: "auto",
+            minSize: 13,
+            initClosed: false,
+            initHidden: false,
+            resizerTip: "Resize This Pane",
+            fxName: "slide",
+            fxSpeed_open: 800,
+            fxSpeed_close: 1000,
+            fxSettings_open: {easing: "easeInQuint"},
+            fxSettings_close: {easing: "easeOutQuint"},
+            closable: true,
+            resizable: true,
+            //slidable:				true,
+            livePaneResizing: true,
+            spacing_open: 8,
+            spacing_closed: 12,
+            initPanes: true,
+            resizeWithWindow: false,
+            contentSelector: ".ui-widget-content",
+            north: {
+                paneSelector: "#searchNorth",
+                name: "searchNorthLayout",
+                size: .2,
+                fxSettings_open: {easing: "easeOutBounce"},
+                closable: true,
+                resizable: true,
+                slidable: true
+            },
+            center: {
+                paneSelector: "#searchCenter",
+                name: "searchCenterLayout",
+                minHeight: 80,
+                size: .8,
+                resizable: true,
+                slidable: true
+            }
+        };
         var alfrescoLayoutSettings = {
             name: "alfrescoLayout",
             size: "auto",
@@ -349,7 +388,7 @@ function loadLayout() {
         tabLayout = $("#tabs").tabs({
             // using callback addon
             activate: $.layout.callbacks.resizeTabLayout,
-            active: 1
+            active: 2
 
             /* OR with a custom callback
              activate: function (evt, ui) {
@@ -365,7 +404,8 @@ function loadLayout() {
 
         $('#clientPage').layout(pageLayoutSettings);
 
-        verteilungLayout = $('#tab2').layout(verteilungLayoutSettings);
+        verteilungLayout = $('#tab3').layout(verteilungLayoutSettings);
+        searchLayout = $('#tab2').layout(searchLayoutSettings);
         alfrescoLayout = $('#tab1').layout(alfrescoLayoutSettings);
         globalLayout.deleteCookie();
         globalLayout.options.stateManagement.autoSave = false
@@ -381,9 +421,10 @@ function loadLayout() {
  * baut die Alfresco Tabelle auf.
  */
 function loadAlfrescoTable() {
-    function openDocument() {
+    function openDocument(event) {
         try {
-
+            event.preventDefault();
+            event.stopImmediatePropagation();
             var data = alfrescoTabelle.row($(this).closest(('tr'))).data();
             var server = getSettings("server");
             if (!server.endsWith('/'))
@@ -400,6 +441,8 @@ function loadAlfrescoTable() {
 
     function move(event) {
         try {
+            event.preventDefault();
+            event.stopImmediatePropagation();
             var dt = event.originalEvent.dataTransfer;
             var row = alfrescoTabelle.row($(this).closest(('tr')));
             var data = row.data();
@@ -515,17 +558,17 @@ function loadAlfrescoTable() {
                                     var span = document.createElement("span");
                                     var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/src/main/resource/images/pdf.png";
                                     var image = document.createElement('img');
-                                    image.id = "alfrescoTable" + row.objectID;
+                                    image.id = "alfrescoTableIcon" + row.objectID;
                                     image.className = "alfrescoTableIconEvent";
                                     image.title = "PDF Dokument";
                                     image.draggable = true;
                                     image.style.cursor = "pointer";
                                     image.src =url;
-                                    $('#alfrescoTabelle tbody').on( 'click', '.alfrescoTableIconEvent', function () {
-                                        openDocument.call(this);
+                                    $('#alfrescoTabelle tbody').on( 'click', '#' + image.id, function () {
+                                        openDocument.call(this, event);
                                     });
 
-                                    $('#alfrescoTabelle tbody').on("dragstart", '.alfrescoTableIconEvent', function (event) {
+                                    $('#alfrescoTabelle tbody').on("dragstart", '#' + image.id, function (event) {
                                         move.call(this, event);
                                     });
                                     span.appendChild(image);
@@ -553,16 +596,16 @@ function loadAlfrescoTable() {
                                     server = server + '/';
                                 var url = server + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
                                 var image = document.createElement('img');
-                                image.id = "alfrescoTableIcon" + row.objectID;
+                                image.id = "alfrescoTableThumbnail" + row.objectID;
                                 image.className = "alfrescoTableThumbnailEvent";
                                 image.draggable = true;
                                 image.style.cursor = "pointer";
                                 image.src =url;
-                                $('#alfrescoTabelle tbody').on( 'click', '.alfrescoTableThumbnailEvent', function () {
-                                    openDocument.call(this);
+                                $('#alfrescoTabelle tbody').on( 'click', '#' + image.id, function () {
+                                    openDocument.call(this, event);
                                 });
 
-                                $('#alfrescoTabelle tbody').on("dragstart", '.alfrescoTableThumbnailEvent', function (event) {
+                                $('#alfrescoTabelle tbody').on("dragstart", '#' + image.id, function (event) {
                                     move.call(this, event);
                                 });
                                 span.appendChild(image);

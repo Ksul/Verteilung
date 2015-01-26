@@ -1516,6 +1516,7 @@ function checkAndBuidAlfrescoEnvironment() {
         ret = erg.success;
     } else {
         tabLayout.tabs({ disabled: [ 0 ] });
+        tabLayout.tabs({ disabled: [ 1 ] });
         ret = true;
     }
     return ret;

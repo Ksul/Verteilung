@@ -238,7 +238,8 @@
     <div id="tabs" class="container">
         <ul id="tabButtons" class="container">
             <li><a href="#tab1">Archiv</a></li>
-            <li><a href="#tab2">Verteilung</a></li>
+            <li><a href="#tab2">Suche</a></li>
+            <li><a href="#tab3">Verteilung</a></li>
         </ul>
         <div id="tabPanels" class="container ui-state-active">
             <div id="tab1" class="tabPanel ui-widget-content hidden">
@@ -299,6 +300,18 @@
                 </div>
             </div>
             <div id="tab2" class="tabPanel ui-widget-content hidden">
+                <div id="searchNorth" class="ui-tab-layout-north container hidden">
+                    <div class="header  ui-widget-header">Suchen</div>
+                    <div class="ui-widget-content">
+                        </div>
+            </div>
+                <div id="searchCenter" class="ui-tab-layout-center container hidden">
+                    <div class="header  ui-widget-header">Ergebnisse</div>
+                    <div class="ui-widget-content">
+                        </div>
+                </div>
+            </div>
+            <div id="tab3" class="tabPanel ui-widget-content hidden">
                 <div id="verteilungSouth" class="ui-tab-layout-south container hidden">
                     <div id="verteilungSouthInnerWest" class="inner-west container ui-widget-header hidden">
                         <div class="header">Konsole</div>
@@ -315,7 +328,7 @@
                 </div>
 
                 <div id="verteilungWest" class="ui-tab-layout-west container ui-widget-header hidden">
-                    <div id="headerWest" class="header"></div>
+                    <div id="headerWest" class="header">Dokument</div>
                     <div class="ui-widget-content" style="overflow:auto;">
                         <div id="dtable"></div>
                         <div id="inTxt" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
