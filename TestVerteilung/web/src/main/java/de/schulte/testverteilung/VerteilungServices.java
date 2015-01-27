@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
@@ -144,12 +143,11 @@ public class VerteilungServices {
                                  int listFolder) {
 
         JSONObject o;
-        JSONObject o1;
         JSONArray list = new JSONArray();
         JSONObject obj = new JSONObject();
-        JSONObject state;
+        //JSONObject state;
         try {
-            state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
+           // state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
              // das Root Object übergeben?
             if (filePath.equals("-1"))
                 filePath = con.getNode("/Archiv").getId();
@@ -158,7 +156,7 @@ public class VerteilungServices {
 
                 // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
                 if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1)) {
-                    o = convertCMISObjectToJSON(cmisObject);
+                    o = convertObjectToJSON(cmisObject.getProperties());
                     // prüfen, ob Children vorhanden sind
                     if (cmisObject instanceof Folder) {
                         ItemIterable<CmisObject> children = con.listFolder(cmisObject.getId());
@@ -212,21 +210,26 @@ public class VerteilungServices {
     }
 
     /**
-     * liefert eine NodeId  mit Hilfe einer CMIS Query
-     * reine Wrapper Methode, die hier nichts zusätzliches mehr machen muss.
+     * liefert eine Liste mit Documenten aus einer CMIS Query
      *
      * @param  cmisQuery        die CMIS Query zum suchen
      * @return obj              ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                  false   ein Fehler ist aufgetreten
-     *                                                         result           das Document als JSON Object
+     *                                                         result           eine Liste mit JSON Objecten
      */
-    public JSONObject findDocument(String cmisQuery)  {
+    public JSONObject findDocument(String cmisQuery) {
 
         JSONObject obj = new JSONObject();
+        JSONObject o;
+        JSONArray list = new JSONArray();
         try {
-            Document document = con.findDocument(cmisQuery);
+            for (CmisObject cmisObject : con.findDocument(cmisQuery)) {
+                o = convertObjectToJSON(cmisObject.getProperties());
+                list.put(o);
+
+            }
             obj.put("success", true);
-            obj.put("result", convertCMISObjectToJSON(document).toString());
+            obj.put("result", list);
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -235,14 +238,14 @@ public class VerteilungServices {
 
     /**
      * konvertiert ein Document in ein JSON Objekt
-     * @param  doc           das Dokument
-     * @return obj1          das Dokument als JSON Objekt
+     * @param  properties    die Properties des Objektes
+     * @return obj1          das Object als JSON Objekt
      * @throws JSONException
      */
-    private JSONObject convertCMISObjectToJSON(CmisObject doc) throws JSONException {
+    private JSONObject convertObjectToJSON( List<Property<?>> properties) throws JSONException {
 
         JSONObject obj1 = new JSONObject();
-        for (Property prop : doc.getProperties()) {
+        for (Property prop : properties) {
             // falls Datumswert dann konvertieren
             if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null) {
                 obj1.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
@@ -393,7 +396,7 @@ public class VerteilungServices {
                 document = con.createDocument((Folder) folderObject, documentName, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState));
                 if (document != null) {
                     obj.put("success", true);
-                    obj.put("result", convertCMISObjectToJSON(document).toString());
+                    obj.put("result", convertObjectToJSON(document.getProperties()).toString());
                 } else {
                     obj.put("success", false);
                     obj.put("result", "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!");
@@ -440,7 +443,7 @@ public class VerteilungServices {
                 }
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
                 obj.put("success", true);
-                obj.put("result", convertCMISObjectToJSON(document).toString());
+                obj.put("result", convertObjectToJSON(document.getProperties()).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
@@ -477,7 +480,7 @@ public class VerteilungServices {
 
                 cmisObject = con.updateProperties(cmisObject, outMap);
                 obj.put("success", true);
-                obj.put("result", convertCMISObjectToJSON(cmisObject).toString());
+                obj.put("result", convertObjectToJSON(cmisObject.getProperties()).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result","Ein Document mit der Id " + documentId + " ist nicht vorhanden!");
@@ -511,7 +514,7 @@ public class VerteilungServices {
                     if (newFolder != null && newFolder instanceof Folder) {
                         CmisObject doc = con.moveDocument((Document) document, (Folder) oldFolder, (Folder) newFolder);
                         obj.put("success", true);
-                        obj.put("result", convertCMISObjectToJSON(doc).toString());
+                        obj.put("result", convertObjectToJSON(doc.getProperties()).toString());
                     } else {
                         obj.put("success", false);
                         obj.put("result", "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
@@ -561,7 +564,7 @@ public class VerteilungServices {
                 folder = con.createFolder((Folder) target, outMap);
                 if (folder != null ) {
                     obj.put("success", true);
-                    obj.put("result", convertCMISObjectToJSON(folder).toString());
+                    obj.put("result", convertObjectToJSON(folder.getProperties()).toString());
                 } else {
                     obj.put("success", false);
                     obj.put("result", "Ein Folder konnte nicht angelegt werden!" );

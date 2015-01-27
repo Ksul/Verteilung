@@ -130,11 +130,12 @@ public class VerteilungServicesTest extends AlfrescoTest {
     @Test
     public void testFindDocument() throws Exception {
         JSONObject obj = services.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'");
+        //JSONObject obj = services.findDocument("SELECT * FROM cmis:document WHERE CONTAINS('August')");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        JSONObject result = new JSONObject(obj.getString("result"));
+        JSONObject result = (JSONObject) ((JSONArray) obj.get("result")).get(0);
         assertNotNull(result);
         assertTrue(result.getString("name").equalsIgnoreCase("doc.xml"));
     }

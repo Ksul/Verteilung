@@ -305,7 +305,7 @@
                     <div>
                         <label for="alfrescoSearch" style="float:left;margin: 20px 5px 5px 5px;">Suche </label>
                         <input id="alfrescoSearch" style="width:400px;height:auto;float:left;margin: 20px 5px 5px 5px;" class="ui-autocomplete-input" autocomplete="off"></input>
-                        <div id="alfrescoSearchButton" style="margin: 18px 5px 5px 5px;">Suche</div>
+                        <div id="alfrescoSearchButton" onclick="startSearch($('#alfrescoSearch').val());" style="margin: 18px 5px 5px 5px;">Suche</div>
                     </div>
 
             </div>
@@ -316,10 +316,10 @@
                                 <a href="#ansicht">Ansicht</a>
                                 <ul>
                                     <li>
-                                        <a href="#normal" onclick="showAlfrescoNormalView();">Normal</a>
+                                        <a href="#normal" onclick="showAlfrescoSearchNormalView();">Normal</a>
                                     </li>
                                     <li>
-                                        <a href="#icons" onclick="showAlfrescoIconView();">Icons</a>
+                                        <a href="#icons" onclick="showAlfrescoSearchIconView();">Icons</a>
                                     </li>
                                 </ul>
                         </ul>

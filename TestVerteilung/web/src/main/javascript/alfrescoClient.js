@@ -40,6 +40,17 @@ function showAlfrescoNormalView(){
 }
 
 /**
+ * startet den normalen Alfresco SearchView
+ */
+function showAlfrescoSearchNormalView(){
+    viewMenu.children('li:first').superfish('hide');
+    alfrescoSearchTabelle.column(0).visible(true);
+    alfrescoSearchTabelle.column(1).visible(true);
+    alfrescoSearchTabelle.column(2).visible(false);
+    calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+}
+
+/**
  * startet den Alfresco Icon View
  */
 function showAlfrescoIconView(){
@@ -52,6 +63,17 @@ function showAlfrescoIconView(){
 }
 
 /**
+ * startet den Alfresco Search Icon View
+ */
+function showAlfrescoSearchIconView() {
+    viewMenu.children('li:first').superfish('hide');
+    alfrescoSearchTabelle.column(0).visible(false);
+    alfrescoSearchTabelle.column(1).visible(false);
+    alfrescoSearchTabelle.column(2).visible(true);
+    calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+}
+
+    /**
  * Eventhandler der für die Verarbeitung von fallen gelassen Dateien auf die Inbox zuständig ist
  * @param evt  das Event
  */
@@ -1594,6 +1616,91 @@ function switchAlfrescoDirectory(data) {
 }
 
 /**
+ * startet die Suche
+ * @param searchText    der zu suchende Text
+ */
+function startSearch(searchText) {
+    try {
+        var sql = "SELECT * FROM cmis:document WHERE CONTAINS('" + searchText + "')";
+        var json = executeService("findDocument", [
+            {"name": "cmisQuery", "value": sql}
+        ], null, true);
+        if (json.success) {
+            alfrescoSearchTabelle.clear();
+            //$('#alfrescoSearchTableFooter').width(alfrescoLayout.center.children.alfrescoCenterInnerLayout.state.center.innerWidth);
+            alfrescoSearchTabelle.rows.add(json.result).draw();
+            calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+            $.fn.dataTable.makeEditable(alfrescoSearchTabelle, {
+                "fnShowError": function (text, aktion) {
+                    message("Fehler", text);
+                },
+                "aoColumns": [null,
+                    null,
+                    {
+                        placeholder: ""
+                    },
+                    {
+                        placeholder: ""
+                    },
+                    {
+                        placeholder: ""
+                    },
+                    {
+                        placeholder: ""
+                    },
+                    {
+                        placeholder: ""
+                    },
+                    null
+                ],
+                sUpdateURL: function (value, settings) {
+                    try {
+                        var extraProperties;
+                        var data = alfrescoSearchTabelle.row($(this).closest('tr')).data();
+                        if (this.cellIndex == 2) {
+                            // Titel geändert
+                            data.title = value
+                        } else if (this.cellIndex == 3) {
+                            // Datum geändert
+                            data.documentDate = $.datepicker.parseDate("dd.mm.yy", value).getTime();
+                        } else if (this.cellIndex == 4) {
+                            // Person geändert
+                            data.person = value;
+                        } else if (this.cellIndex == 5) {
+                            // Betrag geändert
+                            data.amount = value;
+                        } else if (this.cellIndex == 6) {
+                            // Id geändert
+                            data.idvalue = value;
+                        }
+                        var extraProperties = {
+                            'P:cm:titled': {'cm:title': data.title, 'cm:description': data.description},
+                            'D:my:archivContent': {'my:documentDate': data.documentDate, 'my:person': data.person},
+                            'P:my:amountable': {'my:amount': data.amount, "my:tax": data.tax},
+                            'P:my:idable': {'my:idvalue': data.idvalue}
+                        };
+                        erg = executeService("updateProperties", [
+                            {"name": "documentId", "value": data.objectId},
+                            {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+                        ], null, true);
+                        if (erg.success) {
+                            data.objectId = $.parseJSON(erg.result).objectId;
+                            return (value);
+                        }
+                        else
+                            return "Dokument konnte nicht aktualisiert werden!" + "<br>" + erg.result;
+                    } catch (e) {
+                        errorHandler(e);
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        errorHandler(e);
+    }
+}
+
+/**
  * behandelt die Clicks auf die Icons in der AlfrescoFoldertabelle
  */
 function handleAlfrescoFolderImageClicks() {
@@ -1668,7 +1775,7 @@ function handleAlfrescoImageClicks() {
     $(document).on("click", ".detailEdit", function () {
         try {
             var tr = $(this).closest('tr');
-            startDocumentDialog(alfrescoTabelle.row(tr));
+            startDocumentDialog($('#'+tr[0].parentElement.parentElement.id).DataTable().row(tr));
         } catch (e) {
             errorHandler(e);
         }
@@ -1681,7 +1788,7 @@ function handleAlfrescoImageClicks() {
             var obj = executeService("getTicket");
             if (obj.success) {
                 var json = executeService("getComments", [
-                    {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId},
+                    {"name": "documentId", "value": $('#'+tr[0].parentElement.parentElement.id).DataTable().row(tr).data().objectId},
                     {"name": "ticket", "value": obj.result.data.ticket}
                 ], ["Kommentare konnten nicht gelesen werden!"]);
                 if (json.success) {
@@ -1696,8 +1803,9 @@ function handleAlfrescoImageClicks() {
     $(document).on("click", ".deleteDocument", function () {
         try {
             var tr = $(this).closest('tr');
-            var id = alfrescoTabelle.row(tr).data().objectId;
-            var $dialog = $('<div></div>').html("Ausgewähltes Dokument " + alfrescoTabelle.row(tr).data().name + " löschen?").dialog({
+            var tabelle = $('#'+tr[0].parentElement.parentElement.id).DataTable();
+            var id = tabelle.row(tr).data().objectId;
+            var $dialog = $('<div></div>').html("Ausgewähltes Dokument " + tabelle.row(tr).data().name + " löschen?").dialog({
                 autoOpen: true,
                 title: "Dokument löschen",
                 modal: true,
@@ -1708,10 +1816,10 @@ function handleAlfrescoImageClicks() {
                         try {
                             $(this).dialog("destroy");
                             var erg = executeService("deleteDocument", [
-                                {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId}
+                                {"name": "documentId", "value": tabelle.row(tr).data().objectId}
                             ], ["Dokument konnte nicht gelöscht werden!"]);
                             if (erg.success) {
-                                alfrescoTabelle.rows().invalidate();
+                               tabelle.rows().invalidate();
                             }
                         } catch (e) {
                             errorHandler(e);
@@ -1730,14 +1838,15 @@ function handleAlfrescoImageClicks() {
         $(document).on("click", ".rulesDocument", function () {
             try {
                 var tr = $(this).closest('tr');
-                var id = alfrescoTabelle.row(tr).data().objectId;
+                var tabelle = $('#'+tr[0].parentElement.parentElement.id).DataTable();
+                var id = $('#'+tr[0].parentElement.parentElement.id).DataTable().row(tr).data().objectId;
                 var json = executeService("getDocumentContent", [
-                    {"name": "documentId", "value": alfrescoTabelle.row(tr).data().objectId},
+                    {"name": "documentId", "value": tabelle.row(tr).data().objectId},
                     {"name": "extract", "value": "true"}
                 ], ["Dokument konnten nicht gelesen werden!"]);
                 if (json.success) {
-                    loadText(json.result, json.result, alfrescoTabelle.row(tr).data().name, alfrescoTabelle.row(tr).data().contentStreamMimeType, null);
-                    tabLayout.tabs("option", "active", 1);
+                    loadText(json.result, json.result, tabelle.row(tr).data().name, tabelle.row(tr).data().contentStreamMimeType, null);
+                    tabLayout.tabs("option", "active", 2);
                 }
             } catch (e) {
                 errorHandler(e);

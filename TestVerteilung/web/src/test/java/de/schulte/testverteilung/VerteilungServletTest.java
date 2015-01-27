@@ -291,7 +291,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(sr);
         JSONObject obj = new JSONObject(sr.toString());
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        JSONObject doc = new JSONObject(obj.getString("result"));
+        JSONObject doc = (JSONObject) ((JSONArray) obj.get("result")).get(0);
         assertNotNull(doc);
         assertTrue(doc.getString("name").equalsIgnoreCase("doc.xml"));
     }

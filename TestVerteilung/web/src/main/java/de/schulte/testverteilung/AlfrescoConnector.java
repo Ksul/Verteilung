@@ -198,21 +198,20 @@ public class AlfrescoConnector {
     }
 
     /**
-     * liefert ein Dokument
+     * sucht Dokumente
      * @param queryString           die Abfragequery
-     * @return                      ein Document
+     * @return                      eine Liste mit CmisObjekten
      */
-    public Document findDocument(String queryString) throws VerteilungException {
+    public List<CmisObject>  findDocument(String queryString) throws VerteilungException {
+        List<CmisObject> erg = new ArrayList<CmisObject>();
 
-        ItemIterable<QueryResult> results = getSession().query(queryString, false);
-
+        ItemIterable<QueryResult> results =  getSession().query(queryString, false);
         for (Iterator<QueryResult> iterator = results.iterator(); iterator.hasNext(); ) {
             QueryResult qResult = iterator.next();
             String objectId = qResult.getPropertyValueByQueryName("cmis:objectId");
-            return (Document) getSession().getObject(getSession().createObjectId(objectId));
-
+            erg.add(getSession().getObject(getSession().createObjectId(objectId)));
         }
-        return null;
+        return erg;
     }
 
     /**

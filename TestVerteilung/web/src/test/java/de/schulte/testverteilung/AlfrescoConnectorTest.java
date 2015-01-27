@@ -16,10 +16,7 @@ import java.io.File;
 
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -102,14 +99,16 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testFindDocument() throws Exception{
-        Document doc = con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'");
-        assertNotNull(doc);
+        List<CmisObject> erg = con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'");
+        assertNotNull(erg);
+        assertEquals(1, erg.size());
+        Document doc = (Document) erg.get(0);
         assertEquals("doc.xml", doc.getName());
     }
 
     @Test
     public void testGetDocumentContent() throws Exception{
-        byte[] content = con.getDocumentContent(con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'"));
+        byte[] content = con.getDocumentContent((Document) con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'").get(0));
         assertNotNull(content);
         assertTrue(content.length > 0);
         String document =  new String(content, Charset.forName("UTF-8"));
