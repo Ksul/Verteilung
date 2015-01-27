@@ -218,6 +218,7 @@
         var settings;
         var alfrescoServerAvailable = false;
         var alfrescoLayout;
+        var searchLayout;
         var verteilungLayout;
         var tabLayout;
         var globalLayout;
@@ -311,7 +312,8 @@
             </div>
                 <div id="searchCenter" class="ui-tab-layout-center container hidden">
                     <div class="header  ui-widget-header">Ergebnisse
-                        <ul id="menu-2" style="float: right;" class="sf-menu" onmouseover="searchLayout.allowOverflow(this);">
+                        <ul id="menu-2" style="float: right;" class="sf-menu"
+                            onmouseover="searchLayout.allowOverflow(this);">
                             <li class="current" style="font-size: 0.9em;line-height: 0.3em">
                                 <a href="#ansicht">Ansicht</a>
                                 <ul>
@@ -324,14 +326,14 @@
                                 </ul>
                         </ul>
                     </div>
-                    <div >
-                        <div id="dtable4">
-                            <table cellpadding="0" cellspacing="0" border="0" class="display"
-                                   id="alfrescoSearchTabelle"></table>
+                    <div>
+                        <div class="ui-widget-content">
+                            <div id="dtable4">
+                                <table cellpadding="0" cellspacing="0" border="0" class="display"
+                                       id="alfrescoSearchTabelle"></table>
+                            </div>
+                            <div class="header ui-widget-header" id="alfrescoSearchTableFooter"></div>
                         </div>
-                        <div class="header ui-widget-header" id="alfrescoSearchTableFooter"></div>
-                    </div>
-                    <div class="ui-widget-content">
                     </div>
                 </div>
             </div>

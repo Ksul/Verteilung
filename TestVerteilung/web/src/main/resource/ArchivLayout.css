@@ -585,6 +585,13 @@ h2 {
     background-color: #ebebeb;
 }
 
+#alfrescoSearchTableFooter {
+    position: absolute;
+    bottom: 0px;
+    height: 25px;
+    background-color: #ebebeb;
+}
+
 .dataTables_paginate {
     float: right;
 }
