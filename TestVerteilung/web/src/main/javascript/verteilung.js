@@ -1325,9 +1325,6 @@ function checkAndBuidAlfrescoEnvironment() {
     // falls ja, dann Server Parameter eintragen
     if (alfrescoServerAvailable) {
         var erg;
-        var scriptFolderId;
-        var archivFolderId;
-        var fehlerFolderId;
         var extraProperties;
         erg = executeService("setParameter", [
             {"name": "server", "value": getSettings("server")},

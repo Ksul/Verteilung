@@ -200,7 +200,6 @@ function loadLayout() {
             initPanes: true,
             resizeWithWindow: false,
             contentSelector: ".ui-widget-content",
-            children: {
                 north: {
                     paneSelector: "#searchNorth",
                     name: "searchNorthLayout",
@@ -216,9 +215,8 @@ function loadLayout() {
                     minHeight: 80,
                     size: .8,
                     resizable: true,
-                    slidable: true
-                }
-            }
+                slidable: true
+                        }
         };
         var alfrescoLayoutSettings = {
             name: "alfrescoLayout",
@@ -299,7 +297,6 @@ function loadLayout() {
                                 onresize: function () {
                                     try {
                                         calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
-                                        $('#alfrescoFolderTableFooter').width(alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.north.alfrescoCenterNorthInnerLayout.state.container.innerWidth);
                                     } catch (e) {
                                         errorHandler(e);
                                     }
@@ -312,8 +309,7 @@ function loadLayout() {
                                 onresize: function () {
                                     try {
                                         calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
-                                        $('#alfrescoTableFooter').width(alfrescoLayout.center.children.alfrescoCenterInnerLayout.state.center.innerWidth);
-                                    } catch (e) {
+                                      } catch (e) {
                                         errorHandler(e);
                                     }
                                 }
@@ -412,7 +408,7 @@ function loadLayout() {
         tabLayout = $("#tabs").tabs({
             // using callback addon
             activate: $.layout.callbacks.resizeTabLayout,
-            active: 2
+            active : 1
 
             /* OR with a custom callback
              activate: function (evt, ui) {
@@ -431,8 +427,9 @@ function loadLayout() {
         verteilungLayout = $('#tab3').layout(verteilungLayoutSettings);
         searchLayout = $('#tab2').layout(searchLayoutSettings);
         alfrescoLayout = $('#tab1').layout(alfrescoLayoutSettings);
+
         globalLayout.deleteCookie();
-        globalLayout.options.stateManagement.autoSave = false
+        globalLayout.options.stateManagement.autoSave = false;
         // if there is no state-cookie, then DISABLE state management initially
         var cookieExists = !$.isEmptyObject(verteilungLayout.readCookie());
         if (!cookieExists) toggleStateManagement(true, false);
@@ -1039,7 +1036,7 @@ function loadAlfrescoSearchTable() {
 
         $("#alfrescoSearchTabelle_info").detach().appendTo('#alfrescoSearchTableFooter');
         $("#alfrescoSearchTabelle_paginate").detach().appendTo('#alfrescoSearchTableFooter');
-        $('#alfrescoSearchTableFooter').width(searchLayout.center.state.innerWidth);
+
         // Add event listener for opening and closing details
         $('#dtable4 tbody').on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
@@ -1058,6 +1055,7 @@ function loadAlfrescoSearchTable() {
                 calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
             }
         });
+
     } catch (e) {
         errorHandler(e);
     }
@@ -1480,7 +1478,6 @@ function switchAlfrescoDirectory(data) {
         ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
         if (json.success) {
             alfrescoFolderTabelle.clear();
-            $('#alfrescoFolderTableFooter').width(alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.north.alfrescoCenterNorthInnerLayout.state.container.innerWidth);
             alfrescoFolderTabelle.rows.add(json.result).draw();
             calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
             $.fn.dataTable.makeEditable( alfrescoFolderTabelle, {
@@ -1544,7 +1541,6 @@ function switchAlfrescoDirectory(data) {
         ], "Dokumente konnten nicht aus dem Server gelesen werden:");
         if (json.success) {
             alfrescoTabelle.clear();
-            $('#alfrescoTableFooter').width(alfrescoLayout.center.children.alfrescoCenterInnerLayout.state.center.innerWidth);
             alfrescoTabelle.rows.add(json.result).draw();
             calculateTableHeight("alfrescoCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             $.fn.dataTable.makeEditable( alfrescoTabelle, {
@@ -1623,13 +1619,12 @@ function switchAlfrescoDirectory(data) {
  */
 function startSearch(searchText) {
     try {
-        var sql = "SELECT * FROM cmis:document WHERE CONTAINS('" + searchText + "')";
+        var sql = "SELECT * FROM my:archivContent WHERE CONTAINS('" + searchText + "')";
         var json = executeService("findDocument", [
             {"name": "cmisQuery", "value": sql}
         ], null, true);
         if (json.success) {
             alfrescoSearchTabelle.clear();
-            $('#alfrescoSearchTableFooter').width(searchLayout.center.state.innerWidth);
             alfrescoSearchTabelle.rows.add(json.result).draw();
             calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
             $.fn.dataTable.makeEditable(alfrescoSearchTabelle, {

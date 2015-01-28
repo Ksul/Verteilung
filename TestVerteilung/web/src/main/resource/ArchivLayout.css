@@ -576,6 +576,7 @@ h2 {
     bottom: 0px;
     height: 25px;
     background-color: #ebebeb;
+    width: 100%;
 }
 
 #alfrescoFolderTableFooter {
@@ -583,6 +584,7 @@ h2 {
     bottom: 0px;
     height: 25px;
     background-color: #ebebeb;
+    width: 100%;
 }
 
 #alfrescoSearchTableFooter {
@@ -590,6 +592,7 @@ h2 {
     bottom: 0px;
     height: 25px;
     background-color: #ebebeb;
+    width: 100%;
 }
 
 .dataTables_paginate {
@@ -598,3 +601,4 @@ h2 {
 .dataTables_info {
     float: left;
 }
+
