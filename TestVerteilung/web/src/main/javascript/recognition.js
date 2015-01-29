@@ -816,8 +816,8 @@ ArchivTyp.prototype.resolve = function() {
 								REC.log(WARN, "Document exists, a new Version will created");
 								REC.makeNewVersion(tmpDoc, REC.currentDocument);
 							} else if (this.unique == "ignore") {
-								REC.log(WARN, "Dokumet existiert bereits, hochgeladenes Dokument wird gel\\u00F6scht!");
-								REC.currentDocument.remove();
+								REC.log(WARN, "Dokument existiert bereits, hochgeladenes Dokument wird gel\\u00F6scht!");
+								//REC.currentDocument.remove();
 								return found;
 							} else {
 								REC.errors.push("Dokument mit dem Dateinamen " + REC.currentDocument.name + " ist im Zielordner bereits vorhanden! ");
@@ -851,7 +851,7 @@ ArchivTyp.prototype.resolve = function() {
 													REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + tmp);
 											} else if (this.unique != "ignore") {
 												REC.log(WARN, "Dokument mit gleichem Titel existiert bereits, hochgeladenes Dokument wird gel\\u00F6scht!");
-												REC.currentDocument.remove();
+												//REC.currentDocument.remove();
 												return found;
 											}
 											break;
@@ -2337,7 +2337,8 @@ Recognition.prototype.buildFolder = function(direction) {
 			var part = parts[i];
 			dir = dir + (dir.length == 0 ? "" : "/") + part;
 			this.log(TRACE, "buildFolder: search Folder " + dir);
-			fol = companyhome.childByNamePath(dir);
+            if (dir.length > 0)
+			    fol = companyhome.childByNamePath(dir);
 			if (!this.exist(fol)) {
 				this.log(INFORMATIONAL, "erstelle Folder " + dir);
 				if (top == null) {

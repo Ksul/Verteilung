@@ -1628,7 +1628,7 @@ function startSearch(searchText) {
         ], null, true);
         if (json.success) {
             if (json.result.length == 0)
-                message("Suche", "Keine Dokumente gefunden", 4000);
+                message("Suche", "Keine Dokumente gefunden", 4000, 100, 300);
             alfrescoSearchTabelle.clear();
             alfrescoSearchTabelle.rows.add(json.result).draw();
             calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");

@@ -164,14 +164,20 @@ function errorHandler(e, description) {
  * @param title Titel des Fensters
  * @param str        Meldungstext
  * @param autoClose  Wert für den Timeout beim automatischen Schliessen der Message
+ * @param height     Höhe des Gensters
+ * @param width      Breite des Fensters
  */
-function message(title, str, autoClose) {
+function message(title, str, autoClose, height, width) {
+    if (!exist(height))
+        height = 200;
+    if (!exist(width))
+        width = 800;
     var dialogSettings = {
         autoOpen: false,
         title: title,
         modal: true,
-        height:200,
-        width:800
+        height: height,
+        width: width
     };
     if (exist(autoClose)) {
        dialogSettings.open = function(event, ui){
@@ -185,7 +191,7 @@ function message(title, str, autoClose) {
         }
     }
 
-    var $dialog = $('#messageBox').html(str).dialog(dialogSettings).css({height:"200px", width:"800px", overflow:"auto"});
+    var $dialog = $('#messageBox').html(str).dialog(dialogSettings).css({height:height+"px", width:width+"px", overflow:"auto"});
     $dialog.dialog('open');
 }
 
