@@ -162,21 +162,30 @@ function errorHandler(e, description) {
 /**
  * zeigt eine Meldung
  * @param title Titel des Fensters
- * @param str   Meldungstext
+ * @param str        Meldungstext
+ * @param autoClose  Wert für den Timeout beim automatischen Schliessen der Message
  */
-function message(title, str) {
-    var $dialog = $('<div></div>').html(str).dialog({
+function message(title, str, autoClose) {
+    var dialogSettings = {
         autoOpen: false,
         title: title,
         modal: true,
         height:200,
-        width:800,
-        buttons: {
+        width:800
+    };
+    if (exist(autoClose)) {
+       dialogSettings.open = function(event, ui){
+           setTimeout("$('#messageBox').dialog('close')",autoClose);
+       }
+    } else {
+        dialogSettings.buttons =  {
             "Ok": function () {
                 $(this).dialog("destroy");
             }
         }
-    }).css({height:"200px", width:"800px", overflow:"auto"});
+    }
+
+    var $dialog = $('#messageBox').html(str).dialog(dialogSettings).css({height:"200px", width:"800px", overflow:"auto"});
     $dialog.dialog('open');
 }
 

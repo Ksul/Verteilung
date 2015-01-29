@@ -678,6 +678,7 @@ function loadAlfrescoTable() {
             ],
             language: {
                 info: "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_",
+                emptyTable: " ",
                 paginate: {
                     first: "Erste ",
                     last:  "Letzte ",
@@ -801,7 +802,8 @@ function loadAlfrescoFolderTable() {
                 }
             ],
             language: {
-                info: "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
+                info: "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_" ,
+                emptyTable: " "
             }
         });
     } catch (e) {
@@ -1025,6 +1027,7 @@ function loadAlfrescoSearchTable() {
             ],
             language: {
                 info: "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_",
+                emptyTable: "Keine Ergebnisse gefunden",
                 paginate: {
                     first: "Erste ",
                     last:  "Letzte ",
@@ -1624,6 +1627,8 @@ function startSearch(searchText) {
             {"name": "cmisQuery", "value": sql}
         ], null, true);
         if (json.success) {
+            if (json.result.length == 0)
+                message("Suche", "Keine Dokumente gefunden", 4000);
             alfrescoSearchTabelle.clear();
             alfrescoSearchTabelle.rows.add(json.result).draw();
             calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
