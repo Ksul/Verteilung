@@ -69,6 +69,7 @@ String.prototype.startsWith = function (str) {
 
 /**
  * parst einen Alfresco Datums String
+ * @param dateString   der Datumsstring
  */
 function parseDate(dateString) {
     try {
@@ -161,7 +162,7 @@ function errorHandler(e, description) {
 
 /**
  * zeigt eine Meldung
- * @param title Titel des Fensters
+ * @param title      Titel des Fensters
  * @param str        Meldungstext
  * @param autoClose  Wert für den Timeout beim automatischen Schliessen der Message
  * @param height     Höhe des Gensters
