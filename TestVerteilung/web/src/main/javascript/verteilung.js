@@ -753,7 +753,7 @@ function doTest() {
     try {
         if (isLocal()) {
             var open = openFile("test.txt");
-            var content = open[0];
+            var content = open;
             REC.currentDocument.setContent(content);
             REC.currentDocument.name = "TEST";
             document.getElementById('headerWest').textContent = "TEST";
@@ -761,8 +761,8 @@ function doTest() {
             textEditor.getSession().setValue(content);
             if (!currentRules.endsWith("test.xml")) {
                 open = openFile("test.xml");
-                currentRules = open[1];
-                rulesEditor.getSession().setValue(open[0]);
+                currentRules = open;
+                rulesEditor.getSession().setValue(open);
                 document.getElementById('headerCenter').textContent = "Regeln (test.xml)";
             }
             REC.testRules(rulesEditor.getSession().getValue());
