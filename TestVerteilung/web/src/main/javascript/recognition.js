@@ -675,15 +675,15 @@ ArchivTyp.prototype.toString = function (ident) {
     if (!REC.exist(ident))
         ident = 0;
     ident++;
-    var txt = REC.getIdent(ident) + "ArchivTyp:\r";
-    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\r";
-    txt = txt + REC.getIdent(ident) + "name: " + this.name + "\r";
-    txt = txt + REC.getIdent(ident) + "searchString: " + this.searchString + "\r";
-    txt = txt + REC.getIdent(ident) + "type: " + this.name + "\r";
-    txt = txt + REC.getIdent(ident) + "unique: " + this.unique + "\r";
-    txt = txt + REC.getIdent(ident) + "removeBlanks: " + this.removeBlanks + "\r";
-    txt = txt + REC.getIdent(ident) + "caseSensitive: " + this.caseSensitive + "\r";
-    txt = txt + REC.getIdent(ident) + "completeWord: " + this.completeWord + "\r";
+    var txt = REC.getIdent(ident) + "ArchivTyp:\n";
+    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\n";
+    txt = txt + REC.getIdent(ident) + "name: " + this.name + "\n";
+    txt = txt + REC.getIdent(ident) + "searchString: " + this.searchString + "\n";
+    txt = txt + REC.getIdent(ident) + "type: " + this.name + "\n";
+    txt = txt + REC.getIdent(ident) + "unique: " + this.unique + "\n";
+    txt = txt + REC.getIdent(ident) + "removeBlanks: " + this.removeBlanks + "\n";
+    txt = txt + REC.getIdent(ident) + "caseSensitive: " + this.caseSensitive + "\n";
+    txt = txt + REC.getIdent(ident) + "completeWord: " + this.completeWord + "\n";
     if (REC.exist(this.archivPosition)) {
         for (i = 0; i < this.archivPosition.length; i++) {
             txt = txt + this.archivPosition[i].toString(ident);
@@ -724,7 +724,7 @@ ArchivTyp.prototype.resolve = function () {
     if (REC.exist(this.debugLevel))
         REC.debugLevel = this.debugLevel;
     REC.log(DEBUG, "resolve ArchivTyp " + this.name);
-    REC.log(TRACE, "ArchivTyp.resolve: settings are: \r" + this);
+    REC.log(TRACE, "ArchivTyp.resolve: settings are: \n" + this);
     var str = REC.exist(this.removeBlanks) ? REC.content.replace(/ /g, '') : REC.content;
     var pst = (this.completeWord ? "\\b" + this.searchString + "?\\b" : this.searchString);
     var pat = new RegExp(pst, (this.caseSensitive ? "" : "i"));
@@ -899,10 +899,10 @@ ArchivPosition.prototype.toString = function (ident) {
     if (!REC.exist(ident))
         ident = 0;
     ident++;
-    var txt = REC.getIdent(ident) + "ArchivPosition:\r";
-    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\r";
-    txt = txt + REC.getIdent(ident) + "link: " + this.link + "\r";
-    txt = txt + REC.getIdent(ident) + "folder: " + this.folder + "\r";
+    var txt = REC.getIdent(ident) + "ArchivPosition:\n";
+    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\n";
+    txt = txt + REC.getIdent(ident) + "link: " + this.link + "\n";
+    txt = txt + REC.getIdent(ident) + "folder: " + this.folder + "\n";
     if (REC.exist(this.archivZiel)) {
         for (var i = 0; i < this.archivZiel.length; i++) {
             txt = txt + this.archivZiel[i].toString(ident);
@@ -916,7 +916,7 @@ ArchivPosition.prototype.resolve = function () {
     if (REC.exist(this.debugLevel))
         REC.debugLevel = this.debugLevel;
     REC.log(DEBUG, "resolve ArchivPosition");
-    REC.log(TRACE, "ArchivPosition.resolve: settings are: \r" + this);
+    REC.log(TRACE, "ArchivPosition.resolve: settings are: \n" + this);
     var tmp = (REC.exist(REC.archivRoot) ? REC.archivRoot : "");
     REC.log(TRACE, "ArchivPosition.resolve: result is " + tmp);
     if (REC.exist(this.folder)) {
@@ -958,9 +958,9 @@ Format.prototype.toString = function (ident) {
     if (!REC.exist(ident))
         ident = 0;
     ident++;
-    var txt = REC.getIdent(ident) + "Format:\r";
-    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\r";
-    txt = txt + REC.getIdent(ident) + "formatString: " + this.formatString + "\r";
+    var txt = REC.getIdent(ident) + "Format:\n";
+    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\n";
+    txt = txt + REC.getIdent(ident) + "formatString: " + this.formatString + "\n";
     return txt;
 };
 
@@ -969,7 +969,7 @@ Format.prototype.resolve = function (value) {
     if (REC.exist(this.debugLevel))
         REC.debugLevel = this.debugLevel;
     REC.log(DEBUG, "resolve Format with " + value);
-    REC.log(TRACE, "Format.resolve: settings are: \r" + this);
+    REC.log(TRACE, "Format.resolve: settings are: \n" + this);
     var erg = null;
     if (REC.isDate(value))
         erg = REC.dateFormat(value, this.formatString);
@@ -993,10 +993,10 @@ ArchivZiel.prototype.toString = function (ident) {
     if (!REC.exist(ident))
         ident = 0;
     ident++;
-    var txt = REC.getIdent(ident) + "ArchivZiel:\r";
-    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\r";
-    txt = txt + REC.getIdent(ident) + "aspect: " + this.aspect + "\r";
-    txt = txt + REC.getIdent(ident) + "type: " + this.type + "\r";
+    var txt = REC.getIdent(ident) + "ArchivZiel:\n";
+    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\n";
+    txt = txt + REC.getIdent(ident) + "aspect: " + this.aspect + "\n";
+    txt = txt + REC.getIdent(ident) + "type: " + this.type + "\n";
     return txt;
 };
 
@@ -1005,7 +1005,7 @@ ArchivZiel.prototype.resolve = function (doc) {
     if (REC.exist(this.debugLevel))
         REC.debugLevel = this.debugLevel;
     REC.log(DEBUG, "resolve ArchivZiel");
-    REC.log(TRACE, "ArchivZiel.resolve: settings are: \r" + this);
+    REC.log(TRACE, "ArchivZiel.resolve: settings are: \n" + this);
     if (REC.exist(this.aspect)) {
         REC.log(TRACE, "ArchivZiel.resolve: Aspect is " + this.aspect);
         if (!companyhome.childByNamePath(doc).hasAspect(this.aspect))
@@ -1070,10 +1070,10 @@ Check.prototype.toString = function (ident) {
     if (!REC.exist(ident))
         ident = 0;
     ident++;
-    var txt = REC.getIdent(ident) + "Check:\r";
-    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\r";
-    txt = txt + REC.getIdent(ident) + "lowerValue: " + this.lowerValue + "\r";
-    txt = txt + REC.getIdent(ident) + "upperValue: " + this.upperValue + "\r";
+    var txt = REC.getIdent(ident) + "Check:\n";
+    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\n";
+    txt = txt + REC.getIdent(ident) + "lowerValue: " + this.lowerValue + "\n";
+    txt = txt + REC.getIdent(ident) + "upperValue: " + this.upperValue + "\n";
     return txt;
 };
 
@@ -1092,15 +1092,16 @@ Delimitter.prototype.toString = function (ident) {
         ident = 0;
     ident++;
     var txt = REC.getIdent(ident) + "Delimitter:\n";
-    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\r";
-    txt = txt + REC.getIdent(ident) + "typ: " + this.typ + "\r";
-    txt = txt + REC.getIdent(ident) + "text: " + this.text + "\r";
-    txt = txt + REC.getIdent(ident) + "count: " + this.count + "\r";
-    txt = txt + REC.getIdent(ident) + "removeBlanks: " + this.removeBlanks + "\r";
+    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\n";
+    txt = txt + REC.getIdent(ident) + "typ: " + this.typ + "\n";
+    txt = txt + REC.getIdent(ident) + "text: " + this.text + "\n";
+    txt = txt + REC.getIdent(ident) + "count: " + this.count + "\n";
+    txt = txt + REC.getIdent(ident) + "removeBlanks: " + this.removeBlanks + "\n";
     return txt;
 };
 
 Delimitter.prototype.resolve = function (erg, direction) {
+    jstestdriver.console.log("X"+this.text+"X");
     var orgLevel = REC.debugLevel;
     if (REC.exist(this.debugLevel))
         REC.debugLevel = this.debugLevel;
@@ -1112,32 +1113,31 @@ Delimitter.prototype.resolve = function (erg, direction) {
     for (var i = 0; i < erg.length; i++) {
         if (typeof erg[i].text == "string") {
             REC.log(DEBUG, "resolve Delimitter: current String is " + REC.printTrace(erg[i].text, direction));
-            var tmp = "erg[i].text";
-            var tmpStart = "erg[i].text";
-            var tmpEnd = "erg[i].text";
+            var txtSave = erg[i].text;
+            var tmp = "erg[i].text = erg[i].text";
+            var tmpPos = "txtSave";
             if (this.typ == "start") {
                 if (this.count < 0) {
-                    tmp = tmp + ".split(this.text).reverse().slice(0, REC.absolute(this.count)).reverse().join(this.text)";
-                    tmpStart = tmpStart + ".split(this.text).reverse().slice(REC.absolute(this.count)).reverse().join(this.text).length + this.text.length";
+                    tmp = tmp + ".split(this.text).reverse().slice(0, Math.abs(this.count)).reverse().join(this.text)";
+                    tmpPos = tmpPos + ".split(this.text).reverse().slice(Math.abs(this.count)).reverse().join(this.text).length + this.text.length";
                 } else {
-                    tmp = tmp + ".split(this.text).slice(REC.absolute(this.count)).join(this.text)";
-                    tmpStart = tmpStart + ".split(this.text).slice(0, REC.absolute(this.count)).join(this.text).length + this.text.length";
+                    tmp = tmp + ".split(this.text).slice(Math.abs(this.count)).join(this.text)";
+                    tmpPos = tmpPos + ".split(this.text).slice(0, Math.abs(this.count)).join(this.text).length + this.text.length";
                 }
-                tmpStart = "erg[i].start = erg[i].start + " + tmpStart;
-                eval(tmpStart);
+                tmpPos = "erg[i].start = erg[i].start + " + tmpPos;
+                eval(tmpPos);
             }
             if (this.typ == "end") {
                 if (this.count < 0) {
-                    tmp = tmp + ".split(this.text).reverse().slice(REC.absolute(this.count)).reverse().join(this.text)";
-                    tmpEnd = tmpEnd + ".split(this.text).reverse().slice(0, REC.absolute(this.count)).reverse().join(this.text).length";
+                    tmp = tmp + ".split(this.text).reverse().slice(Math.abs(this.count)).reverse().join(this.text)";
+                    tmpPos = tmpPos + ".split(this.text).reverse().slice(0, Math.abs(this.count)).reverse().join(this.text).length";
                 } else {
-                    tmp = tmp + ".split(this.text).slice(0, REC.absolute(this.count)).join(this.text)";
-                    tmpEnd = tmpEnd + ".split(this.text).slice(REC.absolute(this.count)).join(this.text).length - this.text.length";
+                    tmp = tmp + ".split(this.text).slice(0, Math.abs(this.count)).join(this.text)";
+                    tmpPos = tmpPos + ".split(this.text).slice(Math.abs(this.count)).join(this.text).length - this.text.length";
                 }
-                tmpEnd = "erg[i].end = erg[i].end - " + tmpEnd;
-                eval(tmpEnd);
+                tmpPos = "erg[i].end = erg[i].end - " + tmpPos;
+                eval(tmpPos);
             }
-            tmp = "erg[i].text = " + tmp;
             REC.log(TRACE, "Delimitter.resolve: eval with " + tmp + " and " + erg[i]);
             eval(tmp);
             REC.log(DEBUG, "Delimitter.resolve: result is " + REC.printTrace(erg[i].text, direction));
@@ -1161,9 +1161,9 @@ Category.prototype.toString = function (ident) {
     if (!REC.exist(ident))
         ident = 0;
     ident++;
-    var txt = REC.getIdent(ident) + "Category:\r";
-    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\r";
-    txt = txt + REC.getIdent(ident) + "name: " + this.name + "\r";
+    var txt = REC.getIdent(ident) + "Category:\n";
+    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\n";
+    txt = txt + REC.getIdent(ident) + "name: " + this.name + "\n";
     return txt;
 };
 
@@ -1172,7 +1172,7 @@ Category.prototype.resolve = function (document) {
     if (REC.exist(this.debugLevel))
         REC.debugLevel = this.debugLevel;
     REC.log(DEBUG, "resolve Category");
-    REC.log(TRACE, "Category.resolve: settings are: \r" + this);
+    REC.log(TRACE, "Category.resolve: settings are: \n" + this);
     if (REC.exist(this.name)) {
         REC.log(TRACE, "Category.resolve: Category is " + this.name);
         REC.log(INFORMATIONAL, "add Category " + this.name);
@@ -1237,9 +1237,9 @@ Tags.prototype.toString = function (ident) {
     if (!REC.exist(ident))
         ident = 0;
     ident++;
-    var txt = REC.getIdent(ident) + "Tags:\r";
-    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\r";
-    txt = txt + REC.getIdent(ident) + "name: " + this.name + "\r";
+    var txt = REC.getIdent(ident) + "Tags:\n";
+    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\n";
+    txt = txt + REC.getIdent(ident) + "name: " + this.name + "\n";
     return txt;
 };
 
@@ -1248,7 +1248,7 @@ Tags.prototype.resolve = function (doc) {
     if (REC.exist(this.debugLevel))
         REC.debugLevel = this.debugLevel;
     REC.log(DEBUG, "resolve Tags");
-    REC.log(TRACE, "Tags.resolve: settings are: \r" + this);
+    REC.log(TRACE, "Tags.resolve: settings are: \n" + this);
     if (REC.exist(this.name)) {
         REC.log(TRACE, "Tags.resolve: Tag is " + this.name);
         doc.addTag(this.name);
@@ -1374,27 +1374,27 @@ SearchItem.prototype.toString = function (ident) {
     if (!REC.exist(ident))
         ident = 0;
     ident++;
-    var txt = REC.getIdent(ident) + "SearchItem:\r";
-    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\r";
-    txt = txt + REC.getIdent(ident) + "name: " + this.name + "\r";
-    txt = txt + REC.getIdent(ident) + "readOverReturn: " + this.readOverReturn + "\r";
-    txt = txt + REC.getIdent(ident) + "fix: " + this.fix + "\r";
-    txt = txt + REC.getIdent(ident) + "kind: " + this.kind + "\r";
-    txt = txt + REC.getIdent(ident) + "word: " + this.word + "\r";
-    txt = txt + REC.getIdent(ident) + "eval: " + this.eval + "\r";
-    txt = txt + REC.getIdent(ident) + "text: " + this.text + "\r";
-    txt = txt + REC.getIdent(ident) + "value: " + this.value + "\r";
-    txt = txt + REC.getIdent(ident) + "expected: " + this.expected + "\r";
-    txt = txt + REC.getIdent(ident) + "target: " + this.target + "\r";
-    txt = txt + REC.getIdent(ident) + "objectTyp: " + this.objectTyp + "\r";
-    txt = txt + REC.getIdent(ident) + "required: " + this.required + "\r";
-    txt = txt + REC.getIdent(ident) + "removeBlanks: " + this.removeBlanks + "\r";
-    txt = txt + REC.getIdent(ident) + "removeReturns: " + this.removeReturns + "\r";
-    txt = txt + REC.getIdent(ident) + "backwards: " + this.backwards + "\r";
-    txt = txt + REC.getIdent(ident) + "left: " + this.left + "\r";
-    txt = txt + REC.getIdent(ident) + "caseSensitive: " + this.caseSensitive + "\r";
-    txt = txt + REC.getIdent(ident) + "completeWord: " + this.completeWord + "\r";
-    txt = txt + REC.getIdent(ident) + "included: " + this.included + "\r";
+    var txt = REC.getIdent(ident) + "SearchItem:\n";
+    txt = txt + REC.getIdent(ident) + "debugLevel: " + this.debugLevel + "\n";
+    txt = txt + REC.getIdent(ident) + "name: " + this.name + "\n";
+    txt = txt + REC.getIdent(ident) + "readOverReturn: " + this.readOverReturn + "\n";
+    txt = txt + REC.getIdent(ident) + "fix: " + this.fix + "\n";
+    txt = txt + REC.getIdent(ident) + "kind: " + this.kind + "\n";
+    txt = txt + REC.getIdent(ident) + "word: " + this.word + "\n";
+    txt = txt + REC.getIdent(ident) + "eval: " + this.eval + "\n";
+    txt = txt + REC.getIdent(ident) + "text: " + this.text + "\n";
+    txt = txt + REC.getIdent(ident) + "value: " + this.value + "\n";
+    txt = txt + REC.getIdent(ident) + "expected: " + this.expected + "\n";
+    txt = txt + REC.getIdent(ident) + "target: " + this.target + "\n";
+    txt = txt + REC.getIdent(ident) + "objectTyp: " + this.objectTyp + "\n";
+    txt = txt + REC.getIdent(ident) + "required: " + this.required + "\n";
+    txt = txt + REC.getIdent(ident) + "removeBlanks: " + this.removeBlanks + "\n";
+    txt = txt + REC.getIdent(ident) + "removeReturns: " + this.removeReturns + "\n";
+    txt = txt + REC.getIdent(ident) + "backwards: " + this.backwards + "\n";
+    txt = txt + REC.getIdent(ident) + "left: " + this.left + "\n";
+    txt = txt + REC.getIdent(ident) + "caseSensitive: " + this.caseSensitive + "\n";
+    txt = txt + REC.getIdent(ident) + "completeWord: " + this.completeWord + "\n";
+    txt = txt + REC.getIdent(ident) + "included: " + this.included + "\n";
     if (REC.exist(this.check)) {
         for (i = 0; i < this.check.length; i++) {
             txt = txt + this.check[i].toString(ident);
@@ -1617,7 +1617,7 @@ SearchItem.prototype.resolve = function () {
     if (REC.exist(this.debugLevel))
         REC.debugLevel = this.debugLevel;
     REC.log(DEBUG, "resolve SearchItem");
-    REC.log(TRACE, "SearchItem.resolve: settings are: \r" + this);
+    REC.log(TRACE, "SearchItem.resolve: settings are: \n" + this);
     if (this.resolved) {
         if (REC.results[this.name] != null)
             return REC.results[this.name].getValue();
@@ -1653,7 +1653,7 @@ SearchItem.prototype.resolve = function () {
             txt = txt.replace(/ /g, '');
         }
         if (REC.exist(this.removeReturns) && this.removeReturns == "before") {
-            txt = txt.replace(/\r/g, '').replace(/\n/g, '');
+            txt = txt.replace(/\n/g, '').replace(/\n/g, '');
         }
         if (REC.exist(this.kind))
             erg.modifyResult(this.findSpecialType(txt, this.kind, this.left, this.expected), 0);
@@ -1670,7 +1670,7 @@ SearchItem.prototype.resolve = function () {
             }
         }
         if (!this.readOverReturn && REC.exist(this.text)) {
-            var exp = new RegExp("[\\r\\n]");
+            var exp = new RegExp("[\\n\\n]");
             for (i = 0; i < erg.length; i++) {
                 if (typeof erg[i].text == "string") {
                     pos = erg[i].text.search(exp);
@@ -1826,6 +1826,17 @@ SearchResultContainer.prototype.isFound = function () {
     return (REC.exist(this.getResult()) && this.getResult().check);
 };
 
+SearchResultContainer.prototype.toString = function (ident) {
+    var txt = "";
+    if (!REC.exist(ident))
+        ident = 0;
+    ident++;
+    for (var i = 0; i < this.length; i++) {
+        txt = txt + REC.getIdent(ident) + this[i].toString() + "\n";
+    }
+    return txt;
+}
+
 SearchResultContainer.prototype.getError = function () {
     var e = this.getResult();
     if (e != null)
@@ -1834,6 +1845,15 @@ SearchResultContainer.prototype.getError = function () {
         return null;
 };
 
+/**
+ * speichert das Ergbenis einer Suche
+ * @param  text     der Text mit der Fundstelle
+ * @param  val      das Ergebnis als passender Objecttyp
+ * @param  start    die Beginnposition des Ergebnis uim Text
+ * @param  end      die Endeposition des Ergebnis uim Text
+ * @param  typ      der Typ des Ergebnis
+ * @param  expected für Testzwecke. Hier kann ein erwartetes Ergebnis hinterlegt werden
+ */
 function SearchResult(text, val, start, end, typ, expected) {
     this.text = text;
     this.start = start;
@@ -1851,10 +1871,24 @@ function SearchResult(text, val, start, end, typ, expected) {
             this.typ = "string";
     } else
         this.typ = typ;
-};
+}
 
 SearchResult.prototype.getValue = function () {
     return this.val;
+};
+
+SearchResult.prototype.toString = function(ident) {
+    if (!REC.exist(ident))
+        ident = 0;
+    ident++;
+    var txt = REC.getIdent(ident) + "SearchResult:\n";
+    txt = txt + REC.getIdent(ident) + "text    : " + this.text + "\n";
+    txt = txt + REC.getIdent(ident) + "start   : " + this.start + "\n";
+    txt = txt + REC.getIdent(ident) + "end     : " + this.end + "\n";
+    txt = txt + REC.getIdent(ident) + "val     : " + this.val + "\n";
+    txt = txt + REC.getIdent(ident) + "typ     : " + this.typ + "\n";
+    txt = txt + REC.getIdent(ident) + "expected: " + this.expected + "\n";
+    return txt;
 };
 
 
@@ -1968,21 +2002,21 @@ Recognition.prototype.print = function (obj, maxDepth, prefix) {
         for (var key in obj) {
             if (typeof obj[key] == 'object') {
                 if (maxDepth !== undefined && maxDepth <= 1) {
-                    result += (prefix + key + '=object [max depth reached]\r');
+                    result += (prefix + key + '=object [max depth reached]\n');
                 } else
                     result += print(obj[key], (maxDepth) ? maxDepth - 1 : maxDepth, prefix + key + '.');
             } else {
                 if (typeof obj[key] != "function")
                     if (typeof obj[key] == "string" && obj[key].length > REC.maxDebugLength)
-                        result += (prefix + key + '=' + obj[key].slice(0, REC.maxDebugLength) + '...\r');
+                        result += (prefix + key + '=' + obj[key].slice(0, REC.maxDebugLength) + '...\n');
                     else
-                        result += (prefix + key + '=' + obj[key] + '\r');
+                        result += (prefix + key + '=' + obj[key] + '\n');
             }
         }
     } else if (typeof obj == 'string' && obj.length > REC.maxDebugLength)
-        result += obj.slice(0, REC.maxDebugLength) + '...\r';
+        result += obj.slice(0, REC.maxDebugLength) + '...\n';
     else
-        result += obj + '\r';
+        result += obj + '\n';
     return result;
 };
 
@@ -2449,7 +2483,7 @@ Recognition.prototype.removeReturns = function (erg) {
     for (var i = 0; i < erg.length; i++) {
         if (typeof erg[i].text == "string") {
             this.log(TRACE, "Removing Returns from String...");
-            erg[i].text = this.mergeStr(erg[i], '\r');
+            erg[i].text = this.mergeStr(erg[i], '\n');
             erg[i].text = this.mergeStr(erg[i], '\n');
             erg[i].start = this.removedCharPos.getStartPos(erg[i].start);
             erg[i].end = this.removedCharPos.getEndPos(erg[i].start, erg[i].text);
@@ -2602,9 +2636,6 @@ Recognition.prototype.formatNumber = function (zahl, laenge) {
     return erg;
 };
 
-Recognition.prototype.absolute = function (val) {
-    return Math.abs(val);
-};
 
 Recognition.prototype.stringToBoolean = function (string, defaultVal) {
     if (this.exist(string)) {
@@ -2970,7 +3001,7 @@ const
 const
     COMMENTS_TOPIC_NAME = "Comments";
 const
-    whitespace = "\n\r\t ";
+    whitespace = "\n\n\t ";
 const
     quotes = "\"'";
 if (typeof (search) == "undefined") {
