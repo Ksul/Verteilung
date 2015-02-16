@@ -11,22 +11,22 @@
 		<searchItem name="Test 3" text="ID-Value" word="1,2" direction="left" objectTyp="date" expected="new Date(2015, 2, 1)" />
 		<searchItem name="Test 4" text="Wert" word="1" readOverReturn="true" objectTyp="float" expected="new Number(21.65)" />
 		<searchItem name="Test 5" text="Datum" readOverReturn="true" direction="left" objectTyp="float" expected="new Number(21.65)">
-			<delimitter typ="start" count="-3" text="\n" />
-			<delimitter typ="end" count="1" text="\n" />
+			<delimitter typ="start" count="-3" text="&#0010;" />
+			<delimitter typ="end" count="1" text="&#0010;" />
 		</searchItem>
 		<searchItem name="Test 6" text="ID-Value" objectTyp="int" expected="new Number(21)">
-			<delimitter typ="start" count="2" text="\u0020" />
-			<delimitter typ="end" count="1" text="\u0009" />
+			<delimitter typ="start" count="2" text="&#0032;" />
+			<delimitter typ="end" count="1" text="&#0009;" />
 		</searchItem>
 		<searchItem name="Test 7" text="Nachtrag" objectTyp="date" expected="new Date(2012, 2, 22)">
-			<delimitter typ="start" count="1" text="\n" />
+			<delimitter typ="start" count="1" text="&#0010;" />
 		</searchItem>
 		<searchItem name="Test 8" text="Wert" objectTyp="float" expected="new Number(123.5)" />
 		<searchItem name="Test 9" text="Gültig" objectTyp="date" expected="new Date(2012, 2, 10)" />
 		<searchItem name="Test 10" kind="amount,1" expected="new Number(22)" />
 		<searchItem name="Test 11" kind="date,4" direction="left" expected="new Date(2010, 11, 24)" />
 		<searchItem name="Test 12" text="KUSA" objectTyp="date" expected="new Date(2008, 0, 7)">
-			<delimitter typ="start" count="1" text="\n" />
+			<delimitter typ="start" count="1" text="&#0010;" />
 			<check lowerValue="01/01/2005" upperValue="01/01/2020" />
 		</searchItem>
 		<searchItem name="Test 13" text="buchen" word="2" objectTyp="float" expected="new Number(349.10)" />

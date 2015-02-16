@@ -1185,13 +1185,12 @@ function loadScript() {
 
 
 /**
- * lädt ein geändertes Verteilungsscript in den Kontext der Anwendung, damit die Ãnderungen wirksam werden
+ * lädt ein geändertes Verteilungsscript in den Kontext der Anwendung, damit die Änderungen wirksam werden
  */
 function reloadScript() {
     try {
         modifiedScript = textEditor.getSession().getValue();
         eval(modifiedScript);
-        REC = new Recognition();
         REC.set(REC);
         fillMessageBox("Script erfolgreich aktualisiert");
     } catch (e) {
@@ -1381,7 +1380,7 @@ function checkAndBuidAlfrescoEnvironment() {
                             rulesID = $.parseJSON(erg.result).objectId;
                     }
                 } else {
-                    scriptID = erg.result;
+                    rulesID = erg.result;
                 }
                 if (erg.success) {
                     // Archiv prüfen

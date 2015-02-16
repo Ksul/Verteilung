@@ -26,7 +26,7 @@
             </searchItem>
             <searchItem name="betrag" text="Rückrechnungsdifferenz" objectTyp="float" target="my:amount">
                 <check lowerValue="-200" upperValue="200" />
-                <delimitter typ="start" text="\u0020" count="1" removeBlanks="after" />
+                <delimitter typ="start" text="&#0032;" count="1" removeBlanks="after" />
                 <archivZiel aspect="my:amountable" />
             </searchItem>
         </archivTyp>
@@ -56,7 +56,7 @@
             <format formatString="MMMM YYYY" />
         </searchItem>
         <searchItem name="datum" text="Datum" objectTyp="date" target="my:documentDate">
-            <delimitter typ="start" text="\u0020" count="1" />
+            <delimitter typ="start" text="&#0032;" count="1" />
             <check lowerValue="01/01/2005" upperValue="01/01/2020" />
         </searchItem>
         <searchItem name="betrag" text="Gesamtbetrag" word="1" objectTyp="float" target="my:amount">
@@ -88,7 +88,7 @@
         <searchItem name="datum" kind="date" target="my:documentDate" />
         <searchItem name="betrag" text="Endbetrag" objectTyp="float" target="my:amount">
             <check lowerValue="30" upperValue="250" debugLevel="trace" />
-            <delimitter typ="start" text="\u0020" count="2" />
+            <delimitter typ="start" text="&#0032;" count="2" />
             <archivZiel aspect="my:amountable" />
         </searchItem>
         <searchItem name="tmp" objectTyp="date" value="datum">
@@ -136,8 +136,8 @@
         <searchItem name="person" fix="Klaus" target="my:person" />
         <archivTyp name="Rechnung O2 alt" searchString="O2 Germany">
             <searchItem name="datum" text="Ihre Kundennummer" objectTyp="date" target="my:documentDate">
-                <delimitter typ="start" text="\n" count="1" />
-                <delimitter typ="end" text="" count="10" />
+                <delimitter typ="start" text="&#0010;" count="1" />
+                <delimitter typ="end" text="&#0032;" count="10" />
                 <check lowerValue="01/01/2000" upperValue="01/10/2012" />
             </searchItem>
             <searchItem name="title" value="datum" objectTyp="date" target="cm:title">
@@ -145,8 +145,8 @@
             </searchItem>
             <searchItem name="betrag" text="Gesamtbetrag (inkl. MwSt.)" objectTyp="float" target="my:amount">
                 <check lowerValue="0" upperValue="50" />
-                <delimitter typ="start" text="\u0020" count="3" />
-                <delimitter typ="end" text="\u0020" count="1" />
+                <delimitter typ="start" text="&#0032;" count="3" />
+                <delimitter typ="end" text="&#0032;" count="1" />
                 <archivZiel aspect="my:amountable" />
             </searchItem>
         </archivTyp>
@@ -173,14 +173,14 @@
         <category name="Rente/Klaus" />
         <searchItem name="person" fix="Klaus" target="my:person" />
         <searchItem name="datum" text="Datum" objectTyp="date" target="my:documentDate">
-            <delimitter typ="start" text="\u0020" count="1" />
+            <delimitter typ="start" text="&#0032;" count="1" />
             <check lowerValue="01/01/2000" upperValue="01/01/2020" />
         </searchItem>
         <searchItem name="title" value="datum" objectTyp="date" target="cm:title">
             <format formatString="MMMM YYYY" />
         </searchItem>
         <searchItem name="id" text="Versicherungsnummer:" target="my:idvalue">
-            <delimitter typ="start" text="\n" count="1" />
+            <delimitter typ="start" text="&#0010;" count="1" />
             <archivZiel aspect="my:idable" />
         </searchItem>
     </archivTyp>
@@ -194,11 +194,11 @@
         <searchItem name="person" fix="Klaus" target="my:person" />
         <searchItem name="title" fix="Robert Kortenbrede" target="cm:title" />
         <searchItem name="datum" text="Datum" objectTyp="date" target="my:documentDate">
-            <delimitter typ="start" text="\u0020" count="1" />
+            <delimitter typ="start" text="&#0032;" count="1" />
             <check lowerValue="01/01/2000" upperValue="01/01/2020" />
         </searchItem>
         <searchItem name="id" text="Belegnummer" target="my:idvalue">
-            <delimitter typ="start" text="\u0020" count="1" />
+            <delimitter typ="start" text="&#0032;" count="1" />
             <archivZiel aspect="my:idable" />
             <check lowerValue="0" upperValue="99999" />
         </searchItem>
@@ -335,7 +335,7 @@
         <category name="Rechnung/Rechnung Musikschule Roxel" />
         <searchItem name="person" fix="Katja" target="my:person" />
         <searchItem name="datum" text="1530" objectTyp="date" target="my:documentDate">
-            <delimitter typ="start" text="\u0020" count="1" />
+            <delimitter typ="start" text="&#0032;" count="1" />
             <check lowerValue="01/01/2007" upperValue="01/01/2020" />
         </searchItem>
         <searchItem name="tmp2" objectTyp="date" value="datum">
@@ -347,7 +347,7 @@
             <archivZiel aspect="my:idable" />
         </searchItem>
         <searchItem name="betrag" text="fällig:" objectTyp="float" target="my:amount">
-            <delimitter typ="start" text="\u0020" count="1" />
+            <delimitter typ="start" text="&#0032;" count="1" />
             <check lowerValue="0" upperValue="950" />
             <archivZiel aspect="my:amountable" />
         </searchItem>
@@ -371,11 +371,11 @@
             </searchItem>
             <searchItem name="title" fix="Zahlungshinweis Kraftfahrzeugsteuer" target="cm:title" />
             <searchItem name="id" text="KraftSt-Nummer" target="my:idvalue">
-                <delimitter typ="start" text="\u0020" count="2" />
+                <delimitter typ="start" text="&#0032;" count="2" />
                 <archivZiel aspect="my:idable" />
             </searchItem>
             <searchItem name="betrag" text="Gesamtbetrag" objectTyp="float" target="my:amount">
-                <delimitter typ="start" text="\u0020" count="1" />
+                <delimitter typ="start" text="&#0032;" count="1" />
                 <check lowerValue="100" upperValue="300" />
                 <archivZiel aspect="my:amountable" />
             </searchItem>
@@ -435,8 +435,8 @@
                 <format formatString="YYYY" />
             </searchItem>
             <searchItem name="description" text="Hinweise" readOverReturn="true" direction="left" target="cm:description">
-                <delimitter typ="start" text="\n" count="-3" />
-                <delimitter typ="end" text="\n" count="-2" />
+                <delimitter typ="start" text="&#0010;" count="-3" />
+                <delimitter typ="end" text="&#0010;" count="-2" />
             </searchItem>
         </archivTyp>
     </archivTyp>
@@ -474,7 +474,7 @@
             <category name="Versicherung/Haftpflicht" />
             <searchItem name="person" fix="Katja" target="my:person" />
             <searchItem name="datum" text="Coburg" objectTyp="date" target="my:documentDate">
-                <delimitter typ="start" text="\u0020" count="1" />
+                <delimitter typ="start" text="&#0032;" count="1" />
                 <check lowerValue="01/01/2005" upperValue="01/01/2020" />
             </searchItem>
             <searchItem name="tmp" objectTyp="date" value="datum">
@@ -678,7 +678,7 @@
                 <archivZiel aspect="my:idable" />
             </searchItem>
             <searchItem name="betrag" text="Rechnungsbetrag" objectTyp="float" target="my:amount" readOverReturn="true" direction="left">
-                <delimitter typ="start" text="\n" count="-3" />
+                <delimitter typ="start" text="&#0010;" count="-3" />
                 <check lowerValue="150" upperValue="250" />
                 <archivZiel aspect="my:amountable" />
             </searchItem>
