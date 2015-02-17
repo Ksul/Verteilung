@@ -416,3 +416,99 @@ SearchItemTest.prototype.testResolveSearchItem28 = function() {
     assertEquals(8, REC.positions[0].endColumn);
 };
 
+SearchItemTest.prototype.testFindForWord1 = function() {
+    var text = "Dies ist ein Test";
+    var erg = new SearchResultContainer();
+    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    erg.addResult(result);
+    searchItem = new SearchItem({});
+    erg =  searchItem.findForWords(erg, [1], false)
+    assertEquals("ist", erg.getResult().text);
+    assertEquals(5, erg.getResult().start);
+    assertEquals(8, erg.getResult().end);
+};
+
+SearchItemTest.prototype.testFindForWord2 = function() {
+    var text = "Dies ist ein Test";
+    var erg = new SearchResultContainer();
+    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    erg.addResult(result);
+    searchItem = new SearchItem({});
+    erg =  searchItem.findForWords(erg, [1,2], false)
+    assertEquals("ist ein", erg.getResult().text);
+    assertEquals(5, erg.getResult().start);
+    assertEquals(12, erg.getResult().end);
+};
+
+SearchItemTest.prototype.testFindForWord3 = function() {
+    var text = "Dies ist ein Test";
+    var erg = new SearchResultContainer();
+    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    erg.addResult(result);
+    searchItem = new SearchItem({});
+    erg =  searchItem.findForWords(erg, [2,2], true)
+    assertEquals("Dies ist", erg.getResult().text);
+    assertEquals(0, erg.getResult().start);
+    assertEquals(8, erg.getResult().end);
+};
+
+SearchItemTest.prototype.testFindForSpecialType1 = function() {
+    var text = "Dies 01.01.2010 ist hoffentlich ein Datum";
+    searchItem = new SearchItem({});
+    erg =  searchItem.findSpecialType(text, ["date"], false, null);
+    assertEquals("01.01.2010", erg[0].text);
+    assertEquals(5, erg[0].start);
+    assertEquals(15, erg[0].end);
+    assertEquals(new Date(2010,0,1), erg[0].val);
+};
+
+SearchItemTest.prototype.testFindForSpecialType2 = function() {
+    var text = "Dies 125,78 €ist hoffentlich ein Betrag";
+    searchItem = new SearchItem({});
+    erg =  searchItem.findSpecialType(text, ["amount"], false, null);
+    assertEquals("125,78 €", erg[0].text);
+    assertEquals(5, erg[0].start);
+    assertEquals(13, erg[0].end);
+    assertEquals(125.78, erg[0].val);
+};
+
+SearchItemTest.prototype.testFindForSpecialType3 = function() {
+    var text = "Dies 125,78 €ist hoffentlich ein Betrag";
+    searchItem = new SearchItem({});
+    erg =  searchItem.findSpecialType(text, ["float"], false, null);
+    assertEquals("125,78", erg[0].text);
+    assertEquals(5, erg[0].start);
+    assertEquals(11, erg[0].end);
+    assertEquals(125.78, erg[0].val);
+};
+
+SearchItemTest.prototype.testFindForSpecialType4 = function() {
+    var text = "Dies 01. März 2010 ist hoffentlich ein Datum";
+    searchItem = new SearchItem({});
+    erg =  searchItem.findSpecialType(text, ["date"], false, null);
+    assertEquals("01. März 2010", erg[0].text);
+    assertEquals(5, erg[0].start);
+    assertEquals(18, erg[0].end);
+    assertEquals(new Date(2010,2,1), erg[0].val);
+};
+
+SearchItemTest.prototype.testFindForSpecialType4 = function() {
+    var text = "Dies März 2010 ist hoffentlich ein Datum";
+    searchItem = new SearchItem({});
+    erg =  searchItem.findSpecialType(text, ["date"], false, null);
+    assertEquals("März 2010", erg[0].text);
+    assertEquals(5, erg[0].start);
+    assertEquals(14, erg[0].end);
+    assertEquals(new Date(2010,2,1), erg[0].val);
+};
+
+SearchItemTest.prototype.testFindForSpecialType5 = function() {
+    var text = "Dies 03. 2010 ist hoffentlich ein Datum";
+    searchItem = new SearchItem({});
+    erg =  searchItem.findSpecialType(text, ["date"], false, null);
+    assertEquals("03. 2010", erg[0].text);
+    assertEquals(5, erg[0].start);
+    assertEquals(13, erg[0].end);
+    assertEquals(new Date(2010,2,1), erg[0].val);
+};
+

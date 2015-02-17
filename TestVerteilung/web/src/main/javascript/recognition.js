@@ -1330,7 +1330,7 @@ function Check(srch, parent) {
         REC.log(DEBUG, "Check.resolve: return for " + this.parent.name + " is " + erg.getResult().text);
         REC.debugLevel = orgLevel;
         return erg;
-    }
+    };
 
     this.toString = function (ident) {
         if (!REC.exist(ident))
@@ -1461,7 +1461,7 @@ function Delimitter(srch) {
         REC.log(TRACE, "resolve Delimitter with " + erg);
         REC.log(TRACE, "Delimitter.resolve: settings are:\n" + this);
         if (REC.exist(this.removeBlanks) && this.removeBlanks == "before") {
-            var str = removeBlanks(erg);
+            erg = REC.removeBlanks(erg);
         }
         for (var i = 0; i < erg.length; i++) {
             if (typeof erg[i].text == "string") {
@@ -1497,7 +1497,7 @@ function Delimitter(srch) {
             }
         }
         if (REC.exist(this.removeBlanks) && this.removeBlanks == "after") {
-            erg = removeBlanks(erg);
+            erg = REC.removeBlanks(erg);
         }
         REC.log(TRACE, "Delimitter.resolve: return is  " + erg);
         REC.debugLevel = orgLevel;
@@ -1800,7 +1800,7 @@ function SearchItem(srch) {
                         var pos = REC.mergeStr(erg[i], ".").replace(",", ".").search(numberExp);
                         if (pos != -1) {
                             erg[i].start = erg[i].start + pos;
-                            erg[i].end = erg[i].start + REC.mergeStr(erg[i], ".").replace(",", ".").match(REC.numberExp)[0].length + add;
+                            erg[i].end = erg[i].start + REC.mergeStr(erg[i], ".").replace(",", ".").match(numberExp)[0].length + add;
                         }
                     }
                 }
@@ -1809,22 +1809,27 @@ function SearchItem(srch) {
         return erg;
     };
 
+    /**
+     * sucht nach einem speziellen Ergebnistyp
+     * @param text              der zu duchsuchende Text
+     * @param kind              die Art des Ergebnistypen Mögliche Werte [amount] Geldbetrag, [date] Datum, [float] Nummer
+     * @param left              die Suchrichtung
+     * @param expected          ein erwartetes Ergebnis für Testzwecke
+     * @return {Array.<T>}
+     */
     this.findSpecialType = function (text, kind, left, expected) {
         var ret = [];
         var erg = null;
         var exp = [];
         if (kind[0] == "date") {
             exp[0] = new RegExp("\\d{1,2}\\.?.[ ]{0,9}[A\\u00C4BCDEFGIJKLMNOPRSTUVYZa\\u00E4bcdefgijklmnoprstuvyz]+\\.?[ ]{0,9}(\\d{4}|\\d{2})|\\d{1,2}\\.\\d{1,2}\\.(\\d{4}|\\d{2})", "g");
+            exp[1] = new RegExp("[A\\u00C4BCDEFGIJKLMNOPRSTUVYZa\\u00E4bcdefgijklmnoprstuvyz]+\\.?[ ]{0,9}(\\d{4}|\\d{2})|\\d{1,2}\\.\\d{1,2}\\.(\\d{4}|\\d{2})", "g");
         } else if (kind[0] == "amount") {
             exp[0] = new RegExp("((([0-9]{1,3}\\.)*[0-9]{1,3})|\\d+)(?:\\.|,(\\d{2}))?( Euro| EUR| \\u20AC)", "g");
         } else if (kind[0] == "float") {
             exp[0] = new RegExp("[\-0-9\.]+[\,]+[0-9]*");
         }
-        // exp[0] = new
-        // RegExp("(0[1-9]|[12][0-9]|3[01])\\s(J(anuar|uli)|M(a(erz|i)|?rz)|August|(Okto|Dezem)ber)\\s[1-9][0-9]{3}|(0[1-9]|[12][0-9]|30)\\s(April|Juni|(Sept|Nov)ember)\\s[1-9][0-9]{3}|(0[1-9]|1[0-9]|2[0-8])\\sFebruar\\s[1-9][0-9]{3}|29\\sFebruar\\s((0[48]|[2468][048]|[13579][26])00|[0-9]{2}(0[48]|[2468][048]|[13579][26]))");
-        // exp[1] = new
-        // RegExp("((0?[1-9]|[12][1-9]|3[01])\\.(0?[13578]|1[02])\\.20[0-9]{2}|(0?[1-9]|[12][1-9]|30)\\.(0?[13456789]|1[012])\\.20[0-9]{2}|(0?[1-9]|1[1-9]|2[0-8])\\.(0?[123456789]|1[012])\\.20[0-9]{2}|(0?[1-9]|[12][1-9])\\.(0?[123456789]|1[012])\\.20(00|04|08|12|16|20|24|28|32|36|40|44|48|52|56|60|64|68|72|76|80|84|88|92|96))");
-        for (var i = 0; i < exp.length; i++) {
+         for (var i = 0; i < exp.length; i++) {
             var match = text.match(exp[i]);
             var typ = null;
             if (REC.exist(match)) {
@@ -1840,6 +1845,7 @@ function SearchItem(srch) {
                         ret.push(res);
                     }
                 }
+                break;
             }
         }
         if (left)
@@ -1848,7 +1854,7 @@ function SearchItem(srch) {
     };
 
     this.handleError = function () {
-        REC.log(INFORMATIONAL, "SearchItemm.resolve: " + this.name + " has NO RESULT");
+        REC.log(INFORMATIONAL, "SearchItem.resolve: " + this.name + " has NO RESULT");
         this.resolved = true;
         REC.results[this.name] = null;
         return null;
@@ -1896,6 +1902,13 @@ function SearchItem(srch) {
         return erg;
     };
 
+    /**
+     *
+     * @param erg    das bisher gefundene Ergebnis
+     * @param word   Array mit der Anzahl Wörtern [Anzahl Wörter bis zum Ergebnis, Anzahl Wörter die ins Ergebnis fliessen]
+     * @param left   die Suchrichtung
+     * @return {*}
+     */
     this.findForWords = function (erg, word, left) {
         for (var i = 0; i < erg.length; i++) {
             if (typeof erg[i].text == "string") {
@@ -1967,7 +1980,7 @@ function SearchItem(srch) {
     };
 
     this.resolve = function () {
-        var i;
+        var i, e, erg;
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
             REC.debugLevel = this.debugLevel;
@@ -1979,18 +1992,18 @@ function SearchItem(srch) {
             else
                 return null;
         }
-        var erg = new SearchResultContainer();
+        erg = new SearchResultContainer();
         if (REC.exist(this.text))
             this.text = REC.replaceVar(this.text);
         var txt = null;
         if (REC.exist(this.fix))
             erg.modifyResult(new SearchResult(null, REC.convertValue(REC.replaceVar(this.fix), this.objectTyp), 0, 0, this.objectTyp, this.expected), 0);
         else if (REC.exist(this.eval)) {
-            var e = eval(REC.replaceVar(this.eval));
+            e = eval(REC.replaceVar(this.eval));
             erg.modifyResult(new SearchResult(e.toString(), e, 0, 0, null, this.expected), 0);
         } else {
             if (REC.exist(this.value)) {
-                var e = this.resolveItem(this.value);
+                e = this.resolveItem(this.value);
                 if (REC.exist(e)) {
                     e = new SearchResult(e.text, e.val, e.start, e.end, e.typ, e.expected);
                     if (REC.exist(this.expected))
@@ -2075,7 +2088,7 @@ function SearchItem(srch) {
             }
         }
         if (this.required && !erg.isFound()) {
-            var e = "Required SearchItem " + this.name + " is missing";
+            e = "Required SearchItem " + this.name + " is missing";
             REC.errors.push(e);
             REC.errors.push(erg.getError());
         } else if (erg.isFound()) {
@@ -2126,8 +2139,7 @@ PositionContainer.prototype.add = function (pos) {
     }
 };
 
-function SearchResultContainer() {
-};
+function SearchResultContainer() {}
 
 SearchResultContainer.prototype = [];
 

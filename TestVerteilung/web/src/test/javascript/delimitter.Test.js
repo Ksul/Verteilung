@@ -117,4 +117,32 @@ DelimitterTest.prototype.test8 = function() {
     assertEquals(9, erg.getResult().end);
 };
 
+DelimitterTest.prototype.test9 = function() {
+    var text = "Dies ist ein Test";
+    var erg = new SearchResultContainer();
+    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    erg.addResult(result);
+    var rules = '<delimitter debugLevel="trace" typ="start" count="4" removeBlanks="before" text=""/>';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
+    erg = delimitter.resolve(erg, false);
+    assertEquals("isteinTest", erg.getResult().text);
+    assertEquals(4, erg.getResult().start);
+};
+
+DelimitterTest.prototype.test10 = function() {
+    var text = "Dies ist ein Test";
+    var erg = new SearchResultContainer();
+    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    erg.addResult(result);
+    var rules = '<delimitter debugLevel="trace" typ="start" count="5" removeBlanks="after" text=""/>';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
+    erg = delimitter.resolve(erg, false);
+    assertEquals("isteinTest", erg.getResult().text);
+    assertEquals(5, erg.getResult().start);
+};
+
 

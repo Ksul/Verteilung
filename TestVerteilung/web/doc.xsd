@@ -32,6 +32,13 @@
         </xsd:annotation>
       </xsd:attribute>
       <xsd:attribute name="kind">
+        <xsd:annotation>
+          <xsd:documentation>Sucht nach einem bestimmten Ergebnistyp. Die möglichen Typen sind:
+                             Datum            [date]
+                             Währungsbetrag   [amount
+                             Zahl             [float]
+          </xsd:documentation>
+        </xsd:annotation>
         <xsd:simpleType>
           <xsd:restriction base="xsd:string">
             <xsd:pattern value="[date|amount|float]+(,+[0-9])?"></xsd:pattern>
@@ -40,7 +47,10 @@
       </xsd:attribute>
       <xsd:attribute name="word" type="xsd:string" use="optional">
         <xsd:annotation>
-          <xsd:documentation>Baut das Ergebnis aus dieser Eingabe zusammen.</xsd:documentation>
+          <xsd:documentation>Sucht nach ganzen Wörtern. Der Parameter kann aus 2 Komponenten bestehen, die durch ein KOmma getrennt werden
+                             Der erste Wert beschreibt di Anzahl Wörter bis zum gesuchten Ergebnis
+                             Der zweite (optionale) Wert gibt die Anzahl Wörter an, die in das Ergebnis übernommen werden sollen (Default: 1)
+          </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
       <xsd:attribute name="eval" type="evalType"></xsd:attribute>
