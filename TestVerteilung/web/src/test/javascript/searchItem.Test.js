@@ -492,7 +492,7 @@ SearchItemTest.prototype.testFindForSpecialType4 = function() {
     assertEquals(new Date(2010,2,1), erg[0].val);
 };
 
-SearchItemTest.prototype.testFindForSpecialType4 = function() {
+SearchItemTest.prototype.testFindForSpecialType5 = function() {
     var text = "Dies März 2010 ist hoffentlich ein Datum";
     searchItem = new SearchItem({});
     erg =  searchItem.findSpecialType(text, ["date"], false, null);
@@ -502,13 +502,5 @@ SearchItemTest.prototype.testFindForSpecialType4 = function() {
     assertEquals(new Date(2010,2,1), erg[0].val);
 };
 
-SearchItemTest.prototype.testFindForSpecialType5 = function() {
-    var text = "Dies 03. 2010 ist hoffentlich ein Datum";
-    searchItem = new SearchItem({});
-    erg =  searchItem.findSpecialType(text, ["date"], false, null);
-    assertEquals("03. 2010", erg[0].text);
-    assertEquals(5, erg[0].start);
-    assertEquals(13, erg[0].end);
-    assertEquals(new Date(2010,2,1), erg[0].val);
-};
+
 
