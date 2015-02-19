@@ -1,38 +1,43 @@
 SearchItemTest = TestCase("SearchItemTest");
 
-REC.content = " Dies ist ein Test!Datum: 01.05.1965\n" +
-"Wert:\n"+
-"\n" +
-"21,65\n" +
-"\n" +
-"Datum\n" +
-"Datum: März 15 ID-Value  21	22 Euro	23\n" +
-"\n" +
-"06.04.09\n" +
-" \n" +
-"\n" +
-"\n" +
-"Nachtrag zum\n" +
-"22 März 2012   \n" +
-"Gesamt in EUR \n" +
-"950,56 \n" +
-"    \n" +
-"+21,49 \n" +
-"Wert 123,5\n"  +
-"Gültig     10.März 2012  \n" +
-"24.12.2010 \n" +
-"KUSA Nr. 43124431 \n" +
-"7. Januar 2008 \n" +
-"Rechnungsdatum23.08.2011 \n" +
-"In den nächsten Tagen buchen wir 349,10 EUR von Ihrem Konto 123\n" +
-"Datum 21. März 2009 \n" +
-"Rechnungsbetrag 'ue 189.13 € \n" +
-"270 646 2793 \n"+
-"959 622 2280 \n"+
-"560 525 3966 \n" +
-"4.300,01 H \n"+
-"300 H \n"+
-"Der Verbrauch ist hoch.";
+
+
+SearchItemTest.prototype.setUp = function() {
+    REC.init();
+    REC.content = " Dies ist ein Test!Datum: 01.05.1965\n" +
+    "Wert:\n"+
+    "\n" +
+    "21,65\n" +
+    "\n" +
+    "Datum\n" +
+    "Datum: März 15 ID-Value  21	22 Euro	23\n" +
+    "\n" +
+    "06.04.09\n" +
+    " \n" +
+    "\n" +
+    "\n" +
+    "Nachtrag zum\n" +
+    "22 März 2012   \n" +
+    "Gesamt in EUR \n" +
+    "950,56 \n" +
+    "    \n" +
+    "+21,49 \n" +
+    "Wert 123,5\n"  +
+    "Gültig     10.März 2012  \n" +
+    "24.12.2010 \n" +
+    "KUSA Nr. 43124431 \n" +
+    "7. Januar 2008 \n" +
+    "Rechnungsdatum23.08.2011 \n" +
+    "In den nächsten Tagen buchen wir 349,10 EUR von Ihrem Konto 123\n" +
+    "Datum 21. März 2009 \n" +
+    "Rechnungsbetrag 'ue 189.13 € \n" +
+    "270 646 2793 \n"+
+    "959 622 2280 \n"+
+    "560 525 3966 \n" +
+    "4.300,01 H \n"+
+    "300 H \n"+
+    "Der Verbrauch ist hoch.";
+};
 
 /*SearchItemTest.prototype.testDateFormat = function() {
     var rec = new Recognition();
@@ -63,8 +68,7 @@ SearchItemTest.prototype.testResolveSearchItem3 = function() {
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     var searchItem = new SearchItem(new XMLObject(XMLDoc.docNode));
-    var tmp = REC.currentSearchItems.concat(searchItem);
-    REC.currentSearchItems = tmp;
+    REC.currentSearchItems = REC.currentSearchItems.concat(searchItem);
     rules = '<searchItem name="id" value="Datum" objectTyp="date"> <format formatString="YYYY" /> </searchItem>';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -73,7 +77,6 @@ SearchItemTest.prototype.testResolveSearchItem3 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem4 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 1" text="Datum" word="1" readOverReturn="true" objectTyp="date" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -86,7 +89,6 @@ SearchItemTest.prototype.testResolveSearchItem4 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem6 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 3" text="ID-Value" word="1,2" direction="left" objectTyp="date" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -99,7 +101,6 @@ SearchItemTest.prototype.testResolveSearchItem6 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem7 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 4" text="Wert" word="1" readOverReturn="true" objectTyp="float" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -112,7 +113,6 @@ SearchItemTest.prototype.testResolveSearchItem7 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem8 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 5" text="Datum" readOverReturn="true" direction="left" objectTyp="float">' +
                 '<delimitter typ="start" count="-3" text="&#0010;" />' +
                 '<delimitter typ="end" count="1" text="&#0010;" />' +
@@ -128,7 +128,6 @@ SearchItemTest.prototype.testResolveSearchItem8 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem9 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 6" text="ID-Value" objectTyp="int">' +
         '<delimitter typ="start" count="2" text="&#0032;" />' +
         '<delimitter typ="end" count="1 "text="&#0009;" />' +
@@ -144,7 +143,6 @@ SearchItemTest.prototype.testResolveSearchItem9 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem10 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 7" text="Nachtrag" objectTyp="date" >' +
         '<delimitter typ="start" count="1" text="&#0010;" />'
         '</searchItem>';
@@ -159,7 +157,6 @@ SearchItemTest.prototype.testResolveSearchItem10 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem11 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 8" text="Wert" objectTyp="float" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -172,7 +169,6 @@ SearchItemTest.prototype.testResolveSearchItem11 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem12 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 9" text="Gültig" objectTyp="date" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -185,7 +181,6 @@ SearchItemTest.prototype.testResolveSearchItem12 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem13 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 10" kind="amount,1" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -198,7 +193,6 @@ SearchItemTest.prototype.testResolveSearchItem13 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem14 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 11" kind="date,4" direction="left"/>';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -211,7 +205,6 @@ SearchItemTest.prototype.testResolveSearchItem14 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem15 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 12" text="KUSA" objectTyp="date">' +
             '<delimitter typ="start" count="1" text="&#0010;" />' +
             '<check lowerValue="01/01/2005" upperValue="01/01/2020" />' +
@@ -227,7 +220,6 @@ SearchItemTest.prototype.testResolveSearchItem15 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem16 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 13" text="buchen" word="2" objectTyp="float" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -240,7 +232,6 @@ SearchItemTest.prototype.testResolveSearchItem16 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem17 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 14" text="buchen" word="2" direction="left" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -253,7 +244,6 @@ SearchItemTest.prototype.testResolveSearchItem17 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem18 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 15" text="Konto" required="false" objectTyp="int" word="1">' +
                 '<check lowerValue="123" />' +
                 ' </searchItem>';
@@ -268,7 +258,6 @@ SearchItemTest.prototype.testResolveSearchItem18 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem19 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 16" text="Rechnungsdatum" objectTyp="date" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -281,7 +270,6 @@ SearchItemTest.prototype.testResolveSearchItem19 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem20 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 17" text="Gesamt in EUR" objectTyp="float" word="2" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -294,7 +282,6 @@ SearchItemTest.prototype.testResolveSearchItem20 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem21 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 18" kind="date,1" direction="left" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -307,7 +294,6 @@ SearchItemTest.prototype.testResolveSearchItem21 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem22 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="txt" text="Rechnungsbetrag" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -325,7 +311,6 @@ SearchItemTest.prototype.testResolveSearchItem22 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem23 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="txt" text="Rechnungsbetrag" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -344,7 +329,6 @@ SearchItemTest.prototype.testResolveSearchItem23 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem24 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="bet1" text="Wertentwicklung in EUR" word="1" objectTyp="float" required="false" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -363,7 +347,6 @@ SearchItemTest.prototype.testResolveSearchItem24 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem25 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 22" text="XYZ|Gesamt" word="2" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -376,7 +359,6 @@ SearchItemTest.prototype.testResolveSearchItem25 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem26 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 23" text="960|959" included="true" word="0,3" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -389,7 +371,6 @@ SearchItemTest.prototype.testResolveSearchItem26 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem27 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 24" text="3966" included="true" word="0,3" direction="left" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -402,7 +383,6 @@ SearchItemTest.prototype.testResolveSearchItem27 = function() {
 };
 
 SearchItemTest.prototype.testResolveSearchItem28 = function() {
-    REC.positions = new PositionContainer();
     var rules = '<searchItem name="Test 25" text="H " objectTyp="float" readOverReturn="true" word="1" direction="left" backwards="true" >' +
                 '<check lowerValue="400" upperValue="10000" />' +
                 '</searchItem>';

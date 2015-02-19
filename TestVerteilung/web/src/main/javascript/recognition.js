@@ -15,15 +15,16 @@ if (typeof (search) == "undefined") {
 }
 if (typeof (companyhome) == "undefined") {
     var companyhome = ({
+
         childByNamePath: function () {
-            return window.parent.REC.currentDocument;
+            return REC.currentDocument;
         }
     });
 }
 if (typeof (commentService) == "undefined") {
     var commentService = ({
         createCommentsFolder: function (node) {
-            return window.parent.REC.currentDocument;
+            return REC.currentDocument;
         }
     });
 }
@@ -1137,6 +1138,11 @@ function ArchivTyp(srch) {
     };
 }
 
+/**
+ * Ermittelt die Zielposition für das Dokument
+ * @param srch      die Parameter
+ * @constructor
+ */
 function ArchivPosition(srch) {
     if (REC.exist(srch.debugLevel))
         REC.debugLevel = REC.getDebugLevel(srch.debugLevel);
@@ -1156,6 +1162,11 @@ function ArchivPosition(srch) {
             REC.log(WARN, "No valid Archivziel found");
     }
 
+    /**
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
+     */
     this.toString = function (ident) {
         if (!REC.exist(ident))
             ident = 0;
@@ -1172,7 +1183,12 @@ function ArchivPosition(srch) {
         return txt;
     };
 
+    /**
+     * ermittelt die Position des Dokumentes im Archiv
+     * @return {string}  die Position
+     */
     this.resolve = function () {
+        var erg;
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
             REC.debugLevel = this.debugLevel;
@@ -1181,11 +1197,17 @@ function ArchivPosition(srch) {
         var tmp = (REC.exist(REC.archivRoot) ? REC.archivRoot : "");
         REC.log(TRACE, "ArchivPosition.resolve: result is " + tmp);
         if (REC.exist(this.folder)) {
-            tmp = tmp + REC.replaceVar(this.folder);
+            var tmp1 =  REC.replaceVar(this.folder);
+            if (!tmp1[1]) {
+                erg = "Variabel konnte nicht im Foldernamen ersetzt werden!\n";
+                REC.errors.push(erg);
+                return;
+            }
+            tmp = tmp + tmp1[0];
             var exp = new RegExp("[*\"<>\?:|]|\\.$");
             if (tmp.match(exp)) {
                 var m = exp.exec(tmp);
-                var erg = "Ung\ufffdtige Zeichen f\ufffdr Foldernamen!\n";
+                erg = "Ung\ufffdtige Zeichen f\ufffdr Foldernamen!\n";
                 erg = erg + tmp + "\n";
                 erg = erg + "Position " + m.index + ":\n";
                 for (var i = 0; i < m.length; i++) {
@@ -1209,13 +1231,23 @@ function ArchivPosition(srch) {
         return tmp;
     };
 
-};
+}
 
+/**
+ * formatiert Werte
+ * @param srch      die Parameter
+ * @constructor
+ */
 function Format(srch) {
     if (REC.exist(srch.debugLevel))
         this.debugLevel = REC.getDebugLevel(srch.debugLevel);
     this.formatString = srch.formatString;
 
+    /**
+     * String Repräsentation des Ob
+      * @param ident
+     * @return {string}
+     */
    this.toString = function (ident) {
         if (!REC.exist(ident))
             ident = 0;
@@ -1226,6 +1258,11 @@ function Format(srch) {
         return txt;
     };
 
+    /**
+     * formatiert den Wert
+     * @param value     der Wert
+     * @return {*}      der Wert als formatierter String
+     */
     this.resolve = function (value) {
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
@@ -1242,9 +1279,13 @@ function Format(srch) {
         return erg;
     };
 
-};
+}
 
-
+/**
+ * Setzt das ArchivZiel
+ * @param srch      die Parameter
+ * @constructor
+ */
 function ArchivZiel(srch) {
     if (REC.exist(srch.debugLevel))
         this.debugLevel = REC.getDebugLevel(srch.debugLevel);
@@ -1253,6 +1294,11 @@ function ArchivZiel(srch) {
     if (REC.exist(srch.type))
         this.type = srch.type;
 
+    /**
+     * String Repräsentation des Ob
+     * @param ident
+     * @return {string}
+     */
     this.toString = function (ident) {
         if (!REC.exist(ident))
             ident = 0;
@@ -1262,8 +1308,11 @@ function ArchivZiel(srch) {
         txt = txt + REC.getIdent(ident) + "aspect: " + this.aspect + "\n";
         txt = txt + REC.getIdent(ident) + "type: " + this.type + "\n";
         return txt;
-    }
+    };
 
+    /**
+     * setzt das Archiv Ziel
+     */
     this.resolve = function (doc) {
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
@@ -1283,7 +1332,7 @@ function ArchivZiel(srch) {
             REC.log(INFORMATIONAL, "specialize type " + this.type);
         }
         REC.debugLevel = orgLevel;
-    }
+    };
 }
 
 function Check(srch, parent) {
@@ -1304,8 +1353,8 @@ function Check(srch, parent) {
         this.lowerValue = (REC.exist(srch.lowerValue) ? parseFloat(REC.trim(srch.lowerValue)) : null);
         this.upperValue = (REC.exist(srch.upperValue) ? parseFloat(REC.trim(srch.upperValue)) : null);
     } else {
-        this.upperValue = (REC.exist(srch.lowerValue) ? srch.upperValue : null);
-        this.upperValue = (REC.exist(srch.lowerValue) ? srch.upperValue : null);
+        this.lowerValue = (REC.exist(srch.lowerValue) ? srch.lowerValue : null);
+        this.upperValue = (REC.exist(srch.upperValue) ? srch.upperValue : null);
     }
 
 
@@ -1994,12 +2043,12 @@ function SearchItem(srch) {
         }
         erg = new SearchResultContainer();
         if (REC.exist(this.text))
-            this.text = REC.replaceVar(this.text);
+            this.text = REC.replaceVar(this.text)[0];
         var txt = null;
         if (REC.exist(this.fix))
-            erg.modifyResult(new SearchResult(null, REC.convertValue(REC.replaceVar(this.fix), this.objectTyp), 0, 0, this.objectTyp, this.expected), 0);
+            erg.modifyResult(new SearchResult(null, REC.convertValue(REC.replaceVar(this.fix)[0], this.objectTyp), 0, 0, this.objectTyp, this.expected), 0);
         else if (REC.exist(this.eval)) {
-            e = eval(REC.replaceVar(this.eval));
+            e = eval(REC.replaceVar(this.eval)[0]);
             erg.modifyResult(new SearchResult(e.toString(), e, 0, 0, null, this.expected), 0);
         } else {
             if (REC.exist(this.value)) {
@@ -2404,11 +2453,17 @@ REC = {
         return result;
     },
 
+    /**
+     * ersetzt eine Variabel mit dem Ergebnis eines SearchItems
+     * @param   str     der String mit der Variabel
+     * @return  Array: [0] der ersetzte String, [1] true, wenn Ersetzung erfolgreich
+     */
     replaceVar: function (str) {
-        var replaced = false;
+        var replaced = true;
         if (str.indexOf("{") != -1) {
+            replaced = false;
             if (this.exist(this.currentSearchItems)) {
-                for (var i = 0; i < this.currentSearchItems.length; i++) {
+                for (var i = 0; i < this.currentSearchItems.length && !replaced; i++) {
                     if (str.indexOf("{" + this.currentSearchItems[i].name + "}") != -1) {
                         var erg = this.currentSearchItems[i].resolve();
                         if (this.exist(erg)) {
@@ -2423,7 +2478,7 @@ REC = {
             if (!replaced)
                 REC.errors.push("could not replace Placeholder " + str.match(/\{.+\}/g) + "!");
         }
-        return str;
+        return [str, replaced];
     },
 
     buildDate: function (text) {
@@ -2658,7 +2713,14 @@ REC = {
             return "";
     },
 
+    /**
+     * formatiert Zahlen
+     * @param   formatNumber    die zu formatierende Zahl
+     * @param   formatString    der Format String
+     * @ return die formatierte Zahl als String
+     * */
     numberFormat: function (formatNumber, formatString) {
+        var c, d, e, f, g, h, i, j, k;
         if (!formatString || isNaN(+formatNumber))
             return formatNumber;
         formatNumber = formatString.charAt(0) == "-" ? -formatNumber : +formatNumber, j = formatNumber < 0 ? formatNumber = -formatNumber : 0, e = formatString.match(/[^\d\-\+#]/g),
@@ -2668,7 +2730,7 @@ REC = {
             formatNumber = (+formatNumber).toFixed(d + 1);
         d = formatString[0].split(e);
         formatString[0] = d.join("");
-        var f = formatString[0] && formatString[0].indexOf("0");
+        f = formatString[0] && formatString[0].indexOf("0");
         if (f > -1)
             for (; c[0].length < formatString[0].length - f;)
                 c[0] = "0" + c[0];
@@ -2677,7 +2739,7 @@ REC = {
         formatNumber = formatNumber.split(".");
         formatNumber[0] = c[0];
         if (c = d[1] && d[d.length - 1].length) {
-            for (var d = formatNumber[0], f = "", k = d.length % c, g = 0, i = d.length; g < i; g++)
+            for ( d = formatNumber[0], f = "", k = d.length % c, g = 0, i = d.length; g < i; g++)
                 f += d.charAt(g), !((g - k + 1) % c) && g < i - c && (f += e);
             formatNumber[0] = f;
         }
@@ -3204,16 +3266,19 @@ REC = {
             this.properties = [];
         },
         name: 'WebScriptTest',
+        subType: "",
+        aspect: "",
         childByNamePath: function () {
             return null;
         },
-        hasAspect: function () {
-            return false;
+        hasAspect: function (aspect) {
+            return this.aspect == aspect;
         },
-        isSubType: function () {
-            return true;
+        isSubType: function (type) {
+            return this.subType == type;
         },
-        addAspect: function () {
+        addAspect: function (aspect) {
+            this.aspect = aspect;
         },
         addTag: function () {
         },
@@ -3222,7 +3287,8 @@ REC = {
         },
         checkin: function () {
         },
-        specializeType: function () {
+        specializeType: function (type) {
+            this.subType = type;
         },
         createNode: function (name, typ) {
             return this;
@@ -3243,6 +3309,32 @@ REC = {
         }
     } : currentDocument,
 
+    init: function(){
+        this.id = Math.random() * 100;
+        this.debugLevel = INFORMATIONAL;
+        this.mess = "";
+        this.content = "";
+        this.errors = [];
+        this.results = [];
+        this.archivRoot = "";
+        this.inBox = "";
+        this.duplicateBox = "";
+        this.errorBox = "";
+        this.unknownBox = "";
+        this.fehlerBox = "";
+        this.maxDebugLength = 0;
+        this.mandatoryElements = [];
+        this.currentSearchItems = [];
+        this.positions = [];
+        this.currXMLName = [];
+        this.removedCharPos = new RemovedChar();
+        this.showContent = false;
+        this.result = [];
+        this.errors = [];
+        this.results = [];
+        this.positions = new PositionContainer();
+    },
+    
     id: Math.random() * 100,
     debugLevel: INFORMATIONAL,
     mess: "",
@@ -3257,11 +3349,9 @@ REC = {
     fehlerBox: "",
     maxDebugLength: 0,
     mandatoryElements: [],
-//currentDocument: "",
     currentSearchItems: [],
     positions: [],
     currXMLName: [],
-// exp1: new RegExp("[^\\s]"),
     removedCharPos: new RemovedChar(),
     showContent: false,
     result: [],

@@ -4,6 +4,9 @@
 
 DelimitterTest = TestCase("DelimitterTest");
 
+DelimitterTest.prototype.setUp = function() {
+    REC.init();
+};
 
 DelimitterTest.prototype.test1 = function() {
     var text = "     Dies ist ein  Test";
