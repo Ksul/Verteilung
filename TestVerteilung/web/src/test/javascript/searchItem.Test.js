@@ -398,38 +398,36 @@ SearchItemTest.prototype.testResolveSearchItem28 = function() {
 
 SearchItemTest.prototype.testFindForWord1 = function() {
     var text = "Dies ist ein Test";
-    var erg = new SearchResultContainer();
     var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
-    erg.addResult(result);
     searchItem = new SearchItem({});
-    erg =  searchItem.findForWords(erg, [1], false)
-    assertEquals("ist", erg.getResult().text);
-    assertEquals(5, erg.getResult().start);
-    assertEquals(8, erg.getResult().end);
+    searchItem.erg.addResult(result);
+    searchItem.findForWords( [1], false)
+    assertEquals("ist", searchItem.erg.getResult().text);
+    assertEquals(5, searchItem.erg.getResult().start);
+    assertEquals(8, searchItem.erg.getResult().end);
 };
 
 SearchItemTest.prototype.testFindForWord2 = function() {
     var text = "Dies ist ein Test";
-    var erg = new SearchResultContainer();
     var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
-    erg.addResult(result);
     searchItem = new SearchItem({});
-    erg =  searchItem.findForWords(erg, [1,2], false)
-    assertEquals("ist ein", erg.getResult().text);
-    assertEquals(5, erg.getResult().start);
-    assertEquals(12, erg.getResult().end);
+    searchItem.erg.addResult(result);
+    searchItem.findForWords([1,2], false)
+    assertEquals("ist ein", searchItem.erg.getResult().text);
+    assertEquals(5, searchItem.erg.getResult().start);
+    assertEquals(12, searchItem.erg.getResult().end);
 };
 
 SearchItemTest.prototype.testFindForWord3 = function() {
     var text = "Dies ist ein Test";
     var erg = new SearchResultContainer();
     var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
-    erg.addResult(result);
     searchItem = new SearchItem({});
-    erg =  searchItem.findForWords(erg, [2,2], true)
-    assertEquals("Dies ist", erg.getResult().text);
-    assertEquals(0, erg.getResult().start);
-    assertEquals(8, erg.getResult().end);
+    searchItem.erg.addResult(result);
+    searchItem.findForWords([2,2], true)
+    assertEquals("Dies ist", searchItem.erg.getResult().text);
+    assertEquals(0, searchItem.erg.getResult().start);
+    assertEquals(8, searchItem.erg.getResult().end);
 };
 
 SearchItemTest.prototype.testFindForSpecialType1 = function() {

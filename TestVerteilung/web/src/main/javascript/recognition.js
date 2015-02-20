@@ -6,6 +6,8 @@ var DEBUG = new DebugLevel(4, "DEBUG");
 var TRACE = new DebugLevel(5, "TRACE");
 var whitespace = "\n\n\t ";
 
+
+// Mock Alfresco Types
 if (typeof (search) == "undefined") {
     var search = ({
         luceneSearch: function () {
@@ -29,19 +31,53 @@ if (typeof (commentService) == "undefined") {
     });
 }
 if (typeof (classification) == "undefined") {
-    var classification = ({
-        getRootCategories: function () {
-            return this;
-        },
-        createRootCategory: function () {
-            return this;
-        },
-        createSubCategory: function () {
-            return this;
-        },
-        subCategories: this,
-        name: "Testkategorie"
-    });
+
+    var classification = new CategoryNode("ROOT");
+    function CategoryNode(name) {
+        this.name = name;
+        this.isCategory = true;
+        this.categoryMembers = [];
+        this.rootCategories = [];
+        this.subCategories = [];
+        this.membersAndSubCategories = [];
+        this.immediateCategoryMembers = [];
+        this.immediateSubCategories = [];
+        this.immediateMembersAndSubCategories = [];
+    }
+    CategoryNode.prototype.createSubCategory = function(name) {
+        var category = new CategoryNode(name);
+        this.subCategories.push(category);
+        return category;
+    };
+
+    CategoryNode.prototype.removeSubCategory = function(name) {
+        for (var i = 0; i < this.subCategories.length; i++) {
+            if (this.subCategories[i].name == name)
+                this.subCategories.splice(i, 1);
+        }
+    };
+
+    CategoryNode.prototype.createRootCategory = function(f, name) {
+        var category = new CategoryNode(name);
+        this.rootCategories.push(category);
+        return category;
+    };
+
+    CategoryNode.prototype.getRootCategories = function(name) {
+
+        for (var i=0; i < this.rootCategories.length; i++){
+            if (this.rootCategories[i].name == name)
+                return this.rootCategories[i].name;
+        }
+        return [];
+    };
+
+    CategoryNode.prototype.removeRootCategory = function(name) {
+        for (var i = 0; i < this.rootCategories.length; i++) {
+            if (this.rootCategories[i].name == name)
+                this.rootCategories.splice(i, 1);
+        }
+    };
 }
 
 Encoder = {
@@ -1335,6 +1371,12 @@ function ArchivZiel(srch) {
     };
 }
 
+/**
+ * Stellt Funktionalität zur Gültigkeitsprüfung von gefundenen Ergebnissen zur Verfügung
+ * @param srch      die Parameter
+ * @param parent    das dazugehörende SearchItem
+ * @constructor
+ */
 function Check(srch, parent) {
 
     if (REC.exist(srch.debugLevel))
@@ -1357,30 +1399,36 @@ function Check(srch, parent) {
         this.upperValue = (REC.exist(srch.upperValue) ? srch.upperValue : null);
     }
 
-
-    this.resolve = function (erg) {
+    /**
+     * führt die eigentliche Prüfung durch
+     */
+    this.resolve = function () {
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
             REC.debugLevel = this.debugLevel;
-        REC.log(DEBUG, "resolve Check with " + erg + " and " + this.parent.name);
+        REC.log(DEBUG, "resolve Check with " + this.parent.erg + " and " + this.parent.name);
         REC.log(TRACE, "Check.resolve: settings are:\n" + this);
-        for (var i = 0; i < erg.length; i++) {
-            if (erg[i].check) {
-                if (REC.exist(this.upperValue) && erg[i].getValue() > this.upperValue) {
-                    erg[i].check = false;
-                    erg[i].error = this.parent.name + " maybe wrong [" + erg[i].getValue() + "] is bigger " + this.upperValue;
+        for (var i = 0; i < this.parent.erg.length; i++) {
+            if (this.parent.erg[i].check) {
+                if (REC.exist(this.upperValue) && this.parent.erg[i].getValue() > this.upperValue) {
+                    this.parent.erg[i].check = false;
+                    this.parent.erg[i].error = this.parent.name + " maybe wrong [" + this.parent.erg[i].getValue() + "] is bigger " + this.upperValue;
                 }
-                if (REC.exist(this.lowerValue) && erg[i].getValue() < this.lowerValue) {
-                    erg[i].check = false;
-                    erg[i].error = this.parent.name + " maybe wrong [" + erg[i].getValue() + "] is smaller " + this.lowerValue;
+                if (REC.exist(this.lowerValue) && this.parent.erg[i].getValue() < this.lowerValue) {
+                    this.parent.erg[i].check = false;
+                    this.parent.erg[i].error = this.parent.name + " maybe wrong [" + this.parent.erg[i].getValue() + "] is smaller " + this.lowerValue;
                 }
             }
         }
-        REC.log(DEBUG, "Check.resolve: return for " + this.parent.name + " is " + erg.getResult().text);
+        REC.log(DEBUG, "Check.resolve: return for " + this.parent.name + " is " + this.parent.erg.getResult().text);
         REC.debugLevel = orgLevel;
-        return erg;
     };
 
+    /**
+     * String Repräsentation des Ob
+     * @param ident
+     * @return {string}
+     */
     this.toString = function (ident) {
         if (!REC.exist(ident))
             ident = 0;
@@ -1481,7 +1529,11 @@ function Comments() {
     };
 }
 
-
+/**
+ * Ermittelt die Grenzen im Suchtext für das zu findende Element
+ * @param srch      die Parameter
+ * @constructor
+ */
 function Delimitter(srch) {
     Encoder.EncodeType = "numerical";
     if (REC.exist(srch.debugLevel))
@@ -1491,6 +1543,12 @@ function Delimitter(srch) {
     this.count = Number(srch.count);
     if (REC.exist(srch.removeBlanks))
         this.removeBlanks = srch.removeBlanks;
+
+    /**
+     * String Repräsentation des Ob
+     * @param ident
+     * @return {string}
+     */
     this.toString = function (ident) {
         if (!REC.exist(ident))
             ident = 0;
@@ -1502,7 +1560,14 @@ function Delimitter(srch) {
         txt = txt + REC.getIdent(ident) + "count: " + this.count + "\n";
         txt = txt + REC.getIdent(ident) + "removeBlanks: " + this.removeBlanks + "\n";
         return txt;
-    }
+    };
+
+    /**
+     * führt die Ermittlung der Grenen für das zu suchende Objekt durch
+     * @param erg           das bis jetzt gefundene Ergebnis
+     * @param direction     die Suchrichtung für Logausgaben
+     * @return {*}
+     */
     this.resolve = function (erg, direction) {
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
@@ -1667,6 +1732,7 @@ function Tags(srch) {
 function SearchItem(srch) {
     var tmp;
     var i;
+    this.erg = new SearchResultContainer();
     this.resolved = false;
     if (REC.exist(srch.debugLevel))
         this.debugLevel = REC.getDebugLevel(srch.debugLevel);
@@ -1822,40 +1888,39 @@ function SearchItem(srch) {
         return txt;
     };
 
-    this.convert = function (erg) {
+    this.convert = function () {
         var numberExp = new RegExp("([\\-][1-9]{1}[0-9]{1,}\\.[\\d]{1,})|([1-9]{1}[0-9]{1,}\\.[\\d]{1,})|([\\-][1-9]{1}[0-9]{1,})|([1-9]{1}[0-9]{1,})", "g");
         var numberDotExp = new RegExp("\\d{1}\\.{1}\\d{1}", "g");
-        for (var i = 0; i < erg.length; i++) {
-            REC.log(TRACE, "SearchItem.resolve: call convertValue " + erg[i].text + " and " + this.name);
-            if (typeof erg[i].text == "string" && REC.exist(this.text)) {
-                erg[i] = REC.makeTrim(erg[i]);
-                erg[i].start = REC.removedCharPos.getStartPos(erg[i].start);
-                erg[i].end = REC.removedCharPos.getEndPos(erg[i].start, erg[i].text);
+        for (var i = 0; i < this.erg.length; i++) {
+            REC.log(TRACE, "SearchItem.resolve: call convertValue " + this.erg[i].text + " and " + this.name);
+            if (typeof this.erg[i].text == "string" && REC.exist(this.text)) {
+                this.erg[i] = REC.makeTrim(this.erg[i]);
+                this.erg[i].start = REC.removedCharPos.getStartPos(this.erg[i].start);
+                this.erg[i].end = REC.removedCharPos.getEndPos(this.erg[i].start, this.erg[i].text);
             }
-            if (typeof erg[i].text == "string")
-                erg[i].val = REC.convertValue(erg[i].text, erg[i].typ);
-            if (erg[i].typ == "date" && !REC.isDate(erg[i].val)) {
-                erg[i].check = false;
-                erg[i].val = null;
-                erg[i].error = "Result for " + this.name + " [" + erg[i].text + "] is not date";
+            if (typeof this.erg[i].text == "string")
+                this.erg[i].val = REC.convertValue(this.erg[i].text, this.erg[i].typ);
+            if (this.erg[i].typ == "date" && !REC.isDate(this.erg[i].val)) {
+                this.erg[i].check = false;
+                this.erg[i].val = null;
+                this.erg[i].error = "Result for " + this.name + " [" + this.erg[i].text + "] is not date";
             }
-            if ((erg[i].typ == "int" || erg[i].typ == "float")) {
-                if (!REC.isNumeric(erg[i].val)) {
-                    erg[i].check = false;
-                    erg[i].val = null;
-                    erg[i].error = "Result for " + this.name + " [" + erg[i].text + "] is not a numeric value";
+            if ((this.erg[i].typ == "int" || this.erg[i].typ == "float")) {
+                if (!REC.isNumeric(this.erg[i].val)) {
+                    this.erg[i].check = false;
+                    this.erg[i].val = null;
+                    this.erg[i].error = "Result for " + this.name + " [" + this.erg[i].text + "] is not a numeric value";
                     if (REC.exist(this.text)) {
-                        var add = (erg[i].text.match(numberDotExp) != null ? erg[i].text.match(numberDotExp).length : 0);
-                        var pos = REC.mergeStr(erg[i], ".").replace(",", ".").search(numberExp);
+                        var add = (this.erg[i].text.match(numberDotExp) != null ? this.erg[i].text.match(numberDotExp).length : 0);
+                        var pos = REC.mergeStr(this.erg[i], ".").replace(",", ".").search(numberExp);
                         if (pos != -1) {
-                            erg[i].start = erg[i].start + pos;
-                            erg[i].end = erg[i].start + REC.mergeStr(erg[i], ".").replace(",", ".").match(numberExp)[0].length + add;
+                            this.erg[i].start = this.erg[i].start + pos;
+                            this.erg[i].end = this.erg[i].start + REC.mergeStr(this.erg[i], ".").replace(",", ".").match(numberExp)[0].length + add;
                         }
                     }
                 }
             }
         }
-        return erg;
     };
 
     /**
@@ -1909,7 +1974,7 @@ function SearchItem(srch) {
         return null;
     };
 
-    this.find = function (txt, erg) {
+    this.find = function (txt) {
         var pos = 0;
         var lastPos = 0;
         var count = 0;
@@ -1944,31 +2009,28 @@ function SearchItem(srch) {
             }
             if (REC.exist(str) && str.text.length > 0) {
                 REC.log(TRACE, "SearchItem.resolve: possible result is " + REC.printTrace(str.text, this.left));
-                erg.modifyResult(str, count++);
+                this.erg.modifyResult(str, count++);
             }
             lastPos = this.left ? 0 : pos;
         }
-        return erg;
     };
 
     /**
-     *
-     * @param erg    das bisher gefundene Ergebnis
+     * sucht ab einer bestimmten Position nach dem X. ganzen Wort
      * @param word   Array mit der Anzahl Wörtern [Anzahl Wörter bis zum Ergebnis, Anzahl Wörter die ins Ergebnis fliessen]
      * @param left   die Suchrichtung
-     * @return {*}
      */
-    this.findForWords = function (erg, word, left) {
-        for (var i = 0; i < erg.length; i++) {
-            if (typeof erg[i].text == "string") {
-                erg[i].text = erg[i].text.replace(/\s/g, ' ');
+    this.findForWords = function ( word, left) {
+        for (var i = 0; i < this.erg.length; i++) {
+            if (typeof this.erg[i].text == "string") {
+                this.erg[i].text = this.erg[i].text.replace(/\s/g, ' ');
                 if (left)
-                    erg[i].text = erg[i].text.split("").reverse().join("");
+                    this.erg[i].text = this.erg[i].text.split("").reverse().join("");
                 var start = word[0];
                 var end = 1;
                 if (word.length > 1)
                     end = word[1];
-                var tmp = erg[i].text.split('');
+                var tmp = this.erg[i].text.split('');
                 var begin = 0;
                 var ende = 0;
                 var marker = false;
@@ -2004,17 +2066,16 @@ function SearchItem(srch) {
                     }
                 }
                 if (left) {
-                    erg[i].text = tmp.slice(start, end).reverse().join("");
-                    erg[i].end = erg[i].end - tmp.slice(0, start).reverse().join("").length;
-                    erg[i].start = erg[i].start + tmp.slice(end).reverse().join("").length;
+                    this.erg[i].text = tmp.slice(start, end).reverse().join("");
+                    this.erg[i].end = this.erg[i].end - tmp.slice(0, start).reverse().join("").length;
+                    this.erg[i].start = this.erg[i].start + tmp.slice(end).reverse().join("").length;
                 } else {
-                    erg[i].text = tmp.slice(start, end).join("");
-                    erg[i].start = erg[i].start + tmp.slice(0, start).join("").length;
-                    erg[i].end = erg[i].end - tmp.slice(end).join("").length;
+                    this.erg[i].text = tmp.slice(start, end).join("");
+                    this.erg[i].start = this.erg[i].start + tmp.slice(0, start).join("").length;
+                    this.erg[i].end = this.erg[i].end - tmp.slice(end).join("").length;
                 }
             }
         }
-        return erg;
     };
 
     this.resolveItem = function (name) {
@@ -2029,7 +2090,7 @@ function SearchItem(srch) {
     };
 
     this.resolve = function () {
-        var i, e, erg;
+        var i, e;
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
             REC.debugLevel = this.debugLevel;
@@ -2041,15 +2102,14 @@ function SearchItem(srch) {
             else
                 return null;
         }
-        erg = new SearchResultContainer();
         if (REC.exist(this.text))
             this.text = REC.replaceVar(this.text)[0];
         var txt = null;
         if (REC.exist(this.fix))
-            erg.modifyResult(new SearchResult(null, REC.convertValue(REC.replaceVar(this.fix)[0], this.objectTyp), 0, 0, this.objectTyp, this.expected), 0);
+            this.erg.modifyResult(new SearchResult(null, REC.convertValue(REC.replaceVar(this.fix)[0], this.objectTyp), 0, 0, this.objectTyp, this.expected), 0);
         else if (REC.exist(this.eval)) {
             e = eval(REC.replaceVar(this.eval)[0]);
-            erg.modifyResult(new SearchResult(e.toString(), e, 0, 0, null, this.expected), 0);
+            this.erg.modifyResult(new SearchResult(e.toString(), e, 0, 0, null, this.expected), 0);
         } else {
             if (REC.exist(this.value)) {
                 e = this.resolveItem(this.value);
@@ -2059,8 +2119,8 @@ function SearchItem(srch) {
                         e.expected = this.expected;
                     if (REC.exist(this.objectTyp))
                         e.typ = this.objectTyp;
-                    erg.addResult(e);
-                    txt = erg.getResult().text;
+                    this.erg.addResult(e);
+                    txt = this.erg.getResult().text;
                 } else
                     return this.handleError();
             } else
@@ -2073,55 +2133,55 @@ function SearchItem(srch) {
                 txt = txt.replace(/\n/g, '').replace(/\n/g, '');
             }
             if (REC.exist(this.kind))
-                erg.modifyResult(this.findSpecialType(txt, this.kind, this.left, this.expected), 0);
+                this.erg.modifyResult(this.findSpecialType(txt, this.kind, this.left, this.expected), 0);
             else if (REC.exist(this.text))
-                erg = this.find(txt, erg);
+                this.find(txt);
         }
-        if (erg.length == 0) {
+        if (this.erg.length == 0) {
             REC.log(TRACE, "searchItem.resolve: no matching result found");
         } else {
             if (REC.exist(this.delimitter)) {
                 for (i = 0; i < this.delimitter.length; i++) {
-                    REC.log(DEBUG, "SearchItem.resolve: call Delimitter.resolve with " + REC.printTrace(erg, this.left));
-                    erg = this.delimitter[i].resolve(erg, this.left);
+                    REC.log(DEBUG, "SearchItem.resolve: call Delimitter.resolve with " + REC.printTrace(this.erg, this.left));
+                    this.erg = this.delimitter[i].resolve(this.erg, this.left);
                 }
             }
             if (!this.readOverReturn && REC.exist(this.text)) {
                 var exp = new RegExp("[\\n\\n]");
-                for (i = 0; i < erg.length; i++) {
-                    if (typeof erg[i].text == "string") {
-                        var pos = erg[i].text.search(exp);
+                for (i = 0; i < this.erg.length; i++) {
+                    if (typeof this.erg[i].text == "string") {
+                        var pos = this.erg[i].text.search(exp);
                         if (pos != -1) {
-                            erg[i].text = erg[i].text.substr(0, pos);
-                            erg[i].end = REC.removedCharPos.getEndPos(erg[i].start, erg[i].text);
+                            this.erg[i].text = this.erg[i].text.substr(0, pos);
+                            this.erg[i].end = REC.removedCharPos.getEndPos(this.erg[i].start, this.erg[i].text);
                         }
                     }
                 }
-                REC.log(DEBUG, "SearchItem.resolve: readOverReturn result is " + REC.printTrace(erg, this.left));
+                REC.log(DEBUG, "SearchItem.resolve: readOverReturn result is " + REC.printTrace(this.erg, this.left));
             }
             if (REC.exist(this.word)) {
-                erg = this.findForWords(erg, this.word, this.left);
+                this.findForWords(this.word, this.left);
             }
             if (REC.exist(this.removeBlanks) && this.removeBlanks == "after") {
-                erg = REC.removeBlanks(erg);
+                this.erg = REC.removeBlanks(this.erg);
             }
             if (REC.exist(this.removeReturns) && this.removeReturns == "after") {
-                erg = REC.removeReturns(erg);
+                this.erg = REC.removeReturns(this.erg);
             }
-            erg = this.convert(erg);
+            this.convert();
             if (REC.exist(this.format)) {
                 for (i = 0; i < this.format.length; i++) {
-                    REC.log(DEBUG, "SearchItem.resolve: call Format.resolve with " + erg.getResult().getValue());
-                    erg.getResult().val = this.format[i].resolve(erg.getResult().getValue());
+                    REC.log(DEBUG, "SearchItem.resolve: call Format.resolve with " + this.erg.getResult().getValue());
+                    this.erg.getResult().val = this.format[i].resolve(this.erg.getResult().getValue());
                 }
             }
             if (REC.exist(this.check)) {
                 for (i = 0; i < this.check.length; i++) {
-                    REC.log(DEBUG, "SearchItem.resolve: call Check.resolve with " + erg);
-                    erg = this.check[i].resolve(erg);
+                    REC.log(DEBUG, "SearchItem.resolve: call Check.resolve");
+                    this.check[i].resolve();
                 }
             }
-            REC.positions.add(REC.convertPosition(REC.content, erg.getResult().start, erg.getResult().end, this.name, erg.getResult().check));
+            REC.positions.add(REC.convertPosition(REC.content, this.erg.getResult().start, this.erg.getResult().end, this.name, this.erg.getResult().check));
 
             if (REC.exist(this.archivZiel)) {
                 for (i = 0; i < this.archivZiel.length; i++) {
@@ -2129,24 +2189,24 @@ function SearchItem(srch) {
                     this.archivZiel[i].resolve(REC.currentDocument.displayPath.split("/").slice(2).join("/") + "/" + REC.currentDocument.name);
                 }
             }
-            if (REC.exist(this.target) && erg.isFound()) {
-                REC.log(INFORMATIONAL, "currentDocument.properties[\"" + this.target + "\"] = \"" + erg.getResult().getValue() + "\";");
-                REC.currentDocument.properties[this.target] = erg.getResult().getValue();
+            if (REC.exist(this.target) && this.erg.isFound()) {
+                REC.log(INFORMATIONAL, "currentDocument.properties[\"" + this.target + "\"] = \"" + this.erg.getResult().getValue() + "\";");
+                REC.currentDocument.properties[this.target] = this.erg.getResult().getValue();
                 REC.currentDocument.save();
                 REC.log(INFORMATIONAL, "Document saved!");
             }
         }
-        if (this.required && !erg.isFound()) {
+        if (this.required && !this.erg.isFound()) {
             e = "Required SearchItem " + this.name + " is missing";
             REC.errors.push(e);
-            REC.errors.push(erg.getError());
-        } else if (erg.isFound()) {
-            REC.log(DEBUG, "SearchItem.resolve: return is  " + erg.getResult().getValue());
+            REC.errors.push(this.erg.getError());
+        } else if (this.erg.isFound()) {
+            REC.log(DEBUG, "SearchItem.resolve: return is  " + this.erg.getResult().getValue());
             REC.debugLevel = orgLevel;
-            REC.results[this.name] = erg.getResult();
-            REC.log(INFORMATIONAL, this.name + " is " + erg.getResult().getValue());
+            REC.results[this.name] = this.erg.getResult();
+            REC.log(INFORMATIONAL, this.name + " is " + this.erg.getResult().getValue());
             this.resolved = true;
-            return erg.getResult().getValue();
+            return this.erg.getResult().getValue();
         } else
             return this.handleError();
     };

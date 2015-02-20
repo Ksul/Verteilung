@@ -35,7 +35,7 @@
         <xsd:annotation>
           <xsd:documentation>Sucht nach einem bestimmten Ergebnistyp. Die möglichen Typen sind:
                              Datum            [date]
-                             Währungsbetrag   [amount
+                             Währungsbetrag   [amount]
                              Zahl             [float]
           </xsd:documentation>
         </xsd:annotation>
