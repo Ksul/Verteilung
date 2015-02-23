@@ -32,7 +32,7 @@ if (typeof (commentService) == "undefined") {
 }
 if (typeof (classification) == "undefined") {
 
-    var classification = new CategoryNode("ROOT");
+
     function CategoryNode(name) {
         this.name = name;
         this.isCategory = true;
@@ -44,6 +44,19 @@ if (typeof (classification) == "undefined") {
         this.immediateSubCategories = [];
         this.immediateMembersAndSubCategories = [];
     }
+
+    CategoryNode.prototype.init = function() {
+        this.isCategory = true;
+        this.categoryMembers = [];
+        this.rootCategories = [];
+        this.subCategories = [];
+        this.membersAndSubCategories = [];
+        this.immediateCategoryMembers = [];
+        this.immediateSubCategories = [];
+        this.immediateMembersAndSubCategories = [];
+        this.rootCategories.push(new CategoryNode("cm:generalclassifiable"));
+    };
+
     CategoryNode.prototype.createSubCategory = function(name) {
         var category = new CategoryNode(name);
         this.subCategories.push(category);
@@ -58,18 +71,26 @@ if (typeof (classification) == "undefined") {
     };
 
     CategoryNode.prototype.createRootCategory = function(f, name) {
+        var rCat;
         var category = new CategoryNode(name);
-        this.rootCategories.push(category);
-        return category;
+        if (this.name == f)
+            rCat = this;
+        else
+            rCat = this.getRootCategories(f);
+        if (REC.exist(rCat)) {
+            rCat.push(category);
+            return category;
+        } else
+            throw ("Root Category not found!");
     };
 
     CategoryNode.prototype.getRootCategories = function(name) {
 
         for (var i=0; i < this.rootCategories.length; i++){
             if (this.rootCategories[i].name == name)
-                return this.rootCategories[i].name;
+                return this.rootCategories[i].rootCategories;
         }
-        return [];
+        return null;
     };
 
     CategoryNode.prototype.removeRootCategory = function(name) {
@@ -78,6 +99,9 @@ if (typeof (classification) == "undefined") {
                 this.rootCategories.splice(i, 1);
         }
     };
+
+    var classification = new CategoryNode("ROOT");
+    classification.init();
 }
 
 Encoder = {
@@ -1280,9 +1304,9 @@ function Format(srch) {
     this.formatString = srch.formatString;
 
     /**
-     * String Repräsentation des Ob
-      * @param ident
-     * @return {string}
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
      */
    this.toString = function (ident) {
         if (!REC.exist(ident))
@@ -1331,9 +1355,9 @@ function ArchivZiel(srch) {
         this.type = srch.type;
 
     /**
-     * String Repräsentation des Ob
-     * @param ident
-     * @return {string}
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
         if (!REC.exist(ident))
@@ -1425,9 +1449,9 @@ function Check(srch, parent) {
     };
 
     /**
-     * String Repräsentation des Ob
-     * @param ident
-     * @return {string}
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
         if (!REC.exist(ident))
@@ -1545,9 +1569,9 @@ function Delimitter(srch) {
         this.removeBlanks = srch.removeBlanks;
 
     /**
-     * String Repräsentation des Ob
-     * @param ident
-     * @return {string}
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
         if (!REC.exist(ident))
@@ -1563,7 +1587,7 @@ function Delimitter(srch) {
     };
 
     /**
-     * führt die Ermittlung der Grenen für das zu suchende Objekt durch
+     * führt die Ermittlung der Grenzen für das zu suchende Objekt durch
      * @param erg           das bis jetzt gefundene Ergebnis
      * @param direction     die Suchrichtung für Logausgaben
      * @return {*}
@@ -1619,11 +1643,22 @@ function Delimitter(srch) {
     }
 }
 
+/**
+ * stellt Funktionalität zum Verwalten der Kategorien zur Verfügung
+ * @param srch      die Parameter
+ * @constructor
+ * TODO Nochmal prüfen, ob das wirklich so funktioniert!
+ */
 function Category(srch) {
     if (REC.exist(srch.debugLevel))
         this.debugLevel = REC.getDebugLevel(srch.debugLevel);
     this.name = srch.name;
 
+    /**
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
+     */
     this.toString = function (ident) {
         if (!REC.exist(ident))
             ident = 0;
@@ -1634,6 +1669,10 @@ function Category(srch) {
         return txt;
     };
 
+    /**
+     * kategorisiert das Dokument
+     * @param document           das Dokument
+     */
     this.resolve = function (document) {
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
@@ -1695,12 +1734,21 @@ function Category(srch) {
     };
 }
 
-
+/**
+ * stellt Funktionalität zum Bearbeiten der Tags eines Dokumentes zur Verfügung
+ * @param srch      die Parameter
+ * @constructor
+ */
 function Tags(srch) {
     if (REC.exist(srch.debugLevel))
         this.debugLevel = REC.getDebugLevel(srch.debugLevel);
     this.name = srch.name;
 
+    /**
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
+     */
     this.toString = function (ident) {
         if (!REC.exist(ident))
             ident = 0;
@@ -1711,6 +1759,10 @@ function Tags(srch) {
         return txt;
     };
 
+    /**
+     * taggt das Dokument
+     * @param document           das Dokument
+     */
     this.resolve = function (doc) {
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
@@ -1728,7 +1780,11 @@ function Tags(srch) {
     };
 }
 
-
+/**
+ * stellt Funktionalität zum Suchen eines Dokumentes zur Verfügung
+ * @param srch      die Parameter
+ * @constructor
+ */
 function SearchItem(srch) {
     var tmp;
     var i;
@@ -1839,6 +1895,11 @@ function SearchItem(srch) {
             REC.log(WARN, "No valid Format found");
     }
 
+    /**
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
+     */
     this.toString = function (ident) {
         var i;
         if (!REC.exist(ident))
@@ -2212,7 +2273,16 @@ function SearchItem(srch) {
     };
 }
 
-
+/**
+ * beschreibt die Position eines gefundenem Wertes in dem Dokument
+ * @param startRow          die Zeile, in der der Wert beginnt
+ * @param startColumn       die Spalte, in der der Wert beginnt
+ * @param endRow            die Zeile, in der der Wert endet
+ * @param endColumn         die Spalte, in der der Wert endete
+ * @param type              der Typ des Wertes
+ * @param desc              eine Beschreibung
+ * @constructor
+ */
 function Position(startRow, startColumn, endRow, endColumn, type, desc) {
     this.startRow = startRow;
     this.startColumn = startColumn;
@@ -3327,20 +3397,35 @@ REC = {
         },
         name: 'WebScriptTest',
         subType: "",
-        aspect: "",
+        aspect: [],
+        tags: [],
         childByNamePath: function () {
             return null;
         },
         hasAspect: function (aspect) {
-            return this.aspect == aspect;
+            for (var i = 0; i < this.aspect.length; i++) {
+                if (this.aspect[i] == aspect)
+                    return true;
+            }
+            return false;
         },
         isSubType: function (type) {
             return this.subType == type;
         },
         addAspect: function (aspect) {
-            this.aspect = aspect;
+            if (!this.hasAspect())
+                this.aspect.push(aspect);
         },
-        addTag: function () {
+        addTag: function (tag) {
+            if (!this.hasTag())
+            this.tags.push(tag);
+        },
+        hasTag: function(tag) {
+            for (var i = 0; i < this.tags.length; i++) {
+                if (this.tags[i] == tag)
+                    return true;
+            }
+            return false;
         },
         checkout: function () {
             return this;
@@ -3366,6 +3451,12 @@ REC = {
         },
         move: function () {
             return true;
+        },
+        init: function() {
+            this.name = 'WebScriptTest';
+            this.subType = "";
+            this.aspect = [];
+            this.tags = [];
         }
     } : currentDocument,
 

@@ -273,9 +273,11 @@
       <xsd:attribute name="unique" default="error" use="optional">
         <xsd:annotation>
           <xsd:documentation>
-            Beschreibt, ob ein Dokument nur einmal in einem Ordner vorkommen darf. Folgende Auswahl besteht: error ein Fehler wird geworfen
-            nothing das Dokument
-            wird ignoriert newVersion eine neue Version des Dokumentes wird erstellt overWrite das Dokument wird überschrieben
+            Beschreibt, ob ein Dokument nur einmal in einem Ordner vorkommen darf. Folgende Auswahl besteht:
+              [error]      ein Fehler wird geworfen
+              [nothing]    das Dokument wird ignoriert
+              [newVersion] eine neue Version des Dokumentes wird erstellt
+             [overWrite]   das Dokument wird überschrieben
           </xsd:documentation>
         </xsd:annotation>
         <xsd:simpleType>
