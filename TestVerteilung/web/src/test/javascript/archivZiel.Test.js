@@ -13,7 +13,7 @@ ArchivZielTest.prototype.test1 = function() {
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     var archivZiel = new ArchivZiel(new XMLObject(XMLDoc.docNode));
-    erg = archivZiel.resolve();
+    erg = archivZiel.resolve(REC.currentDocument);
     assertTrue("falsches Archiv Ziel", REC.currentDocument.isSubType("my:archivContent"));
 };
 
@@ -22,7 +22,7 @@ ArchivZielTest.prototype.test2 = function() {
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     var archivZiel = new ArchivZiel(new XMLObject(XMLDoc.docNode));
-    erg = archivZiel.resolve();
+    erg = archivZiel.resolve(REC.currentDocument);
     assertTrue("falscher Aspect", REC.currentDocument.hasAspect("my:idable"));
 };
 
@@ -31,7 +31,7 @@ ArchivZielTest.prototype.test3 = function() {
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     var archivZiel = new ArchivZiel(new XMLObject(XMLDoc.docNode));
-    erg = archivZiel.resolve();
+    erg = archivZiel.resolve(REC.currentDocument);
     assertTrue("falscher Aspect", REC.currentDocument.hasAspect("my:idable"));
     assertTrue("falsches Archiv Ziel", REC.currentDocument.isSubType("my:archivContent"));
 };

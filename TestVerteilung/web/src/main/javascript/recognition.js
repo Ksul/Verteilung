@@ -16,13 +16,164 @@ if (typeof (search) == "undefined") {
     });
 }
 if (typeof (companyhome) == "undefined") {
-    var companyhome = ({
 
-        childByNamePath: function () {
-            return REC.currentDocument;
+    function Liste(){}
+    Liste.prototype = [];
+    Liste.prototype.contains = function(element) {
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] == element)
+                return true;
         }
-    });
+        return false;
+    };
+    Liste.prototype.add = function(element) {
+        if (this.contains(element))
+            throw "Element bereits vorhanden";
+        this.push(element);
+    };
+    Liste.prototype.remove = function(element) {
+        if (!this.contains(element))
+            throw "Element nicht vorhanden";
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] == element)
+                this.slice(i, 1);
+        }
+    };
+
+    function BasicNode() {
+        this.allNodes = new Liste();
+        this.addNode = function (node) {
+            this.allNodes.add(node);
+        };
+        this.initNodes = function(){
+            this.allNodes = new Liste();
+        };
+    }
+
+    function ScriptNode(name, displayPath, type) {
+        this.name = name;
+        this.displayPath = displayPath;
+        this.subType = "";
+        this.aspect = new Liste();
+        this.tags = new Liste();
+        this.properties = new Liste();
+        this.children = new Liste();
+        this.parent = new Liste();
+        this.type = type;
+    }
+
+    ScriptNode.prototype = new BasicNode();
+    ScriptNode.prototype.constructor = ScriptNode;
+
+    ScriptNode.prototype.setContent = function (inhalt) {
+        this.content = inhalt;
+        this.properties = [];
+    };
+
+    ScriptNode.prototype.childByNamePath = function (name) {
+        for (var i = 0; i < this.allNodes.length; i++) {
+            if (this.allNodes[i] == name)
+                return this.allNodes[i];
+        }
+        return null;
+    };
+
+    ScriptNode.prototype.createFolder = function (name) {
+        if (this.type != "cm:folder")
+            throw "Kein Folder!";
+        var newFolder = new ScriptNode(name, this.displayPath + (this.displayPath.substr(this.displayPath.length -1, 1) =="/" ? "" : "/") + name, "cm:folder");
+        this.addNode(newFolder);
+        this.children.add(newFolder);
+        newFolder.parent.add(this);
+        return newFolder;
+    };
+
+    ScriptNode.prototype.hasAspect = function (aspect) {
+        if (this.aspect.contains(aspect))
+            return true;
+        return false;
+    };
+
+    ScriptNode.prototype.isSubType = function (type) {
+        return this.subType == type;
+    };
+
+    ScriptNode.prototype.addAspect = function (aspect) {
+        if (!this.hasAspect())
+            this.aspect.add(aspect);
+    };
+
+    ScriptNode.prototype.addTag = function (tag) {
+        if (!this.hasTag())
+            this.tags.add(tag);
+    };
+
+    ScriptNode.prototype.hasTag = function(tag) {
+        if (this.tags.contains(tag))
+            return true;
+        return false;
+    };
+    
+    ScriptNode.prototype.checkout = function () {
+        return this;
+    };
+
+    ScriptNode.prototype.checkin = function () {
+    };
+
+    ScriptNode.prototype.specializeType = function (type) {
+        this.subType = type;
+    };
+
+    ScriptNode.prototype.createNode = function (name, typ) {
+        if (this.type != "cm:folder")
+            throw "Kein Folder!";
+        var newNode =  new ScriptNode(name, this.displayPath + (this.displayPath.substr(this.displayPath.length -1, 1) =="/" ? "" : "/") + name, typ);
+        this.addNode(newNode);
+        this.children.add(newNode);
+        newNode.parent.add(this);
+        return newNode;
+    };
+
+    ScriptNode.prototype.save = function () {
+    };
+
+    ScriptNode.prototype.remove = function (node) {
+        this.children.remove(node);
+        return true;
+    };
+
+    ScriptNode.prototype.copy = function(newNode) {
+        newNode.children.push(this);
+    };
+
+    ScriptNode.prototype.transformDocument = function () {
+        return this;
+    };
+
+    ScriptNode.prototype.move = function (newNode) {
+
+        this.parent.children.remove(newNode);
+        newNode.children.add(this);
+        this.parent.add(newNode);
+        return true;
+    };
+
+    ScriptNode.prototype.init = function() {
+        this.subType = "";
+        this.aspect = new Liste();
+        this.tags = new Liste();
+        this.properties = new Liste();
+        this.children = new Liste();
+        this.parent = new Liste();
+    };
+    var companyhome = new ScriptNode("companyHome", "/", "cm:folder");
 }
+
+
+
+
+
 if (typeof (commentService) == "undefined") {
     var commentService = ({
         createCommentsFolder: function (node) {
@@ -1244,20 +1395,58 @@ function ArchivPosition(srch) {
     };
 
     /**
-     * ermittelt die Position des Dokumentes im Archiv
-     * @return {string}  die Position
+     * liefert den Alfresco Folder, bzw. erstellt die Folderstruktur, falls noch nicht vorhanden
+     * @param folderName            der Folder als String
+     * @return {*}                  der Alfresco Folder
      */
-    this.resolve = function () {
-        var erg;
-        var orgLevel = REC.debugLevel;
-        if (REC.exist(this.debugLevel))
-            REC.debugLevel = this.debugLevel;
-        REC.log(DEBUG, "resolve ArchivPosition");
-        REC.log(TRACE, "ArchivPosition.resolve: settings are: \n" + this);
+    this.resolveFolder = function (folderName) {
+        REC.log(TRACE, "buildFolder: entering with " + folderName);
+        var fol = null;
+        var dir = folderName;
+        var top = companyhome.childByNamePath(folderName);
+        if (top == null) {
+            REC.log(TRACE, "buildFolder: folder " + folderName + " not found");
+            var parts = folderName.split("/");
+            dir = "";
+            for (var i = 0; i < parts.length; i++) {
+                var part = parts[i];
+                dir = dir + (dir.length == 0 ? "" : "/") + part;
+                REC.log(TRACE, "buildFolder: search Folder " + dir);
+                if (dir.length > 0)
+                    fol = companyhome.childByNamePath(dir);
+                if (!REC.exist(fol)) {
+                    REC.log(INFORMATIONAL, "erstelle Folder " + dir);
+                    if (top == null) {
+                        REC.log(TRACE, "buildFolder: create Folder[" + part + "] at companyhome ");
+                        top = companyhome.createFolder(part);
+                    } else {
+                        REC.log(TRACE, "buildFolder: create Folder[" + part + "] at " + top.name);
+                        top = top.createFolder(part);
+                    }
+                    if (top == null) {
+                        REC.errors.push("Folder " + dir + " konnte nicht erstellt werden");
+                        dir = null;
+                        break;
+                    }
+                } else {
+                    REC.log(TRACE, "buildFolder: folder " + dir + " found");
+                    top = fol;
+                }
+            }
+        }
+        REC.log(TRACE, "buildFolder result is " + dir);
+        return dir;
+    };
+
+    /**
+     * baut einen Foldernamen auf
+     * @return {*}   der Alfresco Folder, bzw null wenn er nicht aufgebaut werden konnte
+     */
+    this.buildFolder = function() {
         var tmp = (REC.exist(REC.archivRoot) ? REC.archivRoot : "");
         REC.log(TRACE, "ArchivPosition.resolve: result is " + tmp);
         if (REC.exist(this.folder)) {
-            var tmp1 =  REC.replaceVar(this.folder);
+            var tmp1 = REC.replaceVar(this.folder);
             if (!tmp1[1]) {
                 erg = "Variabel konnte nicht im Foldernamen ersetzt werden!\n";
                 REC.errors.push(erg);
@@ -1278,17 +1467,32 @@ function ArchivPosition(srch) {
             }
         }
         REC.log(TRACE, "ArchivPosition.resolve: result is " + tmp);
-        tmp = REC.buildFolder(tmp);
+        tmp = this.resolveFolder(tmp);
         REC.log(TRACE, "ArchivPosition.resolve: result is " + tmp);
+        return tmp;
+    };
+
+    /**
+     * ermittelt die Position des Dokumentes im Archiv
+     * @return {string}  die Position
+     */
+    this.resolve = function () {
+        var erg, folder;
+        var orgLevel = REC.debugLevel;
+        if (REC.exist(this.debugLevel))
+            REC.debugLevel = this.debugLevel;
+        REC.log(DEBUG, "resolve ArchivPosition");
+        REC.log(TRACE, "ArchivPosition.resolve: settings are: \n" + this);
+        folder = this.buildFolder();
         if (REC.exist(this.archivZiel)) {
             for (i = 0; i < this.archivZiel.length; i++) {
-                REC.log(TRACE, "ArchivPosition.resolve: call ArchivZiel.resolve with " + tmp);
-                this.archivZiel[i].resolve(tmp);
+                REC.log(TRACE, "ArchivPosition.resolve: call ArchivZiel.resolve with " + folder);
+                this.archivZiel[i].resolve(folder);
             }
         }
-        REC.log(DEBUG, "ArchivPosition.resolve: return is " + tmp);
+        REC.log(DEBUG, "ArchivPosition.resolve: return is " + folder);
         REC.debugLevel = orgLevel;
-        return tmp;
+        return folder;
     };
 
 }
@@ -1372,6 +1576,7 @@ function ArchivZiel(srch) {
 
     /**
      * setzt das Archiv Ziel
+     * @param doc   das Document, für das das Archivziel gesetzt werden soll
      */
     this.resolve = function (doc) {
         var orgLevel = REC.debugLevel;
@@ -2918,44 +3123,7 @@ REC = {
         }
     },
 
-    buildFolder: function (direction) {
-        this.log(TRACE, "buildFolder: entering with " + direction);
-        var fol = null;
-        var dir = direction;
-        var top = companyhome.childByNamePath(direction);
-        if (top == null) {
-            this.log(TRACE, "buildFolder: folder " + direction + " not found");
-            var parts = direction.split("/");
-            dir = "";
-            for (var i = 0; i < parts.length; i++) {
-                var part = parts[i];
-                dir = dir + (dir.length == 0 ? "" : "/") + part;
-                this.log(TRACE, "buildFolder: search Folder " + dir);
-                if (dir.length > 0)
-                    fol = companyhome.childByNamePath(dir);
-                if (!this.exist(fol)) {
-                    this.log(INFORMATIONAL, "erstelle Folder " + dir);
-                    if (top == null) {
-                        this.log(TRACE, "buildFolder: create Folder[" + part + "] at companyhome ");
-                        top = companyhome.createFolder(part);
-                    } else {
-                        this.log(TRACE, "buildFolder: create Folder[" + part + "] at " + top.name);
-                        top = top.createFolder(part);
-                    }
-                    if (top == null) {
-                        this.errors.push("Folder " + dir + " konnte nicht erstellt werden");
-                        dir = null;
-                        break;
-                    }
-                } else {
-                    this.log(TRACE, "buildFolder: folder " + dir + " found");
-                    top = fol;
-                }
-            }
-        }
-        this.log(TRACE, "buildFolder result is " + dir);
-        return dir;
-    },
+
     makeNewVersion: function (doc, newDoc) {
         if (doc.isLocked) {
             this.errors.push("Gelocktes Dokument kann nicht ver?ndert werden!");
@@ -3310,6 +3478,13 @@ REC = {
         }
         return;
     },
+
+    /**
+     * führt die Erkennung durch
+     * @param doc       das zu erkennende Dokument
+     * @param rules     die Regeln
+     * @param deb       wird nicht benutzt
+     */
     recognize: function (doc, rules, deb) {
         this.archivRoot = "";
         if (this.exist(rules.debugLevel))
@@ -3390,75 +3565,7 @@ REC = {
         REC = rec;
     },
 
-    currentDocument: typeof (currentDocument) == "undefined" ? {
-        setContent: function (inhalt) {
-            this.content = inhalt;
-            this.properties = [];
-        },
-        name: 'WebScriptTest',
-        subType: "",
-        aspect: [],
-        tags: [],
-        childByNamePath: function () {
-            return null;
-        },
-        hasAspect: function (aspect) {
-            for (var i = 0; i < this.aspect.length; i++) {
-                if (this.aspect[i] == aspect)
-                    return true;
-            }
-            return false;
-        },
-        isSubType: function (type) {
-            return this.subType == type;
-        },
-        addAspect: function (aspect) {
-            if (!this.hasAspect())
-                this.aspect.push(aspect);
-        },
-        addTag: function (tag) {
-            if (!this.hasTag())
-            this.tags.push(tag);
-        },
-        hasTag: function(tag) {
-            for (var i = 0; i < this.tags.length; i++) {
-                if (this.tags[i] == tag)
-                    return true;
-            }
-            return false;
-        },
-        checkout: function () {
-            return this;
-        },
-        checkin: function () {
-        },
-        specializeType: function (type) {
-            this.subType = type;
-        },
-        createNode: function (name, typ) {
-            return this;
-        },
-        displayPath: 'WebScriptTest/WebScriptTest',
-        save: function () {
-        },
-        remove: function () {
-        },
-        properties: [],
-        transformDocument: function () {
-            return this;
-        },
-        remove: function () {
-        },
-        move: function () {
-            return true;
-        },
-        init: function() {
-            this.name = 'WebScriptTest';
-            this.subType = "";
-            this.aspect = [];
-            this.tags = [];
-        }
-    } : currentDocument,
+    currentDocument: typeof (currentDocument) == "undefined" ? companyhome.createNode('WebScriptTest', "my:archivContent") : currentDocument,
 
     init: function(){
         this.id = Math.random() * 100;
