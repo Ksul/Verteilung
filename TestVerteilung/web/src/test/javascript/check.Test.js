@@ -98,7 +98,7 @@ CheckTest.prototype.test7 = function() {
     var check = new Check(new XMLObject(XMLDoc.docNode), searchItem);
     check.resolve();
     assertFalse("Fehler nicht gefunden", searchItem.erg[0].check);
-    assertEquals("Wert maybe wrong [Thu Jan 01 2015 00:00:00 GMT+0100 (CET)] is smaller Fri Jan 02 2015 00:00:00 GMT+0100 (CET)", searchItem.erg[0].error);
+    assertEquals("Wert maybe wrong [" + new Date(2015,0,1).toString() + "] is smaller " + new Date(2015,0,2).toString(), searchItem.erg[0].error);
 };
 
 CheckTest.prototype.test8 = function() {
@@ -111,7 +111,7 @@ CheckTest.prototype.test8 = function() {
     var check = new Check(new XMLObject(XMLDoc.docNode), searchItem);
     check.resolve();
     assertFalse("Fehler nicht gefunden", searchItem.erg[0].check);
-    assertEquals("Wert maybe wrong [Fri Jan 01 2016 00:00:00 GMT+0100 (CET)] is bigger Thu Dec 31 2015 00:00:00 GMT+0100 (CET)", searchItem.erg[0].error);
+    assertEquals("Wert maybe wrong [" + new Date(2016,0,1).toString() + "] is bigger " + new Date(2015,11,31).toString(), searchItem.erg[0].error);
 };
 
 CheckTest.prototype.test9 = function() {

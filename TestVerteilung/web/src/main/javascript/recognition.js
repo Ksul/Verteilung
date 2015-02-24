@@ -99,7 +99,7 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.addAspect = function (aspect) {
-        if (!this.hasAspect())
+        if (!this.hasAspect(aspect))
             this.aspect.add(aspect);
     };
 
@@ -1350,7 +1350,7 @@ function ArchivTyp(srch) {
 }
 
 /**
- * Ermittelt die Zielposition für das Dokument
+ * Ermittelt die Zielposition fï¿½r das Dokument
  * @param srch      die Parameter
  * @constructor
  */
@@ -1374,8 +1374,8 @@ function ArchivPosition(srch) {
     }
 
     /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
+     * Stringreprï¿½sentation des Objektes
+     * @param ident         Einrï¿½ckung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1508,8 +1508,8 @@ function Format(srch) {
     this.formatString = srch.formatString;
 
     /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
+     * Stringreprï¿½sentation des Objektes
+     * @param ident         Einrï¿½ckung
      * @return {string}     das Objekt als String
      */
    this.toString = function (ident) {
@@ -1559,8 +1559,8 @@ function ArchivZiel(srch) {
         this.type = srch.type;
 
     /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
+     * Stringreprï¿½sentation des Objektes
+     * @param ident         Einrï¿½ckung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1576,7 +1576,7 @@ function ArchivZiel(srch) {
 
     /**
      * setzt das Archiv Ziel
-     * @param doc   das Document, für das das Archivziel gesetzt werden soll
+     * @param doc   das Document, fï¿½r das das Archivziel gesetzt werden soll
      */
     this.resolve = function (doc) {
         var orgLevel = REC.debugLevel;
@@ -1601,9 +1601,9 @@ function ArchivZiel(srch) {
 }
 
 /**
- * Stellt Funktionalität zur Gültigkeitsprüfung von gefundenen Ergebnissen zur Verfügung
+ * Stellt Funktionalitï¿½t zur Gï¿½ltigkeitsprï¿½fung von gefundenen Ergebnissen zur Verfï¿½gung
  * @param srch      die Parameter
- * @param parent    das dazugehörende SearchItem
+ * @param parent    das dazugehï¿½rende SearchItem
  * @constructor
  */
 function Check(srch, parent) {
@@ -1629,7 +1629,7 @@ function Check(srch, parent) {
     }
 
     /**
-     * führt die eigentliche Prüfung durch
+     * fï¿½hrt die eigentliche Prï¿½fung durch
      */
     this.resolve = function () {
         var orgLevel = REC.debugLevel;
@@ -1654,8 +1654,8 @@ function Check(srch, parent) {
     };
 
     /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
+     * Stringreprï¿½sentation des Objektes
+     * @param ident         Einrï¿½ckung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1759,7 +1759,7 @@ function Comments() {
 }
 
 /**
- * Ermittelt die Grenzen im Suchtext für das zu findende Element
+ * Ermittelt die Grenzen im Suchtext fï¿½r das zu findende Element
  * @param srch      die Parameter
  * @constructor
  */
@@ -1774,8 +1774,8 @@ function Delimitter(srch) {
         this.removeBlanks = srch.removeBlanks;
 
     /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
+     * Stringreprï¿½sentation des Objektes
+     * @param ident         Einrï¿½ckung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1792,9 +1792,9 @@ function Delimitter(srch) {
     };
 
     /**
-     * führt die Ermittlung der Grenzen für das zu suchende Objekt durch
+     * fï¿½hrt die Ermittlung der Grenzen fï¿½r das zu suchende Objekt durch
      * @param erg           das bis jetzt gefundene Ergebnis
-     * @param direction     die Suchrichtung für Logausgaben
+     * @param direction     die Suchrichtung fï¿½r Logausgaben
      * @return {*}
      */
     this.resolve = function (erg, direction) {
@@ -1849,10 +1849,10 @@ function Delimitter(srch) {
 }
 
 /**
- * stellt Funktionalität zum Verwalten der Kategorien zur Verfügung
+ * stellt Funktionalitï¿½t zum Verwalten der Kategorien zur Verfï¿½gung
  * @param srch      die Parameter
  * @constructor
- * TODO Nochmal prüfen, ob das wirklich so funktioniert!
+ * TODO Nochmal prï¿½fen, ob das wirklich so funktioniert!
  */
 function Category(srch) {
     if (REC.exist(srch.debugLevel))
@@ -1860,8 +1860,8 @@ function Category(srch) {
     this.name = srch.name;
 
     /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
+     * Stringreprï¿½sentation des Objektes
+     * @param ident         Einrï¿½ckung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1940,7 +1940,7 @@ function Category(srch) {
 }
 
 /**
- * stellt Funktionalität zum Bearbeiten der Tags eines Dokumentes zur Verfügung
+ * stellt Funktionalitï¿½t zum Bearbeiten der Tags eines Dokumentes zur Verfï¿½gung
  * @param srch      die Parameter
  * @constructor
  */
@@ -1950,8 +1950,8 @@ function Tags(srch) {
     this.name = srch.name;
 
     /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
+     * Stringreprï¿½sentation des Objektes
+     * @param ident         Einrï¿½ckung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1986,7 +1986,7 @@ function Tags(srch) {
 }
 
 /**
- * stellt Funktionalität zum Suchen eines Dokumentes zur Verfügung
+ * stellt Funktionalitï¿½t zum Suchen eines Dokumentes zur Verfï¿½gung
  * @param srch      die Parameter
  * @constructor
  */
@@ -2101,8 +2101,8 @@ function SearchItem(srch) {
     }
 
     /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
+     * Stringreprï¿½sentation des Objektes
+     * @param ident         Einrï¿½ckung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -2192,9 +2192,9 @@ function SearchItem(srch) {
     /**
      * sucht nach einem speziellen Ergebnistyp
      * @param text              der zu duchsuchende Text
-     * @param kind              die Art des Ergebnistypen Mögliche Werte [amount] Geldbetrag, [date] Datum, [float] Nummer
+     * @param kind              die Art des Ergebnistypen Mï¿½gliche Werte [amount] Geldbetrag, [date] Datum, [float] Nummer
      * @param left              die Suchrichtung
-     * @param expected          ein erwartetes Ergebnis für Testzwecke
+     * @param expected          ein erwartetes Ergebnis fï¿½r Testzwecke
      * @return {Array.<T>}
      */
     this.findSpecialType = function (text, kind, left, expected) {
@@ -2283,7 +2283,7 @@ function SearchItem(srch) {
 
     /**
      * sucht ab einer bestimmten Position nach dem X. ganzen Wort
-     * @param word   Array mit der Anzahl Wörtern [Anzahl Wörter bis zum Ergebnis, Anzahl Wörter die ins Ergebnis fliessen]
+     * @param word   Array mit der Anzahl Wï¿½rtern [Anzahl Wï¿½rter bis zum Ergebnis, Anzahl Wï¿½rter die ins Ergebnis fliessen]
      * @param left   die Suchrichtung
      */
     this.findForWords = function ( word, left) {
@@ -3480,7 +3480,7 @@ REC = {
     },
 
     /**
-     * führt die Erkennung durch
+     * fï¿½hrt die Erkennung durch
      * @param doc       das zu erkennende Dokument
      * @param rules     die Regeln
      * @param deb       wird nicht benutzt
