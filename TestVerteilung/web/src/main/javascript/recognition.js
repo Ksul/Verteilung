@@ -21,23 +21,26 @@ if (typeof (companyhome) == "undefined") {
     Liste.prototype = [];
     Liste.prototype.contains = function(element) {
         for (var i = 0; i < this.length; i++) {
-            if (this[i] == element)
+            if (this[i].name == element)
                 return true;
         }
         return false;
     };
     Liste.prototype.add = function(element) {
-        if (this.contains(element))
+        if (this.contains(element.name))
             throw "Element bereits vorhanden";
         this.push(element);
     };
     Liste.prototype.remove = function(element) {
-        if (!this.contains(element))
+        if (!this.contains(element.name))
             throw "Element nicht vorhanden";
         for (var i = 0; i < this.length; i++) {
             if (this[i] == element)
                 this.slice(i, 1);
         }
+    };
+    Liste.prototype.clear = function() {
+        this.length = 0;
     };
 
     function BasicNode() {
@@ -46,8 +49,11 @@ if (typeof (companyhome) == "undefined") {
             this.allNodes.add(node);
         };
         this.initNodes = function(){
-            this.allNodes = new Liste();
+            this.allNodes.clear();
         };
+        this.hasNode = function (name) {
+            return this.allNodes.contains(name);
+        }
     }
 
     function ScriptNode(name, displayPath, type) {
@@ -72,7 +78,7 @@ if (typeof (companyhome) == "undefined") {
 
     ScriptNode.prototype.childByNamePath = function (name) {
         for (var i = 0; i < this.allNodes.length; i++) {
-            if (this.allNodes[i] == name)
+            if (this.allNodes[i].name == name)
                 return this.allNodes[i];
         }
         return null;
@@ -89,9 +95,7 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.hasAspect = function (aspect) {
-        if (this.aspect.contains(aspect))
-            return true;
-        return false;
+        return this.aspect.contains(aspect)
     };
 
     ScriptNode.prototype.isSubType = function (type) {
@@ -109,9 +113,8 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.hasTag = function(tag) {
-        if (this.tags.contains(tag))
-            return true;
-        return false;
+        return this.tags.contains(tag)
+
     };
     
     ScriptNode.prototype.checkout = function () {
@@ -144,7 +147,11 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.copy = function(newNode) {
-        newNode.children.push(this);
+        var cNode =  new ScriptNode(this.name, newNode.displayPath + (newNode.displayPath.substr(newNode.displayPath.length -1, 1) =="/" ? "" : "/") + this.name, this.typ);
+        newNode.children.add(cNode);
+        cNode.parent.add(newNode);
+        this.addNode(cNode);
+        return cNode;
     };
 
     ScriptNode.prototype.transformDocument = function () {
@@ -152,7 +159,6 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.move = function (newNode) {
-
         this.parent.children.remove(newNode);
         newNode.children.add(this);
         this.parent.add(newNode);
@@ -161,11 +167,13 @@ if (typeof (companyhome) == "undefined") {
 
     ScriptNode.prototype.init = function() {
         this.subType = "";
-        this.aspect = new Liste();
-        this.tags = new Liste();
-        this.properties = new Liste();
-        this.children = new Liste();
-        this.parent = new Liste();
+        this.aspect.clear();
+        this.tags.clear();
+        this.properties.clear();
+        this.children.clear();
+        this.parent.clear();
+        this.initNodes();
+        companyhome.createNode('WebScriptTest', "my:archivContent");
     };
     var companyhome = new ScriptNode("companyHome", "/", "cm:folder");
 }
@@ -1374,8 +1382,8 @@ function ArchivPosition(srch) {
     }
 
     /**
-     * Stringreprï¿½sentation des Objektes
-     * @param ident         Einrï¿½ckung
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1484,13 +1492,13 @@ function ArchivPosition(srch) {
         REC.log(DEBUG, "resolve ArchivPosition");
         REC.log(TRACE, "ArchivPosition.resolve: settings are: \n" + this);
         folder = this.buildFolder();
-        if (REC.exist(this.archivZiel)) {
+        if (REC.exist(this.archivZiel) && REC.exist(folder)) {
             for (i = 0; i < this.archivZiel.length; i++) {
-                REC.log(TRACE, "ArchivPosition.resolve: call ArchivZiel.resolve with " + folder);
+                REC.log(TRACE, "ArchivPosition.resolve: call ArchivZiel.resolve with " + folder.displayPath);
                 this.archivZiel[i].resolve(folder);
             }
         }
-        REC.log(DEBUG, "ArchivPosition.resolve: return is " + folder);
+        REC.log(DEBUG, "ArchivPosition.resolve: return is " + (REC.exist(folder) ? folder.displayPath : "<null>"));
         REC.debugLevel = orgLevel;
         return folder;
     };
@@ -1576,27 +1584,35 @@ function ArchivZiel(srch) {
 
     /**
      * setzt das Archiv Ziel
-     * @param doc   das Document, fï¿½r das das Archivziel gesetzt werden soll
+     * @param node   der Knoten, für das das Archivziel gesetzt werden soll
+     * @return {boolean} false, wenn das Archivziel nicht gesetzt werden konnte.
      */
-    this.resolve = function (doc) {
+    this.resolve = function (node) {
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
             REC.debugLevel = this.debugLevel;
         REC.log(DEBUG, "resolve ArchivZiel");
         REC.log(TRACE, "ArchivZiel.resolve: settings are: \n" + this);
+        if (!REC.exist(node)) {
+            REC.errors.push("ArchivZiel.resolve: Node not found!");
+            return false;
+        }
         if (REC.exist(this.aspect)) {
             REC.log(TRACE, "ArchivZiel.resolve: Aspect is " + this.aspect);
-            if (!companyhome.childByNamePath(doc).hasAspect(this.aspect))
-                companyhome.childByNamePath(doc).addAspect(this.aspect);
+            if (!node.hasAspect(this.aspect))
+                node.addAspect(this.aspect);
             REC.log(INFORMATIONAL, "add aspect " + this.aspect);
         }
+
         if (REC.exist(this.type)) {
             REC.log(TRACE, "ArchivZiel.resolve: Type is " + this.type);
-            if (!companyhome.childByNamePath(doc).isSubType(this.type))
-                companyhome.childByNamePath(doc).specializeType(this.type);
+            if (!node.isSubType(this.type))
+                node.specializeType(this.type);
             REC.log(INFORMATIONAL, "specialize type " + this.type);
         }
+
         REC.debugLevel = orgLevel;
+        return true;
     };
 }
 
@@ -3618,3 +3634,4 @@ REC = {
     positions: new PositionContainer()
 }
 REC.run();
+

@@ -52,8 +52,12 @@ ArchivPositionTest.prototype.test4 = function() {
     assertEquals("Variabel konnte nicht im Foldernamen ersetzt werden!\n", REC.errors[1]);
 };
 
-ArchivPositionTest.prototype.test5 = function() {
-    companyhome.init("companyhome", "/", "cm:folder");
-    var x = companyhome.createFolder("Test");
-    x.createFolder("XXX") ;
+ArchivPositionTest.prototype.testResolveFolder1 = function() {
+    companyhome.initNodes();
+    var archivPosition = new ArchivPosition({});
+    var newFolder = archivPosition.resolveFolder("/aa/bb/cc");
+    assertNotNull(newFolder);
+    assertTrue(companyhome.hasNode("aa"));
+    assertTrue(companyhome.hasNode("bb"));
+    assertTrue(companyhome.hasNode("cc"));
 };
