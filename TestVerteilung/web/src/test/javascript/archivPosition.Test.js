@@ -61,3 +61,14 @@ ArchivPositionTest.prototype.testResolveFolder1 = function() {
     assertTrue(companyhome.hasNode("bb"));
     assertTrue(companyhome.hasNode("cc"));
 };
+
+ArchivPositionTest.prototype.testResolveFolder2 = function() {
+    companyhome.initNodes();
+    companyhome.createFolder("aa");
+    var archivPosition = new ArchivPosition({});
+    var newFolder = archivPosition.resolveFolder("/aa/bb/cc");
+    assertNotNull(newFolder);
+    assertTrue(companyhome.hasNode("aa"));
+    assertTrue(companyhome.hasNode("bb"));
+    assertTrue(companyhome.hasNode("cc"));
+};

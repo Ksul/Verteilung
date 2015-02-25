@@ -21,18 +21,18 @@ if (typeof (companyhome) == "undefined") {
     Liste.prototype = [];
     Liste.prototype.contains = function(element) {
         for (var i = 0; i < this.length; i++) {
-            if (this[i].name == element)
+            if (this[i] == element)
                 return true;
         }
         return false;
     };
     Liste.prototype.add = function(element) {
-        if (this.contains(element.name))
-            throw "Element bereits vorhanden";
+        if (this.contains(element))
+            throw "Element " + element + " bereits vorhanden";
         this.push(element);
     };
     Liste.prototype.remove = function(element) {
-        if (!this.contains(element.name))
+        if (!this.contains(element))
             throw "Element nicht vorhanden";
         for (var i = 0; i < this.length; i++) {
             if (this[i] == element)
@@ -40,7 +40,7 @@ if (typeof (companyhome) == "undefined") {
         }
     };
     Liste.prototype.clear = function() {
-        this.length = 0;
+        this.slice(0, this.length);
     };
 
     function BasicNode() {
@@ -52,8 +52,12 @@ if (typeof (companyhome) == "undefined") {
             this.allNodes.clear();
         };
         this.hasNode = function (name) {
-            return this.allNodes.contains(name);
-        }
+            for (var i = 0; i < this.allNodes.length; i++) {
+                if (this.allNodes[i].name == name)
+                    return true;
+            }
+            return false;
+        };
     }
 
     function ScriptNode(name, displayPath, type) {
@@ -108,7 +112,7 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.addTag = function (tag) {
-        if (!this.hasTag())
+        if (!this.hasTag(tag))
             this.tags.add(tag);
     };
 
@@ -1382,8 +1386,8 @@ function ArchivPosition(srch) {
     }
 
     /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
+     * Stringreprï¿½sentation des Objektes
+     * @param ident         Einrï¿½ckung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1418,27 +1422,29 @@ function ArchivPosition(srch) {
             dir = "";
             for (var i = 0; i < parts.length; i++) {
                 var part = parts[i];
-                dir = dir + (dir.length == 0 ? "" : "/") + part;
-                REC.log(TRACE, "buildFolder: search Folder " + dir);
-                if (dir.length > 0)
-                    fol = companyhome.childByNamePath(dir);
-                if (!REC.exist(fol)) {
-                    REC.log(INFORMATIONAL, "erstelle Folder " + dir);
-                    if (top == null) {
-                        REC.log(TRACE, "buildFolder: create Folder[" + part + "] at companyhome ");
-                        top = companyhome.createFolder(part);
+                if (part.length > 0) {
+                    dir = dir + (dir.length == 0 ? "" : "/") + part;
+                    REC.log(TRACE, "buildFolder: search Folder " + dir);
+                    if (dir.length > 0)
+                        fol = companyhome.childByNamePath(dir);
+                    if (!REC.exist(fol)) {
+                        REC.log(INFORMATIONAL, "erstelle Folder " + dir);
+                        if (top == null) {
+                            REC.log(TRACE, "buildFolder: create Folder[" + part + "] at companyhome ");
+                            top = companyhome.createFolder(part);
+                        } else {
+                            REC.log(TRACE, "buildFolder: create Folder[" + part + "] at " + top.name);
+                            top = top.createFolder(part);
+                        }
+                        if (top == null) {
+                            REC.errors.push("Folder " + dir + " konnte nicht erstellt werden");
+                            dir = null;
+                            break;
+                        }
                     } else {
-                        REC.log(TRACE, "buildFolder: create Folder[" + part + "] at " + top.name);
-                        top = top.createFolder(part);
+                        REC.log(TRACE, "buildFolder: folder " + dir + " found");
+                        top = fol;
                     }
-                    if (top == null) {
-                        REC.errors.push("Folder " + dir + " konnte nicht erstellt werden");
-                        dir = null;
-                        break;
-                    }
-                } else {
-                    REC.log(TRACE, "buildFolder: folder " + dir + " found");
-                    top = fol;
                 }
             }
         }
@@ -1584,7 +1590,7 @@ function ArchivZiel(srch) {
 
     /**
      * setzt das Archiv Ziel
-     * @param node   der Knoten, für das das Archivziel gesetzt werden soll
+     * @param node   der Knoten, fï¿½r das das Archivziel gesetzt werden soll
      * @return {boolean} false, wenn das Archivziel nicht gesetzt werden konnte.
      */
     this.resolve = function (node) {
