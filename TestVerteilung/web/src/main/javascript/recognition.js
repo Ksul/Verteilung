@@ -50,9 +50,8 @@ if (typeof (companyhome) == "undefined") {
         this.splice(0, this.length);
     };
 
-    function ScriptNode(name, displayPath, type) {
+    function ScriptNode(name, type) {
         this.name = name;
-        this.displayPath = displayPath;
         this.subType = "";
         this.aspect = new Liste();
         this.tags = new Liste();
@@ -62,6 +61,20 @@ if (typeof (companyhome) == "undefined") {
         this.type = type;
     }
 
+    ScriptNode.prototype.getDisplayPath = function () {
+        var path = "";
+        var parent = null;
+        if (this.parent.length > 0)
+            parent = this.parent[0];
+        while (parent != null) {
+            path = "/" + parent.name + path;
+            if (parent.parent.length > 0)
+                parent = parent.parent[0];
+            else
+                parent = null;
+        }
+        return path;
+    };
 
     ScriptNode.prototype.setContent = function (inhalt) {
         this.content = inhalt;
@@ -88,7 +101,7 @@ if (typeof (companyhome) == "undefined") {
     ScriptNode.prototype.createFolder = function (name) {
         if (this.type != "cm:folder")
             throw "Kein Folder!";
-        var newFolder = new ScriptNode(name, this.displayPath + (this.displayPath.substr(this.displayPath.length -1, 1) =="/" ? "" : "/") + name, "cm:folder");
+        var newFolder = new ScriptNode(name, "cm:folder");
         this.children.add(newFolder);
         newFolder.parent.add(this);
         return newFolder;
@@ -131,7 +144,7 @@ if (typeof (companyhome) == "undefined") {
     ScriptNode.prototype.createNode = function (name, typ) {
         if (this.type != "cm:folder")
             throw "Kein Folder!";
-        var newNode =  new ScriptNode(name, this.displayPath + (this.displayPath.substr(this.displayPath.length -1, 1) =="/" ? "" : "/") + name, typ);
+        var newNode =  new ScriptNode(name, typ);
         this.children.add(newNode);
         newNode.parent.add(this);
         return newNode;
@@ -146,7 +159,7 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.copy = function(newNode) {
-        var cNode =  new ScriptNode(this.name, newNode.displayPath + (newNode.displayPath.substr(newNode.displayPath.length -1, 1) =="/" ? "" : "/") + this.name, this.typ);
+        var cNode =  new ScriptNode(this.name, this.typ);
         newNode.children.add(cNode);
         cNode.parent.add(newNode);
         return cNode;
@@ -174,7 +187,7 @@ if (typeof (companyhome) == "undefined") {
         this.children.clear();
         this.parent.clear();
     };
-    var companyhome = new ScriptNode("companyhome", "/", "cm:folder");
+    var companyhome = new ScriptNode("/", "cm:folder");
 }
 
 if (typeof (commentService) == "undefined") {
@@ -1280,7 +1293,7 @@ function ArchivTyp(srch) {
                     REC.log(TRACE, "ArchivTyp.resolve: call ArchivPosition.resolve");
                     orgFolder = this.archivPosition[i].resolve();
                     if (orgFolder != null) {
-                        REC.log(TRACE, "ArchivTyp.resolve: process archivPosition" + orgFolder.displayPath);
+                        REC.log(TRACE, "ArchivTyp.resolve: process archivPosition" + REC.completeNodePath(orgFolder));
                         if (REC.exist(REC.mandatoryElements) && this.name != REC.errorBox && this.name != REC.duplicateBox) {
                             for (var j = 0; j < REC.mandatoryElements.length; j++) {
                                 if (!REC.exist(REC.currentDocument.properties[REC.mandatoryElements[j]])) {
@@ -1297,7 +1310,7 @@ function ArchivTyp(srch) {
                             this.unique = "copy";
                         if (this.archivPosition[i].link && REC.exist(orgFolder)) {
                             //TODO Das funktioniert wohl nicht richtig
-                            REC.log(INFORMATIONAL, "Document link to folder " + orgFolder.displayPath);
+                            REC.log(INFORMATIONAL, "Document link to folder " + REC.completeNodePath(orgFolder));
                             REC.log(INFORMATIONAL, tmp + "/" + orgFolder.name);
                             REC.log(INFORMATIONAL, (REC.exist(companyhome.childByNamePath(tmp + "/" + orgFolder.name))));
                             if (REC.exist(companyhome.childByNamePath(tmp + "/" + orgFolder.name)))
@@ -1305,8 +1318,8 @@ function ArchivTyp(srch) {
                             else
                                 companyhome.childByNamePath(tmp).addNode(orgFolder);
                         } else {
-                            REC.log(INFORMATIONAL, "Document place to folder " + orgFolder.displayPath);
-                            REC.log(TRACE, "ArchivTyp.resolve: search Document: " + REC.currentDocument.name + " in " + orgFolder.displayPath);
+                            REC.log(INFORMATIONAL, "Document place to folder " + REC.completeNodePath(orgFolder));
+                            REC.log(TRACE, "ArchivTyp.resolve: search Document: " + REC.currentDocument.name + " in " + REC.completeNodePath(orgFolder));
                             var tmpDoc = orgFolder.childByNamePath(REC.currentDocument.name);
                             if (tmpDoc != null) {
                                 if (REC.exist(this.unique) && this.unique == "newVersion") {
@@ -1345,7 +1358,7 @@ function ArchivTyp(srch) {
                                                 } else if (this.unique == "overWrite") {
                                                     x[k].remove();
                                                     if (!REC.currentDocument.move(orgFolder))
-                                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + orgFolder.displayPath);
+                                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(orgFolder));
                                                 } else if (this.unique != "ignore") {
                                                     REC.log(WARN, "Dokument mit gleichem Titel existiert bereits, hochgeladenes Dokument wird gel\\u00F6scht!");
                                                     //REC.currentDocument.remove();
@@ -1360,7 +1373,7 @@ function ArchivTyp(srch) {
                                 if (!uni) {
                                     REC.log(TRACE, "ArchivTyp.resolve: move document to folder");
                                     if (!REC.currentDocument.move(orgFolder))
-                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + orgFolder.displayPath);
+                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(orgFolder));
                                 }
                             }
                         }
@@ -1512,11 +1525,11 @@ function ArchivPosition(srch) {
         folder = this.buildFolder();
         if (REC.exist(this.archivZiel) && REC.exist(folder)) {
             for (i = 0; i < this.archivZiel.length; i++) {
-                REC.log(TRACE, "ArchivPosition.resolve: call ArchivZiel.resolve with " + folder.displayPath);
+                REC.log(TRACE, "ArchivPosition.resolve: call ArchivZiel.resolve with " + REC.completeNodePath(folder));
                 this.archivZiel[i].resolve(folder);
             }
         }
-        REC.log(DEBUG, "ArchivPosition.resolve: return is " + (REC.exist(folder) ? folder.displayPath : "<null>"));
+        REC.log(DEBUG, "ArchivPosition.resolve: return is " + (REC.exist(folder) ? REC.completeNodePath(folder) : "<null>"));
         REC.debugLevel = orgLevel;
         return folder;
     };
@@ -2485,8 +2498,8 @@ function SearchItem(srch) {
 
             if (REC.exist(this.archivZiel)) {
                 for (i = 0; i < this.archivZiel.length; i++) {
-                    REC.log(DEBUG, "SearchItem.resolve: call ArchivZiel.resolve with " + REC.currentDocument.displayPath.split("/").slice(2).join("/") + "/" + REC.currentDocument.name);
-                    this.archivZiel[i].resolve(REC.currentDocument.displayPath.split("/").slice(2).join("/") + "/" + REC.currentDocument.name);
+                    REC.log(DEBUG, "SearchItem.resolve: call ArchivZiel.resolve with " + REC.completeNodePath(REC.currentDocument));
+                    this.archivZiel[i].resolve(REC.currentDocument);
                 }
             }
             if (REC.exist(this.target) && this.erg.isFound()) {
@@ -2848,6 +2861,10 @@ REC = {
                 REC.errors.push("could not replace Placeholder " + str.match(/\{.+\}/g) + "!");
         }
         return [str, replaced];
+    },
+
+    completeNodePath: function(node) {
+        return node.getDisplayPath().split("/").slice(2).join("/") + "/" + node.name;
     },
 
     buildDate: function (text) {

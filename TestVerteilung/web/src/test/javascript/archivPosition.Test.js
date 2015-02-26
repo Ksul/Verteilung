@@ -16,7 +16,7 @@ ArchivPositionTest.prototype.test1 = function() {
     XMLDoc.parse();
     var archivPosition = new ArchivPosition(new XMLObject(XMLDoc.docNode));
     erg = archivPosition.resolve();
-    assertEquals("/Dokumente/Auto/KFZ Steuern", erg.displayPath);
+    assertEquals("/Dokumente/Auto/KFZ Steuern", erg.getDisplayPath().split("/").slice(2).join("/") + "/" + erg.name);
 };
 
 ArchivPositionTest.prototype.test2 = function() {
@@ -40,7 +40,7 @@ ArchivPositionTest.prototype.test3 = function() {
     XMLDoc.parse();
     var archivPosition = new ArchivPosition(new XMLObject(XMLDoc.docNode));
     erg = archivPosition.resolve();
-    assertEquals("/Dokumente/Rechnungen/Sonstige Rechnungen/Test", erg.displayPath);
+    assertEquals("/Dokumente/Rechnungen/Sonstige Rechnungen/Test", erg.getDisplayPath().split("/").slice(2).join("/") + "/" + erg.name);
 };
 
 ArchivPositionTest.prototype.test4 = function() {
