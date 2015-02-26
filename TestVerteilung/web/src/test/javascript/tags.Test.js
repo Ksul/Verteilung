@@ -5,7 +5,7 @@
 TagsTest = TestCase("TagsTest");
 
 TagsTest.prototype.setUp = function() {
-   REC.currentDocument.init();
+   REC.init();
 };
 
 TagsTest.prototype.test1 = function() {

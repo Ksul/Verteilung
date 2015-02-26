@@ -6,6 +6,7 @@ ArchivPositionTest = TestCase("ArchivPositionTest");
 
 ArchivPositionTest.prototype.setUp = function() {
     REC.init();
+    companyhome.init();
 };
 
 
@@ -15,7 +16,7 @@ ArchivPositionTest.prototype.test1 = function() {
     XMLDoc.parse();
     var archivPosition = new ArchivPosition(new XMLObject(XMLDoc.docNode));
     erg = archivPosition.resolve();
-    assertEquals("Dokumente/Auto/KFZ Steuern", erg);
+    assertEquals("/Dokumente/Auto/KFZ Steuern", erg.displayPath);
 };
 
 ArchivPositionTest.prototype.test2 = function() {
@@ -39,7 +40,7 @@ ArchivPositionTest.prototype.test3 = function() {
     XMLDoc.parse();
     var archivPosition = new ArchivPosition(new XMLObject(XMLDoc.docNode));
     erg = archivPosition.resolve();
-    assertEquals("Dokumente/Rechnungen/Sonstige Rechnungen/Test", erg);
+    assertEquals("/Dokumente/Rechnungen/Sonstige Rechnungen/Test", erg.displayPath);
 };
 
 ArchivPositionTest.prototype.test4 = function() {
@@ -53,22 +54,20 @@ ArchivPositionTest.prototype.test4 = function() {
 };
 
 ArchivPositionTest.prototype.testResolveFolder1 = function() {
-    companyhome.initNodes();
     var archivPosition = new ArchivPosition({});
     var newFolder = archivPosition.resolveFolder("/aa/bb/cc");
     assertNotNull(newFolder);
-    assertTrue(companyhome.hasNode("aa"));
-    assertTrue(companyhome.hasNode("bb"));
-    assertTrue(companyhome.hasNode("cc"));
+    assertNotNull(companyhome.childByNamePath("aa"));
+    assertNotNull(companyhome.childByNamePath("aa/bb"));
+    assertNotNull(companyhome.childByNamePath("aa/bb/cc"));
 };
 
 ArchivPositionTest.prototype.testResolveFolder2 = function() {
-    companyhome.initNodes();
     companyhome.createFolder("aa");
     var archivPosition = new ArchivPosition({});
     var newFolder = archivPosition.resolveFolder("/aa/bb/cc");
     assertNotNull(newFolder);
-    assertTrue(companyhome.hasNode("aa"));
-    assertTrue(companyhome.hasNode("bb"));
-    assertTrue(companyhome.hasNode("cc"));
+    assertNotNull(companyhome.childByNamePath("aa"));
+    assertNotNull(companyhome.childByNamePath("aa/bb"));
+    assertNotNull(companyhome.childByNamePath("aa/bb/cc"));
 };

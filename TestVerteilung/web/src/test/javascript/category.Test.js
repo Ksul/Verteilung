@@ -6,6 +6,7 @@ CategoryTest = TestCase("CategoryTest");
 
 CategoryTest.prototype.setUp = function() {
     REC.init();
+    companyhome.init();
     classification.init();
 };
 

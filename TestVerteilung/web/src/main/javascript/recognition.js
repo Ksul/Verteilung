@@ -21,44 +21,34 @@ if (typeof (companyhome) == "undefined") {
     Liste.prototype = [];
     Liste.prototype.contains = function(element) {
         for (var i = 0; i < this.length; i++) {
-            if (this[i] == element)
+            if (this[i].name == element.name)
                 return true;
         }
         return false;
     };
     Liste.prototype.add = function(element) {
         if (this.contains(element))
-            throw "Element " + element + " bereits vorhanden";
+            throw "Element " + element.name + " bereits vorhanden";
         this.push(element);
     };
     Liste.prototype.remove = function(element) {
         if (!this.contains(element))
-            throw "Element nicht vorhanden";
+            throw "Element " + element.name + " nicht vorhanden";
         for (var i = 0; i < this.length; i++) {
             if (this[i] == element)
-                this.slice(i, 1);
+                this.splice(i, 1);
         }
     };
-    Liste.prototype.clear = function() {
-        this.slice(0, this.length);
+    Liste.prototype.get = function(element){
+        for (var i = 0; i < this.length; i++) {
+            if (this[i].name == element.name)
+                return this[i];
+        }
+        return null;
     };
-
-    function BasicNode() {
-        this.allNodes = new Liste();
-        this.addNode = function (node) {
-            this.allNodes.add(node);
-        };
-        this.initNodes = function(){
-            this.allNodes.clear();
-        };
-        this.hasNode = function (name) {
-            for (var i = 0; i < this.allNodes.length; i++) {
-                if (this.allNodes[i].name == name)
-                    return true;
-            }
-            return false;
-        };
-    }
+    Liste.prototype.clear = function() {
+        this.splice(0, this.length);
+    };
 
     function ScriptNode(name, displayPath, type) {
         this.name = name;
@@ -72,8 +62,6 @@ if (typeof (companyhome) == "undefined") {
         this.type = type;
     }
 
-    ScriptNode.prototype = new BasicNode();
-    ScriptNode.prototype.constructor = ScriptNode;
 
     ScriptNode.prototype.setContent = function (inhalt) {
         this.content = inhalt;
@@ -81,9 +69,18 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.childByNamePath = function (name) {
-        for (var i = 0; i < this.allNodes.length; i++) {
-            if (this.allNodes[i].name == name)
-                return this.allNodes[i];
+        var parts = name.split("/");
+        var currentNode = this;
+        for (var i = 0; i < parts.length; i++) {
+            var part = parts[i];
+            if (part.length > 0) {
+                if (!currentNode.children.contains({name:part}))
+                    break;
+                else
+                    currentNode = currentNode.children.get({name:part});
+                if (i == parts.length - 1)
+                    return currentNode;
+            }
         }
         return null;
     };
@@ -92,14 +89,13 @@ if (typeof (companyhome) == "undefined") {
         if (this.type != "cm:folder")
             throw "Kein Folder!";
         var newFolder = new ScriptNode(name, this.displayPath + (this.displayPath.substr(this.displayPath.length -1, 1) =="/" ? "" : "/") + name, "cm:folder");
-        this.addNode(newFolder);
         this.children.add(newFolder);
         newFolder.parent.add(this);
         return newFolder;
     };
 
     ScriptNode.prototype.hasAspect = function (aspect) {
-        return this.aspect.contains(aspect)
+        return this.aspect.contains({name:aspect})
     };
 
     ScriptNode.prototype.isSubType = function (type) {
@@ -108,16 +104,16 @@ if (typeof (companyhome) == "undefined") {
 
     ScriptNode.prototype.addAspect = function (aspect) {
         if (!this.hasAspect(aspect))
-            this.aspect.add(aspect);
+            this.aspect.add({name:aspect});
     };
 
     ScriptNode.prototype.addTag = function (tag) {
         if (!this.hasTag(tag))
-            this.tags.add(tag);
+            this.tags.add({name:tag});
     };
 
     ScriptNode.prototype.hasTag = function(tag) {
-        return this.tags.contains(tag)
+        return this.tags.contains({name:tag})
 
     };
     
@@ -136,7 +132,6 @@ if (typeof (companyhome) == "undefined") {
         if (this.type != "cm:folder")
             throw "Kein Folder!";
         var newNode =  new ScriptNode(name, this.displayPath + (this.displayPath.substr(this.displayPath.length -1, 1) =="/" ? "" : "/") + name, typ);
-        this.addNode(newNode);
         this.children.add(newNode);
         newNode.parent.add(this);
         return newNode;
@@ -154,7 +149,6 @@ if (typeof (companyhome) == "undefined") {
         var cNode =  new ScriptNode(this.name, newNode.displayPath + (newNode.displayPath.substr(newNode.displayPath.length -1, 1) =="/" ? "" : "/") + this.name, this.typ);
         newNode.children.add(cNode);
         cNode.parent.add(newNode);
-        this.addNode(cNode);
         return cNode;
     };
 
@@ -163,8 +157,11 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.move = function (newNode) {
-        this.parent.children.remove(newNode);
+        for (var i = 0; i < this.parent.length; i++) {
+            this.parent[i].children.remove(this);
+        }
         newNode.children.add(this);
+        this.parent.clear();
         this.parent.add(newNode);
         return true;
     };
@@ -176,15 +173,9 @@ if (typeof (companyhome) == "undefined") {
         this.properties.clear();
         this.children.clear();
         this.parent.clear();
-        this.initNodes();
-        companyhome.createNode('WebScriptTest', "my:archivContent");
     };
-    var companyhome = new ScriptNode("companyHome", "/", "cm:folder");
+    var companyhome = new ScriptNode("companyhome", "/", "cm:folder");
 }
-
-
-
-
 
 if (typeof (commentService) == "undefined") {
     var commentService = ({
@@ -842,7 +833,6 @@ XMLDoc = {
         return n;
     },
 
-
     removeNodeFromTree: function (node) {
         var parentXMLText = this.getUnderlyingXMLText();
         var selectedNodeXMLText = node.getUnderlyingXMLText();
@@ -858,6 +848,7 @@ XMLDoc = {
         referenceNode.children = newNode.children;
         return this;
     },
+
     selectNode: function (tagpath) {
         tagpath = REC.trim(tagpath, true, true);
         var srcnode, node, tag, params, elm, rg;
@@ -1202,6 +1193,29 @@ function ArchivTyp(srch) {
         return txt;
     };
 
+    /**
+     * erstellt eine neue Version eines Knotens
+     * @param doc               der Knoten
+     * @param newDoc            die neue Version des Knotens
+     * @return {boolean}        [true] wenn alles geklappt hat, [false] im Fehlerfall
+     */
+    this.makeNewVersion = function (doc, newDoc) {
+        if (doc.isLocked) {
+            this.errors.push("Gelocktes Dokument kann nicht verändert werden!");
+            return false;
+        } else {
+            if (!doc.hasAspect("cm:workingcopy")) {
+                doc.ensureVersioningEnabled(true, false);
+                var workingCopy = doc.checkoutForUpload();
+                workingCopy.properties.content.write(this.currentDocument.properties.content);
+                workingCopy.checkin();
+                newDoc.remove();
+                this.log(INFORMATIONAL, "Neue Version des Dokumentes erstellt");
+                return true;
+            }
+        }
+    };
+
     this.resolve = function () {
         var i;
         var found = false;
@@ -1219,14 +1233,13 @@ function ArchivTyp(srch) {
                 REC.currXMLName.push(this.name);
             REC.log(INFORMATIONAL, "Regel gefunden " + this.name);
             if (REC.exist(REC.currentSearchItems)) {
-                var tmp = REC.currentSearchItems.concat(this.searchItem);
-                REC.currentSearchItems = tmp;
+                REC.currentSearchItems = REC.currentSearchItems.concat(this.searchItem);
             } else
                 REC.currentSearchItems = this.searchItem;
             if (REC.exist(this.archivZiel)) {
                 for (i = 0; i < this.archivZiel.length; i++) {
                     REC.log(TRACE, "ArchivTyp.resolve: call ArchivZiel.resolve with " + REC.currentDocument.toString());
-                    this.archivZiel[i].resolve(REC.currentDocument.displayPath.split("/").slice(2).join("/") + "/" + REC.currentDocument.name);
+                    this.archivZiel[i].resolve(REC.currentDocument);
                 }
             }
             if (REC.exist(this.archivTyp)) {
@@ -1265,9 +1278,9 @@ function ArchivTyp(srch) {
                 var orgFolder = null;
                 for (i = 0; i < this.archivPosition.length; i++) {
                     REC.log(TRACE, "ArchivTyp.resolve: call ArchivPosition.resolve");
-                    tmp = this.archivPosition[i].resolve();
-                    if (tmp != null) {
-                        REC.log(TRACE, "ArchivTyp.resolve: process archivPosition" + tmp);
+                    orgFolder = this.archivPosition[i].resolve();
+                    if (orgFolder != null) {
+                        REC.log(TRACE, "ArchivTyp.resolve: process archivPosition" + orgFolder.displayPath);
                         if (REC.exist(REC.mandatoryElements) && this.name != REC.errorBox && this.name != REC.duplicateBox) {
                             for (var j = 0; j < REC.mandatoryElements.length; j++) {
                                 if (!REC.exist(REC.currentDocument.properties[REC.mandatoryElements[j]])) {
@@ -1283,7 +1296,8 @@ function ArchivTyp(srch) {
                         } else
                             this.unique = "copy";
                         if (this.archivPosition[i].link && REC.exist(orgFolder)) {
-                            REC.log(INFORMATIONAL, "Document link to folder " + tmp);
+                            //TODO Das funktioniert wohl nicht richtig
+                            REC.log(INFORMATIONAL, "Document link to folder " + orgFolder.displayPath);
                             REC.log(INFORMATIONAL, tmp + "/" + orgFolder.name);
                             REC.log(INFORMATIONAL, (REC.exist(companyhome.childByNamePath(tmp + "/" + orgFolder.name))));
                             if (REC.exist(companyhome.childByNamePath(tmp + "/" + orgFolder.name)))
@@ -1291,14 +1305,13 @@ function ArchivTyp(srch) {
                             else
                                 companyhome.childByNamePath(tmp).addNode(orgFolder);
                         } else {
-                            REC.log(INFORMATIONAL, "Document place to folder " + tmp);
-                            REC.log(TRACE, "ArchivTyp.resolve: search Document: " + REC.currentDocument.name + " in " + tmp);
-                            orgFolder = companyhome.childByNamePath(tmp);
+                            REC.log(INFORMATIONAL, "Document place to folder " + orgFolder.displayPath);
+                            REC.log(TRACE, "ArchivTyp.resolve: search Document: " + REC.currentDocument.name + " in " + orgFolder.displayPath);
                             var tmpDoc = orgFolder.childByNamePath(REC.currentDocument.name);
                             if (tmpDoc != null) {
                                 if (REC.exist(this.unique) && this.unique == "newVersion") {
                                     REC.log(WARN, "Document exists, a new Version will created");
-                                    REC.makeNewVersion(tmpDoc, REC.currentDocument);
+                                    this.makeNewVersion(tmpDoc, REC.currentDocument);
                                 } else if (this.unique == "ignore") {
                                     REC.log(WARN, "Dokument existiert bereits, hochgeladenes Dokument wird gel\\u00F6scht!");
                                     //REC.currentDocument.remove();
@@ -1327,12 +1340,12 @@ function ArchivTyp(srch) {
                                                     return found;
                                                 } else if (this.unique == "newVersion") {
                                                     log(WARN, "Dokument mit diesem Titel bereits vorhanden! Erstelle neue Version...");
-                                                    if (!REC.makeNewVersion(x[k], REC.currentDocument))
+                                                    if (!this.makeNewVersion(x[k], REC.currentDocument))
                                                         return found;
                                                 } else if (this.unique == "overWrite") {
                                                     x[k].remove();
                                                     if (!REC.currentDocument.move(orgFolder))
-                                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + tmp);
+                                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + orgFolder.displayPath);
                                                 } else if (this.unique != "ignore") {
                                                     REC.log(WARN, "Dokument mit gleichem Titel existiert bereits, hochgeladenes Dokument wird gel\\u00F6scht!");
                                                     //REC.currentDocument.remove();
@@ -1347,7 +1360,7 @@ function ArchivTyp(srch) {
                                 if (!uni) {
                                     REC.log(TRACE, "ArchivTyp.resolve: move document to folder");
                                     if (!REC.currentDocument.move(orgFolder))
-                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + tmp);
+                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + orgFolder.displayPath);
                                 }
                             }
                         }
@@ -1362,7 +1375,7 @@ function ArchivTyp(srch) {
 }
 
 /**
- * Ermittelt die Zielposition f�r das Dokument
+ * Ermittelt die Zielposition für das Dokument
  * @param srch      die Parameter
  * @constructor
  */
@@ -1386,8 +1399,8 @@ function ArchivPosition(srch) {
     }
 
     /**
-     * Stringrepr�sentation des Objektes
-     * @param ident         Einr�ckung
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1438,7 +1451,6 @@ function ArchivPosition(srch) {
                         }
                         if (top == null) {
                             REC.errors.push("Folder " + dir + " konnte nicht erstellt werden");
-                            dir = null;
                             break;
                         }
                     } else {
@@ -1449,7 +1461,7 @@ function ArchivPosition(srch) {
             }
         }
         REC.log(TRACE, "buildFolder result is " + dir);
-        return dir;
+        return top;
     };
 
     /**
@@ -1488,7 +1500,7 @@ function ArchivPosition(srch) {
 
     /**
      * ermittelt die Position des Dokumentes im Archiv
-     * @return {string}  die Position
+     * @return {node}  der Folder, in das das Dokument eingestellt werden soll
      */
     this.resolve = function () {
         var erg, folder;
@@ -1522,8 +1534,8 @@ function Format(srch) {
     this.formatString = srch.formatString;
 
     /**
-     * Stringrepr�sentation des Objektes
-     * @param ident         Einr�ckung
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
      * @return {string}     das Objekt als String
      */
    this.toString = function (ident) {
@@ -1573,8 +1585,8 @@ function ArchivZiel(srch) {
         this.type = srch.type;
 
     /**
-     * Stringrepr�sentation des Objektes
-     * @param ident         Einr�ckung
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1590,7 +1602,7 @@ function ArchivZiel(srch) {
 
     /**
      * setzt das Archiv Ziel
-     * @param node   der Knoten, f�r das das Archivziel gesetzt werden soll
+     * @param node   der Knoten, für das das Archivziel gesetzt werden soll
      * @return {boolean} false, wenn das Archivziel nicht gesetzt werden konnte.
      */
     this.resolve = function (node) {
@@ -1623,9 +1635,9 @@ function ArchivZiel(srch) {
 }
 
 /**
- * Stellt Funktionalit�t zur G�ltigkeitspr�fung von gefundenen Ergebnissen zur Verf�gung
+ * Stellt Funktionalität zur Gültigkeitsprüfung von gefundenen Ergebnissen zur Verfügung
  * @param srch      die Parameter
- * @param parent    das dazugeh�rende SearchItem
+ * @param parent    das dazu gehörende SearchItem
  * @constructor
  */
 function Check(srch, parent) {
@@ -1651,7 +1663,7 @@ function Check(srch, parent) {
     }
 
     /**
-     * f�hrt die eigentliche Pr�fung durch
+     * führt die eigentliche Prüfung durch
      */
     this.resolve = function () {
         var orgLevel = REC.debugLevel;
@@ -1676,8 +1688,8 @@ function Check(srch, parent) {
     };
 
     /**
-     * Stringrepr�sentation des Objektes
-     * @param ident         Einr�ckung
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1781,7 +1793,7 @@ function Comments() {
 }
 
 /**
- * Ermittelt die Grenzen im Suchtext f�r das zu findende Element
+ * Ermittelt die Grenzen im Suchtext für das zu findende Element
  * @param srch      die Parameter
  * @constructor
  */
@@ -1796,8 +1808,8 @@ function Delimitter(srch) {
         this.removeBlanks = srch.removeBlanks;
 
     /**
-     * Stringrepr�sentation des Objektes
-     * @param ident         Einr�ckung
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1814,9 +1826,9 @@ function Delimitter(srch) {
     };
 
     /**
-     * f�hrt die Ermittlung der Grenzen f�r das zu suchende Objekt durch
+     * führt die Ermittlung der Grenzen für das zu suchende Objekt durch
      * @param erg           das bis jetzt gefundene Ergebnis
-     * @param direction     die Suchrichtung f�r Logausgaben
+     * @param direction     die Suchrichtung für Logausgaben
      * @return {*}
      */
     this.resolve = function (erg, direction) {
@@ -1871,10 +1883,10 @@ function Delimitter(srch) {
 }
 
 /**
- * stellt Funktionalit�t zum Verwalten der Kategorien zur Verf�gung
+ * stellt Funktionalität zum Verwalten der Kategorien zur Verfügung
  * @param srch      die Parameter
  * @constructor
- * TODO Nochmal pr�fen, ob das wirklich so funktioniert!
+ * TODO Nochmal prüfen, ob das wirklich so funktioniert!
  */
 function Category(srch) {
     if (REC.exist(srch.debugLevel))
@@ -1882,8 +1894,8 @@ function Category(srch) {
     this.name = srch.name;
 
     /**
-     * Stringrepr�sentation des Objektes
-     * @param ident         Einr�ckung
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -1962,7 +1974,7 @@ function Category(srch) {
 }
 
 /**
- * stellt Funktionalit�t zum Bearbeiten der Tags eines Dokumentes zur Verf�gung
+ * stellt Funktionalität zum Bearbeiten der Tags eines Dokumentes zur Verfügung
  * @param srch      die Parameter
  * @constructor
  */
@@ -1972,8 +1984,8 @@ function Tags(srch) {
     this.name = srch.name;
 
     /**
-     * Stringrepr�sentation des Objektes
-     * @param ident         Einr�ckung
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -2008,7 +2020,7 @@ function Tags(srch) {
 }
 
 /**
- * stellt Funktionalit�t zum Suchen eines Dokumentes zur Verf�gung
+ * stellt Funktionalität zum Suchen eines Dokumentes zur Verfügung
  * @param srch      die Parameter
  * @constructor
  */
@@ -2123,8 +2135,8 @@ function SearchItem(srch) {
     }
 
     /**
-     * Stringrepr�sentation des Objektes
-     * @param ident         Einr�ckung
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
      * @return {string}     das Objekt als String
      */
     this.toString = function (ident) {
@@ -2214,9 +2226,9 @@ function SearchItem(srch) {
     /**
      * sucht nach einem speziellen Ergebnistyp
      * @param text              der zu duchsuchende Text
-     * @param kind              die Art des Ergebnistypen M�gliche Werte [amount] Geldbetrag, [date] Datum, [float] Nummer
+     * @param kind              die Art des Ergebnistypen Mögliche Werte [amount] Geldbetrag, [date] Datum, [float] Nummer
      * @param left              die Suchrichtung
-     * @param expected          ein erwartetes Ergebnis f�r Testzwecke
+     * @param expected          ein erwartetes Ergebnis für Testzwecke
      * @return {Array.<T>}
      */
     this.findSpecialType = function (text, kind, left, expected) {
@@ -2305,7 +2317,7 @@ function SearchItem(srch) {
 
     /**
      * sucht ab einer bestimmten Position nach dem X. ganzen Wort
-     * @param word   Array mit der Anzahl W�rtern [Anzahl W�rter bis zum Ergebnis, Anzahl W�rter die ins Ergebnis fliessen]
+     * @param word   Array mit der Anzahl Wörtern [Anzahl Wörter bis zum Ergebnis, Anzahl Wörter die ins Ergebnis fliessen]
      * @param left   die Suchrichtung
      */
     this.findForWords = function ( word, left) {
@@ -2628,7 +2640,7 @@ SearchResultContainer.prototype.getError = function () {
  * @param  start    die Beginnposition des Ergebnis uim Text
  * @param  end      die Endeposition des Ergebnis uim Text
  * @param  typ      der Typ des Ergebnis
- * @param  expected f�r Testzwecke. Hier kann ein erwartetes Ergebnis hinterlegt werden
+ * @param  expected für Testzwecke. Hier kann ein erwartetes Ergebnis hinterlegt werden
  */
 function SearchResult(text, val, start, end, typ, expected) {
     this.text = text;
@@ -3145,24 +3157,6 @@ REC = {
         }
     },
 
-
-    makeNewVersion: function (doc, newDoc) {
-        if (doc.isLocked) {
-            this.errors.push("Gelocktes Dokument kann nicht ver?ndert werden!");
-            return false;
-        } else {
-            if (!doc.hasAspect("cm:workingcopy")) {
-                doc.ensureVersioningEnabled(true, false);
-                var workingCopy = doc.checkoutForUpload();
-                workingCopy.properties.content.write(this.currentDocument.properties.content);
-                workingCopy.checkin();
-                newDoc.remove();
-                this.log(INFORMATIONAL, "Neue Version des Dokumentes erstellt");
-                return true;
-            }
-        }
-    },
-
     isEmpty: function (str) {
         return (str == null) || (str.length == 0);
     },
@@ -3502,7 +3496,7 @@ REC = {
     },
 
     /**
-     * f�hrt die Erkennung durch
+     * führt die Erkennung durch
      * @param doc       das zu erkennende Dokument
      * @param rules     die Regeln
      * @param deb       wird nicht benutzt
@@ -3613,6 +3607,7 @@ REC = {
         this.errors = [];
         this.results = [];
         this.positions = new PositionContainer();
+        this.currentDocument.init();
     },
     
     id: Math.random() * 100,

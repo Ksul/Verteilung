@@ -6,7 +6,6 @@ ArchivZielTest = TestCase("ArchivZielTest");
 
 ArchivZielTest.prototype.setUp = function() {
     REC.init();
-    companyhome.init();
 };
 
 ArchivZielTest.prototype.test1 = function() {
