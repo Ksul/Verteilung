@@ -1331,8 +1331,10 @@ function ArchivTyp(srch) {
                                     return found;
                                 } else {
                                     REC.errors.push("Dokument mit dem Dateinamen " + REC.currentDocument.name + " ist im Zielordner bereits vorhanden! ");
-                                    REC.fehlerBox = REC.duplicateBox;
-                                    return found;
+                                    REC.log(TRACE, "ArchivTyp.resolve: move document to folder " +  REC.completeNodePath(REC.duplicateBox));
+                                    if (!REC.currentDocument.move(REC.duplicateBox))
+                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(REC.duplicateBox));
+                                    return true;
                                 }
                             } else {
                                 var uni = false;

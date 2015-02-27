@@ -15,4 +15,4 @@ TagsTest.prototype.test1 = function() {
     var tags = new Tags(new XMLObject(XMLDoc.docNode));
     tags.resolve(REC.currentDocument);
     assertTrue(REC.currentDocument.hasTag("Rückrechnung"));
-}
+};
