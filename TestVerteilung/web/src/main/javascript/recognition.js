@@ -10,8 +10,16 @@ var whitespace = "\n\n\t ";
 // Mock Alfresco Types
 if (typeof (search) == "undefined") {
     var search = ({
-        luceneSearch: function () {
-            return [];
+        willFind: false,
+        node: null,
+        setFind: function(value, node) {this.willFind = value;
+                                        this.node = node;
+        },
+        luceneSearch: function (xPath) {
+            if (!this.willFind)
+                return [];
+            else
+                return this.node;
         }
     });
 }
@@ -154,7 +162,9 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.remove = function (node) {
-        this.children.remove(node);
+        for (var i = 0; i < this.parent.length; i++) {
+            this.parent[i].children.remove(this);
+        }
         return true;
     };
 
@@ -177,6 +187,10 @@ if (typeof (companyhome) == "undefined") {
         this.parent.clear();
         this.parent.add(newNode);
         return true;
+    };
+
+    ScriptNode.prototype.setProperty = function(key, value){
+        this.properties[key] = value;
     };
 
     ScriptNode.prototype.init = function() {
@@ -1229,9 +1243,57 @@ function ArchivTyp(srch) {
         }
     };
 
+    /**
+     * handelt das Dokument
+     * @param {array} documente     eine Liste der gefundenen bereits vorhandene gleichen Dokumente
+     * @param destination          das ermittelte Ziel Verzeichnis für das hochgeladene Dokument
+     */
+    this.handleDocument = function(documente, destination) {
+        var move;
+        if (documente.length > 0) {
+            move = false;
+            for (var i = 0; i < documente.length; i++) {
+                var document = documente[i];
+                if (this.unique == "newVersion") {
+                    // neue Version erstellen
+                    REC.log(WARN, "Dokument ist bereits vorhanden! Erstelle neue Version...");
+                    if (!this.makeNewVersion(searchTitleResult[k], REC.currentDocument))
+                        break;
+                } else if (this.unique == "overWrite") {
+                    // überschreiben
+                    REC.log(WARN, "Dokument ist bereits vorhanden! Dokument wird ersetzt...");
+                    document.remove();
+                    move = true
+                } else if (this.unique == "nothing") {
+                    // nichts machen und hochgeladenes Dokument löschen
+                    REC.log(WARN, "Dokument mit gleichem Titel existiert bereits, hochgeladenes Dokument wird gel\\u00F6scht!");
+                    REC.currentDocument.remove();
+                    break;
+                } else {
+                    // this.unique == "error"
+                    // Fehler werfen und hochgeladenes Dokument in die Duplicate Box stellen
+                    REC.errors.push("Dokument mit dem " + (REC.currentDocument.name == document.name ? "Dateinamen " + REC.currentDocument.name : "Titel " + REC.currentDocument.properties["cm:title"]) + " ist im Zielordner bereits vorhanden! ");
+                    REC.log(TRACE, "ArchivTyp.resolve: move document to folder " + REC.completeNodePath(REC.duplicateBox));
+                    if (!REC.currentDocument.move(REC.duplicateBox))
+                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(REC.duplicateBox));
+                    break;
+                }
+            }
+        } else {
+            // keine möglichen doppelten Dokumente gefunden
+            move = true;
+        }
+        if (move) {
+            REC.log(TRACE, "ArchivTyp.resolve: move document to folder");
+            if (!REC.currentDocument.move(destination))
+                REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(destination));
+        }
+    };
+
     this.resolve = function () {
         var i;
         var found = false;
+        var erg;
         var orgLevel = REC.debugLevel;
         if (REC.exist(this.debugLevel))
             REC.debugLevel = this.debugLevel;
@@ -1282,18 +1344,19 @@ function ArchivTyp(srch) {
                     this.category[i].resolve(REC.currentDocument);
                 }
             }
+            // TODO wofür ist das
             var p = this.parent;
             while (REC.exist(p)) {
                 p.unique = this.unique;
                 p = p.parent;
             }
             if (REC.exist(this.archivPosition)) {
-                var orgFolder = null;
+                var destinationFolder = null;
                 for (i = 0; i < this.archivPosition.length; i++) {
                     REC.log(TRACE, "ArchivTyp.resolve: call ArchivPosition.resolve");
-                    orgFolder = this.archivPosition[i].resolve();
-                    if (orgFolder != null) {
-                        REC.log(TRACE, "ArchivTyp.resolve: process archivPosition" + REC.completeNodePath(orgFolder));
+                    destinationFolder = this.archivPosition[i].resolve();
+                    if (destinationFolder != null) {
+                        REC.log(TRACE, "ArchivTyp.resolve: process archivPosition" + REC.completeNodePath(destinationFolder));
                         if (REC.exist(REC.mandatoryElements) && this.name != REC.errorBox && this.name != REC.duplicateBox) {
                             for (var j = 0; j < REC.mandatoryElements.length; j++) {
                                 if (!REC.exist(REC.currentDocument.properties[REC.mandatoryElements[j]])) {
@@ -1308,79 +1371,47 @@ function ArchivTyp(srch) {
                             COM.removeComments(REC.currentDocument);
                         } else
                             this.unique = "copy";
-                        if (this.archivPosition[i].link && REC.exist(orgFolder)) {
+                        if (this.archivPosition[i].link && REC.exist(destinationFolder)) {
                             //TODO Das funktioniert wohl nicht richtig
-                            REC.log(INFORMATIONAL, "Document link to folder " + REC.completeNodePath(orgFolder));
-                            REC.log(INFORMATIONAL, tmp + "/" + orgFolder.name);
-                            REC.log(INFORMATIONAL, (REC.exist(companyhome.childByNamePath(tmp + "/" + orgFolder.name))));
-                            if (REC.exist(companyhome.childByNamePath(tmp + "/" + orgFolder.name)))
+                            REC.log(INFORMATIONAL, "Document link to folder " + REC.completeNodePath(destinationFolder));
+                            REC.log(INFORMATIONAL, tmp + "/" + destinationFolder.name);
+                            REC.log(INFORMATIONAL, (REC.exist(companyhome.childByNamePath(tmp + "/" + destinationFolder.name))));
+                            if (REC.exist(companyhome.childByNamePath(tmp + "/" + destinationFolder.name)))
                                 REC.log(WARN, "Link already exists!");
                             else
-                                companyhome.childByNamePath(tmp).addNode(orgFolder);
+                                companyhome.childByNamePath(tmp).addNode(destinationFolder);
                         } else {
-                            REC.log(INFORMATIONAL, "Document place to folder " + REC.completeNodePath(orgFolder));
-                            REC.log(TRACE, "ArchivTyp.resolve: search Document: " + REC.currentDocument.name + " in " + REC.completeNodePath(orgFolder));
-                            var tmpDoc = orgFolder.childByNamePath(REC.currentDocument.name);
+                            REC.log(INFORMATIONAL, "Document place to folder " + REC.completeNodePath(destinationFolder));
+                            REC.log(TRACE, "ArchivTyp.resolve: search Document: " + REC.currentDocument.name + " in " + REC.completeNodePath(destinationFolder));
+                            var tmpDoc = destinationFolder.childByNamePath(REC.currentDocument.name);
                             if (tmpDoc != null) {
-                                if (REC.exist(this.unique) && this.unique == "newVersion") {
-                                    REC.log(WARN, "Document exists, a new Version will created");
-                                    this.makeNewVersion(tmpDoc, REC.currentDocument);
-                                } else if (this.unique == "ignore") {
-                                    REC.log(WARN, "Dokument existiert bereits, hochgeladenes Dokument wird gel\\u00F6scht!");
-                                    //REC.currentDocument.remove();
-                                    return found;
-                                } else {
-                                    REC.errors.push("Dokument mit dem Dateinamen " + REC.currentDocument.name + " ist im Zielordner bereits vorhanden! ");
-                                    REC.log(TRACE, "ArchivTyp.resolve: move document to folder " +  REC.completeNodePath(REC.duplicateBox));
-                                    if (!REC.currentDocument.move(REC.duplicateBox))
-                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(REC.duplicateBox));
-                                    return true;
-                                }
+                                this.handleDocument([tmpDoc], destinationFolder);
                             } else {
-                                var uni = false;
+                                var searchTitleResult = [];
                                 if (REC.exist(this.unique) && REC.exist(REC.results["title"])) {
                                     REC.log(TRACE, "ArchivTyp.resolve: check for unique");
-                                    var q = "+PATH:\"/" + orgFolder.qnamePath + "//*\" +@cm\\:title:\"" + REC.results["title"].val + "\"";
-                                    REC.log(TRACE, "ArchivTyp.resolve: search document with " + q);
-                                    var x = search.luceneSearch(q);
-                                    if (x.length > 0) {
-                                        REC.log(TRACE, "ArchivTyp.resolve: search document found " + x.length + " documents");
-                                        for (var k = 0; k < x.length; k++) {
-                                            REC.log(TRACE, "ArchivTyp.resolve: compare with document " + x[k].name + "[" + x[k].properties['cm:title'] + "]...");
-                                            if (x[k].properties["cm:title"] == REC.results["title"].val) {
-                                                uni = true;
-                                                if (this.unique == "error") {
-                                                    REC.errors.push("Dokument mit Titel [" + REC.results["title"].val + "] ist im Zielordner bereits vorhanden");
-                                                    REC.fehlerBox = REC.duplicateBox;
-                                                    return found;
-                                                } else if (this.unique == "newVersion") {
-                                                    log(WARN, "Dokument mit diesem Titel bereits vorhanden! Erstelle neue Version...");
-                                                    if (!this.makeNewVersion(x[k], REC.currentDocument))
-                                                        return found;
-                                                } else if (this.unique == "overWrite") {
-                                                    x[k].remove();
-                                                    if (!REC.currentDocument.move(orgFolder))
-                                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(orgFolder));
-                                                } else if (this.unique != "ignore") {
-                                                    REC.log(WARN, "Dokument mit gleichem Titel existiert bereits, hochgeladenes Dokument wird gel\\u00F6scht!");
-                                                    //REC.currentDocument.remove();
-                                                    return found;
-                                                }
-                                                break;
+                                    var searchCriteria = "+PATH:\"/" + destinationFolder.qnamePath + "//*\" +@cm\\:title:\"" + REC.results["title"].val + "\"";
+                                    REC.log(TRACE, "ArchivTyp.resolve: search document with " + searchCriteria);
+                                    searchTitleResult = search.luceneSearch(searchCriteria);
+                                    if (searchTitleResult.length > 0) {
+                                        REC.log(TRACE, "ArchivTyp.resolve: search document found " + searchTitleResult.length + " documents");
+                                        for (var k = 0; k < searchTitleResult.length; k++) {
+                                            // TODO prüfen, ob man das machen muss
+                                            REC.log(TRACE, "ArchivTyp.resolve: compare with document " + searchTitleResult[k].name + "[" + searchTitleResult[k].properties['cm:title'] + "]...");
+                                            if (searchTitleResult[k].properties["cm:title"] != REC.results["title"].val) {
+                                                searchTitleResult.splice(k, 1)
                                             }
                                         }
-                                    } else
+                                    } else {
                                         REC.log(TRACE, "ArchivTyp.resolve: check for unique: no document with same title found");
+                                    }
                                 }
-                                if (!uni) {
-                                    REC.log(TRACE, "ArchivTyp.resolve: move document to folder");
-                                    if (!REC.currentDocument.move(orgFolder))
-                                        REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(orgFolder));
-                                }
+                                this.handleDocument(searchTitleResult, destinationFolder);
                             }
                         }
-                    } else
+                    } else {
                         REC.errors.push("kein Zielordner vorhanden!");
+                    }
                 }
             }
         }
@@ -2420,9 +2451,9 @@ function SearchItem(srch) {
         if (REC.exist(this.text))
             this.text = REC.replaceVar(this.text)[0];
         var txt = null;
-        if (REC.exist(this.fix))
+        if (REC.exist(this.fix)) {
             this.erg.modifyResult(new SearchResult(null, REC.convertValue(REC.replaceVar(this.fix)[0], this.objectTyp), 0, 0, this.objectTyp, this.expected), 0);
-        else if (REC.exist(this.eval)) {
+        } else if (REC.exist(this.eval)) {
             e = eval(REC.replaceVar(this.eval)[0]);
             this.erg.modifyResult(new SearchResult(e.toString(), e, 0, 0, null, this.expected), 0);
         } else {

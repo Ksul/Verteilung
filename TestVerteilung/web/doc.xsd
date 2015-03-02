@@ -292,7 +292,7 @@
                     <xsd:documentation>
                         Beschreibt, ob ein Dokument nur einmal in einem Ordner vorkommen darf. Folgende Auswahl besteht:
                         [error] ein Fehler wird geworfen
-                        [nothing] das Dokument wird ignoriert
+                        [nothing] das neue Dokument wird ignoriert und gelöscht
                         [newVersion] eine neue Version des Dokumentes wird erstellt
                         [overWrite] das Dokument wird überschrieben
                     </xsd:documentation>

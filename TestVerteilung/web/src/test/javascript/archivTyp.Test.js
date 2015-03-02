@@ -8,11 +8,14 @@ ArchivTypTest = TestCase("ArchivTypTest");
 ArchivTypTest.prototype.setUp = function() {
     REC.init();
     companyhome.init();
-    REC.currentDocument = companyhome.createNode('WebScriptTest', "my:archivContent");
     REC.unknownBox = companyhome.createFolder("Unbekannt");
     REC.inbox = companyhome.createFolder("Inbox");
     REC.errorBox = companyhome.createFolder("Fehler");
     REC.duplicateBox = REC.errorBox.createFolder("Doppelte");
+    REC.currentDocument = REC.inbox.createNode('WebScriptTest', "my:archivContent");
+    REC.currentDocument.setProperty("cm:title", "Test Title");
+    REC.currentDocument.setProperty("my:person", "Klaus");
+    search.setFind(false);
 };
 
 ArchivTypTest.prototype.test1 = function() {
@@ -26,14 +29,16 @@ ArchivTypTest.prototype.test1 = function() {
                     ' </archivTyp>';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
-    assertNotNull(companyhome.childByNamePath("/WebScriptTest"));
+    assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
     var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
     archivTyp.resolve();
-    assertNull(companyhome.childByNamePath("/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
     var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
     assertNotNull(doc);
     assertTrue(doc.isSubType("my:archivContent"));
     assertTrue(doc.parent[0].isSubType("my:archivFolder"));
+    assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
 };
 
 ArchivTypTest.prototype.test2 = function() {
@@ -52,7 +57,7 @@ ArchivTypTest.prototype.test2 = function() {
         ' </archivTyp>';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
-    assertNotNull(companyhome.childByNamePath("/WebScriptTest"));
+    assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
     var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
     archivTyp.resolve();
     assertNull(companyhome.childByNamePath("/WebScriptTest"));
@@ -61,5 +66,147 @@ ArchivTypTest.prototype.test2 = function() {
     doc = companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest");
     assertNotNull(doc);
     assertTrue(doc.isSubType("my:archivContent"));
+    assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
+};
+
+ArchivTypTest.prototype.test3 = function() {
+    var folder = companyhome.createFolder("Dokumente");
+    folder = folder.createFolder("Rechnungen");
+    folder = folder.createFolder("Rechnungen Zauberfrau");
+    folder = folder.createFolder("2015");
+    var node = folder.createNode("WebScriptTest", "my:archivContent");
+    node.setProperty("cm:title", "Rechnung 1");
+    search.setFind(true, node);
+    REC.content ="ZAUBERFRAU";
+    var rules = ' <archivTyp name="Zauberfrau" searchString="ZAUBERFRAU">' +
+        ' <archivZiel type="my:archivContent" /> ' +
+        ' <archivPosition folder="Dokumente/Rechnungen/Rechnungen Zauberfrau/{tmp}"> ' +
+        ' <archivZiel type="my:archivFolder" /> ' +
+        ' </archivPosition>' +
+        ' <searchItem name="tmp" fix="2015" />' +
+        ' <searchItem name="title" fix="Rechnung 1" />' +
+        ' </archivTyp>';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
+    archivTyp.resolve();
+    assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
+    assertNotNull(doc);
+    doc = companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest");
+    assertNotNull(doc);
+    assertTrue(doc.isSubType("my:archivContent"));
+    assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
+};
+
+ArchivTypTest.prototype.test4 = function() {
+    var folder = companyhome.createFolder("Dokumente");
+    folder = folder.createFolder("Rechnungen");
+    folder = folder.createFolder("Rechnungen Zauberfrau");
+    folder = folder.createFolder("2015");
+    folder.createNode("WebScriptTest", "my:archivContent");
+    REC.content ="ZAUBERFRAU";
+    var rules = ' <archivTyp name="Zauberfrau" searchString="ZAUBERFRAU" unique="nothing">' +
+        ' <archivZiel type="my:archivContent" /> ' +
+        ' <archivPosition folder="Dokumente/Rechnungen/Rechnungen Zauberfrau/{tmp}"> ' +
+        ' <archivZiel type="my:archivFolder" /> ' +
+        ' </archivPosition>' +
+        ' <searchItem name="tmp" fix="2015" />' +
+        ' </archivTyp>';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
+    archivTyp.resolve();
+    assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
+    assertNotNull(doc);
+    assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
+};
+
+ArchivTypTest.prototype.test5 = function() {
+    var folder = companyhome.createFolder("Dokumente");
+    folder = folder.createFolder("Rechnungen");
+    folder = folder.createFolder("Rechnungen Zauberfrau");
+    folder = folder.createFolder("2015");
+    folder.createNode("WebScriptTest", "my:archivContent");
+    REC.content ="ZAUBERFRAU";
+    var rules = ' <archivTyp name="Zauberfrau" searchString="ZAUBERFRAU" unique="nothing"> ' +
+        ' <archivZiel type="my:archivContent" /> ' +
+        ' <archivPosition folder="Dokumente/Rechnungen/Rechnungen Zauberfrau/{tmp}"> ' +
+        ' <archivZiel type="my:archivFolder" /> ' +
+        ' </archivPosition>' +
+        ' <searchItem name="tmp" fix="2015" />' +
+        ' </archivTyp>';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
+    archivTyp.resolve();
+    assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
+    assertNotNull(doc);
+    assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
+};
+
+ArchivTypTest.prototype.test6 = function() {
+    var folder = companyhome.createFolder("Dokumente");
+    folder = folder.createFolder("Rechnungen");
+    folder = folder.createFolder("Rechnungen Zauberfrau");
+    folder = folder.createFolder("2015");
+    var node = folder.createNode("WebScriptTest", "my:archivContent");
+    node.setProperty("my:person", "Till");
+    REC.content ="ZAUBERFRAU";
+    var rules = ' <archivTyp name="Zauberfrau" searchString="ZAUBERFRAU" unique="overWrite">' +
+        ' <archivZiel type="my:archivContent" /> ' +
+        ' <archivPosition folder="Dokumente/Rechnungen/Rechnungen Zauberfrau/{tmp}"> ' +
+        ' <archivZiel type="my:archivFolder" /> ' +
+        ' </archivPosition>' +
+        ' <searchItem name="tmp" fix="2015" />' +
+        ' </archivTyp>';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
+    archivTyp.resolve();
+    assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
+    assertNotNull(doc);
+    assertEquals("Klaus", doc.properties["my:person"]);
+    assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
+};
+
+ArchivTypTest.prototype.test7 = function() {
+    var folder = companyhome.createFolder("Dokumente");
+    folder = folder.createFolder("Rechnungen");
+    folder = folder.createFolder("Rechnungen Zauberfrau");
+    folder = folder.createFolder("2015");
+    var node = folder.createNode("WebScriptTest", "my:archivContent");
+    node.setProperty("cm:title", "Rechnung 1");
+    search.setFind(true, node);
+    REC.content ="ZAUBERFRAU";
+    var rules = ' <archivTyp name="Zauberfrau" searchString="ZAUBERFRAU" unique="overWrite">' +
+        ' <archivZiel type="my:archivContent" /> ' +
+        ' <archivPosition folder="Dokumente/Rechnungen/Rechnungen Zauberfrau/{tmp}"> ' +
+        ' <archivZiel type="my:archivFolder" /> ' +
+        ' </archivPosition>' +
+        ' <searchItem name="tmp" fix="2015" />' +
+        ' <searchItem name="title" fix="Rechnung 1" />' +
+        ' </archivTyp>';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
+    archivTyp.resolve();
+    assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
+    assertNotNull(doc);
+    assertEquals("Klaus", doc.properties["my:person"]);
+    assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
 };
 
