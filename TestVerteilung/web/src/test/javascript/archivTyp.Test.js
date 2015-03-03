@@ -15,6 +15,7 @@ ArchivTypTest.prototype.setUp = function() {
     REC.currentDocument = REC.inbox.createNode('WebScriptTest', "my:archivContent");
     REC.currentDocument.setProperty("cm:title", "Test Title");
     REC.currentDocument.setProperty("my:person", "Klaus");
+    REC.currentDocument.properties.content.write("Test");
     search.setFind(false);
 };
 
@@ -206,6 +207,35 @@ ArchivTypTest.prototype.test7 = function() {
     var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
     assertNotNull(doc);
     assertEquals("Klaus", doc.properties["my:person"]);
+    assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
+};
+
+ArchivTypTest.prototype.test8 = function() {
+    var folder = companyhome.createFolder("Dokumente");
+    folder = folder.createFolder("Rechnungen");
+    folder = folder.createFolder("Rechnungen Zauberfrau");
+    folder = folder.createFolder("2015");
+    var node = folder.createNode("WebScriptTest", "my:archivContent");
+    node.properties.content.write("Hallo");
+    REC.content ="ZAUBERFRAU";
+    var rules = ' <archivTyp name="Zauberfrau" searchString="ZAUBERFRAU" unique="newVersion">' +
+        ' <archivZiel type="my:archivContent" /> ' +
+        ' <archivPosition folder="Dokumente/Rechnungen/Rechnungen Zauberfrau/{tmp}"> ' +
+        ' <archivZiel type="my:archivFolder" /> ' +
+        ' </archivPosition>' +
+        ' <searchItem name="tmp" fix="2015" />' +
+        ' </archivTyp>';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
+    archivTyp.resolve();
+    assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
+    assertNotNull(doc);
+    assertTrue(doc.isVersioned());
+    assertEquals("Hallo", doc.properties.content);
     assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
     assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
 };

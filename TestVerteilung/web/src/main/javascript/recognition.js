@@ -58,14 +58,25 @@ if (typeof (companyhome) == "undefined") {
         this.splice(0, this.length);
     };
 
+
+    function Content() {
+        this.content = "";
+    }
+
+    Content.prototype.write = function(cont) {
+        this.content = cont;
+    };
+
     function ScriptNode(name, type) {
         this.name = name;
         this.subType = "";
         this.aspect = new Liste();
         this.tags = new Liste();
         this.properties = new Liste();
+        this.properties["content"] = new Content();
         this.children = new Liste();
         this.parent = new Liste();
+        this.versions = new Liste();
         this.type = type;
     }
 
@@ -139,11 +150,30 @@ if (typeof (companyhome) == "undefined") {
     };
     
     ScriptNode.prototype.checkout = function () {
-        return this;
+        if (this.hasAspect(("cm:workingcopy")))
+            throw "Der Knoten " + this.name + " ist bereits ausgecheckt!";
+        var workNode = JSON.parse( JSON.stringify( this ) );
+        workNode.addAspect("cm:workingcopy");
+        return workNode;
+    };
+
+    ScriptNode.prototype.checkoutForUpload = function() {
+       return this.checkout();
     };
 
     ScriptNode.prototype.checkin = function () {
+        if (!this.hasAspect(("cm:workingcopy")))
+            throw "Der Knoten " + this.name + " ist nicht ausgecheckt!";
+        this.aspect.remove({name: "cm:workingcopy"});
+        var i = 1;
+        while(this.versions.contains({name:i}))
+            i++;
+        this.versions.add({name:i, value:this});
     };
+
+    ScriptNode.prototype.isVersioned = function() {
+        return this.versions.length > 0;
+    }
 
     ScriptNode.prototype.specializeType = function (type) {
         this.subType = type;
@@ -193,12 +223,21 @@ if (typeof (companyhome) == "undefined") {
         this.properties[key] = value;
     };
 
+    ScriptNode.prototype.ensureVersioningEnabled = function(autoVersion, autoVersionProps){
+        if (!this.hasAspect("cm:versionable")) {
+            this.addAspect("cm:versionable");
+            this.versions.add({name:1, value: this});
+        }
+    };
+
     ScriptNode.prototype.init = function() {
         this.subType = "";
         this.aspect.clear();
         this.tags.clear();
         this.properties.clear();
+        this.properties["content"] = new Content();
         this.children.clear();
+        this.versions.clear();
         this.parent.clear();
     };
     var companyhome = new ScriptNode("/", "cm:folder");
@@ -1234,10 +1273,10 @@ function ArchivTyp(srch) {
             if (!doc.hasAspect("cm:workingcopy")) {
                 doc.ensureVersioningEnabled(true, false);
                 var workingCopy = doc.checkoutForUpload();
-                workingCopy.properties.content.write(this.currentDocument.properties.content);
+                workingCopy.properties.content.write(REC.currentDocument.properties.content);
                 workingCopy.checkin();
                 newDoc.remove();
-                this.log(INFORMATIONAL, "Neue Version des Dokumentes erstellt");
+                REC.log(INFORMATIONAL, "Neue Version des Dokumentes erstellt");
                 return true;
             }
         }
@@ -1257,7 +1296,7 @@ function ArchivTyp(srch) {
                 if (this.unique == "newVersion") {
                     // neue Version erstellen
                     REC.log(WARN, "Dokument ist bereits vorhanden! Erstelle neue Version...");
-                    if (!this.makeNewVersion(searchTitleResult[k], REC.currentDocument))
+                    if (!this.makeNewVersion(document, REC.currentDocument))
                         break;
                 } else if (this.unique == "overWrite") {
                     // überschreiben
