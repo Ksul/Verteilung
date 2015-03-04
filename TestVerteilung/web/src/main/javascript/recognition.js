@@ -25,12 +25,34 @@ if (typeof (search) == "undefined") {
 }
 if (typeof (companyhome) == "undefined") {
 
+    function BasicObject(name) {
+
+        this.generateUUID = function () {
+            var d = new Date().getTime();
+            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = (d + Math.random()*16)%16 | 0;
+                d = Math.floor(d/16);
+                return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+            });
+            return uuid;
+        };
+
+        this.equals = function(obj) {
+            return obj.id == this.id;
+        };
+
+        this.id = this.generateUUID();
+        this.name = name;
+    }
+
     function Liste(){}
     Liste.prototype = [];
     Liste.prototype.contains = function(element) {
-        for (var i = 0; i < this.length; i++) {
-            if (this[i].name == element.name)
-                return true;
+        for (var key in this) {
+            if (this.hasOwnProperty(key)) {
+                if (this[key].name == element.name)
+                    return true;
+            }
         }
         return false;
     };
@@ -48,27 +70,50 @@ if (typeof (companyhome) == "undefined") {
         }
     };
     Liste.prototype.get = function(element){
-        for (var i = 0; i < this.length; i++) {
-            if (this[i].name == element.name)
-                return this[i];
+        for (var key in this) {
+            if (this.hasOwnProperty(key)) {
+                if (this[key].name == element.name)
+                    return this[key];
+            }
         }
         return null;
     };
     Liste.prototype.clear = function() {
         this.splice(0, this.length);
     };
+    Liste.prototype.clone = function() {
+        var newList = new Liste();
+        for (var key in this) {
+            if (this.hasOwnProperty(key)) {
+                if (typeof this[key] == "object" && "clone" in this[key])
+                    newList[key] = this[key].clone();
+                else
+                    newList[key] = this[key];
+            }
+        }
+        return newList;
+    };
 
 
     function Content() {
+        BasicObject.call(this);
         this.content = "";
     }
 
+    Content.prototype = new BasicObject();
+    Content.prototype.constructor = Content;
+
     Content.prototype.write = function(cont) {
-        this.content = cont;
+        this.content = cont.content;
+    };
+    Content.prototype.clone = function() {
+       var newContent = new Content();
+        newContent.content = this.content;
+        return newContent;
     };
 
     function ScriptNode(name, type) {
-        this.name = name;
+        BasicObject.call(this, name);
         this.subType = "";
         this.aspect = new Liste();
         this.tags = new Liste();
@@ -78,7 +123,10 @@ if (typeof (companyhome) == "undefined") {
         this.parent = new Liste();
         this.versions = new Liste();
         this.type = type;
+        this.workingParent = null;
     }
+    ScriptNode.prototype = new BasicObject();
+    ScriptNode.prototype.constructor = ScriptNode;
 
     ScriptNode.prototype.getDisplayPath = function () {
         var path = "";
@@ -104,12 +152,12 @@ if (typeof (companyhome) == "undefined") {
         var parts = name.split("/");
         var currentNode = this;
         for (var i = 0; i < parts.length; i++) {
-            var part = parts[i];
-            if (part.length > 0) {
-                if (!currentNode.children.contains({name:part}))
+            var part = new BasicObject(parts[i]);
+            if (part.name.length > 0) {
+                if (!currentNode.children.contains(part))
                     break;
                 else
-                    currentNode = currentNode.children.get({name:part});
+                    currentNode = currentNode.children.get(part);
                 if (i == parts.length - 1)
                     return currentNode;
             }
@@ -127,7 +175,7 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.hasAspect = function (aspect) {
-        return this.aspect.contains({name:aspect})
+        return this.aspect.contains(new BasicObject(aspect))
     };
 
     ScriptNode.prototype.isSubType = function (type) {
@@ -136,24 +184,25 @@ if (typeof (companyhome) == "undefined") {
 
     ScriptNode.prototype.addAspect = function (aspect) {
         if (!this.hasAspect(aspect))
-            this.aspect.add({name:aspect});
+            this.aspect.add(new BasicObject(aspect));
     };
 
     ScriptNode.prototype.addTag = function (tag) {
         if (!this.hasTag(tag))
-            this.tags.add({name:tag});
+            this.tags.add(new BasicObject(tag));
     };
 
     ScriptNode.prototype.hasTag = function(tag) {
-        return this.tags.contains({name:tag})
+        return this.tags.contains(new BasicObject(tag))
 
     };
     
     ScriptNode.prototype.checkout = function () {
         if (this.hasAspect(("cm:workingcopy")))
             throw "Der Knoten " + this.name + " ist bereits ausgecheckt!";
-        var workNode = JSON.parse( JSON.stringify( this ) );
+        var workNode = this.clone();
         workNode.addAspect("cm:workingcopy");
+        workNode.workingParent = this;
         return workNode;
     };
 
@@ -162,18 +211,22 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.checkin = function () {
-        if (!this.hasAspect(("cm:workingcopy")))
+        if (!REC.exist(this.workingParent) || !this.hasAspect(("cm:workingcopy")))
             throw "Der Knoten " + this.name + " ist nicht ausgecheckt!";
-        this.aspect.remove({name: "cm:workingcopy"});
+        this.aspect.remove(new BasicObject("cm:workingcopy"));
         var i = 1;
-        while(this.versions.contains({name:i}))
+        while(this.workingParent.versions.contains(new BasicObject(i)))
             i++;
-        this.versions.add({name:i, value:this});
+        this.workingParent.properties = this.properties;
+        var version = new BasicObject(i);
+        version.value = this.workingParent;
+        this.workingParent.versions.add(version);
+        return this.workingParent;
     };
 
     ScriptNode.prototype.isVersioned = function() {
         return this.versions.length > 0;
-    }
+    };
 
     ScriptNode.prototype.specializeType = function (type) {
         this.subType = type;
@@ -226,8 +279,22 @@ if (typeof (companyhome) == "undefined") {
     ScriptNode.prototype.ensureVersioningEnabled = function(autoVersion, autoVersionProps){
         if (!this.hasAspect("cm:versionable")) {
             this.addAspect("cm:versionable");
-            this.versions.add({name:1, value: this});
+            var version = new BasicObject(1);
+            version.value = this.clone();
+            this.versions.add(version);
         }
+    };
+
+    ScriptNode.prototype.clone = function(){
+        var newNode = new ScriptNode(this.name, this.typ);
+        newNode.subType = this.subType;
+        newNode.aspect = this.aspect.clone();
+        newNode.tags = this.tags.clone();
+        newNode.properties = this.properties.clone();
+        newNode.children = this.children;
+        newNode.versions = this.versions;
+        newNode.parent = this.parent;
+        return newNode;
     };
 
     ScriptNode.prototype.init = function() {
@@ -239,6 +306,7 @@ if (typeof (companyhome) == "undefined") {
         this.children.clear();
         this.versions.clear();
         this.parent.clear();
+        this.workingParent = null;
     };
     var companyhome = new ScriptNode("/", "cm:folder");
 }
@@ -254,7 +322,7 @@ if (typeof (classification) == "undefined") {
 
 
     function CategoryNode(name) {
-        this.name = name;
+        BasicObject.call(this, name);
         this.isCategory = true;
         this.categoryMembers = [];
         this.rootCategories = [];
@@ -264,6 +332,9 @@ if (typeof (classification) == "undefined") {
         this.immediateSubCategories = [];
         this.immediateMembersAndSubCategories = [];
     }
+
+    CategoryNode.prototype = new BasicObject();
+    CategoryNode.prototype.constructor = CategoryNode;
 
     CategoryNode.prototype.init = function() {
         this.isCategory = true;
@@ -3507,6 +3578,7 @@ REC = {
             ret = ret + "\t";
         return ret;
     },
+
 
     getContent: function (doc) {
         var erg;

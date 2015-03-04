@@ -235,7 +235,7 @@ ArchivTypTest.prototype.test8 = function() {
     var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
     assertNotNull(doc);
     assertTrue(doc.isVersioned());
-    assertEquals("Hallo", doc.properties.content);
+    assertEquals("Hallo", doc.properties.content.content);
     assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
     assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
 };
