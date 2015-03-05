@@ -252,6 +252,13 @@ if (typeof (companyhome) == "undefined") {
         return newNode;
     };
 
+    ScriptNode.prototype.addNode = function(node){
+        if (this.type != "cm:folder")
+            throw "Kein Folder!";
+        this.children.add(node);
+        node.parent.add(this);
+    };
+
     ScriptNode.prototype.save = function () {
     };
 
@@ -1495,12 +1502,10 @@ function ArchivTyp(srch) {
                         if (this.archivPosition[i].link && REC.exist(destinationFolder)) {
                             //TODO Das funktioniert wohl nicht richtig
                             REC.log(INFORMATIONAL, "Document link to folder " + REC.completeNodePath(destinationFolder));
-                            REC.log(INFORMATIONAL, destinationFolder + "/" + destinationFolder.name);
-                            REC.log(INFORMATIONAL, (REC.exist(companyhome.childByNamePath(destinationFolder + "/" + destinationFolder.name))));
-                            if (REC.exist(companyhome.childByNamePath(destinationFolder + "/" + destinationFolder.name)))
+                            if (REC.exist(companyhome.childByNamePath(destinationFolder.displayPath + "/" + REC.currentDocument.name)))
                                 REC.log(WARN, "Link already exists!");
                             else
-                                companyhome.childByNamePath(destinationFolder).addNode(destinationFolder);
+                                destinationFolder.addNode(REC.currentDocument);
                         } else {
                             REC.log(INFORMATIONAL, "Document place to folder " + REC.completeNodePath(destinationFolder));
                             REC.log(TRACE, "ArchivTyp.resolve: search Document: " + REC.currentDocument.name + " in " + REC.completeNodePath(destinationFolder));
