@@ -19,7 +19,7 @@ if (typeof (search) == "undefined") {
             if (!this.willFind)
                 return [];
             else
-                return this.node;
+                return [this.node];
         }
     });
 }
@@ -95,9 +95,12 @@ if (typeof (companyhome) == "undefined") {
     };
 
 
-    function Content() {
+    function Content(cont) {
         BasicObject.call(this);
-        this.content = "";
+        if (typeof cont == "string")
+            this.content = cont;
+        else
+            this.content = "";
     }
 
     Content.prototype = new BasicObject();
@@ -222,6 +225,14 @@ if (typeof (companyhome) == "undefined") {
         version.value = this.workingParent;
         this.workingParent.versions.add(version);
         return this.workingParent;
+    };
+
+    ScriptNode.prototype.getVersion = function(label) {
+        if (!this.isVersioned())
+            throw this.name + " ist nicht versioniert!";
+        if (!this.versions.contains(new BasicObject(label)))
+            throw "Version " + label + " von " +this.name + " ist nicht vorhanden!";
+        return this.versions.get(new BasicObject(label)).value;
     };
 
     ScriptNode.prototype.isVersioned = function() {
@@ -1484,12 +1495,12 @@ function ArchivTyp(srch) {
                         if (this.archivPosition[i].link && REC.exist(destinationFolder)) {
                             //TODO Das funktioniert wohl nicht richtig
                             REC.log(INFORMATIONAL, "Document link to folder " + REC.completeNodePath(destinationFolder));
-                            REC.log(INFORMATIONAL, tmp + "/" + destinationFolder.name);
-                            REC.log(INFORMATIONAL, (REC.exist(companyhome.childByNamePath(tmp + "/" + destinationFolder.name))));
-                            if (REC.exist(companyhome.childByNamePath(tmp + "/" + destinationFolder.name)))
+                            REC.log(INFORMATIONAL, destinationFolder + "/" + destinationFolder.name);
+                            REC.log(INFORMATIONAL, (REC.exist(companyhome.childByNamePath(destinationFolder + "/" + destinationFolder.name))));
+                            if (REC.exist(companyhome.childByNamePath(destinationFolder + "/" + destinationFolder.name)))
                                 REC.log(WARN, "Link already exists!");
                             else
-                                companyhome.childByNamePath(tmp).addNode(destinationFolder);
+                                companyhome.childByNamePath(destinationFolder).addNode(destinationFolder);
                         } else {
                             REC.log(INFORMATIONAL, "Document place to folder " + REC.completeNodePath(destinationFolder));
                             REC.log(TRACE, "ArchivTyp.resolve: search Document: " + REC.currentDocument.name + " in " + REC.completeNodePath(destinationFolder));
