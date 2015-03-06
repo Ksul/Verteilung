@@ -291,16 +291,16 @@ ArchivTypTest.prototype.test10 = function() {
     REC.content ="Verdienstabrechnung     0000123456  3000 Abrechnungsmonat Mai 2015";
     var rules = '<archivTyp name="LVMGehalt" searchString="Verdienstabrechnung">                              ' +
                 ' <archivZiel type="my:archivContent" />                                                      ' +
-    '<archivPosition folder="Dokumente/Gehalt/Gehalt LVM/{tmp}">                                              ' +
+    '<archivPosition folder="Dokumente/Gehalt/Gehalt Hansel/{tmp}">                                              ' +
     '<archivZiel type="my:archivFolder" />                                                                    ' +
     '</archivPosition>                                                                                        ' +
-    '<archivPosition link="true" folder="Dokumente/LVM/Gehalt LVM">                                           ' +
+    '<archivPosition link="true" folder="Dokumente/Hansel/Gehalt Hansel">                                           ' +
     '<archivZiel type="my:archivFolder" />                                                                    ' +
     '</archivPosition>                                                                                        ' +
     '<tags name="Gehalt" />                                                                                   ' +
-    '<tags name="LVM" />                                                                                      ' +
-    '<category name="Gehalt/Gehalt Klaus" />                                                                  ' +
-    '<searchItem name="person" fix="Klaus" target="my:person" />                                              ' +
+    '<tags name="Hansel" />                                                                                      ' +
+    '<category name="Gehalt/Gehalt Hansel" />                                                                  ' +
+    '<searchItem name="person" fix="Hansel" target="my:person" />                                              ' +
     '<searchItem name="tmp" objectTyp="date" value="datum">                                                   ' +
     '<format formatString="YYYY" />                                                                           ' +
     '</searchItem>                                                                                            ' +
@@ -333,10 +333,32 @@ ArchivTypTest.prototype.test10 = function() {
     var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
     archivTyp.resolve();
     assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
-    var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
+    var doc = companyhome.childByNamePath("/Dokumente/Gehalt/Gehalt Hansel/2015/WebScriptTest");
     assertNotNull(doc);
     assertTrue(doc.isSubType("my:archivContent"));
-    assertTrue(doc.parent[0].isSubType("my:archivFolder"));
+    assertEquals(3000, doc.properties["my:amount"]);
+    assertEquals(new Date(2015, 4, 1), doc.properties["my:documentDate"]);
+    assertEquals("Mai 2015", doc.properties["cm:title"]);
+    assertEquals("Hansel", doc.properties["my:person"]);
+    assertTrue(doc.hasTag("Gehalt"));
+    assertTrue(doc.hasTag("Hansel"));
+    assertTrue(doc.hasAspect("my:amountable"));
+    assertTrue(doc.properties["cm:categories"][0].name == "Gehalt Hansel");
+    //assertTrue(doc.isCategory());
+    //assertTrue(doc.category.contains(new BasicObject("")));
+    var linkDoc = companyhome.childByNamePath("Dokumente/Hansel/Gehalt Hansel/WebScriptTest");
+    assertNotNull(linkDoc);
+    assertTrue(linkDoc.isSubType("my:archivContent"));
+    assertEquals(3000, linkDoc.properties["my:amount"]);
+    assertEquals(new Date(2015, 4, 1), linkDoc.properties["my:documentDate"]);
+    assertEquals("Mai 2015", linkDoc.properties["cm:title"]);
+    assertEquals("Hansel", linkDoc.properties["my:person"]);
+    assertTrue(linkDoc.hasTag("Gehalt"));
+    assertTrue(linkDoc.hasTag("Hansel"));
+    assertTrue(linkDoc.hasAspect("my:amountable"));
+    assertTrue(linkDoc.parent[0].isSubType("my:archivFolder"));
+    assertTrue(linkDoc.properties["cm:categories"][0].name == "Gehalt Hansel");
+    assertTrue(doc.id == linkDoc.id);
     assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
     assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
 };

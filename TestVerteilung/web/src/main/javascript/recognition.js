@@ -29,12 +29,11 @@ if (typeof (companyhome) == "undefined") {
 
         this.generateUUID = function () {
             var d = new Date().getTime();
-            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                 var r = (d + Math.random()*16)%16 | 0;
                 d = Math.floor(d/16);
                 return (c=='x' ? r : (r&0x3|0x8)).toString(16);
             });
-            return uuid;
         };
 
         this.equals = function(obj) {
@@ -43,7 +42,23 @@ if (typeof (companyhome) == "undefined") {
 
         this.id = this.generateUUID();
         this.name = name;
+
     }
+
+    function BasicNode(name) {
+        BasicObject.call(this, name);
+        this.aspect = new Liste();
+    }
+
+    BasicNode.prototype = new BasicObject();
+    BasicNode.prototype.constructor = BasicNode;
+    BasicNode.prototype.addAspect = function (aspect) {
+        if (!this.hasAspect(aspect))
+            this.aspect.add(new BasicObject(aspect));
+    };
+    BasicNode.prototype.hasAspect = function (aspect) {
+        return this.aspect.contains(new BasicObject(aspect))
+    };
 
     function Liste(){}
     Liste.prototype = [];
@@ -116,9 +131,8 @@ if (typeof (companyhome) == "undefined") {
     };
 
     function ScriptNode(name, type) {
-        BasicObject.call(this, name);
+        BasicNode.call(this, name);
         this.subType = "";
-        this.aspect = new Liste();
         this.tags = new Liste();
         this.properties = new Liste();
         this.properties["content"] = new Content();
@@ -128,7 +142,7 @@ if (typeof (companyhome) == "undefined") {
         this.type = type;
         this.workingParent = null;
     }
-    ScriptNode.prototype = new BasicObject();
+    ScriptNode.prototype = new BasicNode();
     ScriptNode.prototype.constructor = ScriptNode;
 
     ScriptNode.prototype.getDisplayPath = function () {
@@ -177,17 +191,8 @@ if (typeof (companyhome) == "undefined") {
         return newFolder;
     };
 
-    ScriptNode.prototype.hasAspect = function (aspect) {
-        return this.aspect.contains(new BasicObject(aspect))
-    };
-
     ScriptNode.prototype.isSubType = function (type) {
         return this.subType == type;
-    };
-
-    ScriptNode.prototype.addAspect = function (aspect) {
-        if (!this.hasAspect(aspect))
-            this.aspect.add(new BasicObject(aspect));
     };
 
     ScriptNode.prototype.addTag = function (tag) {
@@ -199,7 +204,7 @@ if (typeof (companyhome) == "undefined") {
         return this.tags.contains(new BasicObject(tag))
 
     };
-    
+
     ScriptNode.prototype.checkout = function () {
         if (this.hasAspect(("cm:workingcopy")))
             throw "Der Knoten " + this.name + " ist bereits ausgecheckt!";
@@ -339,26 +344,27 @@ if (typeof (commentService) == "undefined") {
 if (typeof (classification) == "undefined") {
 
 
-    function CategoryNode(name) {
-        BasicObject.call(this, name);
+    function CategoryNode(aspect, name) {
+        BasicNode.call(this, name);
+        this.addAspect(aspect);
         this.isCategory = true;
         this.categoryMembers = [];
-        this.rootCategories = [];
-        this.subCategories = [];
+        this.rootCategories = new Liste();
+        this.subCategories = new Liste();
         this.membersAndSubCategories = [];
         this.immediateCategoryMembers = [];
         this.immediateSubCategories = [];
         this.immediateMembersAndSubCategories = [];
     }
 
-    CategoryNode.prototype = new BasicObject();
+    CategoryNode.prototype = new BasicNode();
     CategoryNode.prototype.constructor = CategoryNode;
 
     CategoryNode.prototype.init = function() {
         this.isCategory = true;
         this.categoryMembers = [];
-        this.rootCategories = [];
-        this.subCategories = [];
+        this.rootCategories.clear();
+        this.subCategories.clear();;
         this.membersAndSubCategories = [];
         this.immediateCategoryMembers = [];
         this.immediateSubCategories = [];
@@ -367,46 +373,23 @@ if (typeof (classification) == "undefined") {
     };
 
     CategoryNode.prototype.createSubCategory = function(name) {
-        var category = new CategoryNode(name);
-        this.subCategories.push(category);
+        var category = new CategoryNode(this.category[0], name);
+        this.subCategories.add(category);
         return category;
     };
 
-    CategoryNode.prototype.removeSubCategory = function(name) {
-        for (var i = 0; i < this.subCategories.length; i++) {
-            if (this.subCategories[i].name == name)
-                this.subCategories.splice(i, 1);
-        }
+    CategoryNode.prototype.createRootCategory = function(aspect, name) {
+        var obj = new BasicObject(name);
+        if (this.rootCategories.contains(obj))
+            throw "Root Category " + name + " bereits vorhanden!";
+        this.rootCategories.add(new CategoryNode(aspect, name));
     };
 
-    CategoryNode.prototype.createRootCategory = function(f, name) {
-        var rCat;
-        var category = new CategoryNode(name);
-        if (this.name == f)
-            rCat = this;
-        else
-            rCat = this.getRootCategories(f);
-        if (REC.exist(rCat)) {
-            rCat.push(category);
-            return category;
-        } else
-            throw ("Root Category not found!");
+    CategoryNode.prototype.getRootCategories = function(aspect) {
+        return this.rootCategories.get(new BasicObject(aspect));
     };
 
-    CategoryNode.prototype.getRootCategories = function(name) {
-
-        for (var i=0; i < this.rootCategories.length; i++){
-            if (this.rootCategories[i].name == name)
-                return this.rootCategories[i].rootCategories;
-        }
-        return null;
-    };
-
-    CategoryNode.prototype.removeRootCategory = function(name) {
-        for (var i = 0; i < this.rootCategories.length; i++) {
-            if (this.rootCategories[i].name == name)
-                this.rootCategories.splice(i, 1);
-        }
+    CategoryNode.prototype.remove = function() {
     };
 
     var classification = new CategoryNode("ROOT");
@@ -1502,7 +1485,7 @@ function ArchivTyp(srch) {
                         if (this.archivPosition[i].link && REC.exist(destinationFolder)) {
                             //TODO Das funktioniert wohl nicht richtig
                             REC.log(INFORMATIONAL, "Document link to folder " + REC.completeNodePath(destinationFolder));
-                            if (REC.exist(companyhome.childByNamePath(destinationFolder.displayPath + "/" + REC.currentDocument.name)))
+                            if (REC.exist(companyhome.childByNamePath(destinationFolder.getDisplayPath() + "/" + REC.currentDocument.name)))
                                 REC.log(WARN, "Link already exists!");
                             else
                                 destinationFolder.addNode(REC.currentDocument);
@@ -2130,7 +2113,7 @@ function Category(srch) {
                 if (top != null) {
                     REC.log(TRACE, "Add Aspect cm:generalclassifiable to document");
                     document.addAspect("cm:generalclassifiable");
-                    var categories = new Array(1);
+                    var categories = [];
                     categories.push(top);
                     REC.log(INFORMATIONAL, "Add Category [" + this.name + "] to document");
                     document.properties["cm:categories"] = categories;
