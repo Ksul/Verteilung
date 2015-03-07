@@ -362,18 +362,18 @@ if (typeof (classification) == "undefined") {
 
     CategoryNode.prototype.init = function() {
         this.isCategory = true;
+        this.aspect.clear();
         this.categoryMembers = [];
         this.rootCategories.clear();
-        this.subCategories.clear();;
+        this.subCategories.clear();
         this.membersAndSubCategories = [];
         this.immediateCategoryMembers = [];
         this.immediateSubCategories = [];
         this.immediateMembersAndSubCategories = [];
-        this.rootCategories.push(new CategoryNode("cm:generalclassifiable"));
     };
 
     CategoryNode.prototype.createSubCategory = function(name) {
-        var category = new CategoryNode(this.category[0], name);
+        var category = new CategoryNode(this.aspect[0], name);
         this.subCategories.add(category);
         return category;
     };
@@ -382,17 +382,26 @@ if (typeof (classification) == "undefined") {
         var obj = new BasicObject(name);
         if (this.rootCategories.contains(obj))
             throw "Root Category " + name + " bereits vorhanden!";
-        this.rootCategories.add(new CategoryNode(aspect, name));
+        var rootCategory =  new CategoryNode(aspect, name);
+        this.rootCategories.add(rootCategory);
+        return rootCategory;
     };
 
     CategoryNode.prototype.getRootCategories = function(aspect) {
-        return this.rootCategories.get(new BasicObject(aspect));
+        var result = [];
+        for (var key in this.rootCategories) {
+            if (key != "length" && this.rootCategories.hasOwnProperty(key)) {
+                if (this.rootCategories[key].hasAspect(aspect))
+                    result.push(this.rootCategories[key]);
+            }
+        }
+        return result;
     };
 
     CategoryNode.prototype.remove = function() {
     };
 
-    var classification = new CategoryNode("ROOT");
+    var classification = new CategoryNode("cm:generalclassifiable", "classification");
     classification.init();
 }
 
@@ -2088,13 +2097,15 @@ function Category(srch) {
                     else
                         nodes = top.subCategories;
                     var nodeExists = false;
-                    for (var i = 0; i < nodes.length; i++) {
-                        var node = nodes[i];
-                        if (node.name == current) {
-                            REC.log(TRACE, "Category [" + current + "] found");
-                            top = node;
-                            nodeExists = true;
-                            break;
+                    for (var nodeKey in nodes) {
+                        if (nodes.hasOwnProperty(nodeKey)) {
+                        var node = nodes[nodeKey];
+                            if (node.name == current) {
+                                REC.log(TRACE, "Category [" + current + "] found");
+                                top = node;
+                                nodeExists = true;
+                                break;
+                            }
                         }
                     }
                     if (!nodeExists) {
