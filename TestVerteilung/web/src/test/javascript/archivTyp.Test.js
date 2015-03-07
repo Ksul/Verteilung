@@ -304,13 +304,13 @@ ArchivTypTest.prototype.test10 = function() {
     '<searchItem name="tmp" objectTyp="date" value="datum">                                                   ' +
     '<format formatString="YYYY" />                                                                           ' +
     '</searchItem>                                                                                            ' +
-    '<archivTyp name="Rückrechnung" searchString="Rückrechnungsdifferenz">                                    ' +
-    '<tags name="Rückrechnung" />                                                                             ' +
-    '<searchItem name="title" fix="Rückrechnung {datum}" target="cm:title" />                                 ' +
+    '<archivTyp name="RÃ¼ckrechnung" searchString="RÃ¼ckrechnungsdifferenz">                                    ' +
+    '<tags name="RÃ¼ckrechnung" />                                                                             ' +
+    '<searchItem name="title" fix="RÃ¼ckrechnung {datum}" target="cm:title" />                                 ' +
     '<searchItem name="datum" text="Abrechnungsmonat" word="2,2" objectTyp="date" target="my:documentDate">   ' +
     '<check lowerValue="01/01/2005" upperValue="01/01/2020" />                                                ' +
     '</searchItem>                                                                                            ' +
-    '<searchItem name="betrag" text="Rückrechnungsdifferenz" objectTyp="float" target="my:amount">            ' +
+    '<searchItem name="betrag" text="RÃ¼ckrechnungsdifferenz" objectTyp="float" target="my:amount">            ' +
     '<check lowerValue="-200" upperValue="200" />                                                             ' +
     '<delimitter typ="start" text="&#0032;" count="1" removeBlanks="after" />                                 ' +
     '<archivZiel aspect="my:amountable" />                                                                    ' +

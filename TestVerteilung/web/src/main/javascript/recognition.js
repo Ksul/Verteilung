@@ -81,7 +81,7 @@ if (typeof (companyhome) == "undefined") {
             throw "Element " + element.name + " nicht vorhanden";
         for (var i = 0; i < this.length; i++) {
             if (this[i] == element)
-                this.splice(i, 1);
+                delete this[i];
         }
     };
     Liste.prototype.get = function(element){
@@ -94,7 +94,11 @@ if (typeof (companyhome) == "undefined") {
         return null;
     };
     Liste.prototype.clear = function() {
-        this.splice(0, this.length);
+        for (var key in this) {
+            if (this.hasOwnProperty(key)) {
+                delete this[key];
+            }
+        }
     };
     Liste.prototype.clone = function() {
         var newList = new Liste();
@@ -141,24 +145,25 @@ if (typeof (companyhome) == "undefined") {
         this.versions = new Liste();
         this.type = type;
         this.workingParent = null;
+        this.displayPath = "";
+
+        this._getDisplayPath = function () {
+            var path = "";
+            var parent = null;
+            if (this.parent.length > 0)
+                parent = this.parent[0];
+            while (parent != null) {
+                path = "/" + parent.name + path;
+                if (parent.parent.length > 0)
+                    parent = parent.parent[0];
+                else
+                    parent = null;
+            }
+            return path;
+        };
     }
     ScriptNode.prototype = new BasicNode();
     ScriptNode.prototype.constructor = ScriptNode;
-
-    ScriptNode.prototype.getDisplayPath = function () {
-        var path = "";
-        var parent = null;
-        if (this.parent.length > 0)
-            parent = this.parent[0];
-        while (parent != null) {
-            path = "/" + parent.name + path;
-            if (parent.parent.length > 0)
-                parent = parent.parent[0];
-            else
-                parent = null;
-        }
-        return path;
-    };
 
     ScriptNode.prototype.setContent = function (inhalt) {
         this.content = inhalt;
@@ -188,6 +193,7 @@ if (typeof (companyhome) == "undefined") {
         var newFolder = new ScriptNode(name, "cm:folder");
         this.children.add(newFolder);
         newFolder.parent.add(this);
+        newFolder.displayPath = newFolder._getDisplayPath();
         return newFolder;
     };
 
@@ -254,6 +260,7 @@ if (typeof (companyhome) == "undefined") {
         var newNode =  new ScriptNode(name, typ);
         this.children.add(newNode);
         newNode.parent.add(this);
+        newNode.displayPath = newNode._getDisplayPath();
         return newNode;
     };
 
@@ -262,6 +269,7 @@ if (typeof (companyhome) == "undefined") {
             throw "Kein Folder!";
         this.children.add(node);
         node.parent.add(this);
+        node.displayPath = node._getDisplayPath();
     };
 
     ScriptNode.prototype.save = function () {
@@ -292,6 +300,7 @@ if (typeof (companyhome) == "undefined") {
         newNode.children.add(this);
         this.parent.clear();
         this.parent.add(newNode);
+        newNode.displayPath = newNode._getDisplayPath();
         return true;
     };
 
@@ -317,6 +326,7 @@ if (typeof (companyhome) == "undefined") {
         newNode.children = this.children;
         newNode.versions = this.versions;
         newNode.parent = this.parent;
+        newNode.displayPath = this.displayPath;
         return newNode;
     };
 
@@ -330,6 +340,7 @@ if (typeof (companyhome) == "undefined") {
         this.versions.clear();
         this.parent.clear();
         this.workingParent = null;
+        this.displayPath = "";
     };
     var companyhome = new ScriptNode("/", "cm:folder");
 }
@@ -1204,7 +1215,11 @@ function XMLNode(nodeType, doc, str) {
     };
 }
 
-
+/**
+ * beschreibt einen Dokument Typen
+ * @param srch  die Parameter
+ * @constructor
+ */
 function ArchivTyp(srch) {
     var i;
     if (REC.exist(srch.debugLevel))
@@ -1293,6 +1308,11 @@ function ArchivTyp(srch) {
             REC.log(WARN, "No valid Archivtyp found");
     }
 
+    /**
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
+     */
     this.toString = function (ident) {
         var i;
         if (!REC.exist(ident))
@@ -1410,6 +1430,12 @@ function ArchivTyp(srch) {
         }
     };
 
+    /**
+     * führt die Erkennung des Dokumentes durch
+     * @returns {boolean} [true]   der ArchivTyp passt und keine weitere Verarbeitung nötig
+     *                    [false]  das Dokument konnte nicht erkannt werden und die Erkennung wird mit anderen
+     *                             ArchivTypen versucht
+     */
     this.resolve = function () {
         var i;
         var found = false;
@@ -1492,9 +1518,8 @@ function ArchivTyp(srch) {
                         } else
                             this.unique = "copy";
                         if (this.archivPosition[i].link && REC.exist(destinationFolder)) {
-                            //TODO Das funktioniert wohl nicht richtig
                             REC.log(INFORMATIONAL, "Document link to folder " + REC.completeNodePath(destinationFolder));
-                            if (REC.exist(companyhome.childByNamePath(destinationFolder.getDisplayPath() + "/" + REC.currentDocument.name)))
+                            if (REC.exist(companyhome.childByNamePath(destinationFolder.displayPath + "/" + REC.currentDocument.name)))
                                 REC.log(WARN, "Link already exists!");
                             else
                                 destinationFolder.addNode(REC.currentDocument);
@@ -1684,7 +1709,6 @@ function ArchivPosition(srch) {
         REC.debugLevel = orgLevel;
         return folder;
     };
-
 }
 
 /**
@@ -1697,11 +1721,11 @@ function Format(srch) {
         this.debugLevel = REC.getDebugLevel(srch.debugLevel);
     this.formatString = srch.formatString;
 
-    /**
-     * Stringrepräsentation des Objektes
-     * @param ident         Einrückung
-     * @return {string}     das Objekt als String
-     */
+   /**
+    * Stringrepräsentation des Objektes
+    * @param ident         Einrückung
+    * @return {string}     das Objekt als String
+    */
    this.toString = function (ident) {
         if (!REC.exist(ident))
             ident = 0;
@@ -2050,7 +2074,6 @@ function Delimitter(srch) {
  * stellt Funktionalität zum Verwalten der Kategorien zur Verfügung
  * @param srch      die Parameter
  * @constructor
- * TODO Nochmal prüfen, ob das wirklich so funktioniert!
  */
 function Category(srch) {
     if (REC.exist(srch.debugLevel))
@@ -2166,7 +2189,7 @@ function Tags(srch) {
 
     /**
      * taggt das Dokument
-     * @param document           das Dokument
+     * @param doc           das Dokument
      */
     this.resolve = function (doc) {
         var orgLevel = REC.debugLevel;
@@ -2354,6 +2377,9 @@ function SearchItem(srch) {
         return txt;
     };
 
+    /**
+     * konvertiert ein gefundenes Ergebnis in den vorgesehen Objecttypen
+     */
     this.convert = function () {
         var numberExp = new RegExp("([\\-][1-9]{1}[0-9]{1,}\\.[\\d]{1,})|([1-9]{1}[0-9]{1,}\\.[\\d]{1,})|([\\-][1-9]{1}[0-9]{1,})|([1-9]{1}[0-9]{1,})", "g");
         var numberDotExp = new RegExp("\\d{1}\\.{1}\\d{1}", "g");
@@ -2440,6 +2466,10 @@ function SearchItem(srch) {
         return null;
     };
 
+    /**
+     * führt die eigentliche Textsuche im Dokumenttext durch
+     * @param txt       der zu suchende Text
+     */
     this.find = function (txt) {
         var pos = 0;
         var lastPos = 0;
@@ -3017,7 +3047,7 @@ REC = {
     },
 
     completeNodePath: function(node) {
-        return node.getDisplayPath().split("/").slice(2).join("/") + "/" + node.name;
+        return node.displayPath.split("/").slice(2).join("/") + "/" + node.name;
     },
 
     buildDate: function (text) {
@@ -3752,7 +3782,7 @@ REC = {
         REC = rec;
     },
 
-    currentDocument: typeof (currentDocument) == "undefined" ? companyhome.createNode('WebScriptTest', "my:archivContent") : currentDocument,
+    currentDocument: null,
 
     init: function(){
         this.id = Math.random() * 100;
@@ -3778,7 +3808,8 @@ REC = {
         this.errors = [];
         this.results = [];
         this.positions = new PositionContainer();
-        this.currentDocument.init();
+        companyhome.init();
+        this.currentDocument = companyhome.createNode('WebScriptTest', "my:archivContent");
     },
     
     id: Math.random() * 100,

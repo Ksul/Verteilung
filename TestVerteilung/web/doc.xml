@@ -8,7 +8,7 @@
         <archivPosition folder="Dokumente/Gehalt/Gehalt LVM/{tmp}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
-        <archivPosition link="true" folder="Dokumente/LVM/Gehalt LVM">
+        <archivPosition link="true" folder="Dokumente/LVM/Gehalt LVM/{tmp}">
             <archivZiel type="my:archivFolder" />
         </archivPosition>
         <tags name="Gehalt" />

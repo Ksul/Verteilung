@@ -48,11 +48,11 @@ SearchItemTest.prototype.setUp = function() {
 };*/
 
 SearchItemTest.prototype.testResolveSearchItem1 = function() {
-    var rules = '<searchItem name="Titel" fix="Test f�r Titel" target="cm:title" />';
+    var rules = '<searchItem name="Titel" fix="Test für Titel" target="cm:title" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     var searchItem = new SearchItem(new XMLObject(XMLDoc.docNode));
-    assertEquals("Test f�r Titel", searchItem.resolve());
+    assertEquals("Test für Titel", searchItem.resolve());
 };
 
 SearchItemTest.prototype.testResolveSearchItem2 = function() {
