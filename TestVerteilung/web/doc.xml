@@ -20,7 +20,8 @@
         </searchItem>
         <archivTyp name="Rückrechnung" searchString="Rückrechnungsdifferenz">
             <tags name="Rückrechnung" />
-            <searchItem name="title" fix="Rückrechnung {datum}" target="cm:title" />
+            <searchItem name="titel" text="Abrechnungsmonat" word="2,2"  />
+            <searchItem name="title" fix="Rückrechnung {titel}" target="cm:title"/>
             <searchItem name="datum" text="Abrechnungsmonat" word="2,2" objectTyp="date" target="my:documentDate">
                 <check lowerValue="01/01/2005" upperValue="01/01/2020" />
             </searchItem>

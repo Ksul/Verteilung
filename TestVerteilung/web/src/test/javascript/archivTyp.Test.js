@@ -289,44 +289,45 @@ ArchivTypTest.prototype.test9 = function() {
 
 ArchivTypTest.prototype.test10 = function() {
     REC.content ="Verdienstabrechnung     0000123456  3000 Abrechnungsmonat Mai 2015";
-    var rules = '<archivTyp name="LVMGehalt" searchString="Verdienstabrechnung">                              ' +
-                ' <archivZiel type="my:archivContent" />                                                      ' +
-    '<archivPosition folder="Dokumente/Gehalt/Gehalt Hansel/{tmp}">                                              ' +
-    '<archivZiel type="my:archivFolder" />                                                                    ' +
-    '</archivPosition>                                                                                        ' +
-    '<archivPosition link="true" folder="Dokumente/Hansel/Gehalt Hansel">                                           ' +
-    '<archivZiel type="my:archivFolder" />                                                                    ' +
-    '</archivPosition>                                                                                        ' +
-    '<tags name="Gehalt" />                                                                                   ' +
-    '<tags name="Hansel" />                                                                                      ' +
-    '<category name="Gehalt/Gehalt Hansel" />                                                                  ' +
-    '<searchItem name="person" fix="Hansel" target="my:person" />                                              ' +
-    '<searchItem name="tmp" objectTyp="date" value="datum">                                                   ' +
-    '<format formatString="YYYY" />                                                                           ' +
-    '</searchItem>                                                                                            ' +
-    '<archivTyp name="Rückrechnung" searchString="Rückrechnungsdifferenz">                                    ' +
-    '<tags name="Rückrechnung" />                                                                             ' +
-    '<searchItem name="title" fix="Rückrechnung {datum}" target="cm:title" />                                 ' +
-    '<searchItem name="datum" text="Abrechnungsmonat" word="2,2" objectTyp="date" target="my:documentDate">   ' +
-    '<check lowerValue="01/01/2005" upperValue="01/01/2020" />                                                ' +
-    '</searchItem>                                                                                            ' +
-    '<searchItem name="betrag" text="Rückrechnungsdifferenz" objectTyp="float" target="my:amount">            ' +
-    '<check lowerValue="-200" upperValue="200" />                                                             ' +
-    '<delimitter typ="start" text="&#0032;" count="1" removeBlanks="after" />                                 ' +
-    '<archivZiel aspect="my:amountable" />                                                                    ' +
-    '</searchItem>                                                                                            ' +
-    '</archivTyp>                                                                                             ' +
-    '<archivTyp name="Verdienstabrechnung" searchString="" unique="error">                                    ' +
-    '<searchItem name="title" text="Abrechnungsmonat" word="1,2" target="cm:title" />                         ' +
-    '<searchItem name="datum" value="title" objectTyp="date" target="my:documentDate">                        ' +
-    '<check lowerValue="01/01/2005" upperValue="01/01/2020" />                                                ' +
-    '</searchItem>                                                                                            ' +
-    '<searchItem name="betrag" text="0000123456" objectTyp="float" target="my:amount">                        ' +
-    '<check lowerValue="3000" upperValue="15000" />                                                           ' +
-    '<archivZiel aspect="my:amountable" />                                                                    ' +
-    '</searchItem>                                                                                            ' +
-    '</archivTyp>                                                                                             ' +
-    '</archivTyp>';
+    var rules = '<archivTyp name="LVMGehalt" searchString="Verdienstabrechnung" debugLevel="debug">                              ' +
+        ' <archivZiel type="my:archivContent" />                                                      ' +
+        '<archivPosition folder="Dokumente/Gehalt/Gehalt Hansel/{tmp}">                                              ' +
+        '<archivZiel type="my:archivFolder" />                                                                    ' +
+        '</archivPosition>                                                                                        ' +
+        '<archivPosition link="true" folder="Dokumente/Hansel/Gehalt Hansel">                                           ' +
+        '<archivZiel type="my:archivFolder" />                                                                    ' +
+        '</archivPosition>                                                                                        ' +
+        '<tags name="Gehalt" />                                                                                   ' +
+        '<tags name="Hansel" />                                                                                      ' +
+        '<category name="Gehalt/Gehalt Hansel" />                                                                  ' +
+        '<searchItem name="person" fix="Hansel" target="my:person" />                                              ' +
+        '<searchItem name="tmp" objectTyp="date" value="datum">                                                   ' +
+        '<format formatString="YYYY" />                                                                           ' +
+        '</searchItem>                                                                                            ' +
+        '<archivTyp name="Rückrechnung" searchString="Rückrechnungsdifferenz">                                    ' +
+        '<tags name="Rückrechnung" />                                                                             ' +
+        '<searchItem name="titel" text="Abrechnungsmonat" word="2,2"  />  ' +
+        '<searchItem name="title" fix="Rückrechnung {titel}" target="cm:title"/>  ' +
+        '<searchItem name="datum" text="Abrechnungsmonat" word="2,2" objectTyp="date" target="my:documentDate">   ' +
+        '<check lowerValue="01/01/2005" upperValue="01/01/2020" />                                                ' +
+        '</searchItem>                                                                                            ' +
+        '<searchItem name="betrag" text="Rückrechnungsdifferenz" objectTyp="float" target="my:amount">            ' +
+        '<check lowerValue="-200" upperValue="200" />                                                             ' +
+        '<delimitter typ="start" text="&#0032;" count="1" removeBlanks="after" />                                 ' +
+        '<archivZiel aspect="my:amountable" />                                                                    ' +
+        '</searchItem>                                                                                            ' +
+        '</archivTyp>                                                                                             ' +
+        '<archivTyp name="Verdienstabrechnung" searchString="" unique="error">                                    ' +
+        '<searchItem name="title" text="Abrechnungsmonat" word="1,2" target="cm:title" />                         ' +
+        '<searchItem name="datum" value="title" objectTyp="date" target="my:documentDate">                        ' +
+        '<check lowerValue="01/01/2005" upperValue="01/01/2020" />                                                ' +
+        '</searchItem>                                                                                            ' +
+        '<searchItem name="betrag" text="0000123456" objectTyp="float" target="my:amount">                        ' +
+        '<check lowerValue="3000" upperValue="15000" />                                                           ' +
+        '<archivZiel aspect="my:amountable" />                                                                    ' +
+        '</searchItem>                                                                                            ' +
+        '</archivTyp>                                                                                             ' +
+        '</archivTyp>';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
@@ -352,6 +353,85 @@ ArchivTypTest.prototype.test10 = function() {
     assertEquals(3000, linkDoc.properties["my:amount"]);
     assertEquals(new Date(2015, 4, 1), linkDoc.properties["my:documentDate"]);
     assertEquals("Mai 2015", linkDoc.properties["cm:title"]);
+    assertEquals("Hansel", linkDoc.properties["my:person"]);
+    assertTrue(linkDoc.hasTag("Gehalt"));
+    assertTrue(linkDoc.hasTag("Hansel"));
+    assertTrue(linkDoc.hasAspect("my:amountable"));
+    assertTrue(linkDoc.parent[0].isSubType("my:archivFolder"));
+    assertTrue(linkDoc.properties["cm:categories"][0].name == "Gehalt Hansel");
+    assertTrue(doc.id == linkDoc.id);
+    assertNull(companyhome.childByNamePath("/Fehler/Doppelte/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Fehler/WebScriptTest"));
+};
+
+ArchivTypTest.prototype.test11 = function() {
+    REC.content ="Verdienstabrechnung     0000123456 Rückrechnungsdifferenz 200 Abrechnungsmonat R Mai 2015";
+    var rules = '<archivTyp name="LVMGehalt" searchString="Verdienstabrechnung" debugLevel="debug">                              ' +
+        ' <archivZiel type="my:archivContent" />                                                      ' +
+        '<archivPosition folder="Dokumente/Gehalt/Gehalt Hansel/{tmp}">                                              ' +
+        '<archivZiel type="my:archivFolder" />                                                                    ' +
+        '</archivPosition>                                                                                        ' +
+        '<archivPosition link="true" folder="Dokumente/Hansel/Gehalt Hansel">                                           ' +
+        '<archivZiel type="my:archivFolder" />                                                                    ' +
+        '</archivPosition>                                                                                        ' +
+        '<tags name="Gehalt" />                                                                                   ' +
+        '<tags name="Hansel" />                                                                                      ' +
+        '<category name="Gehalt/Gehalt Hansel" />                                                                  ' +
+        '<searchItem name="person" fix="Hansel" target="my:person" />                                              ' +
+        '<searchItem name="tmp" objectTyp="date" value="datum">                                                   ' +
+        '<format formatString="YYYY" />                                                                           ' +
+        '</searchItem>                                                                                            ' +
+        '<archivTyp name="Rückrechnung" searchString="Rückrechnungsdifferenz">                                    ' +
+        '<tags name="Rückrechnung" />                                                                             ' +
+        '<searchItem name="titel" text="Abrechnungsmonat" word="2,2"  />  ' +
+        '<searchItem name="title" fix="Rückrechnung {titel}" target="cm:title"/>  ' +
+        '<searchItem name="datum" text="Abrechnungsmonat" word="2,2" objectTyp="date" target="my:documentDate">   ' +
+        '<check lowerValue="01/01/2005" upperValue="01/01/2020" />                                                ' +
+        '</searchItem>                                                                                            ' +
+        '<searchItem name="betrag" text="Rückrechnungsdifferenz" objectTyp="float" target="my:amount">            ' +
+        '<check lowerValue="-200" upperValue="200" />                                                             ' +
+        '<delimitter typ="start" text="&#0032;" count="1" removeBlanks="after" />                                 ' +
+        '<archivZiel aspect="my:amountable" />                                                                    ' +
+        '</searchItem>                                                                                            ' +
+        '</archivTyp>                                                                                             ' +
+        '<archivTyp name="Verdienstabrechnung" searchString="" unique="error">                                    ' +
+        '<searchItem name="title" text="Abrechnungsmonat" word="1,2" target="cm:title" />                         ' +
+        '<searchItem name="datum" value="title" objectTyp="date" target="my:documentDate">                        ' +
+        '<check lowerValue="01/01/2005" upperValue="01/01/2020" />                                                ' +
+        '</searchItem>                                                                                            ' +
+        '<searchItem name="betrag" text="0000123456" objectTyp="float" target="my:amount">                        ' +
+        '<check lowerValue="3000" upperValue="15000" />                                                           ' +
+        '<archivZiel aspect="my:amountable" />                                                                    ' +
+        '</searchItem>                                                                                            ' +
+        '</archivTyp>                                                                                             ' +
+        '</archivTyp>';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    assertNotNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var archivTyp = new ArchivTyp(new XMLObject(XMLDoc.docNode));
+    archivTyp.resolve();
+    jstestdriver.console.log("JsTestDriver", REC.getMessage());
+
+    assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
+    var doc = companyhome.childByNamePath("/Dokumente/Gehalt/Gehalt Hansel/2015/WebScriptTest");
+    assertNotNull(doc);
+    assertTrue(doc.isSubType("my:archivContent"));
+    assertEquals(200, doc.properties["my:amount"]);
+    assertEquals(new Date(2015, 4, 1), doc.properties["my:documentDate"]);
+    assertEquals("Rückrechnung Mai 2015", doc.properties["cm:title"]);
+    assertEquals("Hansel", doc.properties["my:person"]);
+    assertTrue(doc.hasTag("Gehalt"));
+    assertTrue(doc.hasTag("Hansel"));
+    assertTrue(doc.hasAspect("my:amountable"));
+    assertTrue(doc.properties["cm:categories"][0].name == "Gehalt Hansel");
+    //assertTrue(doc.isCategory());
+    //assertTrue(doc.category.contains(new BasicObject("")));
+    var linkDoc = companyhome.childByNamePath("Dokumente/Hansel/Gehalt Hansel/WebScriptTest");
+    assertNotNull(linkDoc);
+    assertTrue(linkDoc.isSubType("my:archivContent"));
+    assertEquals(200, linkDoc.properties["my:amount"]);
+    assertEquals(new Date(2015, 4, 1), linkDoc.properties["my:documentDate"]);
+    assertEquals("Rückrechnung Mai 2015", linkDoc.properties["cm:title"]);
     assertEquals("Hansel", linkDoc.properties["my:person"]);
     assertTrue(linkDoc.hasTag("Gehalt"));
     assertTrue(linkDoc.hasTag("Hansel"));
