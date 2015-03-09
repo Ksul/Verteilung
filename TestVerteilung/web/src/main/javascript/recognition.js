@@ -289,8 +289,8 @@ if (typeof (companyhome) == "undefined") {
         return cNode;
     };
 
-    ScriptNode.prototype.transformDocument = function () {
-        return this;
+    ScriptNode.prototype.transformDocument = function (mimeType) {
+        return this.properties["content"];
     };
 
     ScriptNode.prototype.move = function (newNode) {
@@ -1503,16 +1503,19 @@ function ArchivTyp(srch) {
                     destinationFolder = this.archivPosition[i].resolve();
                     if (destinationFolder != null) {
                         REC.log(TRACE, "ArchivTyp.resolve: process archivPosition" + REC.completeNodePath(destinationFolder));
-                        if (REC.exist(REC.mandatoryElements) && this.name != REC.errorBox && this.name != REC.duplicateBox) {
+                        if (REC.exist(REC.mandatoryElements) && this.name != REC.errorBox.name && this.name != REC.duplicateBox.name) {
                             for (var j = 0; j < REC.mandatoryElements.length; j++) {
                                 if (!REC.exist(REC.currentDocument.properties[REC.mandatoryElements[j]])) {
                                     REC.errors.push(REC.mandatoryElements[j] + " is missing!");
                                 }
                             }
-                            if (REC.errors.length > 0)
+                            if (REC.errors.length > 0) {
+                                if (!REC.currentDocument.move(REC.errorBox))
+                                    REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(REC.errorBox));
                                 return found;
+                            }
                         }
-                        if (this.name != REC.errorBox && this.name != REC.duplicateBox) {
+                        if (this.name != REC.errorBox && this.name != REC.duplicateBox.name) {
                             var COM = new Comments();
                             COM.removeComments(REC.currentDocument);
                         } else
@@ -1658,7 +1661,7 @@ function ArchivPosition(srch) {
      * @return {*}   der Alfresco Folder, bzw null wenn er nicht aufgebaut werden konnte
      */
     this.buildFolder = function() {
-        var tmp = (REC.exist(REC.archivRoot) ? REC.archivRoot : "");
+        var tmp = (REC.exist(REC.archivRoot) ? REC.completeNodePath(REC.archivRoot) : "");
         REC.log(TRACE, "ArchivPosition.resolve: result is " + tmp);
         if (REC.exist(this.folder)) {
             var tmp1 = REC.replaceVar(this.folder);
@@ -3703,7 +3706,6 @@ REC = {
      * @param deb       wird nicht benutzt
      */
     recognize: function (doc, rules, deb) {
-        this.archivRoot = "";
         if (this.exist(rules.debugLevel))
             this.debugLevel = this.getDebugLevel(rules.debugLevel);
         this.log(INFORMATIONAL, "Debug Level is set to: " + this.print(this.debugLevel));
@@ -3717,30 +3719,30 @@ REC = {
         this.log(INFORMATIONAL, "Process Dokument " + docName);
         this.content = this.getContent(this.currentDocument);
         if (this.exist(rules.inBox))
-            this.inbox = this.trim(rules.inBox);
+            this.inbox = companyhome.childByNamePath(this.trim(rules.inBox));
         else
-            this.inbox = "Inbox";
-        this.log(INFORMATIONAL, "Inbox is located: " + this.inbox);
+            this.inbox = companyhome.childByNamePath("Inbox");
+        this.log(INFORMATIONAL, "Inbox is located: " + REC.completeNodePath(this.inbox));
         if (this.exist(rules.errorBox))
             this.errorBox = this.trim(rules.errorBox);
         else
-            this.errorBox = "Fehler";
-        this.log(INFORMATIONAL, "ErrorBox is located: " + this.errorBox);
+            this.errorBox = companyhome.childByNamePath("Fehler");
+        this.log(INFORMATIONAL, "ErrorBox is located: " + REC.completeNodePath(this.errorBox));
         if (this.exist(rules.duplicateBox))
-            this.duplicateBox = this.trim(rules.duplicateBox);
+            this.duplicateBox = companyhome.childByNamePath(this.trim(rules.duplicateBox));
         else
-            this.duplicateBox = "Fehler/Doppelte";
-        this.log(INFORMATIONAL, "DuplicateBox is located: " + this.duplicateBox);
+            this.duplicateBox = companyhome.childByNamePath("Fehler/Doppelte");
+        this.log(INFORMATIONAL, "DuplicateBox is located: " + REC.completeNodePath(this.duplicateBox));
         if (this.exist(rules.unknownBox))
-            this.unknownBox = this.trim(rules.unknownBox);
+            this.unknownBox = companyhome.childByNamePath(this.trim(rules.unknownBox));
         else
-            this.unknownBox = "Unbekannt";
-        this.log(INFORMATIONAL, "UnknownBox is located: " + this.unknownBox);
+            this.unknownBox = companyhome.childByNamePath("Unbekannt");
+        this.log(INFORMATIONAL, "UnknownBox is located: " + REC.completeNodePath(this.unknownBox));
         if (this.exist(rules.archivRoot))
-            this.archivRoot = this.trim(rules.archivRoot);
+            this.archivRoot = companyhome.childByNamePath(this.trim(rules.archivRoot));
         else
-            this.archivRoot = "Archiv/";
-        this.log(INFORMATIONAL, "ArchivRoot is located: " + this.archivRoot);
+            this.archivRoot = companyhome.childByNamePath("Archiv/");
+        this.log(INFORMATIONAL, "ArchivRoot is located: " + REC.completeNodePath(this.archivRoot));
         if (this.exist(rules.mandatory)) {
             var mnd = this.trim(rules.mandatory);
             this.mandatoryElements = mnd.split(",");
@@ -3756,7 +3758,7 @@ REC = {
         }
         if (!ruleFound) {
             this.errors.push("Unbekanntes Dokument, keine passende Regel gefunden!");
-            this.fehlerBox = this.unknownBox;
+            this.currentDocument.move(this.errorBox)
         }
         this.log(INFORMATIONAL, "Process Dokument " + docName + " finished!");
         return;
@@ -3791,12 +3793,12 @@ REC = {
         this.content = "";
         this.errors = [];
         this.results = [];
-        this.archivRoot = "";
-        this.inBox = "";
-        this.duplicateBox = "";
-        this.errorBox = "";
-        this.unknownBox = "";
-        this.fehlerBox = "";
+        this.archivRoot = null;
+        this.inBox = null;
+        this.duplicateBox = null;
+        this.errorBox = null;
+        this.unknownBox = null;
+        this.fehlerBox = null;
         this.maxDebugLength = 0;
         this.mandatoryElements = [];
         this.currentSearchItems = [];
@@ -3818,12 +3820,12 @@ REC = {
     content: "",
     errors: [],
     results: [],
-    archivRoot: "",
-    inBox: "",
-    duplicateBox: "",
-    errorBox: "",
-    unknownBox: "",
-    fehlerBox: "",
+    archivRoot: null,
+    inBox: null,
+    duplicateBox: null,
+    errorBox: null,
+    unknownBox: null,
+    fehlerBox: null,
     maxDebugLength: 0,
     mandatoryElements: [],
     currentSearchItems: [],
