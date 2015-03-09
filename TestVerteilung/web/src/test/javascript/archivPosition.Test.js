@@ -26,7 +26,7 @@ ArchivPositionTest.prototype.test2 = function() {
     var archivPosition = new ArchivPosition(new XMLObject(XMLDoc.docNode));
     erg = archivPosition.resolve();
     assertEquals(null, erg);
-    assertEquals("Ung\ufffdtige Zeichen f\ufffdr Foldernamen!\nDokumente/Auto/KFZ :Steuern\nPosition 19:\n:\n", REC.errors[0]);
+    assertEquals("Ung\ufffdtige Zeichen f\ufffdr Foldernamen!\n/Dokumente/Auto/KFZ :Steuern\nPosition 20:\n:\n", REC.errors[0]);
 };
 
 ArchivPositionTest.prototype.test3 = function() {

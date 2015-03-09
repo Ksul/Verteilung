@@ -60,7 +60,11 @@ if (typeof (companyhome) == "undefined") {
         return this.aspect.contains(new BasicObject(aspect))
     };
 
-    function Liste(){}
+    function Liste(){
+        var list = [];
+        list.__proto__ = Liste.prototype;
+        return list;
+    }
     Liste.prototype = [];
     Liste.prototype.contains = function(element) {
         for (var key in this) {
@@ -99,6 +103,7 @@ if (typeof (companyhome) == "undefined") {
                 delete this[key];
             }
         }
+        this.length = 0;
     };
     Liste.prototype.clone = function() {
         var newList = new Liste();
@@ -140,6 +145,7 @@ if (typeof (companyhome) == "undefined") {
         this.tags = new Liste();
         this.properties = new Liste();
         this.properties["content"] = new Content();
+        this.content = this.properties["content"].content;
         this.children = new Liste();
         this.parent = new Liste();
         this.versions = new Liste();
@@ -148,19 +154,20 @@ if (typeof (companyhome) == "undefined") {
         this.displayPath = "";
 
         this._getDisplayPath = function () {
-            var path = "";
+            var path = [];
             var parent = null;
             if (this.parent.length > 0)
                 parent = this.parent[0];
             while (parent != null) {
-                path = "/" + parent.name + path;
+                path.unshift(parent.name);
                 if (parent.parent.length > 0)
                     parent = parent.parent[0];
                 else
                     parent = null;
             }
-            return path;
+            return "/" + path.join("/");
         };
+        return this;
     }
     ScriptNode.prototype = new BasicNode();
     ScriptNode.prototype.constructor = ScriptNode;
@@ -180,9 +187,9 @@ if (typeof (companyhome) == "undefined") {
                     break;
                 else
                     currentNode = currentNode.children.get(part);
-                if (i == parts.length - 1)
-                    return currentNode;
             }
+            if (i == parts.length - 1)
+                return currentNode;
         }
         return null;
     };
@@ -290,7 +297,7 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.transformDocument = function (mimeType) {
-        return this.properties["content"];
+        return this.clone();
     };
 
     ScriptNode.prototype.move = function (newNode) {
@@ -323,6 +330,7 @@ if (typeof (companyhome) == "undefined") {
         newNode.aspect = this.aspect.clone();
         newNode.tags = this.tags.clone();
         newNode.properties = this.properties.clone();
+        newNode.content = newNode.properties["content"].content;
         newNode.children = this.children;
         newNode.versions = this.versions;
         newNode.parent = this.parent;
@@ -336,6 +344,7 @@ if (typeof (companyhome) == "undefined") {
         this.tags.clear();
         this.properties.clear();
         this.properties["content"] = new Content();
+        this.content = this.properties["content"].content;
         this.children.clear();
         this.versions.clear();
         this.parent.clear();
@@ -1501,7 +1510,7 @@ function ArchivTyp(srch) {
                 for (i = 0; i < this.archivPosition.length; i++) {
                     REC.log(TRACE, "ArchivTyp.resolve: call ArchivPosition.resolve");
                     destinationFolder = this.archivPosition[i].resolve();
-                    if (destinationFolder != null) {
+                    if (REC.exist(destinationFolder)) {
                         REC.log(TRACE, "ArchivTyp.resolve: process archivPosition" + REC.completeNodePath(destinationFolder));
                         if (REC.exist(REC.mandatoryElements) && this.name != REC.errorBox.name && this.name != REC.duplicateBox.name) {
                             for (var j = 0; j < REC.mandatoryElements.length; j++) {
@@ -1550,6 +1559,7 @@ function ArchivTyp(srch) {
                                         }
                                     } else {
                                         REC.log(TRACE, "ArchivTyp.resolve: check for unique: no document with same title found");
+                                        REC.currentDocument.move(destinationFolder);
                                     }
                                 }
                                 this.handleDocument(searchTitleResult, destinationFolder);
@@ -1670,7 +1680,7 @@ function ArchivPosition(srch) {
                 REC.errors.push(erg);
                 return;
             }
-            tmp = tmp + tmp1[0];
+            tmp = tmp + "/" + tmp1[0];
             var exp = new RegExp("[*\"<>\?:|]|\\.$");
             if (tmp.match(exp)) {
                 var m = exp.exec(tmp);
@@ -3718,31 +3728,46 @@ REC = {
         var docName = this.currentDocument.name;
         this.log(INFORMATIONAL, "Process Dokument " + docName);
         this.content = this.getContent(this.currentDocument);
-        if (this.exist(rules.inBox))
-            this.inbox = companyhome.childByNamePath(this.trim(rules.inBox));
-        else
-            this.inbox = companyhome.childByNamePath("Inbox");
-        this.log(INFORMATIONAL, "Inbox is located: " + REC.completeNodePath(this.inbox));
-        if (this.exist(rules.errorBox))
-            this.errorBox = this.trim(rules.errorBox);
-        else
-            this.errorBox = companyhome.childByNamePath("Fehler");
-        this.log(INFORMATIONAL, "ErrorBox is located: " + REC.completeNodePath(this.errorBox));
-        if (this.exist(rules.duplicateBox))
-            this.duplicateBox = companyhome.childByNamePath(this.trim(rules.duplicateBox));
-        else
-            this.duplicateBox = companyhome.childByNamePath("Fehler/Doppelte");
-        this.log(INFORMATIONAL, "DuplicateBox is located: " + REC.completeNodePath(this.duplicateBox));
-        if (this.exist(rules.unknownBox))
-            this.unknownBox = companyhome.childByNamePath(this.trim(rules.unknownBox));
-        else
-            this.unknownBox = companyhome.childByNamePath("Unbekannt");
-        this.log(INFORMATIONAL, "UnknownBox is located: " + REC.completeNodePath(this.unknownBox));
         if (this.exist(rules.archivRoot))
             this.archivRoot = companyhome.childByNamePath(this.trim(rules.archivRoot));
         else
-            this.archivRoot = companyhome.childByNamePath("Archiv/");
-        this.log(INFORMATIONAL, "ArchivRoot is located: " + REC.completeNodePath(this.archivRoot));
+            this.archivRoot = companyhome.childByNamePath("Archiv");
+        if (this.exist(this.archivRoot))
+            this.log(INFORMATIONAL, "ArchivRoot is located: " + this.completeNodePath(this.archivRoot));
+        else
+            throw "Archiv Root not found!";
+        if (this.exist(rules.inBox))
+            this.inBox = this.archivRoot.childByNamePath(this.trim(rules.inBox));
+        else
+            this.inBox = this.archivRoot.childByNamePath("Inbox");
+        if (this.exist(this.inBox))
+            this.log(INFORMATIONAL, "Inbox is located: " + this.completeNodePath(this.inBox));
+        else
+            throw "Inbox not found!";
+        if (this.exist(rules.errorBox))
+            this.errorBox = this.archivRoot.childByNamePath(this.trim(rules.errorBox));
+        else
+            this.errorBox = this.archivRoot.childByNamePath("Fehler");
+        if (this.exist(this.errorBox))
+            this.log(INFORMATIONAL, "ErrorBox is located: " + this.completeNodePath(this.errorBox));
+        else
+            throw "ErrorBox not found!";
+        if (this.exist(rules.duplicateBox))
+            this.duplicateBox = this.archivRoot.childByNamePath(this.trim(rules.duplicateBox));
+        else
+            this.duplicateBox = this.archivRoot.childByNamePath("Fehler/Doppelte");
+        if (this.exist(this.duplicateBox))
+            this.log(INFORMATIONAL, "DuplicateBox is located: " + this.completeNodePath(this.duplicateBox));
+        else
+            throw "DuplicateBox not found!";
+        if (this.exist(rules.unknownBox))
+            this.unknownBox = this.archivRoot.childByNamePath(this.trim(rules.unknownBox));
+        else
+            this.unknownBox = this.archivRoot.childByNamePath("Unbekannt");
+        if (this.exist(this.unknownBox))
+            this.log(INFORMATIONAL, "UnknownBox is located: " + this.completeNodePath(this.unknownBox));
+        else
+            throw "UnknownBox not found!";
         if (this.exist(rules.mandatory)) {
             var mnd = this.trim(rules.mandatory);
             this.mandatoryElements = mnd.split(",");

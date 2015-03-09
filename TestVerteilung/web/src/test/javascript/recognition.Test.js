@@ -4,14 +4,21 @@
 
 RecognitionTest = TestCase("RecognitionTest");
 
+var iBox;
+
 RecognitionTest.prototype.setUp = function() {
     REC.init();
     companyhome.init();
+    var archiv = companyhome.createFolder("Archiv");
+    archiv.createFolder("Unbekannt");
+    iBox = archiv.createFolder("Inbox");
+    var err = archiv.createFolder("Fehler");
+    err.createFolder("Doppelte");
 };
 
 RecognitionTest.prototype.testRecognize = function() {
-    var doc = REC.inbox.createNode(("WebscriptTest", "my:archivContent"));
-    doc.properties.content.write(new Content("Zauberfrau Rechnung Nr 1001 Gesamtbetrag 200  14.02.2015"));
+    var doc = iBox.createNode("WebScriptTest", "my:archivContent");
+    doc.properties.content.write(new Content("Zauberfrau Rechnung Nr 1001 Gesamtbetrag 200  Datum 14.02.2015"));
     var rules =
    '<documentTypes                                                                                                                                                                                                                                                                                 ' +
    'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"                                                                                                                                                                                                                                          ' +
@@ -51,13 +58,14 @@ RecognitionTest.prototype.testRecognize = function() {
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     REC.recognize(doc, new XMLObject(XMLDoc.docNode));
-    assertNull(companyhome.childByNamePath("/Inbox/WebScriptTest"));
-    doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
+    jstestdriver.log(REC.getMessage()) ;
+    assertNull(companyhome.childByNamePath("/Archiv/Inbox/WebScriptTest"));
+    doc = companyhome.childByNamePath("/Archiv/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
     assertNotNull(doc);
     assertTrue(doc.isSubType("my:archivContent"));
     assertEquals(200, doc.properties["my:amount"]);
     assertEquals(new Date(2015, 1, 14), doc.properties["my:documentDate"]);
-    assertEquals("Februar 2015", doc.properties["cm:title"]);
+    assertEquals("Januar 2015", doc.properties["cm:title"]);
     assertEquals("Klaus", doc.properties["my:person"]);
     assertTrue(doc.hasTag("Rechnung"));
     assertTrue(doc.hasTag("Zauberfrau"));
