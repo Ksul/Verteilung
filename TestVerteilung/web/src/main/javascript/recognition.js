@@ -1499,7 +1499,7 @@ function ArchivTyp(srch) {
                     this.category[i].resolve(REC.currentDocument);
                 }
             }
-            // TODO wofür ist das
+            // Unique in die Parents übertragen
             var p = this.parent;
             while (REC.exist(p)) {
                 p.unique = this.unique;
@@ -1524,11 +1524,11 @@ function ArchivTyp(srch) {
                                 return found;
                             }
                         }
-                        if (this.name != REC.errorBox && this.name != REC.duplicateBox.name) {
+                        //TODO Das nochmal ändern
+                        if (this.name != REC.errorBox.name && this.name != REC.duplicateBox.name) {
                             var COM = new Comments();
                             COM.removeComments(REC.currentDocument);
-                        } else
-                            this.unique = "copy";
+                        }
                         if (this.archivPosition[i].link && REC.exist(destinationFolder)) {
                             REC.log(INFORMATIONAL, "Document link to folder " + REC.completeNodePath(destinationFolder));
                             if (REC.exist(companyhome.childByNamePath(destinationFolder.displayPath + "/" + REC.currentDocument.name)))
@@ -1559,7 +1559,6 @@ function ArchivTyp(srch) {
                                         }
                                     } else {
                                         REC.log(TRACE, "ArchivTyp.resolve: check for unique: no document with same title found");
-                                        REC.currentDocument.move(destinationFolder);
                                     }
                                 }
                                 this.handleDocument(searchTitleResult, destinationFolder);
@@ -2940,8 +2939,8 @@ function XMLObject(ruleDocument) {
     var tmp = [];
     // for each(elem in rule.children()) {
     var elements = ruleDocument.getElements();
-    for (var i = 0; i < elements.length; i++) {
-        var elem = elements[i];
+    for (var k = 0; k < elements.length; k++) {
+        var elem = elements[k];
         if (typeof tmp[elem.tagName] == "undefined") {
             tmp[elem.tagName] = [];
             tmp[elem.tagName].push(new XMLObject(elem));
@@ -3783,7 +3782,8 @@ REC = {
         }
         if (!ruleFound) {
             this.errors.push("Unbekanntes Dokument, keine passende Regel gefunden!");
-            this.currentDocument.move(this.errorBox)
+            if (!doc.move(this.unknownBox))
+               REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(REC.unknownBox));
         }
         this.log(INFORMATIONAL, "Process Dokument " + docName + " finished!");
         return;

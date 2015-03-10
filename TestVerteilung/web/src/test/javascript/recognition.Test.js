@@ -73,3 +73,28 @@ RecognitionTest.prototype.testRecognize = function() {
     assertTrue(doc.hasAspect("my:amountable"));
     assertTrue(doc.properties["cm:categories"][0].name == "Rechnung Zauberfrau");
 };
+
+RecognitionTest.prototype.testUnknownDocument = function() {
+    var doc = iBox.createNode("WebScriptTest", "my:archivContent");
+    doc.properties.content.write(new Content("Hansel Rechnung Nr 1001 Gesamtbetrag 200  Datum 14.02.2015"));
+    var rules =
+        '<documentTypes                                                                                                                                                                                                                                                                                 ' +
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"                                                                                                                                                                                                                                          ' +
+        'xmlns:cm="http://www.alfresco.org/model/content/1.0"                                                                                                                                                                                                                                           ' +
+        'xmlns:my="http://www.schulte.local/archiv"  xsi:noNamespaceSchemaLocation="doc.xsd" archivRoot="Archiv/" inBox="Inbox" mandatory="cm:title,my:documentDate,my:person" unknownBox="Unbekannt" errorBox="Fehler"  duplicateBox="Fehler/Doppelte" debugLevel="informational" maxDebugLength="40"> ' +
+        '<archivTyp name="Zauberfrau" searchString="ZAUBERFRAU">                                                                                                                                                                                                                                        ' +
+        '<archivZiel type="my:archivContent" />                                                                                                                                                                                                                                                         ' +
+        '<archivPosition folder="Dokumente/Rechnungen/Rechnungen Zauberfrau/{tmp}">                                                                                                                                                                                                                     ' +
+        '<archivZiel type="my:archivFolder" />                                                                                                                                                                                                                                                          ' +
+        '</archivPosition>                                                                                                                                                                                                                                                                              ' +
+        '</archivTyp>                                                                                                                                                                                                                                                                                   ' +
+        '</documentTypes>                                                                                                                                                                                                                                                                               ';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    REC.recognize(doc, new XMLObject(XMLDoc.docNode));
+    jstestdriver.log(REC.getMessage()) ;
+    assertNull(companyhome.childByNamePath("/Archiv/Inbox/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Archiv/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest"));
+    assertNotNull(companyhome.childByNamePath("/Archiv/Unbekannt/WebScriptTest"));
+    assertNull(companyhome.childByNamePath("/Archiv/Fehler/WebScriptTest"));
+};

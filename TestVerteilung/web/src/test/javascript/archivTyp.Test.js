@@ -236,7 +236,7 @@ ArchivTypTest.prototype.testDuplicateWithNewVersion1 = function() {
     var doc = companyhome.childByNamePath("/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
     assertNotNull(doc);
     assertTrue(doc.isVersioned());
-    assertFalse(doc.hasAspect(new BasicObject("cm:workingcopy")))
+    assertFalse(doc.hasAspect(new BasicObject("cm:workingcopy")));
     assertEquals("Test", doc.properties.content.content);
     var version = doc.getVersion(1);
     assertNotNull(version);
