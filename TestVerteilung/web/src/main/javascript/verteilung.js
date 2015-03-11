@@ -923,7 +923,8 @@ function work() {
                     sel = rulesEditor.getSession().getValue();
             } else
                 sel = rulesEditor.getSession().getValue();
-            REC.currentDocument.setContent(textEditor.getSession().getValue());
+            REC.init();
+            REC.currentDocument.setContent(new Content(textEditor.getSession().getValue()));
             REC.currentDocument.name = currentFile;
             removeMarkers(markers, textEditor);
             REC.testRules(sel);
@@ -1157,8 +1158,7 @@ function loadScript() {
                     content = json.result;
                     workDocument = "recognition.js";
                     eval(content);
-                    REC = new Recognition();
-                    REC.set(REC);
+                    REC = new REC();
                     removeMarkers(markers, textEditor);
                     textEditor.getSession().setMode(new jsMode());
                     textEditor.getSession().setValue(content);

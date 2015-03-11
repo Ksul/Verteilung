@@ -262,7 +262,7 @@ if (typeof (companyhome) == "undefined") {
     };
 
     ScriptNode.prototype.createNode = function (name, typ) {
-        if (this.type != "cm:folder")
+        if (this.type != "cm:folder" && this.type != "fm:topic")
             throw "Kein Folder!";
         var newNode =  new ScriptNode(name, typ);
         this.children.add(newNode);
@@ -357,7 +357,8 @@ if (typeof (companyhome) == "undefined") {
 if (typeof (commentService) == "undefined") {
     var commentService = ({
         createCommentsFolder: function (node) {
-            return REC.currentDocument;
+            var commentsFolder = new ScriptNode("Comments", "fm:topic");
+            return commentsFolder;
         }
     });
 }
@@ -3556,6 +3557,10 @@ REC = {
         return erg;
     },
 
+    /**
+     * liefert die angesammelten Meldungen
+     * @return {string}
+     */
     getMessage: function () {
         if (this.errors.length > 0) {
             for (var i = 0; i < this.errors.length; i++)
@@ -3698,10 +3703,6 @@ REC = {
             XMLDoc.loadXML(rules);
             XMLDoc.parse();
             this.recognize(this.currentDocument, new XMLObject(XMLDoc.docNode));
-        } catch (e) {
-            for (var prop in e)
-                this.log(ERROR, "property: " + prop + " value: [" + e[prop] + "]");
-            this.errors.push("Fehler: " + e.toString());
         } finally {
             this.handleUnexpected(this.fehlerBox);
         }
@@ -3805,10 +3806,6 @@ REC = {
         }
     },
 
-    set: function (rec) {
-        REC = rec;
-    },
-
     currentDocument: null,
 
     init: function(){
@@ -3818,11 +3815,6 @@ REC = {
         this.content = "";
         this.errors = [];
         this.results = [];
-        this.archivRoot = null;
-        this.inBox = null;
-        this.duplicateBox = null;
-        this.errorBox = null;
-        this.unknownBox = null;
         this.fehlerBox = null;
         this.maxDebugLength = 0;
         this.mandatoryElements = [];
@@ -3836,6 +3828,11 @@ REC = {
         this.results = [];
         this.positions = new PositionContainer();
         companyhome.init();
+        this.archivRoot = companyhome.createFolder("Archiv");
+        this.unknownBox = this.archivRoot.createFolder("Unbekannt");
+        this.inBox = this.archivRoot.createFolder("Inbox");
+        this.errorBox  = this.archivRoot.createFolder("Fehler");
+        this.duplicateBox = this.errorBox.createFolder("Doppelte");
         this.currentDocument = companyhome.createNode('WebScriptTest', "my:archivContent");
     },
     

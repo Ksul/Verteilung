@@ -16,7 +16,7 @@ ArchivPositionTest.prototype.test1 = function() {
     XMLDoc.parse();
     var archivPosition = new ArchivPosition(new XMLObject(XMLDoc.docNode));
     erg = archivPosition.resolve();
-    assertEquals("/Dokumente/Auto/KFZ Steuern", erg.displayPath.split("/").slice(2).join("/") + "/" + erg.name);
+    assertEquals("/Archiv/Dokumente/Auto/KFZ Steuern", erg.displayPath.split("/").slice(2).join("/") + "/" + erg.name);
 };
 
 ArchivPositionTest.prototype.test2 = function() {
@@ -26,7 +26,7 @@ ArchivPositionTest.prototype.test2 = function() {
     var archivPosition = new ArchivPosition(new XMLObject(XMLDoc.docNode));
     erg = archivPosition.resolve();
     assertEquals(null, erg);
-    assertEquals("Ung\ufffdtige Zeichen f\ufffdr Foldernamen!\n/Dokumente/Auto/KFZ :Steuern\nPosition 20:\n:\n", REC.errors[0]);
+    assertEquals("Ung\ufffdtige Zeichen f\ufffdr Foldernamen!\n/Archiv/Dokumente/Auto/KFZ :Steuern\nPosition 27:\n:\n", REC.errors[0]);
 };
 
 ArchivPositionTest.prototype.test3 = function() {
@@ -40,7 +40,7 @@ ArchivPositionTest.prototype.test3 = function() {
     XMLDoc.parse();
     var archivPosition = new ArchivPosition(new XMLObject(XMLDoc.docNode));
     erg = archivPosition.resolve();
-    assertEquals("/Dokumente/Rechnungen/Sonstige Rechnungen/Test", erg.displayPath.split("/").slice(2).join("/") + "/" + erg.name);
+    assertEquals("/Archiv/Dokumente/Rechnungen/Sonstige Rechnungen/Test", erg.displayPath.split("/").slice(2).join("/") + "/" + erg.name);
 };
 
 ArchivPositionTest.prototype.test4 = function() {

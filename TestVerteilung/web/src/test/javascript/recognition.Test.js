@@ -8,15 +8,10 @@ var iBox;
 
 RecognitionTest.prototype.setUp = function() {
     REC.init();
-    companyhome.init();
-    var archiv = companyhome.createFolder("Archiv");
-    archiv.createFolder("Unbekannt");
-    iBox = archiv.createFolder("Inbox");
-    var err = archiv.createFolder("Fehler");
-    err.createFolder("Doppelte");
 };
 
 RecognitionTest.prototype.testRecognize = function() {
+    var iBox = companyhome.childByNamePath("/Archiv/Inbox");
     var doc = iBox.createNode("WebScriptTest", "my:archivContent");
     doc.properties.content.write(new Content("Zauberfrau Rechnung Nr 1001 Gesamtbetrag 200  Datum 14.02.2015"));
     var rules =
@@ -75,6 +70,7 @@ RecognitionTest.prototype.testRecognize = function() {
 };
 
 RecognitionTest.prototype.testUnknownDocument = function() {
+    var iBox = companyhome.childByNamePath("Archiv/Inbox");
     var doc = iBox.createNode("WebScriptTest", "my:archivContent");
     doc.properties.content.write(new Content("Hansel Rechnung Nr 1001 Gesamtbetrag 200  Datum 14.02.2015"));
     var rules =
