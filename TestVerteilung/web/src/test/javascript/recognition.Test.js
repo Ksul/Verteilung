@@ -53,7 +53,7 @@ RecognitionTest.prototype.testRecognize = function() {
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     REC.recognize(doc, new XMLObject(XMLDoc.docNode));
-    jstestdriver.log(REC.getMessage()) ;
+    jstestdriver.log(REC.getMessage().join("\n")) ;
     assertNull(companyhome.childByNamePath("/Archiv/Inbox/WebScriptTest"));
     doc = companyhome.childByNamePath("/Archiv/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest");
     assertNotNull(doc);
@@ -88,7 +88,7 @@ RecognitionTest.prototype.testUnknownDocument = function() {
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     REC.recognize(doc, new XMLObject(XMLDoc.docNode));
-    jstestdriver.log(REC.getMessage()) ;
+    jstestdriver.log(REC.getMessage().join("\n")) ;
     assertNull(companyhome.childByNamePath("/Archiv/Inbox/WebScriptTest"));
     assertNull(companyhome.childByNamePath("/Archiv/Dokumente/Rechnungen/Rechnungen Zauberfrau/2015/WebScriptTest"));
     assertNotNull(companyhome.childByNamePath("/Archiv/Unbekannt/WebScriptTest"));

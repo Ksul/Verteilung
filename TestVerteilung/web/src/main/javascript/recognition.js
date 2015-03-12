@@ -3566,16 +3566,26 @@ REC = {
             for (var i = 0; i < this.errors.length; i++)
                 this.log(ERROR, "Fehler: " + this.errors[i]);
         }
-        if (this.showContent || this.debugLevel.level >= DEBUG.level)
-            this.mess = this.mess + "\n=====>\n" + this.content + "\n<====\n";
+        if (this.showContent || this.debugLevel.level >= DEBUG.level) {
+            this.mess.push("=====>");
+            this.mess.push(this.content);
+            this.mess.push("<====");
+        }
         return this.mess;
     },
 
     log: function (level, text) {
         if (this.debugLevel.level >= level.level) {
-            this.mess = this.mess + this.dateFormat(new Date(), "G:i:s,u") + " " + level.text + " " + text + "\n";
+            this.mess.push(this.dateFormat(new Date(), "G:i:s,u") + " " + level.text + " " + text);
         }
     },
+
+    /**
+     * prüft, ob eine Wert existiert
+     * @param val           der zu prüfende Wert
+     * @return {boolean}    [true]    wenn der Wert existiert
+     *                      [false]   wenn der Wert nicht existiert
+     */
     exist: function (val) {
         return typeof val != "undefined" && val != null;
     },
@@ -3698,11 +3708,16 @@ REC = {
     },
     testRules: function (rules) {
         try {
-            this.mess = "";
             this.currXMLName = [];
             XMLDoc.loadXML(rules);
             XMLDoc.parse();
             this.recognize(this.currentDocument, new XMLObject(XMLDoc.docNode));
+        } catch (e) {
+            this.log(ERROR, e.toString());
+            var str = "";
+            for (var prop in e)
+                str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+            this.log(ERROR, "Stacktrace:\n" + e.stack);
         } finally {
             this.handleUnexpected(this.fehlerBox);
         }
@@ -3795,13 +3810,15 @@ REC = {
             try {
                 this.recognize(document, this.getRules(), space.name != "Inbox");
             } catch (e) {
-                for (var prop in e) {
-                    this.log(ERROR, "property: " + prop + " value: [" + e[prop] + "]");
-                }
+                var str = e.toString() + "\n";
+                for (var prop in e)
+                    str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
+                str = str + "Stacktrace: \n" + e.stack.split('\n').reverse().join('\n');
+                this.log(ERROR, str);
                 this.errors.push("Fehler: " + e.toString());
             } finally {
                 this.handleUnexpected(this.fehlerBox);
-                logger.log(this.getMessage());
+                logger.log(this.getMessage().join("\n"));
             }
         }
     },
@@ -3811,7 +3828,7 @@ REC = {
     init: function(){
         this.id = Math.random() * 100;
         this.debugLevel = INFORMATIONAL;
-        this.mess = "";
+        this.mess = [];
         this.content = "";
         this.errors = [];
         this.results = [];
@@ -3838,7 +3855,7 @@ REC = {
     
     id: Math.random() * 100,
     debugLevel: INFORMATIONAL,
-    mess: "",
+    mess: [],
     content: "",
     errors: [],
     results: [],

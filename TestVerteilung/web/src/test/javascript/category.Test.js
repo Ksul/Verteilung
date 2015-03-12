@@ -16,10 +16,9 @@ CategoryTest.prototype.test1 = function() {
     XMLDoc.parse();
     var category = new Category(new XMLObject(XMLDoc.docNode));
     category.resolve(REC.currentDocument);
-    assertTrue(REC.mess.search("Root Category created!") != -1);
-    assertTrue(REC.mess.search("Category \\[Steuern] not found! Create Category") != -1);
-    assertTrue(REC.mess.search("Category \\[Einkommen] not found! Create Category") != -1);
-    assertTrue(REC.mess.search("Add Category \\[Steuern/Einkommen] to document") != -1);
+    assertTrue( classification.rootCategories.contains((new BasicObject("Steuern"))));
+    var cat = classification.rootCategories.get(new BasicObject("Steuern"));
+    assertTrue(cat.subCategories.contains(new BasicObject("Einkommen")));
 };
 
 CategoryTest.prototype.test2 = function() {
@@ -29,7 +28,7 @@ CategoryTest.prototype.test2 = function() {
     XMLDoc.parse();
     var category = new Category(new XMLObject(XMLDoc.docNode));
     category.resolve(REC.currentDocument);
-    assertTrue(REC.mess.search("Category \\[Steuern] found") != -1);
-    assertTrue(REC.mess.search("Category \\[Einkommen] not found! Create Category") != -1);
-    assertTrue(REC.mess.search("Add Category \\[Steuern/Einkommen] to document") != -1);
+    assertTrue( classification.rootCategories.contains((new BasicObject("Steuern"))));
+    var cat = classification.rootCategories.get(new BasicObject("Steuern"));
+    assertTrue(cat.subCategories.contains(new BasicObject("Einkommen")));
 };

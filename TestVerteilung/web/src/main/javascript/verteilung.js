@@ -687,21 +687,33 @@ function printResults(results) {
 
 /**
  * gibt die Meldungen im entsprechenden Fenster aus
- * @param text
- * @param reverse
+ * die Meldungen werden auf 2 verschiedene Arten verarbeitet:
+ *  die Meldung kommt als Text dann wird ein Zeitstempel und ein Log-Level hinzugefügt
+ *  oder die Meldung ist ein fertiges Array, dann werden sie einfach angehängt
+ * @param message   die Message als String oder als Array von Strings
+ * @param reverse   die Reihenfolge wird umgedreht
+ * @param level     ein LogLevel
  */
-function fillMessageBox(text, reverse) {
-    if (reverse) {
-        text = text.split('\n').reverse().join('\n');
-        if (text.startsWith("\n"))
-            text = text.substr(1);
+function fillMessageBox(message, reverse, level) {
+    var output;
+    if (typeof message == "string") {
+        if (!REC.exist(level))
+            level = REC.INFORMATIONAL;
+        messages.pop(REC.dateFormat(new Date(), "G:i:s,u") + " " + level.text + " " + message);
     }
-    var inhalt = timeStamp(false) + " " + text + "\n" + outputEditor.getSession().getValue();
-    outputEditor.getSession().setValue(inhalt);
+    else {
+        messages = messages.concat(message);
+    }
+    if (reverse) {
+        output = messages.reverse().join("\n");
+    } else {
+        output = messages.join("\n");
+    }
+    outputEditor.getSession().setValue(output);
 }
 
 /**
- * gibt einen aktuellen Timestamp zutück "m/d/yy h:MM:ss TT"
+ * gibt einen aktuellen Timestamp zurück "m/d/yy h:MM:ss TT"
  * @param withDate mit Datum
  * @type {Date}
  */
