@@ -696,14 +696,36 @@ function printResults(results) {
  */
 function fillMessageBox(message, reverse, level) {
     var output;
+    var ident = "                    ";
+    var tmp = [];
+    var out = [];
+    var pos = 0;
     if (typeof message == "string") {
         if (!REC.exist(level))
-            level = REC.INFORMATIONAL;
-        messages.pop(REC.dateFormat(new Date(), "G:i:s,u") + " " + level.text + " " + message);
+            level = INFORMATIONAL;
+        tmp.pop(REC.dateFormat(new Date(), "G:i:s,u") + " " + level.text + " " + message);
     }
     else {
-        messages = messages.concat(message);
+        tmp = message;
     }
+    message = [];
+    for (var j = 0; j < tmp.length; j++) {
+        var zeile = tmp[j];
+        var z = zeile.split("\n");
+        var i = 0;
+        for (var k = 0; k < z.length; k++) {
+            var z1 = z[k];
+            if (i == 0 && z1.length > 0) {
+                pos = z1.indexOf(" ", z1.indexOf(" ") + 1) + 1;
+                out.push(z1);
+                i++;
+            } else if (z1.length > 0)
+                out.push(ident.substr(0, pos) + z1);
+        }
+        message.push(out.join("\n"));
+        out = [];
+    }
+    messages = messages.concat(message);
     if (reverse) {
         output = messages.reverse().join("\n");
     } else {
@@ -936,7 +958,7 @@ function work() {
             } else
                 sel = rulesEditor.getSession().getValue();
             REC.init();
-            REC.currentDocument.setContent(new Content(textEditor.getSession().getValue()));
+            REC.currentDocument.properties.content.write(new Content(textEditor.getSession().getValue()));
             REC.currentDocument.name = currentFile;
             removeMarkers(markers, textEditor);
             REC.testRules(sel);

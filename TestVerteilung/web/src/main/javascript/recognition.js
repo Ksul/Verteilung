@@ -172,11 +172,6 @@ if (typeof (companyhome) == "undefined") {
     ScriptNode.prototype = new BasicNode();
     ScriptNode.prototype.constructor = ScriptNode;
 
-    ScriptNode.prototype.setContent = function (inhalt) {
-        this.content = inhalt;
-        this.properties = [];
-    };
-
     ScriptNode.prototype.childByNamePath = function (name) {
         var parts = name.split("/");
         var currentNode = this;
