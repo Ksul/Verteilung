@@ -92,7 +92,7 @@ function handleDropInbox(evt) {
                         var json = executeService("createDocument", [
                             {"name": "documentId", "value":inboxID},
                             {"name": "fileName", "value": f.name},
-                            {"name": "documentText", "value": btoa(content)},
+                            {"name": "documentText", "value": base64EncArr(strToUTF8Arr(content))},
                             {"name": "mimeType", "value": "application/pdf"},
                             {"name": "extraProperties", "value": "{}"},
                             {"name": "versionState", "value": "major"}
@@ -1899,6 +1899,7 @@ function handleVerteilungImageClicks() {
             markers = setMarkers(daten[name]["position"], textEditor);
             textEditor.getSession().setValue(daten[name]["text"]);
             propsEditor.getSession().setValue(printResults(daten[name]["result"]));
+            //TODO das muss anders gemacht werden
             fillMessageBox(daten[name]["log"], true);
             manageControls();
 

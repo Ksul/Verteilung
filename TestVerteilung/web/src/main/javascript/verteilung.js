@@ -250,7 +250,7 @@ function loadMultiText(content, txt, name, typ,  notDeleteable, container) {
         dat["text"] = txt;
         dat["file"] = name;
         dat["content"] = content;
-        dat["log"] = REC.getMessage();
+        dat["log"] = REC.mess;
         dat["result"] = REC.results;
         dat["position"] = REC.positions;
         dat["xml"] = REC.currXMLName;
@@ -368,10 +368,10 @@ function readFiles(files) {
                                             for (var pos in erg) {
                                                 var entry = erg[pos];
                                                 if (count == 1)
-                                                    loadText(atob(entry.data), entry.extractedData, entry.name, "application/zip", null);
+                                                    loadText(UTF8ArrToStr(base64DecToArr(entry.data)), entry.extractedData, entry.name, "application/zip", null);
                                                 else {
                                                     // die originalen Bytes kommen decodiert, also encoden!
-                                                    loadMultiText(atob(entry.data), entry.extractedData, entry.name, entry.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain", "true",  null);
+                                                    loadMultiText(UTF8ArrToStr(base64DecToArr(entry.data)), entry.extractedData, entry.name, entry.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain", "true",  null);
                                                 }
                                             }
                                         }
@@ -455,7 +455,7 @@ function executeService(service, params, messages, ignoreError) {
                 for (index = 0; index < params.length; ++index) {
                     // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
-                        params[index].value = btoa(params[index].value);
+                        params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
                     // prüfen, ob Parameter zu lang ist
                     if (typeof params[index].value == "String" && params[index].value.length > maxLen) {
                         // den Inhalt häppchenweise übertragen
@@ -483,7 +483,7 @@ function executeService(service, params, messages, ignoreError) {
                 for (index = 0; index < params.length; ++index) {
                     // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
-                        params[index].value = btoa(params[index].value);
+                        params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
                     eval("dataString." + params[index].name + " = params[" + index + "].value");
                 }
             }
@@ -521,8 +521,10 @@ function executeService(service, params, messages, ignoreError) {
                 errorString = errorString + "<br>" + json.error;
             throw new Error(errorString);
         } else {
-            if (exist(successMessage))
-                fillMessageBox(successMessage);
+            if (exist(successMessage)) {
+                REC.log(INFORMATIONAL, successMessage);
+                fillMessageBox(true);
+            }
         }
         return json;
     } catch (e) {
@@ -687,51 +689,10 @@ function printResults(results) {
 
 /**
  * gibt die Meldungen im entsprechenden Fenster aus
- * die Meldungen werden auf 2 verschiedene Arten verarbeitet:
- *  die Meldung kommt als Text dann wird ein Zeitstempel und ein Log-Level hinzugefügt
- *  oder die Meldung ist ein fertiges Array, dann werden sie einfach angehängt
- * @param message   die Message als String oder als Array von Strings
  * @param reverse   die Reihenfolge wird umgedreht
- * @param level     ein LogLevel
  */
-function fillMessageBox(message, reverse, level) {
-    var output;
-    var ident = "                    ";
-    var tmp = [];
-    var out = [];
-    var pos = 0;
-    if (typeof message == "string") {
-        if (!REC.exist(level))
-            level = INFORMATIONAL;
-        tmp.pop(REC.dateFormat(new Date(), "G:i:s,u") + " " + level.text + " " + message);
-    }
-    else {
-        tmp = message;
-    }
-    message = [];
-    for (var j = 0; j < tmp.length; j++) {
-        var zeile = tmp[j];
-        var z = zeile.split("\n");
-        var i = 0;
-        for (var k = 0; k < z.length; k++) {
-            var z1 = z[k];
-            if (i == 0 && z1.length > 0) {
-                pos = z1.indexOf(" ", z1.indexOf(" ") + 1) + 1;
-                out.push(z1);
-                i++;
-            } else if (z1.length > 0)
-                out.push(ident.substr(0, pos) + z1);
-        }
-        message.push(out.join("\n"));
-        out = [];
-    }
-    messages = messages.concat(message);
-    if (reverse) {
-        output = messages.reverse().join("\n");
-    } else {
-        output = messages.join("\n");
-    }
-    outputEditor.getSession().setValue(output);
+function fillMessageBox(reverse) {
+    outputEditor.getSession().setValue(REC.getMessage(reverse));
 }
 
 /**
@@ -788,7 +749,8 @@ function doTest() {
         if (isLocal()) {
             var open = openFile("test.txt");
             var content = open;
-            REC.currentDocument.setContent(content);
+            REC.init();
+            REC.currentDocument.properties.content.write(new Content(content));
             REC.currentDocument.name = "TEST";
             document.getElementById('headerWest').textContent = "TEST";
             removeMarkers(markers, textEditor);
@@ -803,7 +765,7 @@ function doTest() {
             setXMLPosition(REC.currXMLName);
             markers = setMarkers(REC.positions, textEditor);
             propsEditor.getSession().setValue(printResults(REC.results));
-            fillMessageBox(REC.getMessage(), true);
+            fillMessageBox(true);
             testMode = true;
             manageControls();
         } else {
@@ -841,7 +803,7 @@ function doTest() {
                         setXMLPosition(REC.currXMLName);
                         markers = setMarkers(REC.positions, textEditor);
                         propsEditor.getSession().setValue(printResults(REC.results));
-                        fillMessageBox(REC.getMessage(), true);
+                        fillMessageBox(true);
                         testMode = true;
                         manageControls();
                     } else
@@ -965,7 +927,7 @@ function work() {
             if (!selectMode)
                 setXMLPosition(REC.currXMLName);
             markers = setMarkers(REC.positions, textEditor);
-            fillMessageBox(REC.getMessage(), true);
+            fillMessageBox(true);
             propsEditor.getSession().setValue(printResults(REC.results));
             document.getElementById('inTxt').style.display = 'block';
             document.getElementById('dtable').style.display = 'none';
@@ -994,7 +956,8 @@ function sendRules() {
                 {"name": "versionComment", "value": ""}
             ], "Regeln konnten nicht übertragen werden:");
             if (json.success) {
-                fillMessageBox("Regeln erfolgreich zum Server übertragen!");
+                REC.log(INFORMATIONAL, "Regeln erfolgreich zum Server übertragen!");
+                fillMessageBox(true);
                 erg = true;
             }
             return erg;
@@ -1016,7 +979,8 @@ function getRules(rulesId, loadLocal) {
             var open = openFile("doc.xml");
             rulesEditor.getSession().setValue(open);
             rulesEditor.getSession().foldAll(1);
-            fillMessageBox("Regeln erfolgreich lokal gelesen!");
+            REC.log(INFORMATIONAL, "Regeln erfolgreich lokal gelesen!");
+            fillMessageBox(true);
         } else {
             var json = executeService("getDocumentContent", [
                 {"name": "documentId", "value": rulesID},
@@ -1025,7 +989,8 @@ function getRules(rulesId, loadLocal) {
             if (json.success) {
                 rulesEditor.getSession().setValue(json.result);
                 rulesEditor.getSession().foldAll(1);
-                fillMessageBox("Regeln erfolgreich vom Server übertragen!");
+                REC.log(INFORMATIONAL, "Regeln erfolgreich vom Server übertragen!");
+                fillMessageBox(true);
             } else
                 message("Fehler", "Fehler bei der Übertragung: " + json.result);
         }
@@ -1106,8 +1071,9 @@ function openFile(file) {
             {"name": "filePath", "value": name}
         ], "Datei konnte nicht geöffnet werden:");
         if (json.success) {
-            fillMessageBox("Datei " + name + " erfolgreich geöffnet!");
-            return atob(json.result);
+            REC.log(INFORMATIONAL, "Datei " + name + " erfolgreich geöffnet!");
+            fillMessageBox(true);
+            return UTF8ArrToStr(base64DecToArr(json.result));
         }
         else
             return "";
@@ -1138,8 +1104,10 @@ function save(file, text) {
             {"name": "filePath", "value": name},
             {"name": "documentText", "value": text}
         ], "Skript konnte nicht gespeichert werden:");
-        if (json.success)
-            fillMessageBox(file + " erfolgreich gesichert!");
+        if (json.success) {
+            REC.log(INFORMATIONAL, file + " erfolgreich gesichert!");
+            fillMessageBox(true);
+        }
         return json.success;
     } catch (e) {
         errorHandler(e);
@@ -1192,7 +1160,6 @@ function loadScript() {
                     content = json.result;
                     workDocument = "recognition.js";
                     eval(content);
-                    REC = new REC();
                     removeMarkers(markers, textEditor);
                     textEditor.getSession().setMode(new jsMode());
                     textEditor.getSession().setValue(content);
@@ -1225,8 +1192,8 @@ function reloadScript() {
     try {
         modifiedScript = textEditor.getSession().getValue();
         eval(modifiedScript);
-        REC.set(REC);
-        fillMessageBox("Script erfolgreich aktualisiert");
+        REC.log(INFORMATIONAL, "Script erfolgreich aktualisiert");
+        fillMessageBox(true);
     } catch (e) {
         errorHandler(e);
     }
@@ -1245,7 +1212,8 @@ function getScript() {
         if (json.success) {
             save(workDocument, textEditor.getSession().getValue());
             textEditor.getSession().setValue(json.result);
-            fillMessageBox("Script erfolgreich heruntergeladen!");
+            REC.log(INFORMATIONAL, "Script erfolgreich heruntergeladen!");
+            fillMessageBox(true);
         }
     } catch (e) {
         errorHandler(e);
@@ -1271,7 +1239,8 @@ function sendScript() {
             ], "Skript konnte nicht zum Server gesendet werden:");
             erg = json.success;
             if (erg)
-                fillMessageBox("Script erfolgreich zum Server gesendet!");
+                REC.log(INFORMATIONAL, "Script erfolgreich zum Server gesendet!");
+                fillMessageBox(true);
         }
         return erg;
     } catch (e) {
@@ -1382,7 +1351,7 @@ function checkAndBuidAlfrescoEnvironment() {
                     erg = executeService("createDocument", [
                         {"name": "documentId", "value": scriptFolderId},
                         {"name": "fileName", "value": "recognition.js"},
-                        {"name": "documentText", "value": btoa(script)},
+                        {"name": "documentText", "value": base64EncArr(strToUTF8Arr(script))},
                         {"name": "mimeType", "value": "application/x-javascript"},
                         {"name": "extraProperties", "value": "{P:cm:titled':{'cm:description':'Skript zum Verteilen der Dokumente'}}"},
                         {"name": "versionState", "value": "major"}
@@ -1404,7 +1373,7 @@ function checkAndBuidAlfrescoEnvironment() {
                         erg = executeService("createDocument", [
                             {"name": "documentId", "value":scriptFolderId},
                             {"name": "fileName", "value": "doc.xml"},
-                            {"name": "documentText", "value": btoa(doc)},
+                            {"name": "documentText", "value": base64EncArr(strToUTF8Arr(doc))},
                             {"name": "mimeType", "value": "application/xml"},
                             {"name": "extraProperties", "value": "{P:cm:titled':{'cm:description':'Dokument mit den Verteil-Regeln'}}"},
                             {"name": "versionState", "value": "major"}

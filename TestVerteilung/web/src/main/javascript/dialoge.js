@@ -121,7 +121,8 @@ function startSettingsDialog() {
                                 {"key": "binding", "value": binding}
                             ]};
                             $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
-                            fillMessageBox("Einstellungen gesichert");
+                            REC.log(INFORMATIONAL, "Einstellungen gesichert");
+                            fillMessageBox(true);
                             closeDialog();
                             init();
                             loadAlfrescoTree();

@@ -3554,9 +3554,15 @@ REC = {
 
     /**
      * liefert die angesammelten Meldungen
+     * @param reverse       die Meldungen werden in umgekehrter Reihenfolge ausgegeben
      * @return {string}
      */
-    getMessage: function () {
+    getMessage: function (reverse) {
+        var output;
+        var ident = "                    ";
+        var out = [];
+        var messages = [];
+        var pos = 0;
         if (this.errors.length > 0) {
             for (var i = 0; i < this.errors.length; i++)
                 this.log(ERROR, "Fehler: " + this.errors[i]);
@@ -3566,7 +3572,28 @@ REC = {
             this.mess.push(this.content);
             this.mess.push("<====");
         }
-        return this.mess;
+        for (var j = 0; j < this.mess.length; j++) {
+            var zeile = this.mess[j];
+            var z = zeile.split("\n");
+            var i = 0;
+            for (var k = 0; k < z.length; k++) {
+                var z1 = z[k];
+                if (i == 0 && z1.length > 0) {
+                    pos = z1.indexOf(" ", z1.indexOf(" ") + 1) + 1;
+                    out.push(z1);
+                    i++;
+                } else if (z1.length > 0)
+                    out.push(ident.substr(0, pos) + z1);
+            }
+            messages.push(out.join("\n"));
+            out = [];
+        }
+        if (reverse) {
+            output = messages.reverse().join("\n");
+        } else {
+            output = messages.join("\n");
+        }
+        return output;
     },
 
     log: function (level, text) {
@@ -3813,7 +3840,7 @@ REC = {
                 this.errors.push("Fehler: " + e.toString());
             } finally {
                 this.handleUnexpected(this.fehlerBox);
-                logger.log(this.getMessage().join("\n"));
+                logger.log(this.getMessage(false));
             }
         }
     },

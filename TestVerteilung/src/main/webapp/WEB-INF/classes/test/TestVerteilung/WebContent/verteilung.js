@@ -209,7 +209,7 @@ function loadMultiText(txt, name, typ,  notDeleteable, alfContainer, container) 
 		this.REC.testRules(this.rulesEditor.getSession().getValue());
 		dat["text"] = txt;
 		dat["file"] = name;
-		dat["log"] = this.REC.getMessage();
+		dat["log"] = REC.mess;
 		dat["result"] = this.REC.results;
 		dat["position"] = this.REC.positions;
 		dat["xml"] = this.REC.currXMLName;
@@ -833,7 +833,7 @@ function doTest() {
             setXMLPosition(this.REC.currXMLName);
             markers = setMarkers(this.REC.positions, this.textEditor);
             this.propsEditor.getSession().setValue(printResults(this.REC.results));
-            fillMessageBox(this.REC.getMessage(), true);
+            fillMessageBox(this.REC.getMessage(true));
             document.getElementById('inTxt').style.display = 'block';
             document.getElementById('dtable').style.display = 'none';
             manageControls();
@@ -977,7 +977,7 @@ function work() {
 		if (!selectMode)
 			setXMLPosition(this.REC.currXMLName);
 		markers = setMarkers(this.REC.positions, this.textEditor);
-		fillMessageBox(this.REC.getMessage(), true);
+		fillMessageBox(this.REC.getMessage(true));
 		this.propsEditor.getSession().setValue(printResults(this.REC.results));
 		document.getElementById('inTxt').style.display = 'block';
 		document.getElementById('dtable').style.display = 'none';

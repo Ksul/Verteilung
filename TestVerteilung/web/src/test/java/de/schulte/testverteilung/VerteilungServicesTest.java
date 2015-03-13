@@ -585,8 +585,26 @@ public class VerteilungServicesTest extends AlfrescoTest {
     }
 
     @Test
-    public void testOpenFile() throws Exception {
+    public void testOpenFilePdf() throws Exception {
         String fileName = properties.getProperty("testPDF");
+        assertNotNull(fileName);
+        String fullPath = "file:///" + System.getProperty("user.dir").replace("\\", "/") + fileName;
+        JSONObject obj = services.openFile(fullPath);
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
+        byte[] content = readFile(System.getProperty("user.dir") + fileName);
+        byte[] contentRead = Base64.decodeBase64(obj.getString("result"));
+        assertTrue("Unterschiedliche Länge gelesen!", content.length == contentRead.length);
+        for (int i = 0; i < content.length; i++) {
+            assertTrue("Unterschiedlicher Inhalt gelesen Position: " + i + " !", content[i] == contentRead[i]);
+        }
+    }
+
+    @Test
+    public void testOpenFileTxt() throws Exception {
+        String fileName = properties.getProperty("testTXT");
         assertNotNull(fileName);
         String fullPath = "file:///" + System.getProperty("user.dir").replace("\\", "/") + fileName;
         JSONObject obj = services.openFile(fullPath);
