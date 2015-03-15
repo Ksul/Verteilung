@@ -1145,10 +1145,10 @@ function handleRulesSelect(evt) {
 function loadScript() {
     try {
         panelSizeReminder = verteilungLayout.state.west.size;
-        verteilungLayout.sizePane("west", "100%");
+        //verteilungLayout.sizePane("west", "100%");
         oldContent = textEditor.getSession().getValue();
         var content;
-        if (REC.exist(modifiedScript) && modifiedScript - length > 0) {
+        if (REC.exist(modifiedScript) && modifiedScript.length > 0) {
             content = modifiedScript;
         } else {
             if (REC.exist(scriptID)) {
@@ -1165,6 +1165,8 @@ function loadScript() {
                     textEditor.getSession().setValue(content);
                     textEditor.setShowInvisibles(false);
                     scriptMode = true;
+                    REC.log(INFORMATIONAL, "Script erfolgreich vom Server geladen!");
+                    fillMessageBox(true);
                     manageControls();
                 }
             }
@@ -1174,6 +1176,8 @@ function loadScript() {
                     textEditor.getSession().setValue(msg);
                     textEditor.setShowInvisibles(false);
                     scriptMode = true;
+                    REC.log(INFORMATIONAL, "Script erfolgreich gelesen!");
+                    fillMessageBox(true);
                     manageControls();
                 });
             }
