@@ -36,7 +36,9 @@ SearchItemTest.prototype.setUp = function() {
     "560 525 3966 \n" +
     "4.300,01 H \n"+
     "300 H \n"+
-    "Der Verbrauch ist hoch.";
+    "Der Verbrauch ist hoch.\n" +
+    "Betrag dankend erhalten 302,26 €\n" +
+    "Unsere Lieferungen";
 };
 
 /*SearchItemTest.prototype.testDateFormat = function() {
@@ -47,7 +49,7 @@ SearchItemTest.prototype.setUp = function() {
     assertEquals("Datumstring ist nicht gleich!", "22.05.2014", dateString);
 };*/
 
-SearchItemTest.prototype.testResolveSearchItem1 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithFix = function() {
     var rules = '<searchItem name="Titel" fix="Test für Titel" target="cm:title" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -55,7 +57,7 @@ SearchItemTest.prototype.testResolveSearchItem1 = function() {
     assertEquals("Test für Titel", searchItem.resolve());
 };
 
-SearchItemTest.prototype.testResolveSearchItem2 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithEval = function() {
     var rules = '<searchItem name="Datum" eval="new Date(2012,01,01)"  objectTyp="date" target="my:documentDate" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -63,7 +65,7 @@ SearchItemTest.prototype.testResolveSearchItem2 = function() {
     assertEquals(new Date(2012,01,01), searchItem.resolve());
 };
 
-SearchItemTest.prototype.testResolveSearchItem3 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithEvalAndFormat = function() {
     var rules = '<searchItem name="Datum" eval="new Date(2012,01,01)" objectTyp="date" target="my:documentDate" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -76,7 +78,7 @@ SearchItemTest.prototype.testResolveSearchItem3 = function() {
     assertEquals("2012", searchItem.resolve());
 };
 
-SearchItemTest.prototype.testResolveSearchItem4 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithReadOverReturn = function() {
     var rules = '<searchItem name="Test 1" text="Datum" word="1" readOverReturn="true" objectTyp="date" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -88,7 +90,7 @@ SearchItemTest.prototype.testResolveSearchItem4 = function() {
     assertEquals(36, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem6 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithWordAndDate = function() {
     var rules = '<searchItem name="Test 3" text="ID-Value" word="1,2" direction="left" objectTyp="date" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -100,7 +102,7 @@ SearchItemTest.prototype.testResolveSearchItem6 = function() {
     assertEquals(14, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem7 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithWordAndFloat = function() {
     var rules = '<searchItem name="Test 4" text="Wert" word="1" readOverReturn="true" objectTyp="float" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -112,7 +114,7 @@ SearchItemTest.prototype.testResolveSearchItem7 = function() {
     assertEquals(5, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem8 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithDelimitterAndFloat = function() {
     var rules = '<searchItem name="Test 5" text="Datum" readOverReturn="true" direction="left" objectTyp="float">' +
                 '<delimitter typ="start" count="-3" text="&#0010;" />' +
                 '<delimitter typ="end" count="1" text="&#0010;" />' +
@@ -127,7 +129,7 @@ SearchItemTest.prototype.testResolveSearchItem8 = function() {
     assertEquals(5, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem9 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithDelimitterAndInt = function() {
     var rules = '<searchItem name="Test 6" text="ID-Value" objectTyp="int">' +
         '<delimitter typ="start" count="2" text="&#0032;" />' +
         '<delimitter typ="end" count="1 "text="&#0009;" />' +
@@ -142,7 +144,7 @@ SearchItemTest.prototype.testResolveSearchItem9 = function() {
     assertEquals(27, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem10 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithDelimitterAndDate = function() {
     var rules = '<searchItem name="Test 7" text="Nachtrag" objectTyp="date" >' +
         '<delimitter typ="start" count="1" text="&#0010;" />'
         '</searchItem>';
@@ -156,7 +158,7 @@ SearchItemTest.prototype.testResolveSearchItem10 = function() {
     assertEquals(12, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem11 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithFloat = function() {
     var rules = '<searchItem name="Test 8" text="Wert" objectTyp="float" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -168,7 +170,7 @@ SearchItemTest.prototype.testResolveSearchItem11 = function() {
     assertEquals(10, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem12 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithDate = function() {
     var rules = '<searchItem name="Test 9" text="Gültig" objectTyp="date" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -180,7 +182,7 @@ SearchItemTest.prototype.testResolveSearchItem12 = function() {
     assertEquals(23, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem13 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithKindAndAmount = function() {
     var rules = '<searchItem name="Test 10" kind="amount,1" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -189,10 +191,10 @@ SearchItemTest.prototype.testResolveSearchItem13 = function() {
     assertEquals(6, REC.positions[0].startRow);
     assertEquals(6, REC.positions[0].endRow);
     assertEquals(28, REC.positions[0].startColumn);
-    assertEquals(35, REC.positions[0].endColumn);
+    assertEquals(30, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem14 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithKindAndDate = function() {
     var rules = '<searchItem name="Test 11" kind="date,4" direction="left"/>';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -204,7 +206,7 @@ SearchItemTest.prototype.testResolveSearchItem14 = function() {
     assertEquals(10, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem15 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithCheck = function() {
     var rules = '<searchItem name="Test 12" text="KUSA" objectTyp="date">' +
             '<delimitter typ="start" count="1" text="&#0010;" />' +
             '<check lowerValue="01/01/2005" upperValue="01/01/2020" />' +
@@ -231,7 +233,7 @@ SearchItemTest.prototype.testResolveSearchItem16 = function() {
     assertEquals(39, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem17 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithDirectionLeft = function() {
     var rules = '<searchItem name="Test 14" text="buchen" word="2" direction="left" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -394,6 +396,18 @@ SearchItemTest.prototype.testResolveSearchItem28 = function() {
     assertEquals(30, REC.positions[0].endRow);
     assertEquals(0, REC.positions[0].startColumn);
     assertEquals(8, REC.positions[0].endColumn);
+};
+
+SearchItemTest.prototype.testResolveSearchItemWithPosition = function() {
+    var rules = ' <searchItem name="betrag" text="erhalten" readOverReturn="true" objectTyp="float" target="my:amount" />';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    searchItem = new SearchItem(new XMLObject(XMLDoc.docNode));
+    assertEquals(302.26, searchItem.resolve());
+    assertEquals(33, REC.positions[0].startRow);
+    assertEquals(33, REC.positions[0].endRow);
+    assertEquals(24, REC.positions[0].startColumn);
+    assertEquals(30, REC.positions[0].endColumn);
 };
 
 SearchItemTest.prototype.testFindForWord1 = function() {

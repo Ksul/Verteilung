@@ -2418,10 +2418,48 @@ function SearchItem(srch) {
                             this.erg[i].end = this.erg[i].start + REC.mergeStr(this.erg[i], ".").replace(",", ".").match(numberExp)[0].length + add;
                         }
                     }
+                } else if (this.erg[i].text.length != this.erg[i].val.toString().length) {
+                    this.erg[i].end = this.erg[i].start + this.erg[i].text.i;
                 }
             }
         }
     };
+
+    /**
+     * konvertiert einen Wert in den vorgegebenen Typ
+     * @param val       der Wert als String
+     * @param typ       der Typ, on den der String konvertiert werden soll
+     * @returns {*}     das Ergebnis in dem vorgegebenen Typ
+     */
+    convertValue = function (val, typ) {
+        var erg = null;
+        if (this.exist(typ)) {
+            if (this.trim(typ.toString()).toLowerCase() == "string")
+                erg = val;
+            else if (this.trim(typ.toString()).toLowerCase() == "date")
+                erg = isNaN(this.buildDate(val).getTime()) ? null : this.buildDate(val);
+            else if (this.trim(typ.toString()).toLowerCase() == "int")
+                erg = isNaN(parseInt(this.prepareNumber(val), 10)) ? null : parseInt(this.prepareNumber(val), 10);
+            else if (this.trim(typ.toString()).toLowerCase() == "float")
+                erg = isNaN(parseFloat(this.prepareNumber(val))) ? null : parseFloat(this.prepareNumber(val));
+        } else
+            erg = val;
+        return erg;
+        // this.erg[i].text.match(new RegExp("^[0-9]*[.][0-9]+$"))
+    };
+
+    /**
+     * bereitet einen String so vor, das er in einen numerischen Wert konvertiert werden kann
+     * @param val           der zu konvertierende String
+     * @returns {string}    der Ergebnisstring
+     */
+    this.prepareNumber = function (val) {
+        if (val.indexOf(',') == -1 && val.split(".").length - 1 == 1)
+            val = val.replace(/\./g, ',');
+        val = val.replace(/\./g, '').replace(/,/g, ".");
+        return val;
+    };
+
 
     /**
      * sucht nach einem speziellen Ergebnistyp
@@ -2868,6 +2906,11 @@ function SearchResult(text, val, start, end, typ, expected) {
         return this.val;
     };
 
+    /**
+     * Stringrepräsentation des Objektes
+     * @param ident         Einrückung
+     * @return {string}     das Objekt als String
+     */
     this.toString = function(ident) {
         if (!REC.exist(ident))
             ident = 0;
@@ -2882,7 +2925,6 @@ function SearchResult(text, val, start, end, typ, expected) {
         return txt;
     };
 }
-
 
 function RemovedChar() {
     this.removedChar = [];
@@ -3322,29 +3364,6 @@ REC = {
         }
         formatNumber[1] = formatString[1] && formatNumber[1] ? h + formatNumber[1] : "";
         return (j ? "-" : "") + formatNumber[0] + formatNumber[1];
-    },
-
-    convertValue: function (val, typ) {
-        var erg = null;
-        if (this.exist(typ)) {
-            if (this.trim(typ.toString()).toLowerCase() == "string")
-                erg = val;
-            else if (this.trim(typ.toString()).toLowerCase() == "date")
-                erg = isNaN(this.buildDate(val).getTime()) ? null : this.buildDate(val);
-            else if (this.trim(typ.toString()).toLowerCase() == "int")
-                erg = isNaN(parseInt(this.prepareNumber(val), 10)) ? null : parseInt(this.prepareNumber(val), 10);
-            else if (this.trim(typ.toString()).toLowerCase() == "float")
-                erg = isNaN(parseFloat(this.prepareNumber(val))) ? null : parseFloat(this.prepareNumber(val));
-        } else
-            erg = val;
-        return erg;
-    },
-
-    prepareNumber: function (val) {
-        if (val.indexOf(',') == -1 && val.split(".").length - 1 == 1)
-            val = val.replace(/\./g, ',');
-        val = val.replace(/\./g, '').replace(/,/g, ".");
-        return val;
     },
 
     monatName: function (datum) {
