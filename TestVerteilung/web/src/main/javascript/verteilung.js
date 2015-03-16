@@ -414,161 +414,6 @@ function readFiles(files) {
 }
 
 /**
- * führt einen Service aus
- * die Methode prüft dabei im Appletzweig, ob ein String Parameter zu lang ist und überträgt ihn dann häppchenweise.
- * der entsprechende Parameter wird dann nicht mehr übergeben und muss dann in der entsprechenden Servicemethode im
- * Applet aus dem internenen Spreicher besorgt werden. Bislang funktioniert dieses Verfahren aber nur mit einem
- * Parameter.
- * @param service           der Name des Service
- * @param params            die Parameter als JSON Objekt
- *                          name:  der Name des Parameters ( wird nur für das Servlet gebraucht)
- *                          value: der Inhalt des Paramaters
- *                          type: der Typ des Parameters
- * @param messages          Array mit Meldungen. Die erste ist die Fehlermeldung, der zweite Eintrag ist eine Erfolgsmeldung
- * @param ignoreError       Flag, ob ein Fehler ignoriert werden soll
- * @return das Ergebnis als JSON Objekt
- */
-function executeService(service, params, messages, ignoreError) {
-    var json;
-    var errorMessage;
-    var successMessage;
-    var longParameter = false;
-    try {
-        if (exist(messages)) {
-            if (typeof messages == "object") {
-                if (messages.length == 2) {
-                    errorMessage = messages[0];
-                    successMessage = messages[1];
-                } else {
-                    errorMessage = messages[0];
-                }
-            } else if (typeof messages == "string") {
-                errorMessage = messages;
-            }
-        }
-        if (isLocal()) {
-            // Aufruf über Applet
-            var maxLen = 1100000;
-            var execute = "document.reader." + service + "(";
-            var first = true;
-            if (exist(params)) {
-                for (index = 0; index < params.length; ++index) {
-                    // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
-                    if (exist(params[index].type) && params[index].type == "byte")
-                        params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
-                    // prüfen, ob Parameter zu lang ist
-                    if (typeof params[index].value == "String" && params[index].value.length > maxLen) {
-                        // den Inhalt häppchenweise übertragen
-                        longParameter = true;
-                        for (var k = 0; k < Math.ceil(params[index].value.length / maxLen); k++)
-                            document.reader.fillParameter(params[index].value.substr(k * maxLen, maxLen), k == 0);
-                    } else {
-                        // der Inhalt ist nicht zu lang und kann direkt zum Applet übertragen werden
-                        if (!first)
-                            execute = execute + ", ";
-                        execute = execute + "params[" + index + "].value";
-                        first = false;
-                    }
-                }
-            }
-            execute = execute + ")";
-            var obj = eval(execute);
-            json = jQuery.parseJSON(obj);
-        } else {
-            // Aufruf über Servlet
-            var dataString = {
-                "function": service
-            };
-            if (exist(params)) {
-                for (index = 0; index < params.length; ++index) {
-                    // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
-                    if (exist(params[index].type) && params[index].type == "byte")
-                        params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
-                    eval("dataString." + params[index].name + " = params[" + index + "].value");
-                }
-            }
-            $.ajax({
-                type: "POST",
-                data: dataString,
-                datatype: "json",
-                cache: false,
-                async: false,
-                url: "/TestVerteilung/VerteilungServlet",
-                error: function (response) {
-                    try {
-                        var r = jQuery.parseJSON(response.responseText);
-                        message("Fehler", "Fehler: " + r.Message + "<br>StackTrace: " + r.StackTrace + "<br>ExceptionType: " + r.ExceptionType);
-                    } catch (e) {
-                        var str = "FEHLER:\n";
-                        str = str + e.toString() + "\n";
-                        for (var prop in e)
-                            str = str + "property: " + prop + " value: [" + e[prop] + "]\n";
-                        message("Fehler", str + "<br>" + response.responseText);
-                    }
-                },
-                success: function (data) {
-                    json = data;
-                }
-            });
-        }
-        if (!json.success) {
-            if (exist(errorMessage))
-                errorString = errorMessage + "<br>" + json.result;
-            else
-                errorString = json.result;
-            // gibt es eine Fehlermeldung aus dem Service?
-            if (exist(json.error))
-                errorString = errorString + "<br>" + json.error;
-            throw new Error(errorString);
-        } else {
-            if (exist(successMessage)) {
-                REC.log(INFORMATIONAL, successMessage);
-                fillMessageBox(true);
-            }
-        }
-        return json;
-    } catch (e) {
-        var p = "Service: " + service + "<br>";
-        if (exist(params)) {
-            for (index = 0; index < params.length; ++index) {
-                p = p + "Parameter: " + params[index].name
-                if (exist(params[index].value) && typeof params[index].value =="string")
-                    p = p + " : " + params[index].value.substr(0, 40) + "<br>";
-                else
-                    p = p + " : Parameter Value fehlt!<br>";
-            }
-        }
-        if (exist(errorMessage))
-            p = errorMessage + "<br>" + e.toString() + "<br>" + p;
-        else
-            p = errorMessage + "<br>" + e.toString();
-        if (!ignoreError)
-            errorHandler(e, p);
-        return {result: e, success: false};
-    }
-}
-
-
-/**
- * generiert eine eindeutige Id
- * @returns {string}
- */
-function uuid() {
-    var chars = '0123456789abcdef'.split('');
-    var uuid = [], rnd = Math.random, r;
-    uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-    uuid[14] = '4';
-    // version 4
-    for ( var i = 0; i < 36; i++) {
-        if (!uuid[i]) {
-            r = 0 | rnd() * 16;
-            uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
-        }
-    }
-    return uuid.join('');
-}
-
-/**
  * startet für alle Dokumente nochmal die Verteilung neu
  */
 function doReRunAll() {
@@ -1145,42 +990,59 @@ function handleRulesSelect(evt) {
 function loadScript() {
     try {
         panelSizeReminder = verteilungLayout.state.west.size;
-        //verteilungLayout.sizePane("west", "100%");
+        verteilungLayout.sizePane("west", "99%");
         oldContent = textEditor.getSession().getValue();
-        var content;
+        var content, json;
+        var read = false;
         if (REC.exist(modifiedScript) && modifiedScript.length > 0) {
             content = modifiedScript;
         } else {
             if (REC.exist(scriptID)) {
-                var json = executeService("getDocumentContent", [
+                json = executeService("getDocumentContent", [
                     {"name": "documentId", "value": scriptID},
                     {"name": "extract", "value": "false"}
                 ], "Skript konnte nicht gelesen werden:");
                 if (json.success) {
-                    content = json.result;
-                    workDocument = "recognition.js";
-                    eval(content);
-                    removeMarkers(markers, textEditor);
-                    textEditor.getSession().setMode(new jsMode());
-                    textEditor.getSession().setValue(content);
-                    textEditor.setShowInvisibles(false);
-                    scriptMode = true;
+                    content = UTF8ArrToStr(base64DecToArr(json.result));
+                    read = true;
                     REC.log(INFORMATIONAL, "Script erfolgreich vom Server geladen!");
-                    fillMessageBox(true);
-                    manageControls();
                 }
             }
             else {
-                $.get('recognition.js', function (msg) {
-                    textEditor.getSession().setMode(new jsMode());
-                    textEditor.getSession().setValue(msg);
-                    textEditor.setShowInvisibles(false);
-                    scriptMode = true;
-                    REC.log(INFORMATIONAL, "Script erfolgreich gelesen!");
-                    fillMessageBox(true);
-                    manageControls();
-                });
+                if (isLocal()) {
+                    var file = document.URL;
+                    var parts = file.split("/").reverse();
+                    parts.splice(0,1);
+                    file = parts.reverse().join("/") +"/src/main/javascript/recognition.js";
+                    json = executeService("openFile", [
+                        {"name": "fileName", "value": file}
+                    ], "Skript konnte nicht gelesen werden:");
+                    if (json.success) {
+                        content = UTF8ArrToStr(base64DecToArr(json.result));
+                        read = true;
+                        REC.log(INFORMATIONAL, "Script erfolgreich gelesen!");
+
+                    }
+                } else {
+                    $.get('recognition.js', function (content) {
+                        REC.log(INFORMATIONAL, "Script erfolgreich gelesen!");
+                        read = true;
+                    });
+                }
             }
+        }
+        if (read) {
+            workDocument = "recognition.js";
+            var tmp = REC.mess;
+            eval(content);
+            REC.mess = tmp;
+            removeMarkers(markers, textEditor);
+            textEditor.getSession().setMode(new jsMode());
+            textEditor.getSession().setValue(content);
+            textEditor.setShowInvisibles(false);
+            scriptMode = true;
+            fillMessageBox(true);
+            manageControls();
         }
     } catch (e) {
         errorHandler(e);
@@ -1284,38 +1146,6 @@ function closeScript() {
     } catch (e) {
         errorHandler(e);
     }
-}
-
-//noinspection JSUnusedGlobalSymbols
-/**
- * konvertiert einen String zu einem Bytearray
- * @param str        der zu konvertierende String
- * @returns {Array}  der String als Bytearray
- */
-function stringToBytes(str) {
-    var ch, st, re = [], j = 0;
-    for ( var i = 0; i < str.length; i++) {
-        ch = str.charCodeAt(i);
-        if (ch < 127) {
-            re[j++] = ch & 0xFF;
-        } else {
-            st = [];
-            // clear stack
-            do {
-                st.push(ch & 0xFF);
-                // push byte to stack
-                ch = ch >> 8;
-                // shift value down by 1 byte
-            } while (ch);
-            // add stack contents to result
-            // done because chars have "wrong" endianness
-            st = st.reverse();
-            for ( var k = 0; k < st.length; ++k)
-                re[j++] = st[k];
-        }
-    }
-    // return an array of bytes
-    return re;
 }
 
 /**
@@ -1518,7 +1348,8 @@ function checkAndBuidAlfrescoEnvironment() {
         tabLayout.tabs("option", "active", 0);
         ret = erg.success;
     } else {
-        tabLayout.tabs({ disabled: [ 0,1 ] });
+        tabLayout.tabs({ disabled: [ 0,1 ],
+                        active: 2});
         ret = true;
     }
     return ret;
