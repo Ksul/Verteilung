@@ -2399,7 +2399,7 @@ function SearchItem(srch) {
                 this.erg[i].end = REC.removedCharPos.getEndPos(this.erg[i].start, this.erg[i].text);
             }
             if (typeof this.erg[i].text == "string")
-                this.erg[i].val = REC.convertValue(this.erg[i].text, this.erg[i].typ);
+                this.erg[i].convertValue();
             if (this.erg[i].typ == "date" && !REC.isDate(this.erg[i].val)) {
                 this.erg[i].check = false;
                 this.erg[i].val = null;
@@ -2419,46 +2419,11 @@ function SearchItem(srch) {
                         }
                     }
                 } else if (this.erg[i].text.length != this.erg[i].val.toString().length) {
-                    this.erg[i].end = this.erg[i].start + this.erg[i].text.i;
                 }
             }
         }
     };
 
-    /**
-     * konvertiert einen Wert in den vorgegebenen Typ
-     * @param val       der Wert als String
-     * @param typ       der Typ, on den der String konvertiert werden soll
-     * @returns {*}     das Ergebnis in dem vorgegebenen Typ
-     */
-    convertValue = function (val, typ) {
-        var erg = null;
-        if (this.exist(typ)) {
-            if (this.trim(typ.toString()).toLowerCase() == "string")
-                erg = val;
-            else if (this.trim(typ.toString()).toLowerCase() == "date")
-                erg = isNaN(this.buildDate(val).getTime()) ? null : this.buildDate(val);
-            else if (this.trim(typ.toString()).toLowerCase() == "int")
-                erg = isNaN(parseInt(this.prepareNumber(val), 10)) ? null : parseInt(this.prepareNumber(val), 10);
-            else if (this.trim(typ.toString()).toLowerCase() == "float")
-                erg = isNaN(parseFloat(this.prepareNumber(val))) ? null : parseFloat(this.prepareNumber(val));
-        } else
-            erg = val;
-        return erg;
-        // this.erg[i].text.match(new RegExp("^[0-9]*[.][0-9]+$"))
-    };
-
-    /**
-     * bereitet einen String so vor, das er in einen numerischen Wert konvertiert werden kann
-     * @param val           der zu konvertierende String
-     * @returns {string}    der Ergebnisstring
-     */
-    this.prepareNumber = function (val) {
-        if (val.indexOf(',') == -1 && val.split(".").length - 1 == 1)
-            val = val.replace(/\./g, ',');
-        val = val.replace(/\./g, '').replace(/,/g, ".");
-        return val;
-    };
 
 
     /**
@@ -2491,9 +2456,9 @@ function SearchItem(srch) {
                         typ = "date";
                     else if (kind[0] == "amount" || kind[0] == "float")
                         typ = "float";
-                    erg = REC.convertValue(match[k], typ);
-                    if (REC.exist(erg)) {
-                        var res = new SearchResult(match[k], erg, result.index, result.index + match[k].length, typ, expected);
+                    var res = new SearchResult(match[k], null, result.index, result.index + match[k].length, typ, expected);
+                    res.convertValue();
+                    if (REC.exist(res.val)) {
                         ret.push(res);
                     }
                 }
@@ -2648,7 +2613,9 @@ function SearchItem(srch) {
             this.text = REC.replaceVar(this.text)[0];
         var txt = null;
         if (REC.exist(this.fix)) {
-            this.erg.modifyResult(new SearchResult(null, REC.convertValue(REC.replaceVar(this.fix)[0], this.objectTyp), 0, 0, this.objectTyp, this.expected), 0);
+            var searchResult = new SearchResult(REC.replaceVar(this.fix)[0], null, 0, 0, this.objectTyp, this.expected);
+            searchResult.convertValue();
+            this.erg.modifyResult(searchResult, 0);
         } else if (REC.exist(this.eval)) {
             e = eval(REC.replaceVar(this.eval)[0]);
             this.erg.modifyResult(new SearchResult(e.toString(), e, 0, 0, null, this.expected), 0);
@@ -2865,7 +2832,7 @@ SearchResultContainer.prototype.toString = function (ident) {
         txt = txt + REC.getIdent(ident) + this[i].toString() + "\n";
     }
     return txt;
-}
+};
 
 SearchResultContainer.prototype.getError = function () {
     var e = this.getResult();
@@ -2907,6 +2874,125 @@ function SearchResult(text, val, start, end, typ, expected) {
     };
 
     /**
+     * konvertiert einen Wert in den vorgegebenen Typ
+     */
+    this.convertValue = function () {
+        var match, prepared;
+        if (REC.trim(this.typ.toString()).toLowerCase() == "string")
+            this.val = this.text;
+        else if (REC.trim(this.typ.toString()).toLowerCase() == "date")
+            this.val = isNaN(this.buildDate(this.text).getTime()) ? null : this.buildDate(this.text);
+        else if (REC.trim(this.typ.toString()).toLowerCase() == "int") {
+            prepared = this.prepareNumber(this.text);
+            if (isNaN(parseInt(prepared, 10)))
+                this.val = null;
+            else {
+                // Positionen korrigieren
+                this.val = parseInt(prepared, 10);
+                match = prepared.match(/[-+]?\d+/);
+                this.start = this.start + match.index;
+                this.end = this.start + this.val.toString().length;
+            }
+        }
+        else if (REC.trim(this.typ.toString()).toLowerCase() == "float") {
+            prepared = this.prepareNumber(this.text);
+            if (isNaN(parseFloat(prepared)))
+                this.val = null;
+            else {
+                // Positionen korrigieren
+                this.val = parseFloat(prepared);
+                match = prepared.match(/[-+]?\d+((.|,)\d+)?/);
+                this.start = this.start + match.index;
+                var pos = this.text.indexOf(' ', match.index);
+                if (pos != -1)
+                    this.end = this.start + pos;
+                else
+                    this.end = this.start + this.text.substr(match.index).length;
+            }
+        }
+    };
+
+    /**
+     * bereitet einen String so vor, das er in einen numerischen Wert konvertiert werden kann
+     * @param val           der zu konvertierende String
+     * @returns {string}    der Ergebnisstring
+     */
+    this.prepareNumber = function (val) {
+        if (val.indexOf(',') == -1 && val.split(".").length - 1 == 1)
+            val = val.replace(/\./g, ',');
+        val = val.replace(/\./g, '').replace(/,/g, ".");
+        return val;
+    };
+
+    /**
+     * versucht aus dem vorgegebenen Text ein Datum aufzubauen
+     * @param text          der Text
+     * @return {*}          ein Datum
+     */
+    this.buildDate = function (text) {
+        var monate = new Array("Januar", "Februar", "M\u00e4rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember");
+        var tmp;
+        var txt;
+        var i;
+        var dat;
+        if (!REC.isDate(dat)) {
+            txt = text.replace(/ /g, '');
+            for (i = 0; i < monate.length; i++) {
+                var pos = txt.indexOf(monate[i]);
+                if (pos != -1) {
+                    var form = REC.numberFormat(i + 1, "00") + ".";
+                    if (pos > 0 && txt.charAt(pos - 1) != ".")
+                        form = "." + form;
+                    txt = txt.replace(monate[i], form);
+                    tmp = txt.split(".");
+                    while (tmp.length < 3)
+                        tmp.unshift("01");
+                    for (var k = tmp.length; k > 0; k--) {
+                        if (k > 3) {
+                            REC.log(WARN, "Kein Datum " + text);
+                            return null;
+                        }
+                        if (k == tmp.length && tmp[k - 1].length == 2)
+                            tmp[k - 1] = "20" + tmp[k - 1];
+                        if (k != tmp.length && tmp[k - 1].length == 1)
+                            tmp[k - 1] = "0" + tmp[k - 1];
+                    }
+                    var help = tmp[0];
+                    tmp[0] = tmp[1];
+                    tmp[1] = help;
+                    txt = tmp.join("/");
+                    dat = new Date(txt);
+                    break;
+                }
+            }
+        }
+        if (!REC.isDate(dat)) {
+            var jahr = text.toString().substr(6);
+            if (jahr.length == 2) {
+                if (parseInt(jahr, 10) < 60)
+                    jahr = "20" + jahr;
+                else
+                    jahr = "19" + jahr;
+            }
+            var mon = text.toString().slice(3, 5);
+            var tag = text.toString().slice(0, 2);
+            dat = new Date(jahr + "/" + mon + "/" + tag);
+        }
+        if (!REC.isDate(dat)) {
+            dat = new Date(text);
+        }
+        if (!REC.isDate(dat)) {
+            txt = text.toString().split("/")[0] + "/01/20" + text.toString().split("/")[1];
+            dat = new Date(txt);
+        }
+        if (!REC.isDate(dat)) {
+            txt = REC.formatNumber(REC.getPosition(monate, text.toString().split(" ")[0]) + 1, 2) + "/01/" + text.toString().split(" ")[1];
+            dat = new Date(txt);
+        }
+        return dat;
+    };
+
+    /**
      * Stringrepräsentation des Objektes
      * @param ident         Einrückung
      * @return {string}     das Objekt als String
@@ -2930,7 +3016,7 @@ function RemovedChar() {
     this.removedChar = [];
     this.push = function (obj) {
         this.removedChar.push(obj);
-    }
+    };
 
     this.getStartPos = function (startPos) {
         this.removedChar.sort(function (a, b) {
@@ -2964,8 +3050,11 @@ function RemovedChar() {
 }
 
 
-
-
+/**
+ * Baut aus dem XML ein XML-Objekt auf
+ * @param ruleDocument      die XML Definition als String
+ * @constructor
+ */
 function XMLObject(ruleDocument) {
     var attributes = ruleDocument.getAttributeNames();
     var count = attributes.length;
@@ -3100,68 +3189,6 @@ REC = {
         return node.displayPath.split("/").slice(2).join("/") + "/" + node.name;
     },
 
-    buildDate: function (text) {
-        var monate = new Array("Januar", "Februar", "M\u00e4rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember");
-        var tmp;
-        var txt;
-        var i;
-        var dat;
-        if (!this.isDate(dat)) {
-            txt = text.replace(/ /g, '');
-            for (i = 0; i < monate.length; i++) {
-                var pos = txt.indexOf(monate[i]);
-                if (pos != -1) {
-                    var form = this.numberFormat(i + 1, "00") + ".";
-                    if (pos > 0 && txt.charAt(pos - 1) != ".")
-                        form = "." + form;
-                    txt = txt.replace(monate[i], form);
-                    tmp = txt.split(".");
-                    while (tmp.length < 3)
-                        tmp.unshift("01");
-                    for (var k = tmp.length; k > 0; k--) {
-                        if (k > 3) {
-                            REC.log(WARN, "Kein Datum " + text);
-                            return null;
-                        }
-                        if (k == tmp.length && tmp[k - 1].length == 2)
-                            tmp[k - 1] = "20" + tmp[k - 1];
-                        if (k != tmp.length && tmp[k - 1].length == 1)
-                            tmp[k - 1] = "0" + tmp[k - 1];
-                    }
-                    var k = tmp[0];
-                    tmp[0] = tmp[1];
-                    tmp[1] = k;
-                    txt = tmp.join("/");
-                    dat = new Date(txt);
-                    break;
-                }
-            }
-        }
-        if (!this.isDate(dat)) {
-            var jahr = text.toString().substr(6);
-            if (jahr.length == 2) {
-                if (parseInt(jahr, 10) < 60)
-                    jahr = "20" + jahr;
-                else
-                    jahr = "19" + jahr;
-            }
-            var mon = text.toString().slice(3, 5);
-            var tag = text.toString().slice(0, 2);
-            dat = new Date(jahr + "/" + mon + "/" + tag);
-        }
-        if (!this.isDate(dat)) {
-            dat = new Date(text);
-        }
-        if (!this.isDate(dat)) {
-            txt = text.toString().split("/")[0] + "/01/20" + text.toString().split("/")[1];
-            dat = new Date(txt);
-        }
-        if (!this.isDate(dat)) {
-            txt = this.formatNumber(this.getPosition(monate, text.toString().split(" ")[0]) + 1, 2) + "/01/" + text.toString().split(" ")[1];
-            dat = new Date(txt);
-        }
-        return dat;
-    },
 
     dateFormat: function (formatDate, formatString) {
         if (formatDate instanceof Date) {
@@ -3762,7 +3789,6 @@ REC = {
         } finally {
             this.handleUnexpected(this.fehlerBox);
         }
-        return;
     },
 
     /**
@@ -3843,7 +3869,6 @@ REC = {
                REC.errors.push("Dokument konnte nicht in den Zielordner verschoben werden " + REC.completeNodePath(REC.unknownBox));
         }
         this.log(INFORMATIONAL, "Process Dokument " + docName + " finished!");
-        return;
     },
 
     run: function () {
@@ -3871,13 +3896,10 @@ REC = {
         this.debugLevel = INFORMATIONAL;
         this.mess = [];
         this.content = "";
-        this.errors = [];
-        this.results = [];
         this.fehlerBox = null;
         this.maxDebugLength = 0;
         this.mandatoryElements = [];
         this.currentSearchItems = [];
-        this.positions = [];
         this.currXMLName = [];
         this.removedCharPos = new RemovedChar();
         this.showContent = false;
@@ -3898,8 +3920,6 @@ REC = {
     debugLevel: INFORMATIONAL,
     mess: [],
     content: "",
-    errors: [],
-    results: [],
     archivRoot: null,
     inBox: null,
     duplicateBox: null,
@@ -3909,7 +3929,6 @@ REC = {
     maxDebugLength: 0,
     mandatoryElements: [],
     currentSearchItems: [],
-    positions: [],
     currXMLName: [],
     removedCharPos: new RemovedChar(),
     showContent: false,
@@ -3917,6 +3936,6 @@ REC = {
     errors: [],
     results: [],
     positions: new PositionContainer()
-}
+};
 REC.run();
 

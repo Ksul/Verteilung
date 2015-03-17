@@ -259,7 +259,7 @@ SearchItemTest.prototype.testResolveSearchItem18 = function() {
     assertEquals(63, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItem19 = function() {
+SearchItemTest.prototype.testResolveSearchItemWithDateAndWithoutSpace = function() {
     var rules = '<searchItem name="Test 16" text="Rechnungsdatum" objectTyp="date" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -309,7 +309,7 @@ SearchItemTest.prototype.testResolveSearchItem22 = function() {
     assertEquals(26, REC.positions[0].startRow);
     assertEquals(26, REC.positions[0].endRow);
     assertEquals(20, REC.positions[0].startColumn);
-    assertEquals(28, REC.positions[0].endColumn);
+    assertEquals(26, REC.positions[0].endColumn);
 };
 
 SearchItemTest.prototype.testResolveSearchItem23 = function() {
@@ -398,7 +398,19 @@ SearchItemTest.prototype.testResolveSearchItem28 = function() {
     assertEquals(8, REC.positions[0].endColumn);
 };
 
-SearchItemTest.prototype.testResolveSearchItemWithPosition = function() {
+SearchItemTest.prototype.testResolveSearchItemWithPositionAndInt = function() {
+    var rules = ' <searchItem name="betrag" text="erhalten" readOverReturn="true" objectTyp="int" target="my:amount" />';
+    XMLDoc.loadXML(rules);
+    XMLDoc.parse();
+    searchItem = new SearchItem(new XMLObject(XMLDoc.docNode));
+    assertEquals(302, searchItem.resolve());
+    assertEquals(33, REC.positions[0].startRow);
+    assertEquals(33, REC.positions[0].endRow);
+    assertEquals(24, REC.positions[0].startColumn);
+    assertEquals(27, REC.positions[0].endColumn);
+};
+
+SearchItemTest.prototype.testResolveSearchItemWithPositionAndFloat = function() {
     var rules = ' <searchItem name="betrag" text="erhalten" readOverReturn="true" objectTyp="float" target="my:amount" />';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -460,7 +472,7 @@ SearchItemTest.prototype.testFindForSpecialType2 = function() {
     erg =  searchItem.findSpecialType(text, ["amount"], false, null);
     assertEquals("125,78 €", erg[0].text);
     assertEquals(5, erg[0].start);
-    assertEquals(13, erg[0].end);
+    assertEquals(11, erg[0].end);
     assertEquals(125.78, erg[0].val);
 };
 
