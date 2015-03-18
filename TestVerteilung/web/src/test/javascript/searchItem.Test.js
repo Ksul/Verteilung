@@ -6,16 +6,16 @@ SearchItemTest.prototype.setUp = function() {
     REC.init();
     REC.content = " Dies ist ein Test!Datum: 01.05.1965\n" +
     "Wert:\n"+
-    "\n" +
-    "21,65\n" +
-    "\n" +
-    "Datum\n" +
-    "Datum: März 15 ID-Value  21	22 Euro	23\n" +
-    "\n" +
-    "06.04.09\n" +
     " \n" +
-    "\n" +
-    "\n" +
+    "21,65\n" +
+    " \n" +
+    "Datum\n" +
+    "Datum: März 15 ID-Value  21\t22 Euro\t23\n" +
+    "   \n" +
+    "06.04.09\n" +
+    "   \n" +
+    "   \n" +
+    "   \n" +
     "Nachtrag zum\n" +
     "22 März 2012   \n" +
     "Gesamt in EUR \n" +
@@ -23,11 +23,11 @@ SearchItemTest.prototype.setUp = function() {
     "    \n" +
     "+21,49 \n" +
     "Wert 123,5\n"  +
-    "Gültig     10.März 2012  \n" +
+    "Gültig     10.März 2012     \n" +
     "24.12.2010 \n" +
-    "KUSA Nr. 43124431 \n" +
-    "7. Januar 2008 \n" +
-    "Rechnungsdatum23.08.2011 \n" +
+    "KUSA Nr. 43124431\n" +
+    "7. Januar 2008  \n" +
+    "Rechnungsdatum23.08.2011\n" +
     "In den nächsten Tagen buchen wir 349,10 EUR von Ihrem Konto 123\n" +
     "Datum 21. März 2009 \n" +
     "Rechnungsbetrag 'ue 189.13 € \n" +
