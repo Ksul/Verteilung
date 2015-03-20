@@ -19,7 +19,7 @@ DelimitterTest.prototype.test1 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("Dies ist ein  Test", erg.getResult().text);
-    assertEquals(5, erg.getResult().start);
+    assertEquals(5, erg.getResult().getStart());
 };
 
 DelimitterTest.prototype.test2 = function() {
@@ -33,7 +33,7 @@ DelimitterTest.prototype.test2 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("ist ein  Test", erg.getResult().text);
-    assertEquals(10, erg.getResult().start);
+    assertEquals(10, erg.getResult().getStart());
 };
 
 DelimitterTest.prototype.test3 = function() {
@@ -47,7 +47,7 @@ DelimitterTest.prototype.test3 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("Dies ist ein Test", erg.getResult().text);
-    assertEquals(3, erg.getResult().start);
+    assertEquals(3, erg.getResult().getStart());
 };
 
 DelimitterTest.prototype.test4 = function() {
@@ -61,7 +61,7 @@ DelimitterTest.prototype.test4 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("ist\nein\nTest", erg.getResult().text);
-    assertEquals(5, erg.getResult().start);
+    assertEquals(5, erg.getResult().getStart());
 };
 
 DelimitterTest.prototype.test5 = function() {
@@ -75,7 +75,7 @@ DelimitterTest.prototype.test5 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("ein\nTest\n", erg.getResult().text);
-    assertEquals(9, erg.getResult().start);
+    assertEquals(9, erg.getResult().getStart());
 };
 
 DelimitterTest.prototype.test6 = function() {
@@ -89,7 +89,7 @@ DelimitterTest.prototype.test6 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("st", erg.getResult().text);
-    assertEquals(15, erg.getResult().start);
+    assertEquals(15, erg.getResult().getStart());
 };
 
 DelimitterTest.prototype.test7 = function() {
@@ -103,7 +103,7 @@ DelimitterTest.prototype.test7 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("Dies ist ein T", erg.getResult().text);
-    assertEquals(14, erg.getResult().end);
+    assertEquals(14, erg.getResult().getEnd());
 };
 
 DelimitterTest.prototype.test8 = function() {
@@ -117,7 +117,7 @@ DelimitterTest.prototype.test8 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("Dies ist ", erg.getResult().text);
-    assertEquals(9, erg.getResult().end);
+    assertEquals(9, erg.getResult().getEnd());
 };
 
 DelimitterTest.prototype.test9 = function() {
@@ -131,7 +131,7 @@ DelimitterTest.prototype.test9 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("isteinTest", erg.getResult().text);
-    assertEquals(4, erg.getResult().start);
+    assertEquals(4, erg.getResult().getStart());
 };
 
 DelimitterTest.prototype.test10 = function() {
@@ -145,7 +145,7 @@ DelimitterTest.prototype.test10 = function() {
     var delimitter = new Delimitter(new XMLObject(XMLDoc.docNode));
     erg = delimitter.resolve(erg, false);
     assertEquals("isteinTest", erg.getResult().text);
-    assertEquals(5, erg.getResult().start);
+    assertEquals(5, erg.getResult().getStart());
 };
 
 

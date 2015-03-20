@@ -4,40 +4,40 @@ SearchItemTest = TestCase("SearchItemTest");
 
 SearchItemTest.prototype.setUp = function() {
     REC.init();
-    REC.content = " Dies ist ein Test!Datum: 01.05.1965\n" +
-    "Wert:\n"+
-    " \n" +
-    "21,65\n" +
-    " \n" +
-    "Datum\n" +
-    "Datum: März 15 ID-Value  21\t22 Euro\t23\n" +
-    "   \n" +
-    "06.04.09\n" +
-    "   \n" +
-    "   \n" +
-    "   \n" +
-    "Nachtrag zum\n" +
-    "22 März 2012   \n" +
-    "Gesamt in EUR \n" +
-    "950,56 \n" +
-    "    \n" +
-    "+21,49 \n" +
-    "Wert 123,5\n"  +
-    "Gültig     10.März 2012     \n" +
-    "24.12.2010 \n" +
-    "KUSA Nr. 43124431\n" +
-    "7. Januar 2008  \n" +
-    "Rechnungsdatum23.08.2011\n" +
-    "In den nächsten Tagen buchen wir 349,10 EUR von Ihrem Konto 123\n" +
-    "Datum 21. März 2009 \n" +
-    "Rechnungsbetrag 'ue 189.13 € \n" +
-    "270 646 2793 \n"+
-    "959 622 2280 \n"+
-    "560 525 3966 \n" +
-    "4.300,01 H \n"+
-    "300 H \n"+
-    "Der Verbrauch ist hoch.\n" +
-    "Betrag dankend erhalten 302,26 €\n" +
+    REC.content = " Dies ist ein Test!Datum: 01.05.1965\r\n" +
+    "Wert:\r\n"+
+    " \r\n" +
+    "21,65\r\n" +
+    " \r\n" +
+    "Datum\r\n" +
+    "Datum: März 15 ID-Value  21\t22 Euro\t23\r\n" +
+    "   \r\n" +
+    "06.04.09\r\n" +
+    "   \r\n" +
+    "   \r\n" +
+    "   \r\n" +
+    "Nachtrag zum\r\n" +
+    "22 März 2012   \r\n" +
+    "Gesamt in EUR \r\n" +
+    "950,56 \r\n" +
+    "    \r\n" +
+    "+21,49 \r\n" +
+    "Wert 123,5\r\n"  +
+    "Gültig     10.März 2012     \r\n" +
+    "24.12.2010 \r\n" +
+    "KUSA Nr. 43124431\r\n" +
+    "7. Januar 2008  \r\n" +
+    "Rechnungsdatum23.08.2011\r\n" +
+    "In den nächsten Tagen buchen wir 349,10 EUR von Ihrem Konto 123\r\n" +
+    "Datum 21. März 2009 \r\n" +
+    "Rechnungsbetrag 'ue 189.13 € \r\n" +
+    "270 646 2793 \r\n"+
+    "959 622 2280 \r\n"+
+    "560 525 3966 \r\n" +
+    "4.300,01 H \r\n"+
+    "300 H \r\n"+
+    "Der Verbrauch ist hoch.\r\n" +
+    "Betrag dankend erhalten 302,26 €\r\n" +
     "Unsere Lieferungen";
 };
 
@@ -62,7 +62,7 @@ SearchItemTest.prototype.testResolveSearchItemWithEval = function() {
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     var searchItem = new SearchItem(new XMLObject(XMLDoc.docNode));
-    assertEquals(new Date(2012,01,01), searchItem.resolve());
+    assertEquals(new Date(2012, 1, 1), searchItem.resolve());
 };
 
 SearchItemTest.prototype.testResolveSearchItemWithEvalAndFormat = function() {
@@ -107,7 +107,7 @@ SearchItemTest.prototype.testResolveSearchItemWithWordAndFloat = function() {
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     searchItem = new SearchItem(new XMLObject(XMLDoc.docNode));
-    assertEquals(new Number(21.65), searchItem.resolve());
+    assertEquals(21.65, searchItem.resolve());
     assertEquals(3, REC.positions[0].startRow);
     assertEquals(3, REC.positions[0].endRow);
     assertEquals(0, REC.positions[0].startColumn);
@@ -122,7 +122,7 @@ SearchItemTest.prototype.testResolveSearchItemWithDelimitterAndFloat = function(
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     searchItem = new SearchItem(new XMLObject(XMLDoc.docNode));
-    assertEquals(new Number(21.65), searchItem.resolve());
+    assertEquals(21.65, searchItem.resolve());
     assertEquals(3, REC.positions[0].startRow);
     assertEquals(3, REC.positions[0].endRow);
     assertEquals(0, REC.positions[0].startColumn);
@@ -137,7 +137,7 @@ SearchItemTest.prototype.testResolveSearchItemWithDelimitterAndInt = function() 
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
     searchItem = new SearchItem(new XMLObject(XMLDoc.docNode));
-    assertEquals(new Number(21), searchItem.resolve());
+    assertEquals(21, searchItem.resolve());
     assertEquals(6, REC.positions[0].startRow);
     assertEquals(6, REC.positions[0].endRow);
     assertEquals(25, REC.positions[0].startColumn);
@@ -146,7 +146,7 @@ SearchItemTest.prototype.testResolveSearchItemWithDelimitterAndInt = function() 
 
 SearchItemTest.prototype.testResolveSearchItemWithDelimitterAndDate = function() {
     var rules = '<searchItem name="Test 7" text="Nachtrag" objectTyp="date" >' +
-        '<delimitter typ="start" count="1" text="&#0010;" />'
+        '<delimitter typ="start" count="1" text="&#0010;" />' +
         '</searchItem>';
     XMLDoc.loadXML(rules);
     XMLDoc.parse();
@@ -427,10 +427,10 @@ SearchItemTest.prototype.testFindForWord1 = function() {
     var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
     searchItem = new SearchItem({});
     searchItem.erg.addResult(result);
-    searchItem.findForWords( [1], false)
+    searchItem.findForWords( [1], false);
     assertEquals("ist", searchItem.erg.getResult().text);
-    assertEquals(5, searchItem.erg.getResult().start);
-    assertEquals(8, searchItem.erg.getResult().end);
+    assertEquals(5, searchItem.erg.getResult().getStart());
+    assertEquals(8, searchItem.erg.getResult().getEnd());
 };
 
 SearchItemTest.prototype.testFindForWord2 = function() {
@@ -438,10 +438,10 @@ SearchItemTest.prototype.testFindForWord2 = function() {
     var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
     searchItem = new SearchItem({});
     searchItem.erg.addResult(result);
-    searchItem.findForWords([1,2], false)
+    searchItem.findForWords([1,2], false);
     assertEquals("ist ein", searchItem.erg.getResult().text);
-    assertEquals(5, searchItem.erg.getResult().start);
-    assertEquals(12, searchItem.erg.getResult().end);
+    assertEquals(5, searchItem.erg.getResult().getStart());
+    assertEquals(12, searchItem.erg.getResult().getEnd());
 };
 
 SearchItemTest.prototype.testFindForWord3 = function() {
@@ -450,10 +450,10 @@ SearchItemTest.prototype.testFindForWord3 = function() {
     var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
     searchItem = new SearchItem({});
     searchItem.erg.addResult(result);
-    searchItem.findForWords([2,2], true)
+    searchItem.findForWords([2,2], true);
     assertEquals("Dies ist", searchItem.erg.getResult().text);
-    assertEquals(0, searchItem.erg.getResult().start);
-    assertEquals(8, searchItem.erg.getResult().end);
+    assertEquals(0, searchItem.erg.getResult().getStart());
+    assertEquals(8, searchItem.erg.getResult().getEnd());
 };
 
 SearchItemTest.prototype.testFindForSpecialType1 = function() {
@@ -461,8 +461,8 @@ SearchItemTest.prototype.testFindForSpecialType1 = function() {
     searchItem = new SearchItem({});
     erg =  searchItem.findSpecialType(text, ["date"], false, null);
     assertEquals("01.01.2010", erg[0].text);
-    assertEquals(5, erg[0].start);
-    assertEquals(15, erg[0].end);
+    assertEquals(5, erg[0].getStart());
+    assertEquals(15, erg[0].getEnd());
     assertEquals(new Date(2010,0,1), erg[0].val);
 };
 
@@ -471,8 +471,8 @@ SearchItemTest.prototype.testFindForSpecialType2 = function() {
     searchItem = new SearchItem({});
     erg =  searchItem.findSpecialType(text, ["amount"], false, null);
     assertEquals("125,78 €", erg[0].text);
-    assertEquals(5, erg[0].start);
-    assertEquals(11, erg[0].end);
+    assertEquals(5, erg[0].getStart());
+    assertEquals(11, erg[0].getEnd());
     assertEquals(125.78, erg[0].val);
 };
 
@@ -481,8 +481,8 @@ SearchItemTest.prototype.testFindForSpecialType3 = function() {
     searchItem = new SearchItem({});
     erg =  searchItem.findSpecialType(text, ["float"], false, null);
     assertEquals("125,78", erg[0].text);
-    assertEquals(5, erg[0].start);
-    assertEquals(11, erg[0].end);
+    assertEquals(5, erg[0].getStart());
+    assertEquals(11, erg[0].getEnd());
     assertEquals(125.78, erg[0].val);
 };
 
@@ -491,8 +491,8 @@ SearchItemTest.prototype.testFindForSpecialType4 = function() {
     searchItem = new SearchItem({});
     erg =  searchItem.findSpecialType(text, ["date"], false, null);
     assertEquals("01. März 2010", erg[0].text);
-    assertEquals(5, erg[0].start);
-    assertEquals(18, erg[0].end);
+    assertEquals(5, erg[0].getStart());
+    assertEquals(18, erg[0].getEnd());
     assertEquals(new Date(2010,2,1), erg[0].val);
 };
 
@@ -501,8 +501,8 @@ SearchItemTest.prototype.testFindForSpecialType5 = function() {
     searchItem = new SearchItem({});
     erg =  searchItem.findSpecialType(text, ["date"], false, null);
     assertEquals("März 2010", erg[0].text);
-    assertEquals(5, erg[0].start);
-    assertEquals(14, erg[0].end);
+    assertEquals(5, erg[0].getStart());
+    assertEquals(14, erg[0].getEnd());
     assertEquals(new Date(2010,2,1), erg[0].val);
 };
 
