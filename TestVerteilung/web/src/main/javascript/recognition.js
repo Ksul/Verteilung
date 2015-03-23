@@ -6,49 +6,9 @@ var DEBUG = new DebugLevel(4, "DEBUG");
 var TRACE = new DebugLevel(5, "TRACE");
 var whitespace = "\n\n\t ";
 
-function stringToBytes(str) {
-    var ch, st, re = [], j = 0;
-    for ( var i = 0; i < str.length; i++) {
-        ch = str.charCodeAt(i);
-        if (ch < 127) {
-            re[j++] = ch & 0xFF;
-        } else {
-            st = [];
-            // clear stack
-            do {
-                st.push(ch & 0xFF);
-                // push byte to stack
-                ch = ch >> 8;
-                // shift value down by 1 byte
-            } while (ch);
-            // add stack contents to result
-            // done because chars have "wrong" endianness
-            st = st.reverse();
-            for ( var k = 0; k < st.length; ++k)
-                re[j++] = st[k];
-        }
-    }
-    // return an array of bytes
-    return re;
-}
-
 // Mock Alfresco Types
-if (typeof (search) == "undefined") {
-    var search = ({
-        willFind: false,
-        node: null,
-        setFind: function(value, node) {this.willFind = value;
-                                        this.node = node;
-        },
-        luceneSearch: function (xPath) {
-            if (!this.willFind)
-                return [];
-            else
-                return [this.node];
-        }
-    });
-}
-if (typeof (companyhome) == "undefined") {
+// wenn 'space' nicht vorhanden ist, dann laufen wir wohl nicht im Alfresco
+if (typeof (space) == "undefined") {
 
     function BasicObject(name) {
 
@@ -370,18 +330,13 @@ if (typeof (companyhome) == "undefined") {
         this.displayPath = "";
     };
     var companyhome = new ScriptNode("/", "cm:folder");
-}
 
-if (typeof (commentService) == "undefined") {
     var commentService = ({
         createCommentsFolder: function (node) {
             var commentsFolder = new ScriptNode("Comments", "fm:topic");
             return commentsFolder;
         }
     });
-}
-if (typeof (classification) == "undefined") {
-
 
     function CategoryNode(aspect, name) {
         BasicNode.call(this, name);
@@ -442,6 +397,20 @@ if (typeof (classification) == "undefined") {
 
     var classification = new CategoryNode("cm:generalclassifiable", "classification");
     classification.init();
+
+    var search = ({
+        willFind: false,
+        node: null,
+        setFind: function(value, node) {this.willFind = value;
+            this.node = node;
+        },
+        luceneSearch: function (xPath) {
+            if (!this.willFind)
+                return [];
+            else
+                return [this.node];
+        }
+    });
 }
 
 Encoder = {
@@ -1689,6 +1658,7 @@ function ArchivPosition(srch) {
      * @return {*}   der Alfresco Folder, bzw null wenn er nicht aufgebaut werden konnte
      */
     this.buildFolder = function() {
+        var erg;
         var tmp = (REC.exist(REC.archivRoot) ? REC.completeNodePath(REC.archivRoot) : "");
         REC.log(TRACE, "ArchivPosition.resolve: result is " + tmp);
         if (REC.exist(this.folder)) {
@@ -1923,8 +1893,17 @@ function Check(srch, parent) {
     }
 }
 
+/**
+ * stellt di Funktionalität für die Kommentare zur Verfügung
+ * @constructor
+ */
 function Comments() {
 
+    /**
+     * fügt einem Knoten einen Kommentar hinzu
+     * @param node          der Knoten
+     * @param content       der Kommentar
+     */
     this.addComment = function (node, content) {
         // fetch the data required to create a comment
         var title = "";
@@ -1940,6 +1919,10 @@ function Comments() {
         commentNode.save();
     };
 
+    /**
+     * entfernt den Kommentar von einem Knoten
+     * @param node      der Knoten
+     */
     this.removeComments = function (node) {
         var nodes = this.getComments(node);
         if (REC.exist(nodes)) {
@@ -1972,6 +1955,11 @@ function Comments() {
         return finalName;
     };
 
+    /**
+     * liefert die Kommentare zu einem Knoren
+     * @param node          der Knoten
+     * @returns {*}         die Kommentare
+     */
     this.getComments = function (node) {
         var commentsFolder = this.getCommentsFolder(node);
         if (commentsFolder !== null) {
@@ -2240,7 +2228,7 @@ function Tags(srch) {
 }
 
 /**
- * stellt Funktionalität zum Suchen eines Dokumentes zur Verfügung
+ * stellt die Funktionalität zum Suchen eines Dokumentes zur Verfügung
  * @param srch      die Parameter
  * @constructor
  */
@@ -2439,7 +2427,7 @@ function SearchItem(srch) {
                         typ = "date";
                     else if (kind[0] == "amount" || kind[0] == "float")
                         typ = "float";
-                    var res = new SearchResult(match[k], null, result.index, result.index + match[k].length, typ, expected);
+                    var res = new SearchResult(text, match[k], null, result.index, result.index + match[k].length, typ, expected);
                     res.convertValue();
                     if (REC.exist(res.val)) {
                         ret.push(res);
@@ -2490,11 +2478,11 @@ function SearchItem(srch) {
             REC.log(TRACE, "SearchItem.resolve: search found at position " + pos);
             var str;
             if (this.left) {
-                str = new SearchResult(txt.slice(lastPos, pos + (this.included ? match[j].length : 0)), null, lastPos, pos + (this.included ? match[j].length : 0), this.objectTyp,
+                str = new SearchResult(txt, txt.slice(lastPos, pos + (this.included ? match[j].length : 0)), null, lastPos, pos + (this.included ? match[j].length : 0), this.objectTyp,
                     this.expected);
                 REC.log(TRACE, "SearchItem.resolve: get result left from position  " + REC.printTrace(str.text, this.left));
             } else {
-                str = new SearchResult(txt.substr(pos + (this.included ? 0 : match[j].length)), null, pos + (this.included ? 0 : match[j].length), txt.length, this.objectTyp, this.expected);
+                str = new SearchResult(txt, txt.substr(pos + (this.included ? 0 : match[j].length)), null, pos + (this.included ? 0 : match[j].length), txt.length, this.objectTyp, this.expected);
                 REC.log(TRACE, "SearchItem.resolve: get result right from position  " + REC.printTrace(str.text, this.left));
             }
             if (REC.exist(str) && str.text.length > 0) {
@@ -2597,17 +2585,17 @@ function SearchItem(srch) {
             this.text = REC.replaceVar(this.text)[0];
         var txt = null;
         if (REC.exist(this.fix)) {
-            var searchResult = new SearchResult(REC.replaceVar(this.fix)[0], null, 0, 0, this.objectTyp, this.expected);
+            var searchResult = new SearchResult(REC.replaceVar(this.fix)[0], REC.replaceVar(this.fix)[0], null, 0, 0, this.objectTyp, this.expected);
             searchResult.convertValue();
             this.erg.modifyResult(searchResult, 0);
         } else if (REC.exist(this.eval)) {
             e = eval(REC.replaceVar(this.eval)[0]);
-            this.erg.modifyResult(new SearchResult(e.toString(), e, 0, 0, null, this.expected), 0);
+            this.erg.modifyResult(new SearchResult(e.toString(), e.toString(), e, 0, 0, null, this.expected), 0);
         } else {
             if (REC.exist(this.value)) {
                 e = this.resolveItem(this.value);
                 if (REC.exist(e)) {
-                    e = new SearchResult(e.text, e.val, e.getStart(), e.getEnd(), e.typ, e.expected);
+                    e = new SearchResult(e.document, e.text, e.val, e.getStart(), e.getEnd(), e.typ, e.expected);
                     if (REC.exist(this.expected))
                         e.expected = this.expected;
                     if (REC.exist(this.objectTyp))
@@ -2618,7 +2606,6 @@ function SearchItem(srch) {
                     return this.handleError();
             } else
                 txt = REC.content;
-            REC.removedCharPos = new RemovedChar();
             if (REC.exist(this.removeBlanks) && this.removeBlanks == "before") {
                 txt = txt.replace(/ /g, '');
             }
@@ -2640,15 +2627,8 @@ function SearchItem(srch) {
                 }
             }
             if (!this.readOverReturn && REC.exist(this.text)) {
-                var exp = new RegExp("[\\n\\n]");
                 for (i = 0; i < this.erg.length; i++) {
-                    if (typeof this.erg[i].text == "string") {
-                        var pos = this.erg[i].text.search(exp);
-                        if (pos != -1) {
-                            this.erg[i].text = this.erg[i].text.substr(0, pos);
-                            this.erg[i].setEnd(REC.removedCharPos.getEndPos(this.erg[i].getStart(), this.erg[i].text));
-                        }
-                    }
+                    this.erg[i].limitToReturn();
                 }
                 REC.log(DEBUG, "SearchItem.resolve: readOverReturn result is " + REC.printTrace(this.erg, this.left));
             }
@@ -2833,9 +2813,7 @@ SearchResultContainer.prototype.removeBlanks = function () {
     for (var i = 0; i < this.length; i++) {
         if (typeof this[i].text == "string") {
             REC.log(TRACE, "Removing Blanks from String...");
-            this[i].text = REC.mergeStr(this[i], ' ');
-            this[i].setStart(REC.removedCharPos.getStartPos(this[i].getStart()));
-            this[i].setEnd(REC.removedCharPos.getEndPos(this[i].getStart(), this[i].text));
+            this[i].mergeStr(' ');
         }
     }
 };
@@ -2843,14 +2821,12 @@ SearchResultContainer.prototype.removeBlanks = function () {
 /**
  * entfernt die Returns aus einem String
  */
-SearchResultContainer.prototype.removeReturns = function (erg) {
+SearchResultContainer.prototype.removeReturns = function () {
     for (var i = 0; i < this.length; i++) {
         if (typeof this[i].text == "string") {
             REC.log(TRACE, "Removing Returns from String...");
-            this[i].text = REC.mergeStr(this[i], '\n');
-            this[i].text = REC.mergeStr(this[i], '\n');
-            this[i].setStart(REC.removedCharPos.getStartPos(this[i].getStart()));
-            this[i].setEnd(REC.removedCharPos.getEndPos(this[i].getStart(), this[i].text));
+            this[i].mergeStr('\n');
+            this[i].mergeStr('\n');
         }
     }
 };
@@ -2859,17 +2835,17 @@ SearchResultContainer.prototype.removeReturns = function (erg) {
  * konvertiert ein gefundenes Ergebnis in den vorgesehen Objecttypen
  */
 SearchResultContainer.prototype.convert = function () {
-    var numberExp = new RegExp("([\\-][1-9]{1}[0-9]{1,}\\.[\\d]{1,})|([1-9]{1}[0-9]{1,}\\.[\\d]{1,})|([\\-][1-9]{1}[0-9]{1,})|([1-9]{1}[0-9]{1,})", "g");
-    var numberDotExp = new RegExp("\\d{1}\\.{1}\\d{1}", "g");
     for (var i = 0; i < this.length; i++) {
         REC.log(TRACE, "SearchItem.resolve: call convertValue " + this[i].text + " and " + this.name);
-        if (typeof this[i].text == "string" && REC.exist(this.text)) {
-            this[i] = REC.makeTrim(this[i]);
-            this[i].setStart(REC.removedCharPos.getStartPos(this[i].getStart()));
-            this[i].setEnd(REC.removedCharPos.getEndPos(this[i].getStart(), this[i].text));
+        if (typeof this[i].text == "string" && REC.exist(this[i].text)) {
+            // Leerzeichen entfernen
+            this[i].makeTrim();
         }
-        if (typeof this[i].text == "string")
+        if (typeof this[i].text == "string") {
+            // Konvertieren in den passenden Objekttypen
             this[i].convertValue();
+        }
+        // prüfen, ob die Konvertierung funktioniert hat
         if (this[i].typ == "date" && !REC.isDate(this[i].val)) {
             this[i].check = false;
             this[i].val = null;
@@ -2880,66 +2856,34 @@ SearchResultContainer.prototype.convert = function () {
                 this[i].check = false;
                 this[i].val = null;
                 this[i].error = "Result for " + this.name + " [" + this[i].text + "] is not a numeric value";
-                if (REC.exist(this.text)) {
+                // TODO Wird das noch gebraucht?
+/*                if (REC.exist(this.text)) {
+                    var numberExp = new RegExp("([\\-][1-9]{1}[0-9]{1,}\\.[\\d]{1,})|([1-9]{1}[0-9]{1,}\\.[\\d]{1,})|([\\-][1-9]{1}[0-9]{1,})|([1-9]{1}[0-9]{1,})", "g");
+                    var numberDotExp = new RegExp("\\d{1}\\.{1}\\d{1}", "g");
+
                     var add = (this[i].text.match(numberDotExp) != null ? this[i].text.match(numberDotExp).length : 0);
                     var pos = REC.mergeStr(this[i], ".").replace(",", ".").search(numberExp);
                     if (pos != -1) {
                         this[i].setStart(this[i].getStart() + pos);
                         this[i].setEnd(this[i].getStart() + REC.mergeStr(this[i], ".").replace(",", ".").match(numberExp)[0].length + add);
                     }
-                }
+                }*/
             }
         }
     }
 };
 
-function RemovedChar() {
-    this.removedChar = [];
-    this.push = function (obj) {
-        this.removedChar.push(obj);
-    };
-
-    this.getStartPos = function (startPos) {
-        this.removedChar.sort(function (a, b) {
-            return a - b;
-        });
-        var finalPos = startPos;
-        for (var k = 0; k < this.removedChar.length; k++) {
-            if (this.removedChar[k] == finalPos)
-                finalPos++;
-            else
-                break;
-        }
-        return finalPos;
-    };
-
-    this.getEndPos = function (startPos, txt) {
-        this.removedChar.sort(function (a, b) {
-            return a - b;
-        });
-        var finalPos = startPos + txt.length;
-        for (var k = 0; k < this.removedChar.length; k++) {
-            if (this.removedChar[k] >= startPos) {
-                if (this.removedChar[k] < finalPos)
-                    finalPos++;
-                else
-                    break;
-            }
-        }
-        return finalPos;
-    };
-}
-
 /**
- * speichert das Ergbenis einer Suche
+ * speichert das Ergebnis einer Suche
  * @param  text       der Text mit der Fundstelle
  * @param  val        das Ergebnis als passender Objecttyp
- * @param  startPos   die Beginnposition des Ergebnis uim Text
+ * @param  startPos   die Beginnposition des Ergebnis im Text
  * @param  endPos     die Endeposition des Ergebnis im Text
  * @param  typ        der Typ des Ergebnis
  * @param  expected   für Testzwecke. Hier kann ein erwartetes Ergebnis hinterlegt werden
  */
-function SearchResult(text, val, startPos, endPos, typ, expected) {
+function SearchResult(document, text, val, startPos, endPos, typ, expected) {
+    this.document = document;
     this.text = text;
     var start = startPos;
     var end = endPos;
@@ -2947,7 +2891,9 @@ function SearchResult(text, val, startPos, endPos, typ, expected) {
     this.error = null;
     this.val = val;
     this.expected = expected;
-    this.removedChar = [];
+    var removedChar = [];
+    // damit wird der Zugriff von privaten Methoden auf public Variabeln ermöglicht
+    var that = this;
     if (!REC.exist(typ) && REC.exist(val)) {
         if (typeof val == "number")
             this.typ = "float";
@@ -2958,6 +2904,37 @@ function SearchResult(text, val, startPos, endPos, typ, expected) {
     } else
         this.typ = typ;
 
+    var calculateStartPos = function () {
+        removedChar.sort(function (a, b) {
+            return a - b;
+        });
+        var finalPos = start;
+        for (var k = 0; k < removedChar.length; k++) {
+            if (removedChar[k] == finalPos)
+                finalPos++;
+            else
+                break;
+        }
+        start = finalPos;
+    };
+
+    var calculateEndPos = function () {
+        removedChar.sort(function (a, b) {
+            return a - b;
+        });
+        var finalPos = start + that.text.length;
+        for (var k = 0; k < removedChar.length; k++) {
+            if (removedChar[k] >= start) {
+                if (removedChar[k] < finalPos)
+                    finalPos++;
+                else
+                    break;
+            }
+        }
+        end = finalPos;
+    };
+
+
     this.getValue = function () {
         return this.val;
     };
@@ -2965,6 +2942,7 @@ function SearchResult(text, val, startPos, endPos, typ, expected) {
     this.getEnd = function() {
         return end;
     };
+
 
     this.setEnd = function(value) {
         end = value;
@@ -3099,6 +3077,14 @@ function SearchResult(text, val, startPos, endPos, typ, expected) {
     };
 
     /**
+     * liefert den für das Ergebnis relevanten Teil des Textes
+     * @returns {*|string}
+     */
+    this.getRelevantTextPart = function(){
+        return this.document.substring(start, end);
+    };
+
+    /**
      * Stringrepräsentation des Objektes
      * @param ident         Einrückung
      * @return {string}     das Objekt als String
@@ -3116,10 +3102,61 @@ function SearchResult(text, val, startPos, endPos, typ, expected) {
         txt = txt + REC.getIdent(ident) + "expected: " + this.expected + "\n";
         return txt;
     };
+
+    /**
+     * entfernt aus dem Ergebnis ein bestimmtes Zeichen
+     * die Startposition wird um die Anzahl der entfernten zeichen verschoben
+     * @param c     das zu ersetzende Zeichen
+     */
+    this.mergeStr = function (c) {
+        var arg = [];
+        for (var i = 0; i < this.text.length; i++) {
+            var part = this.text.substr(i, 1);
+            if (part != c)
+                arg.push(part);
+            else
+                removedChar.push(start + i);
+        }
+        this.text = arg.join("");
+        calculateStartPos();
+        calculateEndPos();
+    };
+
+    /**
+     * entfernt die Leerzeichen aus dem Ergebnis
+     */
+    this.makeTrim = function () {
+        var startpos = 0;
+        var endpos = this.text.length;
+        var pos = this.text.search(/[^\s\s*]/);
+        if (pos != -1)
+            startpos = pos;
+        pos = this.text.search(/\s\s*$/);
+        if (pos != -1)
+            endpos = pos;
+        for (var i = 0; i < this.text.length; i++)
+            if (i < startpos || i > endpos)
+                removedChar.push(start + i);
+        this.text = REC.trim(this.text);
+        calculateStartPos();
+        calculateEndPos();
+    };
+
+    /**
+     * limitiert das Ergebnis auf die aktuelle Zeile
+     * @see readOverReturn
+     */
+    this.limitToReturn = function() {
+        var exp = new RegExp("[\\n\\n]");
+        if (typeof this.text == "string") {
+            var pos = this.text.search(exp);
+            if (pos != -1) {
+                this.text = this.text.substr(0, pos);
+                calculateEndPos();
+             }
+        }
+    };
 }
-
-
-
 
 /**
  * Baut aus dem XML ein XML-Objekt auf
@@ -3540,19 +3577,6 @@ REC = {
         return trimString.substring(left, trimString.length - right);
     },
 
-    mergeStr: function (erg, c) {
-        var arg = [];
-        for (var i = 0; i < erg.text.length; i++) {
-            var part = erg.text.substr(i, 1);
-            if (part != c)
-                arg.push(part);
-            else
-                this.removedCharPos.push(erg.getStart() + i);
-        }
-        return arg.join("");
-    },
-
-
     convertEscapes: function (str) {
         var escAmpRegEx = /&amp;/g;
         var escLtRegEx = /&lt;/g;
@@ -3627,22 +3651,6 @@ REC = {
         }
         strRet = strRet + "</" + tagName + ">";
         return strRet;
-    },
-
-    makeTrim: function (erg) {
-        var startpos = 0;
-        var endpos = erg.text.length;
-        var pos = erg.text.search(/[^\s\s*]/);
-        if (pos != -1)
-            startpos = pos;
-        pos = erg.text.search(/\s\s*$/);
-        if (pos != -1)
-            endpos = pos;
-        for (var i = 0; i < erg.text.length; i++)
-            if (i < startpos || i > endpos)
-                this.removedCharPos.push(erg.getStart() + i);
-        erg.text = this.trim(erg.text);
-        return erg;
     },
 
     /**
@@ -3774,7 +3782,7 @@ REC = {
         } else {
             throw "Dokumenteninhalt konnte nicht extrahiert werden";
         }
-        return erg;
+        return erg.replace(/\r\n/g,'\n');
     },
 
     /**
@@ -3948,7 +3956,6 @@ REC = {
         this.mandatoryElements = [];
         this.currentSearchItems = [];
         this.currXMLName = [];
-        this.removedCharPos = new RemovedChar();
         this.showContent = false;
         this.result = [];
         this.errors = [];
@@ -3977,7 +3984,6 @@ REC = {
     mandatoryElements: [],
     currentSearchItems: [],
     currXMLName: [],
-    removedCharPos: new RemovedChar(),
     showContent: false,
     result: [],
     errors: [],

@@ -39,6 +39,7 @@ SearchItemTest.prototype.setUp = function() {
     "Der Verbrauch ist hoch.\r\n" +
     "Betrag dankend erhalten 302,26 €\r\n" +
     "Unsere Lieferungen";
+    REC.content = REC.content.replace(/\r\n/g,'\n');
 };
 
 /*SearchItemTest.prototype.testDateFormat = function() {
@@ -424,7 +425,7 @@ SearchItemTest.prototype.testResolveSearchItemWithPositionAndFloat = function() 
 
 SearchItemTest.prototype.testFindForWord1 = function() {
     var text = "Dies ist ein Test";
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     searchItem = new SearchItem({});
     searchItem.erg.addResult(result);
     searchItem.findForWords( [1], false);
@@ -435,7 +436,7 @@ SearchItemTest.prototype.testFindForWord1 = function() {
 
 SearchItemTest.prototype.testFindForWord2 = function() {
     var text = "Dies ist ein Test";
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     searchItem = new SearchItem({});
     searchItem.erg.addResult(result);
     searchItem.findForWords([1,2], false);
@@ -447,7 +448,7 @@ SearchItemTest.prototype.testFindForWord2 = function() {
 SearchItemTest.prototype.testFindForWord3 = function() {
     var text = "Dies ist ein Test";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     searchItem = new SearchItem({});
     searchItem.erg.addResult(result);
     searchItem.findForWords([2,2], true);

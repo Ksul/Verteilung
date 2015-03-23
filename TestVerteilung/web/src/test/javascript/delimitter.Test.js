@@ -11,7 +11,7 @@ DelimitterTest.prototype.setUp = function() {
 DelimitterTest.prototype.test1 = function() {
     var text = "     Dies ist ein  Test";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter typ="start" count="5" text="&#0032;" />';
     XMLDoc.loadXML(rules);
@@ -25,7 +25,7 @@ DelimitterTest.prototype.test1 = function() {
 DelimitterTest.prototype.test2 = function() {
     var text = "     Dies ist ein  Test";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter debugLevel="trace" typ="start" count="6"  text="&#0032;" />';
     XMLDoc.loadXML(rules);
@@ -39,7 +39,7 @@ DelimitterTest.prototype.test2 = function() {
 DelimitterTest.prototype.test3 = function() {
     var text = "\n \nDies ist ein Test";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter debugLevel="trace" typ="start" count="2"  text="&#0010;"/>';
     XMLDoc.loadXML(rules);
@@ -53,7 +53,7 @@ DelimitterTest.prototype.test3 = function() {
 DelimitterTest.prototype.test4 = function() {
     var text = "Dies\nist\nein\nTest";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter debugLevel="trace" typ="start" count="-3"  text="&#0010;"/>';
     XMLDoc.loadXML(rules);
@@ -67,7 +67,7 @@ DelimitterTest.prototype.test4 = function() {
 DelimitterTest.prototype.test5 = function() {
     var text = "Dies\nist\nein\nTest\n";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter debugLevel="trace" typ="start" count="-3"  text="&#0010;"/>';
     XMLDoc.loadXML(rules);
@@ -81,7 +81,7 @@ DelimitterTest.prototype.test5 = function() {
 DelimitterTest.prototype.test6 = function() {
     var text = "Dies ist ein Test";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter debugLevel="trace" typ="start" count="3"  text="e"/>';
     XMLDoc.loadXML(rules);
@@ -95,7 +95,7 @@ DelimitterTest.prototype.test6 = function() {
 DelimitterTest.prototype.test7 = function() {
     var text = "Dies ist ein Test";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter debugLevel="trace" typ="end" count="3"  text="e"/>';
     XMLDoc.loadXML(rules);
@@ -109,7 +109,7 @@ DelimitterTest.prototype.test7 = function() {
 DelimitterTest.prototype.test8 = function() {
     var text = "Dies ist ein Test";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter debugLevel="trace" typ="end" count="2"  text="e"/>';
     XMLDoc.loadXML(rules);
@@ -123,7 +123,7 @@ DelimitterTest.prototype.test8 = function() {
 DelimitterTest.prototype.test9 = function() {
     var text = "Dies ist ein Test";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter debugLevel="trace" typ="start" count="4" removeBlanks="before" text=""/>';
     XMLDoc.loadXML(rules);
@@ -137,7 +137,7 @@ DelimitterTest.prototype.test9 = function() {
 DelimitterTest.prototype.test10 = function() {
     var text = "Dies ist ein Test";
     var erg = new SearchResultContainer();
-    var result = new SearchResult(text, "Test", 0, text.length, "String", "asd");
+    var result = new SearchResult(text, text, "Test", 0, text.length, "String", "asd");
     erg.addResult(result);
     var rules = '<delimitter debugLevel="trace" typ="start" count="5" removeBlanks="after" text=""/>';
     XMLDoc.loadXML(rules);

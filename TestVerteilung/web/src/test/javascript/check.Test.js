@@ -10,7 +10,7 @@ CheckTest.prototype.setUp = function() {
 };
 
 CheckTest.prototype.test1 = function() {
-    var result = new SearchResult("100", 100, 0, 3, "int", "asd");
+    var result = new SearchResult("100", "100", 100, 0, 3, "int", "asd");
     var searchItem = new SearchItem({name: "Wert", objectTyp:"int"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="100" upperValue="300" />';
@@ -23,7 +23,7 @@ CheckTest.prototype.test1 = function() {
 };
 
 CheckTest.prototype.test2 = function() {
-    var result = new SearchResult("99", 99, 0, 3, "int", "asd");
+    var result = new SearchResult("99", "99", 99, 0, 3, "int", "asd");
     var searchItem = new SearchItem({name: "Wert", objectTyp:"int"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="100" upperValue="300" />';
@@ -36,7 +36,7 @@ CheckTest.prototype.test2 = function() {
 };
 
 CheckTest.prototype.test3 = function() {
-    var result = new SearchResult("301", 301, 0, 3, "int", "asd");
+    var result = new SearchResult("301", "301", 301, 0, 3, "int", "asd");
     var searchItem = new SearchItem({name: "Wert", objectTyp:"int"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="100" upperValue="300" />';
@@ -49,7 +49,7 @@ CheckTest.prototype.test3 = function() {
 };
 
 CheckTest.prototype.test4 = function() {
-    var result = new SearchResult("300", 300.00, 0, 3, "float", "asd");
+    var result = new SearchResult("300", "300", 300.00, 0, 3, "float", "asd");
     var searchItem = new SearchItem({name: "Wert", objectTyp:"float"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="100" upperValue="300" />';
@@ -62,7 +62,7 @@ CheckTest.prototype.test4 = function() {
 };
 
 CheckTest.prototype.test5 = function() {
-    var result = new SearchResult("300", 300.01, 0, 3, "float", "asd");
+    var result = new SearchResult("300", "300", 300.01, 0, 3, "float", "asd");
     var searchItem = new SearchItem({name: "Wert", objectTyp:"float"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="100" upperValue="300" />';
@@ -76,7 +76,7 @@ CheckTest.prototype.test5 = function() {
 
 
 CheckTest.prototype.test6 = function() {
-    var result = new SearchResult("02.01.2015", new Date(2015,0,2), 0, 3, "date", "asd");
+    var result = new SearchResult("02.01.2015", "02.01.2015", new Date(2015,0,2), 0, 3, "date", "asd");
     var searchItem = new SearchItem({name: "Wert", objectTyp:"date"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="01/02/2015" upperValue="12/31/2015" />';
@@ -89,7 +89,7 @@ CheckTest.prototype.test6 = function() {
 };
 
 CheckTest.prototype.test7 = function() {
-    var result = new SearchResult("01.01.2015", new Date(2015,0,1), 0, 3, "date", "asd");
+    var result = new SearchResult("01.01.2015", "01.01.2015", new Date(2015,0,1), 0, 3, "date", "asd");
     var searchItem = new SearchItem({name: "Wert", objectTyp:"date"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="01/02/2015" upperValue="12/31/2015" />';
@@ -102,7 +102,7 @@ CheckTest.prototype.test7 = function() {
 };
 
 CheckTest.prototype.test8 = function() {
-    var result = new SearchResult("01.01.2015", new Date(2016,0,1), 0, 3, "date", "asd");
+    var result = new SearchResult("01.01.2015", "01.01.2015", new Date(2016,0,1), 0, 3, "date", "asd");
     var searchItem = new SearchItem({name: "Wert", objectTyp:"date"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="01/02/2015" upperValue="12/31/2015" />';
@@ -115,7 +115,7 @@ CheckTest.prototype.test8 = function() {
 };
 
 CheckTest.prototype.test9 = function() {
-    var result = new SearchResult("k", "k", 0, 3, "string", "asd");
+    var result = new SearchResult("k", "k", "k", 0, 3, "string", "asd");
     var searchItem = new SearchItem({name: "Wert"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="b" upperValue="y" />';
@@ -128,7 +128,7 @@ CheckTest.prototype.test9 = function() {
 };
 
 CheckTest.prototype.test10 = function() {
-    var result = new SearchResult("a", "a", 0, 3, "string", "asd");
+    var result = new SearchResult("a", "a", "a", 0, 3, "string", "asd");
     var searchItem = new SearchItem({name: "Wert"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="b" upperValue="y" />';
@@ -141,7 +141,7 @@ CheckTest.prototype.test10 = function() {
 };
 
 CheckTest.prototype.test11 = function() {
-    var result = new SearchResult("z", "z", 0, 3, "string", "asd");
+    var result = new SearchResult("z","z", "z", 0, 3, "string", "asd");
     var searchItem = new SearchItem({name: "Wert"});
     searchItem.erg.addResult(result);
     var rules = '  <check lowerValue="b" upperValue="y" />';
