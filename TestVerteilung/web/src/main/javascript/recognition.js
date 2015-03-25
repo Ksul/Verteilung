@@ -130,6 +130,7 @@ if (typeof (space) == "undefined") {
         this.properties["content"] = new Content();
         this.content = this.properties["content"].content;
         this.children = new Liste();
+        this.childAssocs = new Liste();
         this.parent = new Liste();
         this.versions = new Liste();
         this.type = type;
@@ -170,6 +171,14 @@ if (typeof (space) == "undefined") {
                 return currentNode;
         }
         return null;
+    };
+
+    ScriptNode.prototype.createAssociation = function(target, name){
+        if (this.childAssocs[name] != null){
+            throw "Assoziation " + name + " bereits vorhanden";
+        } else {
+            this.childAssocs[name] = target;
+        }
     };
 
     ScriptNode.prototype.createFolder = function (name) {
@@ -240,7 +249,7 @@ if (typeof (space) == "undefined") {
     };
 
     ScriptNode.prototype.createNode = function (name, typ) {
-        if (this.type != "cm:folder" && this.type != "fm:topic")
+        if (this.type != "cm:folder" && this.type != "fm:forum")
             throw "Kein Folder!";
         var newNode =  new ScriptNode(name, typ);
         this.children.add(newNode);
@@ -250,7 +259,7 @@ if (typeof (space) == "undefined") {
     };
 
     ScriptNode.prototype.addNode = function(node){
-        if (this.type != "cm:folder")
+        if (this.type != "cm:folder" && this.type != "fm:forum")
             throw "Kein Folder!";
         this.children.add(node);
         node.parent.add(this);
@@ -324,6 +333,7 @@ if (typeof (space) == "undefined") {
         this.properties["content"] = new Content();
         this.content = this.properties["content"].content;
         this.children.clear();
+        this.childAssocs.clear();
         this.versions.clear();
         this.parent.clear();
         this.workingParent = null;
@@ -331,12 +341,18 @@ if (typeof (space) == "undefined") {
     };
     var companyhome = new ScriptNode("/", "cm:folder");
 
-    var commentService = ({
-        createCommentsFolder: function (node) {
-            var commentsFolder = new ScriptNode("Comments", "fm:topic");
-            return commentsFolder;
-        }
-    });
+    function CommentService () {
+        this.createCommentsFolder= function (node) {
+            var discussion =  new ScriptNode(node.name + " Comments", "fm:forum");
+            node.createAssociation(discussion, "fm:discussion");
+            node.addAspect("fm:discussable");
+            var comment = new ScriptNode("Comments", "fm:topic");
+            discussion.addNode(comment);
+            return discussion;
+        };
+    }
+
+    var commentService = new CommentService();
 
     function CategoryNode(aspect, name) {
         BasicNode.call(this, name);
@@ -1920,7 +1936,7 @@ function Comments() {
     };
 
     /**
-     * entfernt den Kommentar von einem Knoten
+     * entfernt die Kommentare von einem Knoten
      * @param node      der Knoten
      */
     this.removeComments = function (node) {

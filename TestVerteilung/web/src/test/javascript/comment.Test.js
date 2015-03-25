@@ -16,5 +16,10 @@ CommentTest.prototype.setUp = function() {
 CommentTest.prototype.testAddComment = function() {
     var comments = new Comments();
     comments.addComment(REC.currentDocument, "Test");
-    REC.currentDocument;
+    assertTrue(REC.currentDocument.hasAspect("fm:discussable"));
+    var discussion = REC.currentDocument.childAssocs["fm:discussion"][0];
+    assertNotNull(discussion);
+    var comment = discussion.childByNamesPath("Comments");
+    assertNotNull(comment);
+
 };
