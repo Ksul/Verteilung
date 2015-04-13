@@ -19,7 +19,7 @@ CommentTest.prototype.testAddComment = function() {
     assertTrue(REC.currentDocument.hasAspect("fm:discussable"));
     var discussion = REC.currentDocument.childAssocs["fm:discussion"][0];
     assertNotNull(discussion);
-    var comment = discussion.childByNamesPath("Comments");
+    var comment = discussion.children[0];
     assertNotNull(comment);
-
+    assertEquals("Test", comment.content);
 };

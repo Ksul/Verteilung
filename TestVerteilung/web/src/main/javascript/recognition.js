@@ -128,7 +128,6 @@ if (typeof (space) == "undefined") {
         this.tags = new Liste();
         this.properties = new Liste();
         this.properties["content"] = new Content();
-        this.content = this.properties["content"].content;
         this.children = new Liste();
         this.childAssocs = new Liste();
         this.parent = new Liste();
@@ -174,10 +173,14 @@ if (typeof (space) == "undefined") {
     };
 
     ScriptNode.prototype.createAssociation = function(target, name){
+        var asoc;
         if (this.childAssocs[name] != null){
-            throw "Assoziation " + name + " bereits vorhanden";
+            asoc = this.childAssocs[name];
+            asoc.push(target);
         } else {
-            this.childAssocs[name] = target;
+            asoc = new Liste();
+            asoc.push(target)
+            this.childAssocs[name] = asoc;
         }
     };
 
@@ -346,8 +349,6 @@ if (typeof (space) == "undefined") {
             var discussion =  new ScriptNode(node.name + " Comments", "fm:forum");
             node.createAssociation(discussion, "fm:discussion");
             node.addAspect("fm:discussable");
-            var comment = new ScriptNode("Comments", "fm:topic");
-            discussion.addNode(comment);
             return discussion;
         };
     }
@@ -1972,7 +1973,7 @@ function Comments() {
     };
 
     /**
-     * liefert die Kommentare zu einem Knoren
+     * liefert die Kommentare zu einem Knoten
      * @param node          der Knoten
      * @returns {*}         die Kommentare
      */
