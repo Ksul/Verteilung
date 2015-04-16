@@ -349,6 +349,8 @@ if (typeof (space) == "undefined") {
             var discussion =  new ScriptNode(node.name + " Comments", "fm:forum");
             node.createAssociation(discussion, "fm:discussion");
             node.addAspect("fm:discussable");
+            var commentsNode = new ScriptNode("Comments", "fm:topic");
+            discussion.addNode(commentsNode);
             return discussion;
         };
     }

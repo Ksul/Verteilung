@@ -19,7 +19,9 @@ CommentTest.prototype.testAddComment = function() {
     assertTrue(REC.currentDocument.hasAspect("fm:discussable"));
     var discussion = REC.currentDocument.childAssocs["fm:discussion"][0];
     assertNotNull(discussion);
-    var comment = discussion.children[0];
+    var topic = discussion.children[0];
+    assertNotNull(topic);
+    var comment = topic.children[0];
     assertNotNull(comment);
     assertEquals("Test", comment.content);
 };
@@ -31,6 +33,8 @@ CommentTest.prototype.testRemoveComment = function() {
     assertTrue(REC.currentDocument.hasAspect("fm:discussable"));
     var discussion = REC.currentDocument.childAssocs["fm:discussion"][0];
     assertNotNull(discussion);
-    var comment = discussion.children[0];
+    var topic = discussion.children[0];
+    assertNotNull(topic);
+    var comment = topic.children[0];
     assertNull(comment);
 };
