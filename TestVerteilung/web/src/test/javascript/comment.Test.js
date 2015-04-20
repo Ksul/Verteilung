@@ -21,7 +21,7 @@ CommentTest.prototype.testAddComment = function() {
     assertNotNull(discussion);
     var topic = discussion.children[0];
     assertNotNull(topic);
-    var comment = topic.children[0];
+    var comment = topic.childAssocs["cm:contains"][0];
     assertNotNull(comment);
     assertEquals("Test", comment.content);
 };
@@ -35,6 +35,6 @@ CommentTest.prototype.testRemoveComment = function() {
     assertNotNull(discussion);
     var topic = discussion.children[0];
     assertNotNull(topic);
-    var comment = topic.children[0];
+    var comment = topic.childAssocs["cm:contains"][0];
     assertNull(comment);
 };

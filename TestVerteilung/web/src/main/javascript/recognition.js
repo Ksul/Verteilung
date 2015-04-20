@@ -252,7 +252,7 @@ if (typeof (space) == "undefined") {
     };
 
     ScriptNode.prototype.createNode = function (name, typ) {
-        if (this.type != "cm:folder" && this.type != "fm:forum")
+        if (this.type != "cm:folder" && this.type != "fm:forum" && this.type != "fm:topic")
             throw "Kein Folder!";
         var newNode =  new ScriptNode(name, typ);
         this.children.add(newNode);
@@ -262,7 +262,7 @@ if (typeof (space) == "undefined") {
     };
 
     ScriptNode.prototype.addNode = function(node){
-        if (this.type != "cm:folder" && this.type != "fm:forum")
+        if (this.type != "cm:folder" && this.type != "fm:forum" && this.type != "fm:topic")
             throw "Kein Folder!";
         this.children.add(node);
         node.parent.add(this);
@@ -351,7 +351,7 @@ if (typeof (space) == "undefined") {
             node.addAspect("fm:discussable");
             var commentsNode = new ScriptNode("Comments", "fm:topic");
             discussion.addNode(commentsNode);
-            return discussion;
+            return commentsNode;
         };
     }
 
