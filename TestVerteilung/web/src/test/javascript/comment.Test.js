@@ -37,3 +37,4 @@ CommentTest.prototype.testRemoveComment = function() {
     assertNotNull(topic);
     assertUndefined(topic.childAssocs["cm:contains"]);
 };
+//Test
