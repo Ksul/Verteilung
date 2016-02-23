@@ -179,7 +179,7 @@ if (typeof (space) == "undefined") {
             asoc.push(target);
         } else {
             asoc = new Liste();
-            asoc.push(target)
+            asoc.push(target);
             this.childAssocs[name] = asoc;
         }
     };
@@ -251,18 +251,20 @@ if (typeof (space) == "undefined") {
         this.subType = type;
     };
 
-    ScriptNode.prototype.createNode = function (name, typ) {
-        if (this.type != "cm:folder" && this.type != "fm:forum")
+    ScriptNode.prototype.createNode = function (name, typ, assocType) {
+        if (this.type != "cm:folder" && this.type != "fm:forum" && this.type != "fm:topic")
             throw "Kein Folder!";
         var newNode =  new ScriptNode(name, typ);
         this.children.add(newNode);
         newNode.parent.add(this);
         newNode.displayPath = newNode._getDisplayPath();
+        if (typeof assocType != "undefined")
+            this.createAssociation(newNode, assocType);
         return newNode;
     };
 
     ScriptNode.prototype.addNode = function(node){
-        if (this.type != "cm:folder" && this.type != "fm:forum")
+        if (this.type != "cm:folder" && this.type != "fm:forum" && this.type != "fm:topic")
             throw "Kein Folder!";
         this.children.add(node);
         node.parent.add(this);
@@ -272,9 +274,14 @@ if (typeof (space) == "undefined") {
     ScriptNode.prototype.save = function () {
     };
 
-    ScriptNode.prototype.remove = function (node) {
+    ScriptNode.prototype.remove = function () {
         for (var i = 0; i < this.parent.length; i++) {
             this.parent[i].children.remove(this);
+            for (assoc in this.parent[i].childAssocs) {
+                if (typeof this.parent[i].childAssocs[assoc] == "object" && this.parent[i].childAssocs[assoc][0] == this)
+                    delete this.parent[i].childAssocs[assoc];
+
+            }
         }
         return true;
     };
@@ -349,7 +356,9 @@ if (typeof (space) == "undefined") {
             var discussion =  new ScriptNode(node.name + " Comments", "fm:forum");
             node.createAssociation(discussion, "fm:discussion");
             node.addAspect("fm:discussable");
-            return discussion;
+            var commentsNode = new ScriptNode("Comments", "fm:topic");
+            discussion.addNode(commentsNode);
+            return commentsNode;
         };
     }
 
@@ -1929,7 +1938,7 @@ function Comments() {
         // get a unique name
         var name = this.getUniqueChildName(commentsFolder, "comment");
         // create the comment
-        var commentNode = commentsFolder.createNode(name, "fm:post");
+        var commentNode = commentsFolder.createNode(name, "fm:post", "cm:contains");
         commentNode.mimetype = "text/html";
         commentNode.properties.title = title;
         commentNode.content = content;

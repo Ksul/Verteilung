@@ -17,9 +17,24 @@ CommentTest.prototype.testAddComment = function() {
     var comments = new Comments();
     comments.addComment(REC.currentDocument, "Test");
     assertTrue(REC.currentDocument.hasAspect("fm:discussable"));
-    var discussion = REC.currentDocument.childAssocs["fm:discussion"][0];
-    assertNotNull(discussion);
-    var comment = discussion.children[0];
+    var forumFolder = REC.currentDocument.childAssocs["fm:discussion"][0];
+    assertNotNull(forumFolder);
+    var topic = forumFolder.children[0];
+    assertNotNull(topic);
+    var comment = topic.childAssocs["cm:contains"][0];
     assertNotNull(comment);
     assertEquals("Test", comment.content);
 };
+
+CommentTest.prototype.testRemoveComment = function() {
+    var comments = new Comments();
+    comments.addComment(REC.currentDocument, "<table border=\"1\"> <tr><td>Nummer</td><td>Fehler</td></tr> ");
+    comments.removeComments(REC.currentDocument);
+    assertTrue(REC.currentDocument.hasAspect("fm:discussable"));
+    var discussion = REC.currentDocument.childAssocs["fm:discussion"][0];
+    assertNotNull(discussion);
+    var topic = discussion.children[0];
+    assertNotNull(topic);
+    assertUndefined(topic.childAssocs["cm:contains"]);
+};
+//Test

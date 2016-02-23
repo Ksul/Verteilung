@@ -111,17 +111,16 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testGetNodeID() throws Exception {
-        JSONObject obj = services.getNodeId("/Archiv");
+        JSONObject obj = services.getNodeId("/");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        obj = services.getNodeId("/Datenverzeichnis/Skripte/recognition.js");
+        obj = services.getNodeId("/Datenverzeichnis/Skripte/");
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        ;
-        obj = services.getNodeId("/Datenverzeichnis/Skripte/doc.xml");
+        obj = services.getNodeId("/Datenverzeichnis/Skripte/backup.js.sample");
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
@@ -129,7 +128,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testFindDocument() throws Exception {
-        JSONObject obj = services.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'");
+        JSONObject obj = services.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='backup.js.sample'");
         //JSONObject obj = services.findDocument("SELECT * FROM cmis:document WHERE CONTAINS('August')");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
@@ -137,7 +136,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         JSONObject result = (JSONObject) ((JSONArray) obj.get("result")).get(0);
         assertNotNull(result);
-        assertTrue(result.getString("name").equalsIgnoreCase("doc.xml"));
+        assertTrue(result.getString("name").equalsIgnoreCase("backup.js.sample"));
     }
 
     @Test

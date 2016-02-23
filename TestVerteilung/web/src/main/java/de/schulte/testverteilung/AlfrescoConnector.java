@@ -88,7 +88,9 @@ public class AlfrescoConnector {
 
         URL url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + LOGIN_URL);
         String urlParameters = "{ \"username\" : \"" + this.user + "\", \"password\" : \"" + this.password + "\" }";
-        return new JSONObject(startRequest(url, RequestType.POST, urlParameters));
+        JSONObject obj = new JSONObject(startRequest(url, RequestType.POST, urlParameters));
+        logger.info(("Ticket für User " + this.user + " und Passord " + this.password + " ausgestellt."));
+        return obj;
     }
 
     /**
@@ -102,9 +104,10 @@ public class AlfrescoConnector {
             try {
             this.session = initSession();
             } catch (Exception e) {
-                String error = " Mit den Parametern Server: " + this.bindingUrl + " User: " + this.user + " Password: " + this.password + " konnte keine Cmis Session etabliert werden!";
+                String error = " Mit den Parametern Server: " + this.server + " Binding: " + this.bindingUrl + " User: " + this.user + " Password: " + this.password + " konnte keine Cmis Session etabliert werden!";
                 throw new VerteilungException(error, e);
             }
+            logger.fine(" Mit den Parametern Server: " + this.server + " Binding: " + this.bindingUrl + " User: " + this.user + " Password: " + this.password + " konnte eine Cmis Session erfolgreich etabliert werden!");
             return this.session;
         }
     }
@@ -287,6 +290,7 @@ public class AlfrescoConnector {
                                    Map<String, Object> extraCMSProperties,
                                    VersioningState versioningState) throws VerteilungException {
 
+        logger.fine("Create Document: " + documentName + " Type: " + documentType + " in Folder " + parentFolder.getName() + " Version: " + versioningState.value());
         Document newDocument;
 
         Map<String, Object> properties = buildProperties(extraCMSProperties);
