@@ -2247,6 +2247,7 @@ function start() {
         });
         viewMenu = $('#menu-1').superfish();
         viewMenu = $('#menu-2').superfish();
+        fillMessageBox(true);
     } catch(e) {
         errorHandler(e);
     }

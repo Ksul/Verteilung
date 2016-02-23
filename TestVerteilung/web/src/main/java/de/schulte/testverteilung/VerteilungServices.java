@@ -1026,6 +1026,7 @@ public class VerteilungServices {
      */
     private Map<String, Object> buildProperties(String extraCMSProperties) throws JSONException {
 
+        logger.fine("buildProperties from " + extraCMSProperties);
         Map<String, Object> outMap = null;
         JSONObject props = new JSONObject(extraCMSProperties);
         Iterator nameItr = props.keys();

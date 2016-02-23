@@ -23,20 +23,9 @@
       <sourceFolder url="file://$MODULE_DIR$/web/src/test/javascript" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/web/src/main/javascript" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="1.7" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="module-library" scope="TEST">
-      <library>
-        <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/lib/junit-4.11.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME$/.ideaLibSources/junit-4.11-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="JsTestDriver Assertion Framework" level="application" />
     <orderEntry type="module-library" scope="TEST">
       <library>
@@ -48,7 +37,8 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="mockito-all-1.9.5" level="project" />
-    <orderEntry type="library" name="Tomcat 7.0.47" level="application_server_libraries" />
+    <orderEntry type="library" name="Tomcat 8" level="application_server_libraries" />
     <orderEntry type="library" name="JsTestDriver Assertion Framework" level="application" />
+    <orderEntry type="library" scope="TEST" name="junit-4.12" level="application" />
   </component>
 </module>
