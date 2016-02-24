@@ -2,6 +2,7 @@ package de.schulte.testverteilung;
 
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
 
@@ -167,6 +168,37 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testCreateDocument() throws Exception {
+        JSONObject obj = services.getNodeId("/");
+        assertThat(obj, notNullValue());
+        assertThat(obj.length() >= 2, is(true));
+        assertThat(obj.get("result"), notNullValue());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), is(true));
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}}";
+        obj = services.createDocument(obj.getString("result"), "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
+        assertThat(obj, notNullValue());
+        assertThat(obj.length() >= 2, is(true));
+        assertThat(obj.get("result"), notNullValue());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), is(true));
+        JSONObject result = new JSONObject(obj.getString("result"));
+        assertThat(result, notNullValue());
+        assertThat(result.getString("name").equalsIgnoreCase("TestDocument.txt"), is(true));
+        obj = services.getDocumentContent(result.getString("objectId"), false);
+        assertThat(obj, notNullValue());
+        assertThat(obj.length() >= 2, is(true));
+        assertThat(obj.get("result"), notNullValue());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), is(true));
+        String document = obj.getString("result");
+        assertThat("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", is(document));
+        obj = services.deleteDocument(services.getNodeId("/TestDocument.txt").getString("result"));
+        assertThat(obj, notNullValue());
+        assertThat(obj.length() >= 2, is(true));
+        assertThat(obj.get("result"), notNullValue());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), is(true));
+    }
+
+    @Test
+    public void testCreateDocumentWithCustomModel() throws Exception {
         JSONObject obj = services.getNodeId("/");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);

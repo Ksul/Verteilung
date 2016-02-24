@@ -66,29 +66,37 @@ public class CMISSessionGenerator {
      * @return
      */
     public Session generateSession() {
+
         Session session;
-        // From: http://chemistry.apache.org/java/examples/example-create-session.html
-        // default factory implementation
-        SessionFactory factory = SessionFactoryImpl.newInstance();
-        Map<String, String> parameter = new HashMap<String, String>();
 
-        // user credentials
-        parameter.put(SessionParameter.USER, this.user);
-        parameter.put(SessionParameter.PASSWORD, this.password);
+        try {
 
-        // connection settings
-        parameter.put(SessionParameter.ATOMPUB_URL, this.atomPubURL);
-        parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+            // From: http://chemistry.apache.org/java/examples/example-create-session.html
+            // default factory implementation
+            SessionFactory factory = SessionFactoryImpl.newInstance();
+            Map<String, String> parameter = new HashMap<String, String>();
+
+            // user credentials
+            parameter.put(SessionParameter.USER, this.user);
+            parameter.put(SessionParameter.PASSWORD, this.password);
+
+            // connection settings
+            parameter.put(SessionParameter.ATOMPUB_URL, this.atomPubURL);
+            parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
 //		parameter.put(SessionParameter.REPOSITORY_ID, this.repositoryName);
 //		Session session = factory.createSession(parameter);
 
-        // Set the alfresco object factory
-        parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+            // Set the alfresco object factory
+            parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
 
-        // create session
-        List<Repository> repositories = factory.getRepositories(parameter);
-        session = repositories.get(0).createSession();
+            // create session
+            List<Repository> repositories = factory.getRepositories(parameter);
+            session = repositories.get(0).createSession();
 
+        } catch(Exception e) {
+            logger.severe("Session konnte nicht aufgebaut werden: " + e.getMessage());
+            throw e;
+        }
         return session;
     }
 

@@ -483,8 +483,8 @@ public class AlfrescoConnector {
 
             for (String key : extraCMSProperties.keySet()) {
                 if (! key.isEmpty()) {
-
-                    properties.put(PropertyIds.OBJECT_TYPE_ID, properties.containsKey(PropertyIds.OBJECT_TYPE_ID) ? properties.get(PropertyIds.OBJECT_TYPE_ID) + "," + key : key);
+                    // hier werden die Typen concateniert. WICHTIG: Die Typ Deklarationen 'D:...' müssen vor den Properties 'P:...' sein.
+                    properties.put(PropertyIds.OBJECT_TYPE_ID, properties.containsKey(PropertyIds.OBJECT_TYPE_ID) ? key.toUpperCase().startsWith("D:") ? key + "," + properties.get(PropertyIds.OBJECT_TYPE_ID) : properties.get(PropertyIds.OBJECT_TYPE_ID) + "," + key : key);
                     properties.putAll(convertProperties((Map<String, Object>) extraCMSProperties.get(key), key));
 
                 } else
@@ -494,6 +494,9 @@ public class AlfrescoConnector {
 
         if (!properties.containsKey(PropertyIds.OBJECT_TYPE_ID))
             properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+        else if (!((String) properties.get(PropertyIds.OBJECT_TYPE_ID)).toUpperCase().startsWith("D:"))
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document," + properties.get(PropertyIds.OBJECT_TYPE_ID));
+
 
         return properties;
     }

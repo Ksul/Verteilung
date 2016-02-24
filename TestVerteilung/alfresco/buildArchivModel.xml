@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="package-jar">
+
+    <!-- Set these as required -->
+    <property name="jar.name" value="ArchivModel.jar"/>
+
+    <property name="project.dir" value="."/>
+    <property name="build.dir" value="${project.dir}/build"/>
+    <property name="jar.file" value="${project.dir}/shared/lib/${jar.name}"/>
+
+
+    <target name="package-jar">
+        <jar destfile="${jar.file}" >
+            <fileset dir="${project.dir}/shared/classes/alfresco/extension" includes="**/*" />
+        </jar>
+    </target>
+
+
+</project>

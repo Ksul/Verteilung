@@ -1188,7 +1188,7 @@ function checkAndBuidAlfrescoEnvironment() {
                 ], null, true);
                 if (!erg.success) {
                     var script = openFile('src/main/javascript/recognition.js');
-                    if (exist(script)) {
+                    if (exist(script) && script.length() > 0) {
                         erg = executeService("createDocument", [
                             {"name": "documentId", "value": scriptFolderId},
                             {"name": "fileName", "value": "recognition.js"},
@@ -1206,7 +1206,8 @@ function checkAndBuidAlfrescoEnvironment() {
                             REC.log(WARN, "Verteilscript (recognition.js) konnte auf dem Alfresco Server nicht angelegt werden!");
                             REC.log(INFORMATIONAL, erg.result);
                         }
-                    }
+                    } else
+                        REC.log(WARN, "Verteilscript (recognition.js) konnte nicht gelesen werden!");
                 } else {
                     scriptID = erg.result;
                 }
@@ -1217,7 +1218,7 @@ function checkAndBuidAlfrescoEnvironment() {
                     ], null, true);
                     if (!erg.success) {
                         var doc = openFile('doc.xml');
-                        if (exist(doc)) {
+                        if (exist(doc) && doc.length() > 0) {
                             erg = executeService("createDocument", [
                                 {"name": "documentId", "value": scriptFolderId},
                                 {"name": "fileName", "value": "doc.xml"},
@@ -1236,7 +1237,8 @@ function checkAndBuidAlfrescoEnvironment() {
                                 REC.log(WARN, "Verteilregeln (doc.xml) konnten auf dem Alfresco Server nicht angelegt werden!");
                                 REC.log(INFORMATIONAL, erg.result);
                             }
-                        }
+                        } else
+                            REC.log(WARN, "Verteilregeln (doc.xml) konnten nicht gelesen werden!");
                     } else {
                         rulesID = erg.result;
                     }
