@@ -131,7 +131,25 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testCreateDocument() throws Exception {
-        CmisObject folder = con.getNode("/Archiv");
+        CmisObject folder = con.getNode("/");
+        assertNotNull(folder);
+        assertTrue(folder instanceof Folder);
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> titledMap = new HashMap<>();
+        titledMap.put("cm:description","Testdokument");
+        //properties.put("P:cm:titled", titledMap);
+        Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR);
+        assertNotNull(document);
+        assertTrue(document instanceof Document);
+        assertEquals("TestDocument.txt", document.getName());
+        assertEquals("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?", IOUtils.toString(document.getContentStream().getStream(), "UTF-8"));
+        document.delete(true);
+    }
+
+    @Test
+    public void testCreateArchivDocument() throws Exception {
+        CmisObject folder = con.getNode("/");
         assertNotNull(folder);
         assertTrue(folder instanceof Folder);
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
@@ -143,6 +161,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         amountMap.put("my:amount","25.33");
         archivModelMap.put("my:person", "Klaus");
         archivModelMap.put("my:documentDate", new Date().getTime());
+       // properties.put(PropertyIds.OBJECT_TYPE_ID, "D:my:archivContent");
         properties.put("P:cm:titled", titledMap);
         properties.put("P:my:amountable", amountMap);
         properties.put("D:my:archivContent", archivModelMap);

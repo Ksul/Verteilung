@@ -308,7 +308,7 @@ function readMultiFile(evt) {
 function readFiles(files) {
     try {
         if (currentRules == null || !currentRules.endsWith("doc.xml")) {
-            var open = openFile("doc.xml");
+            var open = openFile("src/main/resource/rules/doc.xml");
             currentRules = open[1];
             rulesEditor.getSession().setValue(open[0]);
             rulesEditor.getSession().foldAll(1);
@@ -821,7 +821,7 @@ function getRules(rulesId, loadLocal) {
     try {
         var ret;
         if (loadLocal) {
-            var open = openFile("doc.xml");
+            var open = openFile("src/main/resource/rules/doc.xml");
             rulesEditor.getSession().setValue(open);
             rulesEditor.getSession().foldAll(1);
             REC.log(INFORMATIONAL, "Regeln erfolgreich lokal gelesen!");
@@ -857,9 +857,10 @@ function openRules() {
             document.getElementById('headerCenter').textContent = "Regeln (Server: doc.xml)";
         } else {
             if (isLocal()) {
+                //TODO Muss hier nicht eine ID übergeben werden?
                 getRules("doc.xml", true);
             } else {
-                $.get('doc.xml', function (msg) {
+                $.get('src/main/resource/rules/doc.xml', function (msg) {
                     rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
                     rulesEditor.getSession().foldAll(1);
                     currentRules = "doc.xml";
@@ -1148,6 +1149,7 @@ function closeScript() {
     }
 }
 
+
 /**
  * prüft und baut das Alfresco Environment auf.
  * @return true, wenn alles geklappt hat
@@ -1187,8 +1189,16 @@ function checkAndBuidAlfrescoEnvironment() {
                     {"name": "filePath", "value": "/Datenverzeichnis/Skripte/recognition.js"}
                 ], null, true);
                 if (!erg.success) {
-                    var script = openFile('src/main/javascript/recognition.js');
-                    if (exist(script)) {
+                    var script;
+                    if (isLocal())
+                        script = openFile('src/main/javascript/recognition.js');
+                    else {
+                        script = $.ajax({
+                            url: "http://localhost:8081/TestVerteilung/src/main/javascript/recognition.js",
+                            async: false
+                        }).responseText;
+                    }
+                    if (exist(script) && script.length > 0) {
                         erg = executeService("createDocument", [
                             {"name": "documentId", "value": scriptFolderId},
                             {"name": "fileName", "value": "recognition.js"},
@@ -1206,7 +1216,8 @@ function checkAndBuidAlfrescoEnvironment() {
                             REC.log(WARN, "Verteilscript (recognition.js) konnte auf dem Alfresco Server nicht angelegt werden!");
                             REC.log(INFORMATIONAL, erg.result);
                         }
-                    }
+                    } else
+                        REC.log(WARN, "Verteilscript (recognition.js) konnte nicht gelesen werden!");
                 } else {
                     scriptID = erg.result;
                 }
@@ -1216,8 +1227,16 @@ function checkAndBuidAlfrescoEnvironment() {
                         {"name": "filePath", "value": "/Datenverzeichnis/Skripte/doc.xml"}
                     ], null, true);
                     if (!erg.success) {
-                        var doc = openFile('doc.xml');
-                        if (exist(doc)) {
+                        var doc;
+                        if (isLocal())
+                            doc = openFile('src/main/resource/rules/doc.xml');
+                        else {
+                            doc = $.ajax({
+                                url: "http://localhost:8081/TestVerteilung/src/main/resource/rules/doc.xml",
+                                async: false
+                            }).responseText;
+                        }
+                        if (exist(doc) && doc.length > 0) {
                             erg = executeService("createDocument", [
                                 {"name": "documentId", "value": scriptFolderId},
                                 {"name": "fileName", "value": "doc.xml"},
@@ -1236,7 +1255,8 @@ function checkAndBuidAlfrescoEnvironment() {
                                 REC.log(WARN, "Verteilregeln (doc.xml) konnten auf dem Alfresco Server nicht angelegt werden!");
                                 REC.log(INFORMATIONAL, erg.result);
                             }
-                        }
+                        } else
+                            REC.log(WARN, "Verteilregeln (doc.xml) konnten nicht gelesen werden!");
                     } else {
                         rulesID = erg.result;
                     }
@@ -1250,16 +1270,17 @@ function checkAndBuidAlfrescoEnvironment() {
                                 {"name": "filePath", "value": "/"}
                             ], "Archiv konnte nicht gefunden werden:");
                             if (erg.success) {
-                                extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Archiv'}, 'P:cm:titled':{'cm:title': 'Archiv', 'cm:description':'Der Archiv Root Ordner'}}";
+                                alfrescoRootFolderID = erg.result;
+                                extraProperties = "{'cmis:folder':{'cmis:name': 'Archiv'}, 'P:cm:titled':{'cm:title': 'Archiv', 'cm:description':'Der Archiv Root Ordner'}}";
                                 erg = executeService("createFolder", [
-                                    {"name": "documentId", "value": erg.result},
-                                    {"name": "fileName", "value": "Archiv"}
+                                    {"name": "documentId", "value": alfrescoRootFolderID},
+                                    {"name": "extraProperties", "value": extraProperties}
                                 ]);
                             } else
                                 REC.log(WARN, "Archiv Root konnten auf dem Alfresco Server nicht gefunden werden!");
                             if (erg.success) {
                                 erg = executeService("getNodeId", [
-                                    {"name": "filePath", "value": archivFolderId}
+                                    {"name": "filePath", "value": "/Archiv"}
                                 ], "Archiv konnte nicht gefunden werden:");
                                 if (erg.success)
                                     archivFolderId = erg.result;
@@ -1274,130 +1295,32 @@ function checkAndBuidAlfrescoEnvironment() {
                         }
                         if (erg.success) {
                             // Archiv Root prüfen
-                            erg = executeService("getNodeId", [
-                                {"name": "filePath", "value": "/Archiv/Dokumente"}
-                            ], null, true);
-                            if (!erg.success) {
-                                extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Dokumente'}, 'P:cm:titled':{'cm:title': 'Dokumente', 'cm:description':'Der Ordner für die abgelegten Dokumente'}}"
-                                erg = executeService("createFolder", [
-                                    {"name": "documentId", "value": archivFolderId},
-                                    {"name": "fileName", "value": extraProperties}
-                                ]);
-                                if (erg.success) {
-                                    erg = executeService("getNodeId", [
-                                        {"name": "filePath", "value": "/Dokumente"}
-                                    ], "Archiv Root konnte nicht gefunden werden:");
-                                    if (erg.success)
-                                        rootID = erg.result;
-                                    else
-                                        REC.log(WARN, "Archiv Root konnte auf dem Alfresco Server nicht gefunden werden!");
-                                } else {
-                                    REC.log(WARN, "Archiv Root konnte auf dem Alfresco Server nicht angelegt werden!");
-                                    REC.log(INFORMATIONAL, erg.result);
-                                }
-                            } else {
+                            erg = buildAlfrescoFolder("/Archiv/Dokumente", archivFolderId, "{'cmis:folder': {'cmis:name': 'Dokumente'}, 'P:cm:titled':{'cm:title': 'Dokumente', 'cm:description':'Der Ordner für die abgelegten Dokumente'}}", "Der Ordner für die abgelegten Dokumente");
+                            if (erg.success) {
                                 rootID = erg.result;
                             }
                         }
                         if (erg.success) {
                             // Inbox prüfen
-                            erg = executeService("getNodeId", [
-                                {"name": "filePath", "value": "/Archiv/Inbox"}
-                            ], null, true);
-                            if (!erg.success) {
-                                extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Inbox'}, 'P:cm:titled':{'cm:title': 'Inbox', 'cm:description':'Der Poseingangsordner'}}"
-                                erg = executeService("createFolder", [
-                                    {"name": "documentId", "value": archivFolderId},
-                                    {"name": "fileName", "value": extraProperties}
-                                ]);
-                                if (erg.success) {
-                                    erg = executeService("getNodeId", [
-                                        {"name": "filePath", "value": "/Archiv/Inbox"}
-                                    ], "Inbox konnte nicht gefunden werden:");
-                                    if (erg.success)
-                                        inboxID = erg.result;
-                                    else
-                                        REC.log(WARN, "Inbox Folder konnte auf dem Alfresco Server nicht gefunden werden!");
-                                } else {
-                                    REC.log(WARN, "Inbox Folder konnte auf dem Alfresco Server nicht angelegt werden!");
-                                    REC.log(INFORMATIONAL, erg.result);
-                                }
-                            } else {
+                            erg = buildAlfrescoFolder("/Archiv/Inbox", archivFolderId, "{'cmis:folder':{'cmis:name': 'Inbox'}, 'P:cm:titled':{'cm:title': 'Inbox', 'cm:description':'Der Posteingangsordner'}}", "Der Posteingangsordner");
+                            if (erg.success) {
                                 inboxID = erg.result;
                             }
                         }
                         if (erg.success) {
                             // Fehlerbox prüfen
-                            erg = executeService("getNodeId", [
-                                {"name": "filePath", "value": "/Archiv/Fehler"}
-                            ], null, true);
-                            if (!erg.success) {
-                                extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Fehler'}, 'P:cm:titled':{'cm:title': 'Fehler', 'cm:description':'Der Ordner für nicht verteilbare Dokumente'}}"
-                                erg = executeService("createFolder", [
-                                    {"name": "documentId", "value": archivFolderId},
-                                    {"name": "fileName", "value": extraProperties}
-                                ]);
-                                if (erg.success) {
-                                    erg = executeService("getNodeId", [
-                                        {"name": "filePath", "value": "/Archiv/Fehler"}
-                                    ], "Verzeichnis für fehlerhafte Dokumente konnte nicht gefunden werden:");
-                                    if (erg.success)
-                                        fehlerFolderId = erg.result;
-                                    else
-                                        REC.log(WARN, "Verzeichnis für fehlerhafte Dokumente konnte auf dem Alfresco Server nicht gefunden werden!");
-                                } else {
-                                    REC.log(WARN, "Verzeichnis für fehlerhafte Dokumente konnte auf dem Alfresco Server nicht angelegt werden!");
-                                    REC.log(INFORMATIONAL, erg.result);
-                                }
-                            } else {
+                            erg = buildAlfrescoFolder("/Archiv/Fehler", archivFolderId, "{'cmis:folder':{'cmis:name': 'Fehler'}, 'P:cm:titled':{'cm:title': 'Fehler', 'cm:description':'Der Ordner für nicht verteilbare Dokumente'}}", "Der Ordner für nicht verteilbare Dokumente");
+                            if (erg.success) {
                                 fehlerFolderId = erg.result;
                             }
                         }
                         if (erg.success) {
                             // Unbekanntbox prüfen
-                            erg = executeService("getNodeId", [
-                                {"name": "filePath", "value": "/Archiv/Unbekannt"}
-                            ], null, true);
-                            if (!erg.success) {
-                                extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Unbekannt'}, 'P:cm:titled':{'cm:title': 'Unbekannt', 'cm:description':'Der Ordner für unbekannte Dokumente'}}"
-                                erg = executeService("createFolder", [
-                                    {"name": "documentId", "value": archivFolderId},
-                                    {"name": "fileName", "value": extraProperties}
-                                ]);
-                                if (erg.success) {
-                                    erg = executeService("getNodeId", [
-                                        {"name": "filePath", "value": "/Archiv/Unbekannt"}
-                                    ], "Verzeichnis für unbekannte Dokumente konnte nicht gefunden werden:");
-                                    if (!erg.success)
-                                        REC.log(WARN, "Verzeichnis für unbekannte Dokumente konnte auf dem Alfresco Server nicht gefunden werden!")
-                                }
-                            } else {
-                                REC.log(WARN, "Verzeichnis für unbekannte Dokumente konnte auf dem Alfresco Server nicht angelegt werden!");
-                                REC.log(INFORMATIONAL, erg.result);
-                            }
+                            erg = buildAlfrescoFolder("/Archiv/Unbekannt", archivFolderId, "{'cmis:folder': {'cmis:name': 'Unbekannt'}, 'P:cm:titled':{'cm:title': 'Unbekannt', 'cm:description':'Der Ordner für unbekannte Dokumente'}}", "Der Ordner für unbekannte Dokumente");
                         }
                         if (erg.success) {
                             // Doppelte Box prüfen
-                            erg = executeService("getNodeId", [
-                                {"name": "filePath", "value": "/Archiv/Fehler/Doppelte"}
-                            ], null, true);
-                            if (!erg.success) {
-                                extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Doppelte'}, 'P:cm:titled':{'cm:title': 'Doppelte', 'cm:description':'Der Ordner für doppelte Dokumente'}}"
-                                erg = executeService("createFolder", [
-                                    {"name": "documentId", "value": fehlerFolderId},
-                                    {"name": "fileName", "value": extraProperties}
-                                ]);
-                                if (erg.success) {
-                                    erg = executeService("getNodeId", [
-                                        {"name": "filePath", "value": "/Archiv/Fehler/Doppelte"}
-                                    ], "Verzeichnis für doppelte Dokumente konnte nicht gefunden werden:");
-                                    if (!erg.success)
-                                        REC.log(WARN, "Verzeichnis für doppelte Dokumente konnte auf dem Alfresco Server nicht gefunden werden!")
-                                } else {
-                                    REC.log(WARN, "Verzeichnis für doppelte Dokumente konnte auf dem Alfresco Server nicht angelegt werden!");
-                                    REC.log(INFORMATIONAL, erg.result);
-                                }
-                            }
+                            erg = buildAlfrescoFolder("/Archiv/Fehler/Doppelte", fehlerFolderId, "{'cmis:folder': {'cmis:name': 'Doppelte'}, 'P:cm:titled':{'cm:title': 'Doppelte', 'cm:description':'Verzeichnis für doppelte Dokumente'}}", "Verzeichnis für doppelte Dokumente");
                         }
                     }
                 }
@@ -1410,11 +1333,44 @@ function checkAndBuidAlfrescoEnvironment() {
     } else {
         if (exist(getSettings("server")))
             REC.log(WARN, "Server " + getSettings("server") + " ist nicht erreichbar!");
-        tabLayout.tabs({ disabled: [ 0,1 ],
-                        active: 2});
+        tabLayout.tabs({
+            disabled: [0, 1],
+            active: 2
+        });
         ret = true;
     }
     return ret;
+}
+
+/**
+ * baut einen Alfresco Archiv Ordner auf
+ * @param folder            der Pfad des Ordners (z.B. /Archiv/Fehler/Doppelte) Aufgebaut wird nur der letzte, also "Doppelte"
+ * @param id                die Id des Ordners in dem  der Ordner erstellt werden soll
+ * @param extraProperties   extra Properies mit den Properties des Ordners
+ * @param txt
+ * @return {{result, success}|das Ergebnis}
+ */
+function buildAlfrescoFolder(folder, id, extraProperties, txt) {
+    var erg = executeService("getNodeId", [
+        {"name": "filePath", "value": folder}
+    ], null, true);
+    if (!erg.success) {
+        erg = executeService("createFolder", [
+            {"name": "documentId", "value": id},
+            {"name": "extraProperties", "value": extraProperties}
+        ]);
+        if (erg.success) {
+            erg = executeService("getNodeId", [
+                {"name": "filePath", "value": folder}
+            ], txt + " konnte nicht gefunden werden:");
+            if (!erg.success)
+                REC.log(WARN, txt + " konnte auf dem Alfresco Server nicht gefunden werden!");
+        } else {
+            REC.log(WARN, txt + " konnte auf dem Alfresco Server nicht angelegt werden!");
+            REC.log(INFORMATIONAL, erg.result);
+        }
+    }
+    return erg;
 }
 
 /**
