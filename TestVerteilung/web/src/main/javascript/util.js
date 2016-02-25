@@ -255,12 +255,14 @@ function loadApplet(level, server, bindingUrl, user, password) {
                 'jempbox-1.6.0.jar, ' +
                 'slf4j-api-1.7.5.jar, ' +
                 'commons-io-2.4.jar,' +
-                'alfresco-opencmis-extension-0.7.jar, ' +
-                'chemistry-opencmis-client-api-0.10.0.jar, ' +
-                'chemistry-opencmis-client-bindings-0.10.0.jar, ' +
-                'chemistry-opencmis-client-impl-0.10.0.jar, ' +
-                'chemistry-opencmis-commons-api-0.10.0.jar, ' +
-                'chemistry-opencmis-commons-impl-0.10.0.jar');
+                'alfresco-opencmis-extension-1.0.jar, ' +
+                'chemistry-opencmis-client-api-0.13.0.jar, ' +
+                'chemistry-opencmis-client-bindings-0.13.0.jar, ' +
+                'chemistry-opencmis-client-impl-0.13.0.jar, ' +
+                'chemistry-opencmis-commons-api-0.13.0.jar, ' +
+                'chemistry-opencmis-commons-impl-0.13.0.jar, ' +
+                'stax2-api-3.1.4.jar, ' +
+                'woodstox-core-asl-4.4.0.jar');
         obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
         document.getElementById('appl').appendChild(obj);
         var app =  $('#reader').get(0);

@@ -1206,7 +1206,7 @@ function checkAndBuidAlfrescoEnvironment() {
                             {"name": "mimeType", "value": "application/x-javascript"},
                             {
                                 "name": "extraProperties",
-                                "value": "{'P:cm:titled':{'cm:description':'Skript zum Verteilen der Dokumente'}}"
+                                "value": "{'cmis:document':{'cmis:name': 'recognition.js'},'P:cm:titled':{'cm:description':'Skript zum Verteilen der Dokumente'}}"
                             },
                             {"name": "versionState", "value": "major"}
                         ], "Verteilungsskript konnte nicht erstellt werden!");
@@ -1244,7 +1244,7 @@ function checkAndBuidAlfrescoEnvironment() {
                                 {"name": "mimeType", "value": "application/xml"},
                                 {
                                     "name": "extraProperties",
-                                    "value": "{'P:cm:titled':{'cm:description':'Dokument mit den Verteil-Regeln'}}"
+                                    "value": "{'cmis:document':{'cmis:name': 'doc.xml'}, 'P:cm:titled':{'cm:description':'Dokument mit den Verteil-Regeln'}}"
                                 },
                                 {"name": "versionState", "value": "major"}
 
