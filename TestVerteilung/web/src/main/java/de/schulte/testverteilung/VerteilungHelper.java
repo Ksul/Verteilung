@@ -22,7 +22,7 @@ public class VerteilungHelper {
      * @return  obj           das JSON Object
      */
     public static JSONObject convertErrorToJSON(Throwable e) {
-        logger.info(e.getMessage());
+
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", false);

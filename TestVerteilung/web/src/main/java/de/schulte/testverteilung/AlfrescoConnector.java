@@ -294,6 +294,12 @@ public class AlfrescoConnector {
         Document newDocument;
 
         Map<String, Object> properties = buildProperties(extraCMSProperties);
+
+        if (!properties.containsKey(PropertyIds.OBJECT_TYPE_ID))
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+        else if (!((String) properties.get(PropertyIds.OBJECT_TYPE_ID)).toUpperCase().startsWith("D:") && !((String) properties.get(PropertyIds.OBJECT_TYPE_ID)).toLowerCase().contains("cmis:document"))
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document," + properties.get(PropertyIds.OBJECT_TYPE_ID));
+
         properties.put(PropertyIds.NAME, documentName);
 
         InputStream stream = new ByteArrayInputStream(documentContent);
@@ -331,9 +337,15 @@ public class AlfrescoConnector {
     public Folder createFolder(Folder targetFolder,
                                Map<String, Object> extraCMSProperties ) throws VerteilungException {
 
+        logger.fine("createFolder: " + targetFolder.getPath() + " extraProperties: " + extraCMSProperties);
+
         Map<String, Object> properties = buildProperties(extraCMSProperties);
+
         if (!properties.containsKey(PropertyIds.OBJECT_TYPE_ID))
             properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
+        else if (!((String) properties.get(PropertyIds.OBJECT_TYPE_ID)).toUpperCase().startsWith("D:") && !((String) properties.get(PropertyIds.OBJECT_TYPE_ID)).toLowerCase().contains("cmis:folder"))
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder," + properties.get(PropertyIds.OBJECT_TYPE_ID));
+
         return targetFolder.createFolder(properties);
     }
 
@@ -491,12 +503,6 @@ public class AlfrescoConnector {
                     properties.putAll(convertProperties((Map<String, Object>) extraCMSProperties.get(key), key));
             }
         }
-
-        if (!properties.containsKey(PropertyIds.OBJECT_TYPE_ID))
-            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-        else if (!((String) properties.get(PropertyIds.OBJECT_TYPE_ID)).toUpperCase().startsWith("D:"))
-            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document," + properties.get(PropertyIds.OBJECT_TYPE_ID));
-
 
         return properties;
     }

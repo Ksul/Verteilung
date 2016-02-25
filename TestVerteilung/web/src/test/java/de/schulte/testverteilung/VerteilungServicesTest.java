@@ -230,12 +230,12 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testCreateFolder() throws Exception {
-        JSONObject obj = services.getNodeId("/Archiv");
+        JSONObject obj = services.getNodeId("/");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
-        String extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Testfolder'}, 'P:cm:titled':{'cm:title': 'Testtitel', 'cm:description':'Dies ist ein Test Folder'}}";
+        String extraProperties = "{'cmis:folder':{'cmis:name': 'Testfolder'}, 'P:cm:titled':{'cm:title': 'Testtitel', 'cm:description':'Dies ist ein Test Folder'}}";
         obj = services.createFolder(obj.getString("result"), extraProperties);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
