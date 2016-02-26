@@ -1051,7 +1051,9 @@ public class VerteilungServices {
      */
     private VersioningState createVersionState(String versionState) throws VerteilungException {
 
-        if (versionState != null && versionState.length() > 0 && !versionState.equals("none") && !versionState.equals("major") && !versionState.equals("minor") && !versionState.equals("checkedout"))
+        if (versionState == null || versionState.length() == 0)
+            versionState = "none";
+        if (!versionState.equals("none") && !versionState.equals("major") && !versionState.equals("minor") && !versionState.equals("checkedout"))
             throw new VerteilungException("ungültiger VersionsStatus");
         VersioningState vs = VersioningState.fromValue(versionState);
         if (vs == null)
