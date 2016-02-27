@@ -416,7 +416,7 @@ public class VerteilungServlet extends HttpServlet {
      * @param  documentType              der Typ des Dokumentes
      * @param  extraCMSProperties        zusätzliche Properties
      * @param  majorVersion              falls Dokument versionierbar, dann wird eine neue Major-Version erzeugt, falls true
-     * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
+     * @param  versionComment            falls Dokument versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
      *                                                                  result           bei Erfolg nichts, ansonsten der Fehler

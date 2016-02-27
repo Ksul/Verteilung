@@ -438,8 +438,12 @@ function executeService(service, params, messages, ignoreError) {
             else
                 errorString = json.result;
             // gibt es eine Fehlermeldung aus dem Service?
-            if (exist(json.error))
+            if (exist(json.error)) {
                 errorString = errorString + "<br>" + json.error;
+                REC.log(ERROR, json.error);
+            }
+            REC.log(ERROR, json.result);
+            fillMessageBox(true);
             throw new Error(errorString);
         } else {
             if (exist(successMessage)) {

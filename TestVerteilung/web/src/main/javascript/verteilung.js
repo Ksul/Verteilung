@@ -794,20 +794,18 @@ function sendRules() {
             vkbeautify.xml(rulesEditor.getSession().getValue());
             var json = executeService("updateDocument", [
                 {"name": "documentId", "value": rulesID},
-                {"name": "documentText", "value": rulesEditor.getSession().getValue()},
-                {"name": "mimeType", "value": "application/xml"},
+                {"name": "documentText", "value": rulesEditor.getSession().getValue(), "type": "byte"},
+                {"name": "mimeType", "value": "text/xml"},
                 {"name": "extraProperties", "value": ""},
-                {"name": "majorVersion", "value": ""},
+                {"name": "versionState", "value": "minor"},
                 {"name": "versionComment", "value": ""}
             ], "Regeln konnten nicht übertragen werden:");
             if (json.success) {
                 REC.log(INFORMATIONAL, "Regeln erfolgreich zum Server übertragen!");
+                rulesID = $.parseJSON(json.result).objectId;
                 erg = true;
-            } else {
-                REC.log(INFORMATIONAL, erg.result);
-                REC.log(WARN, "Regeln konnten nicht zum Server übertragen werden!");
+                fillMessageBox(true);
             }
-            fillMessageBox(true);
             return erg;
         }
     } catch (e) {
@@ -1102,16 +1100,18 @@ function sendScript() {
         if (workDocument.endsWith("recognition.js")) {
             var json = executeService("updateDocument", [
                 {"name": "documentId", "value": scriptID},
-                {"name": "documentText", "value": textEditor.getSession().getValue()},
+                {"name": "documentText", "value": textEditor.getSession().getValue(), "type": "byte"},
                 {"name": "mimetype", "value": "application/javascript"},
                 {"name": "extraProperties", "value": ""},
-                {"name": "majorVersion", "value": ""},
+                {"name": "versionState", "value": "minor"},
                 {"name": "versionComment", "value": ""}
             ], "Skript konnte nicht zum Server gesendet werden:");
-            erg = json.success;
-            if (erg)
+            if (json.success) {
                 REC.log(INFORMATIONAL, "Script erfolgreich zum Server gesendet!");
+                scriptID = $.parseJSON(json.result).objectId;
+                erg = true;
                 fillMessageBox(true);
+            }
         }
         return erg;
     } catch (e) {
@@ -1175,7 +1175,6 @@ function checkAndBuidAlfrescoEnvironment() {
             {"name": "password", "value": getSettings("password")}
         ], "Parameter für die Services konnten nicht gesetzt werden:");
         if (!erg.success) {
-            REC.log(INFORMATIONAL, erg.result);
             REC.log(WARN, "Binding Parameter konnten nicht gesetzt werden!");
         }
         if (erg.success) {
@@ -1186,7 +1185,6 @@ function checkAndBuidAlfrescoEnvironment() {
             if (erg.success)
                 scriptFolderId = erg.result;
             else {
-                REC.log(INFORMATIONAL, erg.result);
                 REC.log(WARN, "Verzeichnis '/Datenverzeichnis/Skripte' auf dem Alfresco Server nicht gefunden!");
             }
         }
@@ -1220,7 +1218,6 @@ function checkAndBuidAlfrescoEnvironment() {
                     if (erg.success)
                         scriptID = $.parseJSON(erg.result).objectId;
                     else {
-                        REC.log(INFORMATIONAL, erg.result);
                         REC.log(WARN, "Verteilscript (recognition.js) konnte auf dem Alfresco Server nicht angelegt werden!");
                     }
                 } else
@@ -1249,7 +1246,7 @@ function checkAndBuidAlfrescoEnvironment() {
                         {"name": "documentId", "value": scriptFolderId},
                         {"name": "fileName", "value": "doc.xml"},
                         {"name": "documentText", "value": base64EncArr(strToUTF8Arr(doc))},
-                        {"name": "mimeType", "value": "application/xml"},
+                        {"name": "mimeType", "value": "text/xml"},
                         {
                             "name": "extraProperties",
                             "value": "{'cmis:document':{'cmis:name': 'doc.xml'}, 'P:cm:titled':{'cm:description':'Dokument mit den Verteil-Regeln'}}"
@@ -1260,7 +1257,6 @@ function checkAndBuidAlfrescoEnvironment() {
                     if (erg.success)
                         rulesID = $.parseJSON(erg.result).objectId;
                     else {
-                        REC.log(INFORMATIONAL, erg.result);
                         REC.log(WARN, "Verteilregeln (doc.xml) konnten auf dem Alfresco Server nicht angelegt werden!");
                     }
                 } else
@@ -1277,7 +1273,6 @@ function checkAndBuidAlfrescoEnvironment() {
             if (erg.success) {
                 alfrescoRootFolderID = erg.result;
             } else {
-                REC.log(INFORMATIONAL, erg.result);
                 REC.log(WARN, "Root konnte auf dem Server nicht gefunden werden!");
             }
         }
@@ -1358,9 +1353,6 @@ function buildAlfrescoFolder(folder, id, txt) {
             ], txt + " konnte nicht gefunden werden:");
             if (!erg.success)
                 REC.log(WARN, txt + " konnte auf dem Alfresco Server nicht gefunden werden!");
-        } else {
-            REC.log(INFORMATIONAL, erg.result);
-            REC.log(WARN, txt + " konnte auf dem Alfresco Server nicht angelegt werden!");
         }
     }
     return erg;

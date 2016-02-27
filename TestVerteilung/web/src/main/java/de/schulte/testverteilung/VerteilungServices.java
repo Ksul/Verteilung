@@ -28,7 +28,6 @@ public class VerteilungServices {
 
     private static Logger logger = Logger.getLogger(VerteilungServices.class.getName());
 
-
     // Speicher für Files
     private Collection<FileEntry> entries = new ArrayList<>();
 

@@ -59,6 +59,19 @@ public class AlfrescoConnector {
         }
     }
 
+    private class IdHelper implements ObjectId {
+        String id;
+
+        public IdHelper(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+    }
+
     private Session session = null;
 
     /**
@@ -377,7 +390,8 @@ public class AlfrescoConnector {
         if (extraCMSProperties != null)
             properties = buildProperties(extraCMSProperties);
 
-        ObjectId id = null;
+        ObjectId id = new IdHelper( document.getId());
+        ObjectId id1 = null;
         if (versionState.equals(VersioningState.MAJOR) || versionState.equals(VersioningState.MINOR)) {
             id = checkOutDocument(document);
             if (id != null) {
@@ -388,21 +402,29 @@ public class AlfrescoConnector {
                     session.getObject(id).updateProperties(properties, true);
                 }
                 id = ((Document) session.getObject(id)).checkIn(versionState.equals(VersioningState.MAJOR), properties, contentStream, versionComment);
+                session.clear();
             } else {
                 if (contentStream != null) {
-                    id = document.setContentStream(contentStream, true, true);
+                    id1 = document.setContentStream(contentStream, true, true);
+                    id = id1 != null ? id1 : id;
                     session.clear();
                 }
                 id = createAspectsFromProperties(extraCMSProperties, id == null ? document : (Document) session.getObject(id));
                 id = (Document) session.getObject(id).updateProperties(properties, true);
             }
         } else {
+            //Update ohne Versionierung (das funktioniert wohl nur genau einmal denn Alfresco lässt bei Documenten mit Versionierung kein
+            // Update ohnen dieses zu.
             if (contentStream != null) {
-                id = document.setContentStream(contentStream, true, true);
+                id1 = document.setContentStream(contentStream, true, true);
+                id = id1 != null ? id1 : id;
                 session.clear();
             }
-            id = createAspectsFromProperties(extraCMSProperties, id == null ? document : (Document) session.getObject(id));
-            id = ((Document) session.getObject(id)).updateProperties(properties, true);
+            if (extraCMSProperties != null && extraCMSProperties.size() > 0)
+                id = createAspectsFromProperties(extraCMSProperties, id == null ? document : (Document) session.getObject(id));
+
+            if (properties != null && properties.size() > 0)
+                id = ((Document) session.getObject(id)).updateProperties(properties, true);
 
 
         }
@@ -415,6 +437,7 @@ public class AlfrescoConnector {
      * @param  extraCMSProperties        zusätzliche Properties
      * @return CmisObject                das geänderte Objekt
      */
+
     public CmisObject updateProperties(CmisObject object,
                                      Map<String, Object> extraCMSProperties) throws VerteilungException {
 
