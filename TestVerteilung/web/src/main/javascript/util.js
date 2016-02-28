@@ -134,6 +134,29 @@ function hasUrlParam(){
 }
 
 /**
+ * erstellt einen vollständigen Pfad zum übegebenen Dateipfad
+ * @param filePath     der übergebene Dateipfad
+ * @returns {String}   den kompletten Pfad zur Datei auf dem Serveer
+ */
+function createPathToFile(filePath) {
+    var file = document.URL;
+    var parts = file.split("/").reverse();
+    parts.splice(0,1);
+    if (!filePath.startsWith("/"))
+        filePath = "/" + filePath;
+    return parts.reverse().join("/") + filePath;
+}
+
+/**
+ * konvertiert den Pfad in einen absoluten Pfad
+ * @param name
+ * @returns {string}
+ */
+function convertPath(name) {
+    return "file://" + window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1) + name;
+}
+
+/**
  * prüft, ob eine Variable vorhanden ist
  * @param val   die zu prüfende Variable
  * @returns {boolean}    true, wenn sie vorhanden ist
@@ -167,6 +190,7 @@ function errorHandler(e, description) {
  * @param autoClose  Wert für den Timeout beim automatischen Schliessen der Message
  * @param height     Höhe des Gensters
  * @param width      Breite des Fensters
+ * TODO Message für einfachen Dialog mit Ja/Nein oder Ok/Cancel aufbohren
  */
 function message(title, str, autoClose, height, width) {
     if (!exist(height))
@@ -404,7 +428,7 @@ function executeService(service, params, messages, ignoreError) {
                 for (index = 0; index < params.length; ++index) {
                     // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
-                        params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
+                        params[index].value = btoa(params[index].value);
                     eval("dataString." + params[index].name + " = params[" + index + "].value");
                 }
             }

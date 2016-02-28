@@ -402,9 +402,9 @@
                     onclick="openPDF(currentFile);" id="pdf"
                     type="submit" class="pdf" title="PDF" value="" style="display: none"/>
             </td>
-            <td width="60px" align="center"><input onclick="loadScript();"
-                                                   name="loadScript" id="loadScript" type="submit"
-                                                   class="edit" title="Script"
+            <td width="60px" align="center"><input onclick="openScript();"
+                                                   name="openScript" id="openScript" type="submit"
+                                                   class="edit" title="Öffnet den Skript Editor"
                                                    value=""/>
             </td>
             <td width="60px" align="center"><input
@@ -432,8 +432,8 @@
                                                    value="" style="display: none"/>
             </td>
             <td width="60px" align="center"><input
-                    onclick="reloadScript();" name="reloadScript" id="reloadScript"
-                    type="submit" class="reload" title="Reload" value=""
+                    onclick="activateScriptToContext();" name="activateScriptToContext" id="activateScriptToContext"
+                    type="submit" class="reload" title="Skript im Kontext aktualisieren" value=""
                     style="display: none"/>
             </td>
             <td width="60px" align="center"><input

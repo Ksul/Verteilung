@@ -68,15 +68,15 @@ function manageControls() {
     document.getElementById('test').style.display = 'block';
     document.getElementById('pdf').style.display = 'block';
     document.getElementById('pdf').setAttribute("disabled", true);
-    document.getElementById('loadScript').style.display = 'block';
-    document.getElementById('loadScript').removeAttribute("disabled");
+    document.getElementById('openScript').style.display = 'block';
+    document.getElementById('openScript').removeAttribute("disabled");
     document.getElementById('searchCont').style.display = 'block';
     document.getElementById('searchCont').removeAttribute("disabled");
     document.getElementById('beautifyScript').style.display = 'none';
     document.getElementById('back').style.display = 'none';
     document.getElementById('closeScript').style.display = 'none';
     document.getElementById('closeTest').style.display = 'none';
-    document.getElementById('reloadScript').style.display = 'none';
+    document.getElementById('activateScriptToContext').style.display = 'none';
     document.getElementById('saveScript').style.display = 'none';
     document.getElementById('saveScript').setAttribute("disabled", true);
     document.getElementById('getScript').style.display = 'none';
@@ -94,7 +94,7 @@ function manageControls() {
         document.getElementById('test').style.display = 'none';
         document.getElementById('closeTest').style.display = 'block';
         //document.getElementById('docAlfresco').setAttribute("disabled", true);
-        document.getElementById('loadScript').setAttribute("disabled", true);
+        document.getElementById('openScript').setAttribute("disabled", true);
         document.getElementById('pdf').setAttribute("disabled", true);
     }
 /*
@@ -142,12 +142,12 @@ function manageControls() {
         document.getElementById('test').style.display = 'none';
         document.getElementById('back').style.display = 'none';
         document.getElementById('pdf').style.display = 'none';
-        document.getElementById('loadScript').style.display = 'none';
+        document.getElementById('openScript').style.display = 'none';
         document.getElementById('closeScript').style.display = 'block';
         document.getElementById('sendScript').style.display = 'block';
         document.getElementById('getScript').style.display = 'block';
         document.getElementById('saveScript').style.display = 'block';
-        document.getElementById('reloadScript').style.display = 'block';
+        document.getElementById('activateScriptToContext').style.display = 'block';
         document.getElementById('beautifyScript').style.display = 'block';
     }
 }
@@ -930,15 +930,6 @@ function openFile(file) {
 }
 
 /**
- * konvertiert den Pfad in einen absoluten Pfad
- * @param name
- * @returns {string}
- */
-function convertPath(name) {
-    return "file://" + window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1) + name;
-}
-
-/**
  * sichert einen Text in eine Datei
  * @param file         die zu erzeugende Datei
  * @param text         der in die Datei zu speichernde Text
@@ -987,9 +978,56 @@ function handleRulesSelect(evt) {
 
 
 /**
- * lädt das Verteilungsscript entweder lokal oder vom Server
+ * lädt das auf dem Server gespeicherte Verteilungsscript
  */
-function loadScript() {
+function getScript() {
+    var fetchScript = function () {
+        var json = executeService("getDocumentContent", [
+            {"name": "documentId", "value": scriptID},
+            {"name": "extract", "value": "false"}
+        ], "Skript konnte nicht gelesen werden:");
+        if (json.success) {
+            textEditor.getSession().setValue(json.result);
+            REC.log(INFORMATIONAL, "Script erfolgreich heruntergeladen!");
+            fillMessageBox(true);
+        }
+    };
+    try {
+        if (!textEditor.getSession().getUndoManager().isClean()) {
+            var $dialog = $('<div></div>').html('Skript wurde geändert!<br>Neu laden?').dialog({
+                autoOpen: true,
+                title: "Skript laden",
+                modal: true,
+                height: 150,
+                width: 200,
+                buttons: {
+                    "Ok": function () {
+                        try {
+                            fetchScript();
+                            $(this).dialog("destroy");
+                        } catch (e) {
+                            errorHandler(e);
+                        }
+                    },
+                    "Abbrechen": function () {
+                        $(this).dialog("destroy");
+                    }
+                }
+            });
+        } else {
+            fetchScript();
+        }
+    } catch (e) {
+        errorHandler(e);
+    }
+}
+
+
+
+/**
+ * öffnet den Editor für das Verteilungsskript
+ */
+function openScript() {
     try {
         panelSizeReminder = verteilungLayout.state.west.size;
         verteilungLayout.sizePane("west", "99%");
@@ -1000,6 +1038,7 @@ function loadScript() {
             content = modifiedScript;
         } else {
             if (REC.exist(scriptID)) {
+                // ScriptID ist vorhanden, wir versuchen das Skript vom Alfresco Server zu laden
                 json = executeService("getDocumentContent", [
                     {"name": "documentId", "value": scriptID},
                     {"name": "extract", "value": "false"}
@@ -1011,26 +1050,23 @@ function loadScript() {
                 }
             }
             else {
-                if (isLocal()) {
-                    var file = document.URL;
-                    var parts = file.split("/").reverse();
-                    parts.splice(0,1);
-                    file = parts.reverse().join("/") +"/src/main/javascript/recognition.js";
-                    json = executeService("openFile", [
-                        {"name": "fileName", "value": file}
-                    ], "Skript konnte nicht gelesen werden:");
-                    if (json.success) {
-                        // TODO Prüfen! UTF8ArrToStr(base64DecToArr(json.result))
-                        content = json.result;
-                        read = true;
-                        REC.log(INFORMATIONAL, "Script erfolgreich gelesen!");
+                // SkriptID ist nicht vorhanden. Bei Applet kann das dann lokal geöffnet werden
 
-                    }
-                } else {
-                    $.get('recognition.js', function (content) {
-                        REC.log(INFORMATIONAL, "Script erfolgreich gelesen!");
-                        read = true;
-                    });
+                if (isLocal())
+                    script = openFile('src/main/javascript/recognition.js');
+                else {
+                    // wir laufen im Servlet und versuchen das Skript vom Server zu bekommen .
+                    // das dürfte eigentlich nie passieren, denn das Skript sollte beim Aufbau
+                    // des Alfresco Environment schon auf den Alfresco Server geladen worden sein.
+                    script = $.ajax({
+                        url: createPathToFile("src/main/javascript/recognition.js"),
+                        async: false
+                    }).responseText;
+                }
+                if (exist(script) && script.length > 0) {
+                    content = script;
+                    read = true;
+                    REC.log(INFORMATIONAL, "Script erfolgreich gelesen!");
                 }
             }
         }
@@ -1043,6 +1079,7 @@ function loadScript() {
             textEditor.getSession().setMode(new jsMode());
             textEditor.getSession().setValue(content);
             textEditor.setShowInvisibles(false);
+            textEditor.getSession().getUndoManager().markClean();
             scriptMode = true;
             fillMessageBox(true);
             manageControls();
@@ -1057,37 +1094,17 @@ function loadScript() {
 /**
  * lädt ein geändertes Verteilungsscript in den Kontext der Anwendung, damit die Änderungen wirksam werden
  */
-function reloadScript() {
+function activateScriptToContext() {
     try {
         modifiedScript = textEditor.getSession().getValue();
         eval(modifiedScript);
-        REC.log(INFORMATIONAL, "Script erfolgreich aktualisiert");
+        REC.log(INFORMATIONAL, "Die gändeterten Skriptanweisungen sind jetzt wirksam!");
         fillMessageBox(true);
     } catch (e) {
         errorHandler(e);
     }
 }
 
-
-/**
- * lädt das Verteilungsscript vom Server
- */
-function getScript() {
-    try {
-        var json = executeService("getDocumentContent", [
-            {"name": "documentId", "value": scriptID},
-            {"name": "extract", "value": "false"}
-        ], "Skript konnte nicht gelesen werden:");
-        if (json.success) {
-            save(workDocument, textEditor.getSession().getValue());
-            textEditor.getSession().setValue(json.result);
-            REC.log(INFORMATIONAL, "Script erfolgreich heruntergeladen!");
-            fillMessageBox(true);
-        }
-    } catch (e) {
-        errorHandler(e);
-    }
-}
 
 
 /**
@@ -1101,7 +1118,7 @@ function sendScript() {
             var json = executeService("updateDocument", [
                 {"name": "documentId", "value": scriptID},
                 {"name": "documentText", "value": textEditor.getSession().getValue(), "type": "byte"},
-                {"name": "mimetype", "value": "application/javascript"},
+                {"name": "mimeType", "value": "application/javascript"},
                 {"name": "extraProperties", "value": ""},
                 {"name": "versionState", "value": "minor"},
                 {"name": "versionComment", "value": ""}
@@ -1128,7 +1145,7 @@ function sendToInbox() {
         {"name": "documentId", "value": inboxID},
         { "name": "fileName", "value": currentFile},
         { "name": "documentContent", "value": currentContent, "type": "byte"},
-        { "name": "documentType", "value": "application/pdf"},
+        { "name": "mimeType", "value": "application/pdf"},
         { "name": "extraCMSProperties", "value": ""},
         { "name": "versionState", "value": "none"}
     ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
@@ -1199,7 +1216,7 @@ function checkAndBuidAlfrescoEnvironment() {
                     script = openFile('src/main/javascript/recognition.js');
                 else {
                     script = $.ajax({
-                        url: "http://localhost:8081/TestVerteilung/src/main/javascript/recognition.js",
+                        url: createPathToFile("src/main/javascript/recognition.js"),
                         async: false
                     }).responseText;
                 }
@@ -1237,7 +1254,7 @@ function checkAndBuidAlfrescoEnvironment() {
                     doc = openFile('src/main/resource/rules/doc.xml');
                 else {
                     doc = $.ajax({
-                        url: "http://localhost:8081/TestVerteilung/src/main/resource/rules/doc.xml",
+                        url: createPathToFile("src/main/resource/rules/doc.xml"),
                         async: false
                     }).responseText;
                 }

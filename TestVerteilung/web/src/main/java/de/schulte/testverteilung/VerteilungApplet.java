@@ -8,6 +8,7 @@ package de.schulte.testverteilung;
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
+// TODO Umstellung auf zentrale Aufrufmethode. Das ist dem Servletaufruf näher und es fällt eher auf wenn die Parameter einen falschen Namen im Aufruf haben.
 
 /**
  *
