@@ -142,7 +142,7 @@ function loadLayout() {
             center__paneSelector: "#clientPage",
             resizable: false
         };
-
+        // Seitenlayout
         var pageLayoutSettings = {
             name: "pageLayout",
             fxName: "slide",		// none, slide, drop, scale
@@ -159,26 +159,53 @@ function loadLayout() {
                 minSize: 33
             },
             center: {
-                paneSelector: "#tabs"
+                paneSelector: "#tabs",
+                resizable: true,
+                slidable: true,
+                size: "auto"
+            },
+            south: {
+                paneSelector: "#contentSouth",
+                contentSelector: ".ui-widget-content",
+                size: 0.1,
+                resizable: true,
+                slidable: true,
+                initHidden: false,
+                livePaneResizing: true,
+                spacing_open: 8,
+                spacing_closed: 12,
+                resizeWithWindow: true,
+                onresize: function () {
+                    if (exist(outputEditor))
+                        outputEditor.resize();
+                }
             }
         };
+
         var contentLayoutSettings = {
             name: "contentLayout",
             spacing_open: 0,
             spacing_closed: 12,
             resizable: false,
             closable: false,
+            initPanes: true,
+            showDebugMessages:			true,
+            contentSelector: ".ui-widget-content",
             north: {
                 paneSelector: "#tabButtons"
             },
             center: {
                 paneSelector: "#tabPanels",
+                resizable: true,
+                slidable: true,
+                size: "auto",
                 //	center panel contains a Tabs widget, with a layout inside 1 or more tab-panels
                 onresize: $.layout.callbacks.resizeTabLayout
             },
-            activate:                   $.layout.callbacks.resizeTabLayout
+            activate: $.layout.callbacks.resizeTabLayout
         };
 
+        // SearchTab
         var searchLayoutSettings = {
             name: "searchLayout",
             size: "auto",
@@ -218,6 +245,7 @@ function loadLayout() {
                 slidable: true
                         }
         };
+        //AlfrescoTab
         var alfrescoLayoutSettings = {
             name: "alfrescoLayout",
             size: "auto",
@@ -319,8 +347,7 @@ function loadLayout() {
                 }
             }
         };
-
-
+        //VerteilungTab
         var verteilungLayoutSettings = {
             name: "verteilungLayout",
             size: "auto",
@@ -347,7 +374,7 @@ function loadLayout() {
             //	some pane-size settings
             west: {
                 paneSelector: "#verteilungWest",
-                size: .6,
+                size: .4,
                 fxSettings_open: {easing: "easeOutBounce"},
                 closable: true,
                 resizable: true,
@@ -364,38 +391,18 @@ function loadLayout() {
                 paneSelector: "#verteilungCenter",
                 initHidden: false,
                 minHeight: 80,
-                size: .4,
+                size: .45,
                 initClosed: false,
                 onresize: function () {
                     rulesEditor.resize();
                 }
 
             },
-            south: {
-                paneSelector: "#verteilungSouth",
-                size: 0.17,
-                contentSelector: ".ui-widget-content",
-                resizable: true,
-                slidable: true,
-                children: {
-                    name: "innerLayout",
-                    contentSelector: ".ui-widget-content",
-                    spacing_open: 8,
-                    spacing_closed: 12,
-                    west: {
-                        paneSelector: "#verteilungSouthInnerWest",
-                        size: .74,
-                        onresize: function () {
-                            outputEditor.resize();
-                        }
-                    },
-                    center: {
-                        size: "auto",
-                        paneSelector: "#verteilungSouthInnerCenter",
-                        onresize: function () {
-                            propsEditor.resize();
-                        }
-                    }
+            east: {
+                size:.15,
+                paneSelector: "#verteilungEast",
+                onresize: function () {
+                    propsEditor.resize();
                 }
             },
             //	enable state management
@@ -418,12 +425,12 @@ function loadLayout() {
              */
         });
 
-        $('#tabs').layout(contentLayoutSettings);
+
 
         globalLayout = $('body').layout(clientPageLayoutSettings);
 
         $('#clientPage').layout(pageLayoutSettings);
-
+        $('#tabs').layout(contentLayoutSettings);
         verteilungLayout = $('#tab3').layout(verteilungLayoutSettings);
         searchLayout = $('#tab2').layout(searchLayoutSettings);
         alfrescoLayout = $('#tab1').layout(alfrescoLayoutSettings);

@@ -237,15 +237,19 @@
 
 <body>
 
-
+<!--Seite-->
 <div id="clientPage" class="ui-state-active">
+    <!--Tab Bereich-->
     <div id="tabs" class="container">
+        <!--Tabulatoren-->
         <ul id="tabButtons" class="container">
             <li><a href="#tab1">Archiv</a></li>
             <li><a href="#tab2">Suche</a></li>
             <li><a href="#tab3">Verteilung</a></li>
         </ul>
+        <!--Tab Panels-->
         <div id="tabPanels" class="container ui-state-active">
+            <!--Tab Archiv-->
             <div id="tab1" class="tabPanel ui-widget-content hidden">
                 <div id="alfrescoWest" class="ui-tab-layout-west container  hidden">
                     <div id="alfrescoHeaderWest" class="header  ui-widget-header">Archiv</div>
@@ -262,11 +266,11 @@
                                     <table cellpadding="0" cellspacing="0" border="0" class="display"
                                            id="alfrescoFolderTabelle"></table>
                                 </div>
-                                <div class="header  ui-widget-header" id="alfrescoFolderTableFooter"></div>
+                                <div class="header ui-widget-header" id="alfrescoFolderTableFooter"></div>
                             </div>
                         </div>
                         <div id="alfrescoCenterCenterCenter" class="inner-center container  hidden">
-                            <div class="header  ui-widget-header" id="alfrescoTabelleHeader">Dokumente</div>
+                            <div class="header ui-widget-header" id="alfrescoTabelleHeader">Dokumente</div>
                             <div >
                                 <div id="dtable2">
                                     <table cellpadding="0" cellspacing="0" border="0" class="display"
@@ -298,21 +302,25 @@
                                             <a href="#icons" onclick="showAlfrescoIconView();">Icons</a>
                                         </li>
                                     </ul>
+                                </li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
+            <!--Tab Suche-->
             <div id="tab2" class="tabPanel ui-widget-content hidden">
                 <div id="searchNorth" class="ui-tab-layout-north container hidden">
                     <div class="header  ui-widget-header">Suchen</div>
                     <div>
                         <label for="alfrescoSearch" style="float:left;margin: 20px 5px 5px 5px;">Suche </label>
-                        <input id="alfrescoSearch" style="width:400px;height:auto;float:left;margin: 20px 5px 5px 5px;" class="ui-autocomplete-input" autocomplete="off"></input>
-                        <div id="alfrescoSearchButton" onclick="startSearch($('#alfrescoSearch').val());" style="margin: 18px 5px 5px 5px;">Suche</div>
+                        <input id="alfrescoSearch" style="width:400px;height:auto;float:left;margin: 20px 5px 5px 5px;"
+                               class="ui-autocomplete-input" autocomplete="off"/>
+                        <div id="alfrescoSearchButton" onclick="startSearch($('#alfrescoSearch').val());"
+                             style="margin: 18px 5px 5px 5px;">Suche
+                        </div>
                     </div>
-
-            </div>
+                </div>
                 <div id="searchCenter" class="ui-tab-layout-center container hidden">
                     <div class="header  ui-widget-header">Ergebnisse
                         <ul id="menu-2" style="float: right;" class="sf-menu"
@@ -340,22 +348,10 @@
                     </div>
                 </div>
             </div>
+            <!--Tab Verteilung-->
             <div id="tab3" class="tabPanel ui-widget-content hidden">
-                <div id="verteilungSouth" class="ui-tab-layout-south container hidden">
-                    <div id="verteilungSouthInnerWest" class="inner-west container ui-widget-header hidden">
-                        <div class="header">Konsole</div>
-                        <div class="ui-widget-content">
-                            <div id="inOutput" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
-                        </div>
-                    </div>
-                    <div id="verteilungSouthInnerCenter" class="inner-center container ui-widget-header hidden">
-                        <div class="header">Ergebnis</div>
-                        <div class="ui-widget-content">
-                            <div id="inProps" style="position:absolute; top:0px;bottom:0;left:0;right:0"></div>
-                        </div>
-                    </div>
-                </div>
 
+                <!--Dokument-->
                 <div id="verteilungWest" class="ui-tab-layout-west container ui-widget-header hidden">
                     <div id="headerWest" class="header">Dokument</div>
                     <div class="ui-widget-content" style="overflow:auto;">
@@ -364,21 +360,37 @@
                     </div>
                 </div>
 
-
+                <!--Regeln-->
                 <div id="verteilungCenter" class="ui-tab-layout-center container ui-widget-header hidden">
                     <div id="headerCenter" class="header">Regeln</div>
                     <div class="ui-widget-content">
                         <div id="inRules" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
                     </div>
                 </div>
+                <!--Ergebnis-->
+                <div id="verteilungEast" class="ui-tab-layout-east container ui-widget-header hidden">
+                    <div class="header">Ergebnis</div>
+                    <div class="ui-widget-content">
+                        <div id="inProps" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+    <!--Ausgabe-->
+    <div id="contentSouth" class="ui-layout-south ui-widget-header container hidden">
+        <div id="headerSouth" class="header">Ausgabe</div>
+        <div class="ui-widget-content">
+            <div id="inOutput" style="position:absolute; top:0;bottom:0;left:0;right:0"></div>
         </div>
     </div>
 </div>
 
+
+
+<!--Buttons-->
 <div id="contentNorth" class="ui-layout-north container ui-widget-content"
-     onmouseover="verteilungLayout.allowOverflow(this); alfrescoLayout.allowOverflow(this);"
-        >
+     onmouseover="verteilungLayout.allowOverflow(this); alfrescoLayout.allowOverflow(this);">
     <table style="">
         <tr>
             <td width="30%"><input id="filesinput" name="filesinput"
@@ -504,8 +516,8 @@
 
         </tr>
     </table>
-
 </div>
+
 </div>
 <div id="messageBox"></div>
 </body>
