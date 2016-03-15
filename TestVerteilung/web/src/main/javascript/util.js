@@ -204,6 +204,7 @@ function message(title, str, autoClose, height, width) {
         height: height,
         width: width
     };
+    var div = $("<div></div>");
     if (exist(autoClose)) {
        dialogSettings.open = function(event, ui){
            setTimeout("$('#messageBox').dialog('close')",autoClose);
@@ -212,11 +213,12 @@ function message(title, str, autoClose, height, width) {
         dialogSettings.buttons =  {
             "Ok": function () {
                 $(this).dialog("destroy");
+                div.remove();
             }
         }
     }
 
-    var $dialog = $('#messageBox').html(str).dialog(dialogSettings).css({height:height+"px", width:width+"px", overflow:"auto"});
+    var $dialog = div.html(str).dialog(dialogSettings).css({height:height+"px", width:width+"px", overflow:"auto"});
     $dialog.dialog('open');
 }
 

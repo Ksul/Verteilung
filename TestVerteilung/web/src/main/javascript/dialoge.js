@@ -298,6 +298,7 @@ function startDocumentDialog(tableRow) {
                     form.registerSubmitHandler(function (e) {
                         if (form.isFormValid()) {
                             try {
+                                // Werte übertragen
                                 var title = $("[name='title']").val(),
                                     description = $("[name='description']").val(),
                                     person = $("[name='person']").val(),
@@ -305,15 +306,10 @@ function startDocumentDialog(tableRow) {
                                     amount = $("[name='amount']").val(),
                                     idvalue = $("[name='idvalue']").val(),
                                     tax = $("[name='tax']").val();
+                                // Wurde was geändert?
                                 if (data.title != title || data.description != description || data.person != person || data.documentDate != documentDate
                                     || data.amount != amount || data.tax != tax) {
-                                    data.title = title;
-                                    data.description = description;
-                                    data.person = person;
-                                    data.documentDate = $.datepicker.parseDate("dd.mm.yy", documentDate).getTime();
-                                    data.amount = amount;
-                                    data.idvalue = idvalue;
-                                    data.tax = tax;
+
                                     var extraProperties = {
                                         'P:cm:titled': {'cm:title': title, 'cm:description': description},
                                         'D:my:archivContent': {'my:documentDate': $.datepicker.parseDate("dd.mm.yy", documentDate).getTime(), 'my:person': person},
@@ -325,7 +321,16 @@ function startDocumentDialog(tableRow) {
                                         {"name": "documentId", "value": data.objectId},
                                         {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                                     ], "Dokument konnte nicht aktualisiert werden!", false);
-
+                                    if (erg.success) {
+                                        // Daten in die Tabelle übertragen
+                                        data.title = title;
+                                        data.description = description;
+                                        data.person = person;
+                                        data.documentDate = $.datepicker.parseDate("dd.mm.yy", documentDate).getTime();
+                                        data.amount = amount;
+                                        data.idvalue = idvalue;
+                                        data.tax = tax;
+                                    }
                                 }
                                 alfrescoTabelle.rows().invalidate();
                                 closeDialog();
@@ -431,10 +436,6 @@ function startFolderDialog(tableRow, modus) {
                                     title = $("[name='title']").val();
 
                                 if (data.name != name || data.title != title || data.description != description) {
-                                    data.name = name;
-                                    data.title = title;
-                                    data.description = description;
-
                                     var extraProperties = {
                                         'cmis:folder': {
                                             'cmis:objectTypeId': 'cmis:folder',
@@ -468,6 +469,9 @@ function startFolderDialog(tableRow, modus) {
                                             $("#tree").jstree('rename_node', node[0], name);
                                         }
                                     }
+                                    data.name = name;
+                                    data.title = title;
+                                    data.description = description;
                                 }
                                 closeDialog();
                             } catch (e) {

@@ -135,8 +135,8 @@ public class VerteilungAppletTest extends AlfrescoTest {
     }
 
     @Test
-    public void testMoveDocument() throws Exception {
-        JSONObject obj = applet.moveDocument("/Archiv", "abcde", "");
+    public void testMoveNode() throws Exception {
+        JSONObject obj = applet.moveNode("/Archiv", "abcde", "");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));

@@ -555,7 +555,7 @@ public class VerteilungServletTest extends AlfrescoTest {
 
 
     @Test
-    public void testMoveDocument() throws Exception {
+    public void testMoveNode() throws Exception {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
         servlet.doPost(request, response);
@@ -595,7 +595,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertNotNull(doc.getString("objectId"));
         sr.getBuffer().delete(0, 9999);
         // Dokument verschieben
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn("moveDocument");
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn("moveNode");
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
         when(request.getParameter(VerteilungServlet.PARAMETER_CURENTLOCATIONID)).thenReturn(currentLocationId);
         when(request.getParameter(VerteilungServlet.PARAMETER_DESTINATIONID)).thenReturn(destinationId);

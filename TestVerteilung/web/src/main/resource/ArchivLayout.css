@@ -82,6 +82,11 @@ h1 {
     margin: .6em 0;
 }
 
+
+.ui-icon-seek-first, .ui-icon-seek-prev, .ui-icon-seek-next, .ui-icon-seek-end {
+    zoom: 2.0;
+}
+
 .ui-dialog .ui-state-error {
     padding: .3em;
 }

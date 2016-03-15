@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
-import com.sun.deploy.net.HttpRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,6 +47,8 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_EXTRAPROPERTIES = "extraProperties";
     public static final String PARAMETER_TICKET = "ticket";
     public static final String PARAMETER_COMMENT = "comment";
+    public static final String PARAMETER_MAXITEMSPERPAGE = "maxItemsPerPage";
+    public static final String PARAMETER_PAGESTOSKIP = "pagesToSkip";
 
     public static final String FUNCTION_CLEARINTERNALSTORAGE = "clearInternalStorage";
     public static final String FUNCTION_CREATEDOCUMENT = "createDocument";
@@ -66,7 +67,8 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_GETNODEID = "getNodeId";
     public static final String FUNCTION_ISURLAVAILABLE = "isURLAvailable";
     public static final String FUNCTION_LISTFOLDERASJSON = "listFolder";
-    public static final String FUNCTION_MOVEDOCUMENT = "moveDocument";
+    public static final String FUNCTION_LISTFOLDERASJSONWITHPAGINATION = "listFolderWithPagination";
+    public static final String FUNCTION_MOVENODE = "moveNode";
     public static final String FUNCTION_OPENFILE = "openFile";
     public static final String FUNCTION_OPENPDF = "openPDF";
     public static final String FUNCTION_SETPARAMETER = "setParameter";
@@ -203,10 +205,12 @@ public class VerteilungServlet extends HttpServlet {
                     obj = updateDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_DOCUMENTTEXT, false), getURLParameter(req, PARAMETER_MIMETYPE, false), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, false), getURLParameter(req, PARAMETER_VERSIONSTATE, false), getURLParameter(req, PARAMETER_VERSIONCOMMENT, false));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPDATEPROPERTIES)) {
                     obj = updateProperties(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_EXTRAPROPERTIES, true));
-                } else if (value.equalsIgnoreCase(FUNCTION_MOVEDOCUMENT)) {
-                    obj = moveDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_CURENTLOCATIONID, true), getURLParameter(req, PARAMETER_DESTINATIONID, true));
+                } else if (value.equalsIgnoreCase(FUNCTION_MOVENODE)) {
+                    obj = moveNode(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_CURENTLOCATIONID, true), getURLParameter(req, PARAMETER_DESTINATIONID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_LISTFOLDERASJSON)) {
                     obj = listFolder(getURLParameter(req, PARAMETER_FILEPATH, true), getURLParameter(req, PARAMETER_WITHFOLDER, true));
+                } else if (value.equalsIgnoreCase(FUNCTION_LISTFOLDERASJSONWITHPAGINATION)) {
+                    obj = listFolderWithPagination(getURLParameter(req, PARAMETER_FILEPATH, true), getURLParameter(req, PARAMETER_WITHFOLDER, true),  getURLParameter(req, PARAMETER_MAXITEMSPERPAGE, true),  getURLParameter(req, PARAMETER_PAGESTOSKIP, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_EXTRACTPDFCONTENT)) {
                     obj = extractPDFContent(getURLParameter(req, PARAMETER_DOCUMENTTEXT, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_EXTRACTPDFFILE)) {
@@ -434,19 +438,19 @@ public class VerteilungServlet extends HttpServlet {
 
     /**
      * verschiebt ein Dokument
-     * @param  documentId                das zu verschiebende Dokument
-     * @param  oldFolderId               der alte Folder in dem das Dokument liegt
-     * @param  newFolderId               der Folder, in das Dokument verschoben werden soll
+     * @param  documentId                die Id des des zu verschiebende Knoten
+     * @param  oldFolderId               der alte Folder in dem der Knoten liegt
+     * @param  newFolderId               der Folder, in das der Knoten verschoben werden soll
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
      *                                                                  result           bei Erfolg das Document als JSONObject, ansonsten der Fehler
      * @throws VerteilungException
      */
-    protected JSONObject moveDocument(String documentId,
-                                      String oldFolderId,
-                                      String newFolderId) throws VerteilungException {
+    protected JSONObject moveNode(String documentId,
+                                  String oldFolderId,
+                                  String newFolderId) throws VerteilungException {
 
-        return services.moveDocument(documentId, oldFolderId, newFolderId);
+        return services.moveNode(documentId, oldFolderId, newFolderId);
     }
 
     /**
@@ -501,6 +505,24 @@ public class VerteilungServlet extends HttpServlet {
                                           String listFolder) throws VerteilungException {
 
         return services.listFolder(filePath, Integer.parseInt(listFolder));
+    }
+
+    /**
+     * liefert die Dokumente eines Alfresco Folders seitenweise als JSON Objekte
+     * @param filePath           der Pfad, der geliefert werden soll (als NodeId)
+     * @param listFolder         was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
+     * @param  maxItemsPerPage   die maximale Anzahl
+     * @param  pagesToSkip       die Anzahl Seiten die übersprungen werden soll
+     * @return                    ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                    false    ein Fehler ist aufgetreten
+     *                                                           result            der Inhalt des Verzeichnisses als JSON Objekte
+     */
+    protected JSONObject listFolderWithPagination(String filePath,
+                                                  String listFolder,
+                                                  String maxItemsPerPage,
+                                                  String pagesToSkip) throws VerteilungException {
+
+        return services.listFolder(filePath, Integer.parseInt(listFolder), Integer.parseInt(maxItemsPerPage), Integer.parseInt(pagesToSkip));
     }
 
 

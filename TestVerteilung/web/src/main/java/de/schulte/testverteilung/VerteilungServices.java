@@ -134,14 +134,17 @@ public class VerteilungServices {
      *
      * @param  filePath          der Pfad, der geliefert werden soll
      * @param  listFolder        was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
+     * @param  maxItemsPerPage   die maximale Anzahl
+     * @param  pagesToSkip       die Anzahl Seiten die übersprungen werden soll
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
      */
     public JSONObject listFolder(String filePath,
-                                 int listFolder) {
+                                 int listFolder,
+                                 int maxItemsPerPage,
+                                 int pagesToSkip) {
 
-        JSONObject o;
         JSONArray list = new JSONArray();
         JSONObject obj = new JSONObject();
         //JSONObject state;
@@ -151,40 +154,92 @@ public class VerteilungServices {
             if (filePath.equals("-1"))
                 filePath = con.getNode("/Archiv").getId();
 
-            for (CmisObject cmisObject : con.listFolder(filePath)) {
+            for (CmisObject cmisObject : con.listFolder(filePath, maxItemsPerPage, pagesToSkip)) {
 
                 // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
-                if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1)) {
-                    o = convertObjectToJSON(cmisObject.getProperties());
-                    // prüfen, ob Children vorhanden sind
-                    if (cmisObject instanceof Folder) {
-                        ItemIterable<CmisObject> children = con.listFolder(cmisObject.getId());
-                        o.put("hasChildren", children.getTotalNumItems() > 0);
-                        boolean hasChildFolder = false;
-                        boolean hasChildDocuments = false;
-                        for (CmisObject childObject : con.listFolder(cmisObject.getId())) {
-                            if (childObject instanceof Folder) {
-                                hasChildFolder = true;
-                            }
-                            if (childObject instanceof Document) {
-                                hasChildDocuments = true;
-                            }
-                            if (hasChildDocuments && hasChildFolder)
-                                break;
-                        }
-                        o.put("hasChildFolder", hasChildFolder);
-                        o.put("hasChildDocuments", hasChildDocuments);
-                    }
-                    o.put("parentId", filePath);
-                    list.put(o);
-                }
+                if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1))
+                    list.put(convertFoundObjectToJson(filePath, cmisObject));
+
             }
             obj.put("success", true);
             obj.put("result", list);
+
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
+    }
+
+    /**
+     * liefert die Dokumente eines Alfresco Folders als JSON Objekte
+     *
+     * @param  filePath          der Pfad, der geliefert werden soll
+     * @param  listFolder        was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
+     */
+    public JSONObject listFolder(String filePath,
+                                 int listFolder) {
+
+        JSONArray list = new JSONArray();
+        JSONObject obj = new JSONObject();
+        //JSONObject state;
+        try {
+            // state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
+            // das Root Object übergeben?
+            if (filePath.equals("-1"))
+                filePath = con.getNode("/Archiv").getId();
+
+            for (CmisObject cmisObject : con.listFolder(filePath)) {
+
+                // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
+                if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1))
+                    list.put(convertFoundObjectToJson(filePath, cmisObject));
+
+            }
+            obj.put("success", true);
+            obj.put("result", list);
+
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * konvertiert das gefundenen Objekt in ein JSON Objekt
+     * @param filePath               der FilePath
+     * @param cmisObject             das zu konvertierende CMIS Objekt
+     * @throws JSONException
+     * @throws VerteilungException
+     * @return JSONObject           das gefüllte JSON Objekt
+     */
+    private JSONObject convertFoundObjectToJson(String filePath, CmisObject cmisObject) throws JSONException, VerteilungException {
+
+        JSONObject o = convertObjectToJSON(cmisObject.getProperties());
+        // prüfen, ob Children vorhanden sind
+        if (cmisObject instanceof Folder) {
+            ItemIterable<CmisObject> children = con.listFolder(cmisObject.getId());
+            o.put("hasChildren", children.getTotalNumItems() > 0);
+            boolean hasChildFolder = false;
+            boolean hasChildDocuments = false;
+            for (CmisObject childObject : con.listFolder(cmisObject.getId())) {
+                if (childObject instanceof Folder) {
+                    hasChildFolder = true;
+                }
+                if (childObject instanceof Document) {
+                    hasChildDocuments = true;
+                }
+                if (hasChildDocuments && hasChildFolder)
+                    break;
+            }
+            o.put("hasChildFolder", hasChildFolder);
+            o.put("hasChildDocuments", hasChildDocuments);
+        }
+        o.put("parentId", filePath);
+
+        return o;
     }
 
     /**
@@ -342,7 +397,6 @@ public class VerteilungServices {
         JSONObject obj = new JSONObject();
         try {
             CmisObject document;
-            CmisObject folderObject;
             document = con.getNodeById(documentId);
             if (document != null && document instanceof Document) {
                 if (((Document) document).isVersionSeriesCheckedOut())
@@ -492,28 +546,32 @@ public class VerteilungServices {
 
     /**
      * verschiebt ein Dokument
-     * @param  documentId                das zu verschiebende Dokument
-     * @param  oldFolderId               der alte Folder in dem das Dokument liegt
-     * @param  newFolderId               der Folder, in das Dokument verschoben werden soll
+     * @param  documentId                die Id des zu verschiebenden Knoten
+     * @param  oldFolderId               der alte Folder in dem der Knoten liegt
+     * @param  newFolderId               der Folder, in das der Knoten verschoben werden soll
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
      *                                                                  result           bei Erfolg das Document als JSONObject, ansonsten der Fehler
      */
-    public JSONObject moveDocument(String documentId,
-                                   String oldFolderId,
-                                   String newFolderId) {
+    public JSONObject moveNode(String documentId,
+                               String oldFolderId,
+                               String newFolderId) {
 
         JSONObject obj = new JSONObject();
         try {
-            CmisObject document = con.getNodeById(documentId);
+            CmisObject node = con.getNodeById(documentId);
             CmisObject oldFolder = con.getNodeById(oldFolderId);
             CmisObject newFolder = con.getNodeById(newFolderId);
-            if (document != null && document instanceof Document) {
+            if (node != null && node instanceof Document || node instanceof Folder) {
                 if (oldFolder != null && oldFolder instanceof Folder) {
                     if (newFolder != null && newFolder instanceof Folder) {
-                        CmisObject doc = con.moveDocument((Document) document, (Folder) oldFolder, (Folder) newFolder);
+                        FileableCmisObject doc = con.moveNode((FileableCmisObject) node, (Folder) oldFolder, (Folder) newFolder);
+                        logger.fine("Knoten " + node.getId() + " von " + ((FileableCmisObject) node).getPaths().get(0) + " nach " + doc.getPaths().get(0) + " verschoben!");
                         obj.put("success", true);
                         obj.put("result", convertObjectToJSON(doc.getProperties()).toString());
+                        // Quell und Zielordner zurückgeben
+                        obj.put("source", convertObjectToJSON(oldFolder.getProperties()).toString());
+                        obj.put("target", convertObjectToJSON(newFolder.getProperties()).toString());
                     } else {
                         obj.put("success", false);
                         obj.put("result", "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
@@ -526,7 +584,7 @@ public class VerteilungServices {
                 }
             } else {
                 obj.put("success", false);
-                obj.put("result", document == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
+                obj.put("result", node == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document oder Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -570,7 +628,7 @@ public class VerteilungServices {
                 }
             } else {
                 obj.put("success", false);
-                obj.put("result", target == null ? "Der Pfad " + target + "  ist nicht vorhanden!" : "Der verwendete Pfad " + target + " ist kein Folder!");
+                obj.put("result", target == null ? "Der angebene Pfad mit der Id " + documentId + " ist nicht vorhanden!" : "Der verwendete Pfad " + target + " ist kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -1026,10 +1084,9 @@ public class VerteilungServices {
     private Map<String, Object> buildProperties(String extraCMSProperties) throws JSONException {
 
         logger.fine("buildProperties from " + extraCMSProperties);
-        Map<String, Object> outMap = null;
         JSONObject props = new JSONObject(extraCMSProperties);
         Iterator nameItr = props.keys();
-        outMap = new HashMap<>();
+        Map<String, Object> outMap = new HashMap<>();
         while (nameItr.hasNext()) {
             String name = (String) nameItr.next();
             Map<String, Object> inMap = new HashMap<>();

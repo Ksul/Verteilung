@@ -218,6 +218,35 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
+     * liefert die Dokumente eines Alfresco Folders seitenweise als JSON Objekte
+     * @param filePath           der Pfad, der geliefert werden soll
+     * @param listFolder         was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
+     * @param  maxItemsPerPage   die maximale Anzahl
+     * @param  pagesToSkip       die Anzahl Seiten die übersprungen werden soll
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
+     */
+    public JSONObject listFolderWithPagination(final String filePath,
+                                               final String listFolder,
+                                               final String maxItemsPerPage,
+                                               final String pagesToSkip)  {
+
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    return services.listFolder(filePath, Integer.parseInt(listFolder), Integer.parseInt(maxItemsPerPage), Integer.parseInt(pagesToSkip));
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
      * @param filePath     der Pfad, der geliefert werden soll
      * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
@@ -226,7 +255,7 @@ public class VerteilungApplet extends Applet {
      *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
      */
     public JSONObject listFolder(final String filePath,
-                                       final String listFolder)  {
+                                 final String listFolder)  {
 
         JSONObject obj;
         try {
@@ -529,23 +558,23 @@ public class VerteilungApplet extends Applet {
 
     /**
      * verschiebt ein Dokument
-     * @param  documentId                das zu verschiebende Dokument
-     * @param  oldFolderId               der alte Folder in dem das Dokument liegt
-     * @param  newFolderId               der Folder, in das Dokument verschoben werden soll
+     * @param  documentId                die Id des zu verschiebenden Knotens
+     * @param  oldFolderId               der alte Folder in dem der Knoten liegt
+     * @param  newFolderId               der Folder, in das der Knoten verschoben werden soll
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
      *                                                                  result           bei Erfolg nichts, ansonsten der Fehler
      */
-    public JSONObject moveDocument(final String documentId,
-                                   final String oldFolderId,
-                                   final String newFolderId) {
+    public JSONObject moveNode(final String documentId,
+                               final String oldFolderId,
+                               final String newFolderId) {
 
         JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.moveDocument(documentId, oldFolderId, newFolderId);
+                    return services.moveNode(documentId, oldFolderId, newFolderId);
                 }
             });
         } catch (PrivilegedActionException e) {

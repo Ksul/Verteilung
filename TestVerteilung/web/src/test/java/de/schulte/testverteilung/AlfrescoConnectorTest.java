@@ -202,11 +202,17 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         properties.put("cmis:document", standardMap);
         document = (Document) con.updateProperties(document, properties);
         assertNotNull(document);
-        // Die Überprüfung auf Aspekte funktioniert nicht
-        //assertTrue(((AlfrescoDocument) document).hasAspect("P:cm:titled"));
+
+        assertTrue(((AlfrescoDocument) document).hasAspect("P:cm:titled"));
         assertEquals(new BigDecimal(25.33).doubleValue(), ((BigDecimal) document.getProperty("my:amount").getValue()).doubleValue(), 0);
         assertTrue((boolean) document.getProperty("my:tax").getValue());
         document.delete(true);
+    }
+
+    @Test
+    public void testTest() throws Exception {
+        CmisObject cmisObject = con.getNode("/Archiv/Fehler/00000a54.pdf");
+        System.out.println(((AlfrescoDocument) cmisObject).getType());
     }
 
     @Test
@@ -283,7 +289,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
     }
 
     @Test
-    public void testMoveDocument() throws Exception {
+    public void testMoveNode() throws Exception {
         CmisObject folder = con.getNode("/Archiv");
         assertNotNull(folder);
         assertTrue(folder instanceof Folder);
@@ -295,7 +301,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         CmisObject newFolder = con.getNode("/Archiv/Fehler");
         assertNotNull(newFolder);
         assertTrue(newFolder instanceof Folder);
-        CmisObject cmisObject = con.moveDocument(document, (Folder) folder, (Folder) newFolder);
+        CmisObject cmisObject = con.moveNode(document, (Folder) folder, (Folder) newFolder);
         assertNotNull(cmisObject);
         assertTrue(cmisObject instanceof Document);
         assertEquals("TestDocument.txt", cmisObject.getName());

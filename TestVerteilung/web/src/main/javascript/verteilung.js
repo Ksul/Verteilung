@@ -1030,7 +1030,7 @@ function getScript() {
 function openScript() {
     try {
         panelSizeReminder = verteilungLayout.state.west.size;
-        verteilungLayout.sizePane("west", "99%");
+        verteilungLayout.sizePane("west", "95%");
         oldContent = textEditor.getSession().getValue();
         var content, json;
         var read = false;
@@ -1140,15 +1140,18 @@ function sendScript() {
  * sendet ein Dokument zur Inbox
  */
 function sendToInbox() {
-
-    var json = executeService("createDocument", [
-        {"name": "documentId", "value": inboxID},
-        { "name": "fileName", "value": currentFile},
-        { "name": "documentContent", "value": currentContent, "type": "byte"},
-        { "name": "mimeType", "value": "application/pdf"},
-        { "name": "extraCMSProperties", "value": ""},
-        { "name": "versionState", "value": "none"}
-    ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
+    try {
+        var json = executeService("createDocument", [
+            {"name": "documentId", "value": inboxFolderId},
+            {"name": "fileName", "value": currentFile},
+            {"name": "documentContent", "value": currentContent, "type": "byte"},
+            {"name": "mimeType", "value": "application/pdf"},
+            {"name": "extraCMSProperties", "value": ""},
+            {"name": "versionState", "value": "none"}
+        ], ["Dokument konnte nicht auf den Server geladen werden:", "Dokument " + name + " wurde erfolgreich in die Inbox verschoben!"]);
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 /**
@@ -1305,14 +1308,14 @@ function checkAndBuidAlfrescoEnvironment() {
             // Archiv Root prüfen
             erg = buildAlfrescoFolder("/Archiv/Dokumente", archivFolderId, "Der Ordner für die abgelegten Dokumente");
             if (erg.success) {
-                rootID = erg.result;
+                documentFolderId = erg.result;
             }
         }
         if (erg.success) {
             // Inbox prüfen
             erg = buildAlfrescoFolder("/Archiv/Inbox", archivFolderId, "Der Posteingangsordner");
             if (erg.success) {
-                inboxID = erg.result;
+                inboxFolderId = erg.result;
             }
         }
         if (erg.success) {
@@ -1325,10 +1328,16 @@ function checkAndBuidAlfrescoEnvironment() {
         if (erg.success) {
             // Unbekanntbox prüfen
             erg = buildAlfrescoFolder("/Archiv/Unbekannt", archivFolderId, "Der Ordner für unbekannte Dokumente");
+            if (erg.success) {
+                unknownFolderId = erg.result;
+            }
         }
         if (erg.success) {
             // Doppelte Box prüfen
             erg = buildAlfrescoFolder("/Archiv/Fehler/Doppelte", fehlerFolderId, "Verzeichnis für doppelte Dokumente");
+            if (erg.success) {
+                doubleFolderId = erg.result;
+            }
         }
         if (erg.success) {
             tabLayout.tabs("option", "active", 0);

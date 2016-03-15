@@ -51,6 +51,15 @@ public class VerteilungServicesTest extends AlfrescoTest {
     }
 
     @Test
+    public void testT() throws Exception{
+        JSONObject obj = services.getNodeId("/Archiv/Unbekannt");
+        String id = obj.getString("result");
+        long t = System.currentTimeMillis()   ;
+        obj = services.listFolder(id, 0);
+        System.out.println(System.currentTimeMillis() - t) ;
+    }
+
+    @Test
     public void testListFolder() throws Exception {
         JSONObject obj = services.listFolder("-1", 0);
         assertTrue(obj.length() >= 2);
@@ -395,7 +404,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
     }
 
     @Test
-    public void testMoveDocument() throws Exception {
+    public void testMoveNode() throws Exception {
         JSONObject oldFolder = services.getNodeId("/Archiv");
         assertNotNull(oldFolder);
         assertTrue(oldFolder.length() >= 2);
@@ -417,7 +426,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         JSONObject documentResult = new JSONObject(document.get("result").toString());
         assertNotNull(documentResult);
         assertNotNull(documentResult.getString("objectId"));
-        JSONObject obj = services.moveDocument(documentResult.getString("objectId"), oldFolderId, newFolderId);
+        JSONObject obj = services.moveNode(documentResult.getString("objectId"), oldFolderId, newFolderId);
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));

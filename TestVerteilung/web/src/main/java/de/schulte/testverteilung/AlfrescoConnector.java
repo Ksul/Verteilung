@@ -327,18 +327,20 @@ public class AlfrescoConnector {
 
     /**
      * verschiebt ein Dokument
-     * @param document              das zu verschiebende Dokument
-     * @param oldFolder             der alte Folder in dem das Dokument liegt
-     * @param newFolder             der Folder, in das Dokument verschoben werden soll
+     * @param fileableCmisObject    der zu verschiebende Knoten
+     * @param oldFolder             der alte Folder in dem der Knoten liegt
+     * @param newFolder             der Folder, in das der Knoten verschoben werden soll
      *
-     * @return                     das verschobene Dokument
+     * @return                     der verschobene Knoten
      */
-    public CmisObject moveDocument(Document document,
-                             Folder oldFolder,
-                             Folder newFolder) {
+    public FileableCmisObject moveNode(FileableCmisObject fileableCmisObject,
+                               Folder oldFolder,
+                               Folder newFolder) {
 
-         return document.move(oldFolder, newFolder);
+         return fileableCmisObject.move(oldFolder, newFolder);
     }
+
+
 
     /**
      * erstellt einen Folder
