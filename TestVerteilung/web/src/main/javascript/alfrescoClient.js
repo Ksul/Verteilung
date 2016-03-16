@@ -716,7 +716,7 @@ function loadAlfrescoTable() {
                     return $.vakata.dnd.start(event, {
                         'jstree': true,
                         'obj': $(this),
-                        'nodes': [{id: true, text: title, data: data,  rowIndex: row.index()}]
+                        'nodes': [{id: data.objectId, text: title, data: data,  rowIndex: row.index()}]
                     }, '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + title + '</div>');
                 } catch (e) {
                     errorHandler(e);
@@ -828,15 +828,29 @@ function loadAlfrescoFolderTable() {
                     var data = row.data();
                     var title = (exist(data.title) ? data.title : data.name);
                     // Kein Verschieben der Standard Ordner
-                    if (data.objectId == archivFolderId || data.objectId == alfrescoRootFolderID || data.objectId == documentFolderId || data.objectId == fehlerFolderId || data.objectId == unknownFolderId || data.objectId == doubleFolderId || data.objectId == inboxFolderId)
+                    if (data.objectId == archivFolderId ||
+                        data.objectId == alfrescoRootFolderID ||
+                        data.objectId == documentFolderId ||
+                        data.objectId == fehlerFolderId ||
+                        data.objectId == unknownFolderId ||
+                        data.objectId == doubleFolderId ||
+                        data.objectId == inboxFolderId) {
                         return false;
-                    else
+                        }
+                    else {
                         return $.vakata.dnd.start(event, {
-                        'jstree': true,
-                        'obj': $(this),
-                        'nodes': [{id: true, text: title, data: data,  rowIndex: row.index()}]
-                    }, '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + title + '</div>');
-                } catch (e) {
+                            'jstree': true,
+                            'obj': $(this),
+                            'nodes': [{
+                                id: data.objectId+"_NEW",
+                                children: data.hasChildFolder,
+                                text: title,
+                                data: data,
+                                rowIndex: row.index()
+                            }]
+                        }, '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + title + '</div>');
+                    }
+                    } catch (e) {
                     errorHandler(e);
                 }
             });
@@ -849,9 +863,15 @@ function loadAlfrescoFolderTable() {
 }
 
 /**
- * baut die Suchergebnis Tabelle auf.
+ * baut die die Tabelle für die Suchergebnisse auf.
  */
 function loadAlfrescoSearchTable() {
+
+    /**
+     * öffnet ein Dokument
+     * @param obj
+     * @param event
+     */
     function openDocument(obj, event) {
         try {
             event.preventDefault();
@@ -2130,6 +2150,9 @@ function loadAlfrescoTree() {
     }
     try {
         tree = $("#tree").jstree({
+            'ui': {
+                'select_limit': 1
+            },
             'core': {
                 'data': function (node, aFunction) {
                     try {
@@ -2180,13 +2203,7 @@ function loadAlfrescoTree() {
                              more.ref.data.objectId == node.data.parentId )) {
                             erg = false;
                         }
-                        if (erg) {
-                            // Knoten darf verschoben werden
-                            return true;
-                        } else {
-                            // Knoten darf nicht verstoben werden
-                            return false;
-                        }
+                        return erg;
                     } catch (e) {
                         errorHandler(e);
                     }
@@ -2213,7 +2230,7 @@ function loadAlfrescoTree() {
                     "valid_children" : []
                 }
             },
-            'plugins': ["dnd", "types"]
+            'plugins': ["dnd", "ui", "types"]
         }).on("select_node.jstree", function (event, data) {
             try {
                 if (!exist(data.node.data))
@@ -2284,11 +2301,15 @@ function loadAlfrescoTree() {
                     REC.log(INFORMATIONAL, (folder ? "Ordner " : "Dokument ") + data.node.data.name + " von " + source.path + " nach " + target.path + " verschoben");
                     fillMessageBox(true);
                     if (folder) {
-                        //Ordner wurde verschoben
+                        // Ordner wurde verschoben
                         // Den ursprünglichen Knoten aus dem Tree entfernen
-                        $('#tree').jstree(true).delete_node(newData.objectId);
+                        $('#tree').jstree(true).delete_node(nodeId, true);
                         // Das Objekt im Tree mit dem geänderten Knoten aktualisieren
                         data.node.data = newData;
+                        var newNode = $('#tree').jstree(true).get_node(data.node.id);
+                        if (newNode)
+                            // Der neue Knoten hat noch nicht die richtige Id
+                            $('#tree').jstree(true).set_id(newNode, nodeId);
                         // Und in den Ordner aus der Tabelle entfernen
                         alfrescoFolderTabelle.row(rowIndex).remove();
                         alfrescoFolderTabelle.draw();

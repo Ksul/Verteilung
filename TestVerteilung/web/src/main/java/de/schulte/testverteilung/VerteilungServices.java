@@ -158,7 +158,7 @@ public class VerteilungServices {
 
                 // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
                 if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1))
-                    list.put(convertFoundObjectToJson(filePath, cmisObject));
+                    list.put(convertObjectToJson(filePath, cmisObject));
 
             }
             obj.put("success", true);
@@ -195,7 +195,7 @@ public class VerteilungServices {
 
                 // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
                 if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1))
-                    list.put(convertFoundObjectToJson(filePath, cmisObject));
+                    list.put(convertObjectToJson(filePath, cmisObject));
 
             }
             obj.put("success", true);
@@ -205,41 +205,6 @@ public class VerteilungServices {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
-    }
-
-    /**
-     * konvertiert das gefundenen Objekt in ein JSON Objekt
-     * @param filePath               der FilePath
-     * @param cmisObject             das zu konvertierende CMIS Objekt
-     * @throws JSONException
-     * @throws VerteilungException
-     * @return JSONObject           das gefüllte JSON Objekt
-     */
-    private JSONObject convertFoundObjectToJson(String filePath, CmisObject cmisObject) throws JSONException, VerteilungException {
-
-        JSONObject o = convertObjectToJSON(cmisObject.getProperties());
-        // prüfen, ob Children vorhanden sind
-        if (cmisObject instanceof Folder) {
-            ItemIterable<CmisObject> children = con.listFolder(cmisObject.getId());
-            o.put("hasChildren", children.getTotalNumItems() > 0);
-            boolean hasChildFolder = false;
-            boolean hasChildDocuments = false;
-            for (CmisObject childObject : con.listFolder(cmisObject.getId())) {
-                if (childObject instanceof Folder) {
-                    hasChildFolder = true;
-                }
-                if (childObject instanceof Document) {
-                    hasChildDocuments = true;
-                }
-                if (hasChildDocuments && hasChildFolder)
-                    break;
-            }
-            o.put("hasChildFolder", hasChildFolder);
-            o.put("hasChildDocuments", hasChildDocuments);
-        }
-        o.put("parentId", filePath);
-
-        return o;
     }
 
     /**
@@ -278,7 +243,7 @@ public class VerteilungServices {
         JSONArray list = new JSONArray();
         try {
             for (CmisObject cmisObject : con.findDocument(cmisQuery)) {
-                o = convertObjectToJSON(cmisObject.getProperties());
+                o = convertPropertiesToJSON(cmisObject.getProperties());
                 list.put(o);
 
             }
@@ -288,33 +253,6 @@ public class VerteilungServices {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
-    }
-
-    /**
-     * konvertiert ein Document in ein JSON Objekt
-     * @param  properties    die Properties des Objektes
-     * @return obj1          das Object als JSON Objekt
-     * @throws JSONException
-     */
-    private JSONObject convertObjectToJSON( List<Property<?>> properties) throws JSONException {
-
-        JSONObject obj1 = new JSONObject();
-        for (Property prop : properties) {
-            // falls Datumswert dann konvertieren
-            if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null) {
-                obj1.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
-            } else if (prop.getLocalName().equals("objectId")) {
-                String id = prop.getValueAsString();
-                obj1.put(prop.getLocalName(), id);
-                if (id.contains(";"))
-                    id = id.substring(0, id.lastIndexOf(';'));
-                if (id.startsWith("workspace://SpacesStore/"))
-                    id = id.substring(24);
-                obj1.put("objectID", id);
-            } else
-                obj1.put(prop.getLocalName(), prop.getValueAsString());
-        }
-        return obj1;
     }
 
     /**
@@ -449,7 +387,7 @@ public class VerteilungServices {
                 document = con.createDocument((Folder) folderObject, documentName, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState));
                 if (document != null) {
                     obj.put("success", true);
-                    obj.put("result", convertObjectToJSON(document.getProperties()).toString());
+                    obj.put("result", convertPropertiesToJSON(document.getProperties()).toString());
                 } else {
                     obj.put("success", false);
                     obj.put("result", "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!");
@@ -496,7 +434,7 @@ public class VerteilungServices {
                 }
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
                 obj.put("success", true);
-                obj.put("result", convertObjectToJSON(document.getProperties()).toString());
+                obj.put("result", convertPropertiesToJSON(document.getProperties()).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
@@ -533,7 +471,7 @@ public class VerteilungServices {
 
                 cmisObject = con.updateProperties(cmisObject, outMap);
                 obj.put("success", true);
-                obj.put("result", convertObjectToJSON(cmisObject.getProperties()).toString());
+                obj.put("result", convertPropertiesToJSON(cmisObject.getProperties()).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result","Ein Document mit der Id " + documentId + " ist nicht vorhanden!");
@@ -565,13 +503,13 @@ public class VerteilungServices {
             if (node != null && node instanceof Document || node instanceof Folder) {
                 if (oldFolder != null && oldFolder instanceof Folder) {
                     if (newFolder != null && newFolder instanceof Folder) {
-                        FileableCmisObject doc = con.moveNode((FileableCmisObject) node, (Folder) oldFolder, (Folder) newFolder);
-                        logger.fine("Knoten " + node.getId() + " von " + ((FileableCmisObject) node).getPaths().get(0) + " nach " + doc.getPaths().get(0) + " verschoben!");
+                        FileableCmisObject fileableCmisObject = con.moveNode((FileableCmisObject) node, (Folder) oldFolder, (Folder) newFolder);
+                        logger.fine("Knoten " + node.getId() + " von " + ((FileableCmisObject) node).getPaths().get(0) + " nach " + fileableCmisObject.getPaths().get(0) + " verschoben!");
                         obj.put("success", true);
-                        obj.put("result", convertObjectToJSON(doc.getProperties()).toString());
+                        obj.put("result", convertObjectToJson(newFolderId, fileableCmisObject).toString());
                         // Quell und Zielordner zurückgeben
-                        obj.put("source", convertObjectToJSON(oldFolder.getProperties()).toString());
-                        obj.put("target", convertObjectToJSON(newFolder.getProperties()).toString());
+                        obj.put("source", convertPropertiesToJSON(oldFolder.getProperties()).toString());
+                        obj.put("target", convertPropertiesToJSON(newFolder.getProperties()).toString());
                     } else {
                         obj.put("success", false);
                         obj.put("result", "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
@@ -621,7 +559,12 @@ public class VerteilungServices {
                 folder = con.createFolder((Folder) target, outMap);
                 if (folder != null ) {
                     obj.put("success", true);
-                    obj.put("result", convertObjectToJSON(folder.getProperties()).toString());
+                    JSONObject o = convertPropertiesToJSON(folder.getProperties());
+                    // neu definierter Folder kann keine Children haben
+                    o.put("hasChildren", false);
+                    o.put("hasChildFolder", false);
+                    o.put("hasChildDocuments", false);
+                    obj.put("result", o.toString());
                 } else {
                     obj.put("success", false);
                     obj.put("result", "Ein Folder konnte nicht angelegt werden!" );
@@ -1115,5 +1058,67 @@ public class VerteilungServices {
         if (vs == null)
             vs = VersioningState.NONE;
         return vs;
+    }
+
+    /**
+     * konvertiert die Properties eines Documentes in ein JSON Objekt
+     * @param  properties    die Properties des Objektes
+     * @return obj1          das Object als JSON Objekt
+     * @throws JSONException
+     */
+    private JSONObject convertPropertiesToJSON(List<Property<?>> properties) throws JSONException {
+
+        JSONObject obj1 = new JSONObject();
+        for (Property prop : properties) {
+            // falls Datumswert dann konvertieren
+            if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null) {
+                obj1.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
+            } else if (prop.getLocalName().equals("objectId")) {
+                String id = prop.getValueAsString();
+                obj1.put(prop.getLocalName(), id);
+                if (id.contains(";"))
+                    id = id.substring(0, id.lastIndexOf(';'));
+                if (id.startsWith("workspace://SpacesStore/"))
+                    id = id.substring(24);
+                obj1.put("objectID", id);
+            } else
+                obj1.put(prop.getLocalName(), prop.getValueAsString());
+        }
+        return obj1;
+    }
+
+    /**
+     * konvertiert ein Objekt in ein JSON Objekt
+     * @param parentId               die Id des Parent Objektes
+     * @param cmisObject             das zu konvertierende CMIS Objekt
+     * @throws JSONException
+     * @throws VerteilungException
+     * @return JSONObject           das gefüllte JSON Objekt
+     */
+    private JSONObject convertObjectToJson(String parentId, CmisObject cmisObject) throws JSONException, VerteilungException {
+
+        JSONObject o = convertPropertiesToJSON(cmisObject.getProperties());
+        // prüfen, ob Children vorhanden sind
+        if (cmisObject instanceof Folder) {
+            ItemIterable<CmisObject> children = con.listFolder(cmisObject.getId());
+            o.put("hasChildren", children.getTotalNumItems() > 0);
+            boolean hasChildFolder = false;
+            boolean hasChildDocuments = false;
+            for (CmisObject childObject : con.listFolder(cmisObject.getId())) {
+                if (childObject instanceof Folder) {
+                    hasChildFolder = true;
+                }
+                if (childObject instanceof Document) {
+                    hasChildDocuments = true;
+                }
+                if (hasChildDocuments && hasChildFolder)
+                    break;
+            }
+            o.put("hasChildFolder", hasChildFolder);
+            o.put("hasChildDocuments", hasChildDocuments);
+        }
+        o.put("parentId", parentId);
+
+        return o;
     }
 }
