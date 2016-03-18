@@ -1081,6 +1081,8 @@ public class VerteilungServices {
                 if (id.startsWith("workspace://SpacesStore/"))
                     id = id.substring(24);
                 obj1.put("objectID", id);
+                // Row Id für Datatables
+                obj1.put("DT_RowId", id);
             } else
                 obj1.put(prop.getLocalName(), prop.getValueAsString());
         }

@@ -1501,6 +1501,7 @@ function fillBreadCrumb(data) {
             'parentId': parentObj
         };
         li.data = jsonData;
+        li.id = id;
         li.onclick = function () {
             $("#tree").jstree('deselect_all', false);
             switchAlfrescoDirectory(this.data);
@@ -2270,12 +2271,19 @@ function loadAlfrescoTree() {
                     var newData = $.parseJSON(json.result);
                     var source = $.parseJSON(json.source);
                     var target = $.parseJSON(json.target);
-                    REC.log(INFORMATIONAL, "Ordner " + data.node.data.name + " von " + " von " + source.path + " nach " + target.path + " verschoben");
+                    REC.log(INFORMATIONAL, "Ordner " + data.node.data.name + " von " + source.path + " nach " + target.path + " verschoben");
                     fillMessageBox(true);
+                    // Bei Bedarf den Ordner aus der Tabelle entfernen
+                    var row = alfrescoFolderTabelle.row('#' + nodeId);
+                    if (row) {
+                        row.remove();
+                        alfrescoFolderTabelle.draw();
+                    }
+                    // Bei Bedarf den neuen Ordner in die Tabelle einfügen
+                    if (jQuery("#breadcrumblist").children().last().get(0).id == newData.parentId)
+                        alfrescoFolderTabelle.rows.add([newData]).draw();
                     // Das Objekt im Tree mit dem geänderten Knoten aktualisieren
                     data.node.data = newData;
-                    // Knoten selektieren. Damit werden die Tabellen auch aktualisiert
-                    $("#tree").jstree('select_node', nodeId);
                 }
 
             } catch (e) {
@@ -2334,16 +2342,31 @@ function loadAlfrescoTree() {
             .on('dnd_move.vakata', function (e, data) {
                 // Hier wird geprüft ob der Ordner, auf den das Element gezogen werden soll ein zulässiger Ordner ist
                 try {
+                    var sourceData, targetData;
                     var erg = false;
                     var t = $(data.event.target);
                     if (!t.closest('.jstree').length) {
                         // prüfen, ob das Element entweder auf eine passende Tabellenzeile (treeDropable)
-                        // oder auf einen Tree Knoten (jstree-achor) gezogen werden soll.
+                        // oder auf einen Tree Knoten (jstree-anchor) gezogen werden soll.
                         if (t.closest('.treeDropable').length ) {
-                            // der Zielknoten
-                            var targetData = $.jstree.reference('#tree').get_node(t).data;
-                            // die Daten aus der Tabellenzeile, also der Folder, in den verschoben werden soll
-                            var sourceData = alfrescoFolderTabelle.row(t.closest('.treeDropable')[0].parentElement).data();
+                            if (data.element.className.indexOf("jstree-anchor") != -1) {
+                                // Quelle ist der Tree
+                                sourceData = $.jstree.reference('#tree').get_node(data.data.nodes[0]).data;
+                            } else if (data.element.className.indexOf("treeDropable") != -1) {
+                                // Quelle ist die Tabelle
+                                // die Daten aus der Tabellenzeile, also der Folder, in den verschoben werden soll
+                                sourceData = data.data.nodes[0].data;
+                            }
+                            if (data.event.target.className.indexOf("jstree-anchor") != -1) {
+                                // Ziel ist der Tree
+                                // der Zielknoten
+                                targetData = $.jstree.reference('#tree').get_node(t).data;
+                            } else if (data.event.target.className.indexOf("treeDropable") != -1) {
+                                // Ziel ist die Tabelle
+                                // die Ziel Reihe
+                                targetData = alfrescoFolderTabelle.row(t.closest('.treeDropable')[0].parentElement).data();
+                            }
+
                             // Folder darf nicht in die Standard Ordner geschoben werden und die Standard Ordner dürfen generell nicht verschoben werden
                             if (sourceData &&
                                      // der zu verschiebene Ordner darf nicht der ArchivRootFolder sein
@@ -2381,7 +2404,6 @@ function loadAlfrescoTree() {
 
                     } else {
                         if (t.closest('.jstree-anchor').length ) {
-                            var targetData, sourceData;
                             // der Zielknoten
                             targetData = $.jstree.reference('#tree').get_node(t).data;
                             // der Quellknoten
@@ -2405,7 +2427,7 @@ function loadAlfrescoTree() {
                                 targetData.objectId != inboxFolderId &&
                                     // Ziel für den Ordner darf nicht der gleiche Folder sein
                                 targetData.objectId != sourceData.objectId &&
-                                    // Ziel für den Ordner darf nicht Parent Folder sein, da sit er nämlich schon drin
+                                    // Ziel für den Ordner darf nicht Parent Folder sein, da ist er nämlich schon drin
                                 targetData.objectId != sourceData.parentId &&
                                     // Ziel für den Ordner darf nicht ein eigener Child Folder sein, denn sonst würde der Knoten "entwurzelt"
                                 getAllChildrenIds($.jstree.reference('#tree'), sourceData.objectId).indexOf(targetData.objectId) == -1) {
@@ -2429,29 +2451,26 @@ function loadAlfrescoTree() {
                     var t = $(data.event.target);
                     if (!t.closest('.jstree').length) {
                         if (t.closest('.treeDropable').length) {
-
-                            var row = alfrescoFolderTabelle.row(t.closest('.treeDropable')[0].parentElement);
-                            var node = $.jstree.reference('#tree').get_node(data.element);
-                            var nodeId = node.data.objectId;
-                            var parentId = node.data.parentId;
-                            var destinationId = row.data().objectId;
-                            var rowIndex = row.index();
-                            var json = executeService("moveNode", [
-                                {"name": "documentId", "value": nodeId},
-                                {"name": "currentLocationId", "value": parentId},
-                                {"name": "destinationId", "value": destinationId}
-                            ], "Ordner konnte nicht verschoben werden:");
-                            if (json.success) {
-                                var newData = $.parseJSON(json.result);
-                                var source = $.parseJSON(json.source);
-                                var target = $.parseJSON(json.target);
-                                REC.log(INFORMATIONAL, "Ordner " + node.data.name + " von " + " von " + source.path + " nach " + target.path + " verschoben");
-                                fillMessageBox(true);
-                                // Und in den Ordner aus der Tabelle entfernen
-                                alfrescoFolderTabelle.row(rowIndex).remove();
-                                alfrescoFolderTabelle.draw();
-                                // Knoten aus dem Tree entfernen
-                                $('#tree').jstree(true).delete_node(node);
+                            var destinationRow = alfrescoFolderTabelle.row(t.closest('.treeDropable')[0].parentElement);
+                            var destinationId = destinationRow.data().objectId;
+                            // TODO Verarbeitung für mehrere Knoten im Drag
+                            // Prüfen ob es nicht das gleiche Element ist
+                            if (data.data.nodes[0].data && data.data.nodes[0].data.objectId != destinationId) {
+                                var nodeId = data.data.nodes[0].data.objectId;
+                                 // Tree updaten
+                                var sourceNode = $.jstree.reference('#tree').get_node(nodeId);
+                                var targetNode = $.jstree.reference('#tree').get_node(destinationId);
+                                if (sourceNode && targetNode)
+                                    $.jstree.reference('#tree').move_node(sourceNode, targetNode);
+                                // Der Rest passiert im move_node Handler!!
+                            } else if (data.data.nodes && data.data.nodes[0] != destinationId) {
+                                var nodeId = data.data.nodes[0];
+                                // Tree updaten
+                                var sourceNode = $.jstree.reference('#tree').get_node(nodeId);
+                                var targetNode = $.jstree.reference('#tree').get_node(destinationId);
+                                if (sourceNode && targetNode)
+                                    $.jstree.reference('#tree').move_node(sourceNode, targetNode);
+                                // Der Rest passiert im move_node Handler!!
                             }
                         }
                     }
