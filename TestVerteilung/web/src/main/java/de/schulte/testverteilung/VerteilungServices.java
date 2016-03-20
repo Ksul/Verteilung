@@ -1080,6 +1080,7 @@ public class VerteilungServices {
                     id = id.substring(0, id.lastIndexOf(';'));
                 if (id.startsWith("workspace://SpacesStore/"))
                     id = id.substring(24);
+                // die modifizierte ObjectId diese ist auch eindeutig und kann im DOM benutzt werden.
                 obj1.put("objectID", id);
                 // Row Id für Datatables
                 obj1.put("DT_RowId", id);

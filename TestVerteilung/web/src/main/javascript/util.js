@@ -398,7 +398,7 @@ function executeService(service, params, messages, ignoreError) {
             var execute = "document.reader." + service + "(";
             var first = true;
             if (exist(params)) {
-                for (index = 0; index < params.length; ++index) {
+                for ( var index = 0; index < params.length; ++index) {
                     // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
                        // params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
@@ -427,7 +427,7 @@ function executeService(service, params, messages, ignoreError) {
                 "function": service
             };
             if (exist(params)) {
-                for (index = 0; index < params.length; ++index) {
+                for (var index = 0; index < params.length; ++index) {
                     // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
                         params[index].value = btoa(params[index].value);
@@ -481,7 +481,7 @@ function executeService(service, params, messages, ignoreError) {
     } catch (e) {
         var p = "Service: " + service + "<br>";
         if (exist(params)) {
-            for (index = 0; index < params.length; ++index) {
+            for (var index = 0; index < params.length; ++index) {
                 p = p + "Parameter: " + params[index].name
                 if (exist(params[index].value) && typeof params[index].value =="string")
                     p = p + " : " + params[index].value.substr(0, 40) + "<br>";
