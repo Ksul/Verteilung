@@ -3997,7 +3997,7 @@ REC = {
     },
     
     id: Math.random() * 100,
-    debugLevel: INFORMATIONAL,
+    debugLevel: DEBUG,
     mess: [],
     content: "",
     archivRoot: null,

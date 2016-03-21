@@ -31,6 +31,9 @@ public class VerteilungServices {
     // Speicher für Files
     private Collection<FileEntry> entries = new ArrayList<>();
 
+    // Cache für listFolder
+    private InMemoryCache<String, JSONArray> cache = new InMemoryCache<String, JSONArray>(20, 50, 3000);
+
     /**
      * Konstruktor
      */
@@ -147,7 +150,7 @@ public class VerteilungServices {
 
         JSONArray list = new JSONArray();
         JSONObject obj = new JSONObject();
-        //JSONObject state;
+
         try {
            // state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
              // das Root Object übergeben?
@@ -184,6 +187,7 @@ public class VerteilungServices {
 
         JSONArray list = new JSONArray();
         JSONObject obj = new JSONObject();
+        JSONArray result = new JSONArray();
         //JSONObject state;
         try {
             // state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
@@ -191,11 +195,24 @@ public class VerteilungServices {
             if (filePath.equals("-1"))
                 filePath = con.getNode("/Archiv").getId();
 
-            for (CmisObject cmisObject : con.listFolder(filePath)) {
+            if (cache.contains(filePath)) {
+                result = cache.get(filePath);
+                logger.fine("listFolder: Result für Id " + filePath + " wurde im Cache gefunden!");
+            }
+            else {
+                logger.fine("listFolder: Result für Id " + filePath + " nicht im Cache gefunden! Lese neu...");
+                for (CmisObject cmisObject : con.listFolder(filePath)){
+                    result.put(convertObjectToJson(filePath, cmisObject));
+                }
+                cache.put(filePath, result);
+            }
+
+            for (int i = 0; i < result.length(); i++) {
+                JSONObject json = result.getJSONObject(i);
 
                 // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
-                if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1))
-                    list.put(convertObjectToJson(filePath, cmisObject));
+                if ((json.getString("baseTypeId").equalsIgnoreCase("cmis:folder") && listFolder < 1) || (json.getString("baseTypeId").equalsIgnoreCase("cmis:document") && listFolder > -1))
+                    list.put(json);
 
             }
             obj.put("success", true);

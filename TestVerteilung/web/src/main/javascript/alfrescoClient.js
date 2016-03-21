@@ -1543,15 +1543,19 @@ function fillBreadCrumb(data) {
 function switchAlfrescoDirectory(data) {
     try {
         var objectID;
+        var times = [];
         if (exist(data))
             objectID = data.objectID;
         else
             objectID = "-1";
+        times.push(new Date().getTime());
         var json = executeService("listFolder", [
             {"name": "filePath", "value": objectID},
             {"name": "withFolder", "value": -1}
         ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
         if (json.success) {
+            times.push(new Date().getTime());
+            REC.log(DEBUG, "Folder gelesen: " + (times[1] -times[0]) + " ms");
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
             calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
@@ -1610,13 +1614,21 @@ function switchAlfrescoDirectory(data) {
             //$("#tree").jstree(true).refresh_node(objectID);
             $("#tree").jstree('select_node', objectID);
         }
+        times.push(new Date().getTime());
         json = executeService("listFolder", [
             {"name": "filePath", "value": objectID},
             {"name": "withFolder", "value": "1"}
         ], "Dokumente konnten nicht aus dem Server gelesen werden:");
         if (json.success) {
+            times.push(new Date().getTime());
+            REC.log(DEBUG, "Dokumente gelesen: " + (times[3] -times[2]) + " ms");
             alfrescoTabelle.clear();
+            times.push(new Date().getTime());
             alfrescoTabelle.rows.add(json.result).draw();
+            times.push(new Date().getTime());
+            REC.log(DEBUG, "Tabelle gefüllt: " + (times[5] -times[4]) + " ms");
+            REC.log(DEBUG, "Insgesamt: " + (times[5] -times[0]) + " ms");
+            fillMessageBox(true);
             calculateTableHeight("alfrescoCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             $.fn.dataTable.makeEditable( alfrescoTabelle, {
                 "fnShowError" : function(text, aktion){
@@ -1682,6 +1694,7 @@ function switchAlfrescoDirectory(data) {
                     }
                 }
             });
+
         }
     } catch (e) {
         errorHandler(e);
@@ -2239,6 +2252,41 @@ function loadAlfrescoTree() {
         return result;
     }
 
+    function customMenu(node) {
+        var tree = $("#tree").jstree(true);
+        var items = {
+            "create": {
+                "separator_before": false,
+                "separator_after": false,
+                "label": "Erstellen",
+                "action": function (obj) {
+                    $node = tree.create_node($node);
+                    tree.edit($node);
+                }
+            },
+            "rename": {
+                "separator_before": false,
+                "separator_after": false,
+                "label": "Ändern",
+                "action": function (obj) {
+                    tree.edit($node);
+                }
+            },
+            "delete": {
+                "separator_before": false,
+                "separator_after": false,
+                "label": "Löschen",
+                "action": function (obj) {
+                    tree.delete_node($node);
+                }
+            }
+        };
+        if (tree.get_type(node) == "alfrescoFehlerFolderStandard") {
+            delete items.delete;
+        }
+        return items;
+    }
+
 
     try {
         $("#tree").jstree('destroy');
@@ -2326,7 +2374,10 @@ function loadAlfrescoTree() {
                     "valid_children" : []
                 }
             },
-            'plugins': ["dnd", "types"]
+            "contextmenu": {
+                "items": customMenu
+            },
+            'plugins': ["dnd", "types", "contextmenu"]
         }).on("select_node.jstree", function (event, data) {
             try {
                 if (!exist(data.node.data))

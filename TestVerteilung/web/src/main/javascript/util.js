@@ -281,6 +281,7 @@ function loadApplet(level, server, bindingUrl, user, password) {
                 'jempbox-1.6.0.jar, ' +
                 'slf4j-api-1.7.5.jar, ' +
                 'commons-io-2.4.jar,' +
+                'commons-collections4-4.1.jar, ' +
                 'alfresco-opencmis-extension-1.0.jar, ' +
                 'chemistry-opencmis-client-api-0.13.0.jar, ' +
                 'chemistry-opencmis-client-bindings-0.13.0.jar, ' +
