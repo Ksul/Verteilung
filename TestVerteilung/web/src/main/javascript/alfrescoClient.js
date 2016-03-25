@@ -170,10 +170,6 @@ function loadLayout() {
             spacing_closed: 12,
             closable: true,
             resizable: false,
-            north: {
-                paneSelector: "#contentNorth",
-                minSize: 33
-            },
             center: {
                 paneSelector: "#tabs",
                 resizable: true,
@@ -384,10 +380,10 @@ function loadLayout() {
             initPanes: true,
             resizeWithWindow: false,
             contentSelector: ".ui-widget-content",
-
-            //	reference only - these options are NOT required because 'true' is the default
-
-            //	some pane-size settings
+            north: {
+                paneSelector: "#verteilungNorth",
+                minSize: 33
+            },
             west: {
                 paneSelector: "#verteilungWest",
                 size: .4,
@@ -1251,24 +1247,12 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
 
         var container = document.createElement("div");
         var image;
-        // Ordner öffnen TODO wird das gebraucht, denn die Fuktionalität gibt es ja schon im ertsen Feld
-        image = document.createElement("div");
-        image.href = "#";
-        image.className = "folderSwitch";
-        image.title = "Ordner öffnen";
-        image.style.backgroundImage = "url(src/main/resource/images/details_open.png)";
-        image.style.width = "16px";
-        image.style.height = "16px";
-        image.style.cursor = "pointer";
-        image.style.cssFloat = "left";
-        image.style.marginRight = "5px";
-        container.appendChild(image);
 
         // Ordner bearbeiten
         image = document.createElement("div");
         image.href = "#";
         image.className = "folderEdit";
-        image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
+        image.style.backgroundImage = "url(src/main/resource/images/beautify16.png)";
         image.title = "Details bearbeiten";
         image.style.cursor = "pointer";
         image.style.width = "16px";
@@ -1287,7 +1271,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             image = document.createElement("div");
             image.href = "#";
             image.className = "folderCreate";
-            image.style.backgroundImage = "url(src/main/resource/images/folder_add.png)";
+            image.style.backgroundImage = "url(src/main/resource/images/details_open.png)";
             image.title = "neuen Folder anlegen";
             image.style.cursor = "pointer";
             image.style.width = "16px";
@@ -1308,10 +1292,10 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             image = document.createElement("div");
             image.href = "#";
             image.className = "folderRemove";
-            image.style.backgroundImage = "url(src/main/resource/images/folder_remove.png)";
+            image.style.backgroundImage = "url(src/main/resource/images/deleteDocument.gif)";
             image.title = "Folder löschen";
             image.style.cursor = "pointer";
-            image.style.width = "16px";
+            image.style.width = "13px";
             image.style.height = "16px";
             image.style.cssFloat = "left";
             image.style.marginRight = "5px";
@@ -1336,7 +1320,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         var image = document.createElement("div");
         image.href = "#";
         image.className = "detailEdit";
-        image.style.backgroundImage = "url(src/main/resource/images/file_edit.png)";
+        image.style.backgroundImage = "url(src/main/resource/images/beautify16.png)";
         image.title = "Details bearbeiten";
         image.style.cursor = "pointer";
         image.style.width = "16px";
@@ -2284,6 +2268,7 @@ function loadAlfrescoTree() {
                 "separator_before": false,
                 "separator_after": false,
                 "label": "Erstellen",
+                "icon" : "src/main/resource/images/details_open.png",
                 "action": function (obj) {
                     try {
                         startFolderDialog($.jstree.reference('#tree').get_node(obj.reference[0]).data, "web-create");
@@ -2296,6 +2281,7 @@ function loadAlfrescoTree() {
                 "separator_before": false,
                 "separator_after": false,
                 "label": "Ändern",
+                "icon" : "src/main/resource/images/beautify16.png",
                 "action": function (obj) {
                     try {
                         startFolderDialog($.jstree.reference('#tree').get_node(obj.reference[0]).data, "web-edit");
@@ -2308,6 +2294,7 @@ function loadAlfrescoTree() {
                 "separator_before": false,
                 "separator_after": false,
                 "label": "Löschen",
+                "icon" : "src/main/resource/images/deleteDocument.gif",
                 "action": function (obj) {
                     try {
                         startFolderDialog($.jstree.reference('#tree').get_node(obj.reference[0]).data, "web-display");
