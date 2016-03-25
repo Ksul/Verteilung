@@ -41,7 +41,8 @@
     <script type="text/javascript" src="./src/main/javascript/jquery.wysiwyg.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/superfish.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/hoverIntent.js" charset="utf-8"></script>
-    <script type="text/javascript" src="./src/main/javascript/alpaca/alpaca/alpaca.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./src/main/javascript/alpaca/handlebars.js"></script>
+    <script type="text/javascript" src="./src/main/javascript/alpaca/alpaca.js"></script>
     <script type="text/javascript" src="./src/main/javascript/vkbeautify.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jsbeautify.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/Base64.js" charset="utf-8"></script>
@@ -54,7 +55,7 @@
     <link type="text/css" href="./src/main/resource/superfish-navbar.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/superfish-vertical.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/jquery.wysiwyg.css" rel="stylesheet"/>
-    <link type="text/css" href="./src/main/javascript/alpaca/alpaca/alpaca.css" rel="stylesheet"/>
+    <link type="text/css" href="./src/main/javascript/alpaca/alpaca.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/style.css" rel="stylesheet"/>
     <link type="text/css" href="./src/main/resource/ArchivLayout.css" rel="stylesheet"/>
 
@@ -196,11 +197,10 @@
         var testMode = false;
         var runLocal = false;
         var REC;
-        var treeObject;
-        var tree;
         var tabelle;
         var alfrescoTabelle;
         var alfrescoFolderTabelle;
+        var alfrescoSearchTabelle;
         var viewMenu;
         var viewMode = 0;
         var workDocument = null;
@@ -223,8 +223,6 @@
         var globalLayout;
         var alfrescoTicket;
         var anOpen = [];
-        treeObject = $.jstree.reference('tree');
-
     </script>
 
 </head>

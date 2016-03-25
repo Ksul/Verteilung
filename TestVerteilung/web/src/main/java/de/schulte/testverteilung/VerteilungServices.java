@@ -328,6 +328,7 @@ public class VerteilungServices {
             CmisObject cmisObject = con.getNodeById(documentId);
             if (cmisObject != null && cmisObject instanceof Folder) {
                 String id = con.uploadDocument(((Folder) cmisObject), file, typ, createVersionState(versionState));
+                //TODO Cache
                 obj.put("success", true);
                 obj.put("result", id);
             } else {
@@ -357,6 +358,7 @@ public class VerteilungServices {
                 if (((Document) document).isVersionSeriesCheckedOut())
                     ((Document) document).cancelCheckOut();
                 document.delete(true);
+                clearCache(document);
                 obj.put("success", true);
                 obj.put("result", "");
             } else {
@@ -403,6 +405,7 @@ public class VerteilungServices {
 
                 document = con.createDocument((Folder) folderObject, documentName, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState));
                 if (document != null) {
+                    clearCache(document);
                     obj.put("success", true);
                     obj.put("result", convertPropertiesToJSON(document.getProperties()).toString());
                 } else {
@@ -450,6 +453,7 @@ public class VerteilungServices {
                     outMap = buildProperties(extraCMSProperties);
                 }
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
+                clearCache(document);
                 obj.put("success", true);
                 obj.put("result", convertPropertiesToJSON(document.getProperties()).toString());
             } else {
@@ -487,6 +491,8 @@ public class VerteilungServices {
                 }
 
                 cmisObject = con.updateProperties(cmisObject, outMap);
+                clearCache(cmisObject);
+
                 obj.put("success", true);
                 obj.put("result", convertPropertiesToJSON(cmisObject.getProperties()).toString());
             } else {
@@ -522,6 +528,8 @@ public class VerteilungServices {
                     if (newFolder != null && newFolder instanceof Folder) {
                         FileableCmisObject fileableCmisObject = con.moveNode((FileableCmisObject) node, (Folder) oldFolder, (Folder) newFolder);
                         logger.fine("Knoten " + node.getId() + " von " + ((FileableCmisObject) node).getPaths().get(0) + " nach " + fileableCmisObject.getPaths().get(0) + " verschoben!");
+                        clearCache(oldFolder);
+                        clearCache(newFolder);
                         obj.put("success", true);
                         obj.put("result", convertObjectToJson(newFolderId, fileableCmisObject).toString());
                         // Quell und Zielordner zurückgeben
@@ -548,7 +556,7 @@ public class VerteilungServices {
     }
 
     /**
-     * erstellt ein Dokument
+     * erstellt einen Ordner
      * @param  documentId              die Id des Folders in dem das Dokument erstellt werden soll als String
      * @param  extraCMSProperties      zusätzliche Properties
      * @return obj                     ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
@@ -575,6 +583,7 @@ public class VerteilungServices {
             if (target != null && target instanceof Folder) {
                 folder = con.createFolder((Folder) target, outMap);
                 if (folder != null ) {
+                    clearCache(folder);
                     obj.put("success", true);
                     JSONObject o = convertPropertiesToJSON(folder.getProperties());
                     // neu definierter Folder kann keine Children haben
@@ -611,8 +620,9 @@ public class VerteilungServices {
             folder = con.getNodeById(documentId);
             if (folder != null && folder instanceof Folder) {
                 List<String> list = ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
-                    obj.put("success", true);
-                    obj.put("result", new JSONObject(list).toString());
+                clearCache(folder);
+                obj.put("success", true);
+                obj.put("result", new JSONObject(list).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result", folder == null ? "Der  angegebene Pfad ist nicht vorhanden!" : "Der verwendete Pfad st kein Folder!");
@@ -1115,7 +1125,8 @@ public class VerteilungServices {
      * @throws VerteilungException
      * @return JSONObject           das gefüllte JSON Objekt
      */
-    private JSONObject convertObjectToJson(String parentId, CmisObject cmisObject) throws JSONException, VerteilungException {
+    private JSONObject convertObjectToJson(String parentId,
+                                           CmisObject cmisObject) throws JSONException, VerteilungException {
 
         JSONObject o = convertPropertiesToJSON(cmisObject.getProperties());
         // prüfen, ob Children vorhanden sind
@@ -1140,5 +1151,17 @@ public class VerteilungServices {
         o.put("parentId", parentId);
 
         return o;
+    }
+
+    /**
+     * prüft, ob ein geändertes Objekt im Cache ist und entfernt dieses gegenenenfalls
+     * das dient dazu, das keine veralterten Objekte im Cache gespeichert werden
+     * @param cmisObject   das zu prüfende Objekt
+     */
+    private void clearCache(CmisObject cmisObject) {
+        // Cache bereinigen
+        String parentId = cmisObject.getProperty("cmis:parentId").getValueAsString();
+        if (cache.contains(parentId))
+            cache.remove(parentId);
     }
 }

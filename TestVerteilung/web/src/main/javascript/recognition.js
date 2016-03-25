@@ -3694,11 +3694,11 @@ REC = {
             for (var i = 0; i < this.errors.length; i++)
                 this.log(ERROR, "Fehler: " + this.errors[i]);
         }
-        if (this.showContent || this.debugLevel.level >= DEBUG.level) {
+/*        if (this.showContent || this.debugLevel.level >= DEBUG.level) {
             this.mess.push("=====>");
             this.mess.push(this.content);
             this.mess.push("<====");
-        }
+        }*/
         for (var j = 0; j < this.mess.length; j++) {
             var zeile = this.mess[j];
             var z = zeile.split("\n");

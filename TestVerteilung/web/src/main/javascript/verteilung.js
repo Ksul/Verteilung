@@ -1291,13 +1291,13 @@ function checkAndBuidAlfrescoEnvironment() {
                 {"name": "filePath", "value": "/"}
             ], "Archiv konnte nicht gefunden werden:");
             if (erg.success) {
-                alfrescoRootFolderID = erg.result;
+                alfrescoRootFolderId = erg.result;
             } else {
                 REC.log(WARN, "Root konnte auf dem Server nicht gefunden werden!");
             }
         }
         if (erg.success) {
-            erg = buildAlfrescoFolder("/Archiv", alfrescoRootFolderID, "Der Archiv Root Ordner");
+            erg = buildAlfrescoFolder("/Archiv", alfrescoRootFolderId, "Der Archiv Root Ordner");
             if (erg.success)
                 archivFolderId = erg.result;
             else
