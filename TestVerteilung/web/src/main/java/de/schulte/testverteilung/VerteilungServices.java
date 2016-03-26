@@ -1,20 +1,27 @@
 package de.schulte.testverteilung;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.jcs.JCS;
+import org.apache.commons.jcs.access.CacheAccess;
+import org.apache.commons.jcs.access.exception.CacheException;
+import org.apache.commons.jcs.engine.control.CompositeCacheManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,7 +39,8 @@ public class VerteilungServices {
     private Collection<FileEntry> entries = new ArrayList<>();
 
     // Cache für listFolder
-    private InMemoryCache<String, JSONArray> cache = new InMemoryCache<String, JSONArray>(20, 50, 3000);
+    private CacheAccess<String, JSONArray> cache;
+
 
     /**
      * Konstruktor
@@ -187,24 +195,24 @@ public class VerteilungServices {
 
         JSONArray list = new JSONArray();
         JSONObject obj = new JSONObject();
-        JSONArray result = new JSONArray();
+        JSONArray result;
         //JSONObject state;
         try {
             // state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
             // das Root Object übergeben?
             if (filePath.equals("-1"))
                 filePath = con.getNode("/Archiv").getId();
-
-            if (cache.contains(filePath)) {
-                result = cache.get(filePath);
+                result = getCache().get(filePath);
+            if (result != null) {
                 logger.fine("listFolder: Result für Id " + filePath + " wurde im Cache gefunden!");
             }
             else {
                 logger.fine("listFolder: Result für Id " + filePath + " nicht im Cache gefunden! Lese neu...");
+                result = new JSONArray();
                 for (CmisObject cmisObject : con.listFolder(filePath)){
                     result.put(convertObjectToJson(filePath, cmisObject));
                 }
-                cache.put(filePath, result);
+                getCache().put(filePath, result);
             }
 
             for (int i = 0; i < result.length(); i++) {
@@ -357,8 +365,9 @@ public class VerteilungServices {
             if (document != null && document instanceof Document) {
                 if (((Document) document).isVersionSeriesCheckedOut())
                     ((Document) document).cancelCheckOut();
-                document.delete(true);
+                // Clear muss vor dem delete weil sonst die Parents nicht gefunden werden können
                 clearCache(document);
+                document.delete(true);
                 obj.put("success", true);
                 obj.put("result", "");
             } else {
@@ -619,8 +628,9 @@ public class VerteilungServices {
             CmisObject folder;
             folder = con.getNodeById(documentId);
             if (folder != null && folder instanceof Folder) {
-                List<String> list = ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
+                // muss vor dem eigentlichen Delete sein sonst findet er die Parents nicht
                 clearCache(folder);
+                List<String> list = ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
                 obj.put("success", true);
                 obj.put("result", new JSONObject(list).toString());
             } else {
@@ -1158,10 +1168,40 @@ public class VerteilungServices {
      * das dient dazu, das keine veralterten Objekte im Cache gespeichert werden
      * @param cmisObject   das zu prüfende Objekt
      */
-    private void clearCache(CmisObject cmisObject) {
+    private void clearCache(CmisObject cmisObject) throws CacheException{
         // Cache bereinigen
-        String parentId = cmisObject.getProperty("cmis:parentId").getValueAsString();
-        if (cache.contains(parentId))
-            cache.remove(parentId);
+        List<Folder> folders = ((FileableCmisObject) cmisObject).getParents();
+        for (Folder folder : folders) {
+            String id = folder.getId();
+            if (id.contains(";"))
+                id = id.substring(0, id.lastIndexOf(';'));
+            if (id.startsWith("workspace://SpacesStore/"))
+                id = id.substring(24);
+            getCache().remove(id);
+        }
+    }
+
+    /**
+     * liefert eine Cacheinstanz
+     * @return   die Instanz
+     */
+    public CacheAccess<String, JSONArray> getCache() throws CacheException {
+        if (cache == null) {
+                CompositeCacheManager ccm = CompositeCacheManager.getUnconfiguredInstance();
+            Properties props = new Properties();
+            props.setProperty("jcs.default", "");
+            props.setProperty("jcs.default.cacheattributes","org.apache.commons.jcs.engine.CompositeCacheAttributes");
+            props.setProperty("jcs.default.cacheattributes.MemoryCacheName","org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache");
+            props.setProperty("jcs.default.cacheattributes.MaxObjects", "3000");
+            props.setProperty("jcs.default.cacheattributes.UseMemoryShrinker","true");
+            props.setProperty("jcs.default.cacheattributes.MaxMemoryIdleTimeSeconds", "10000");
+            props.setProperty("jcs.default.cacheattributes.ShrinkerIntervalSeconds", "5000");
+            props.setProperty("jcs.default.cacheattributes.UseDisk","false");
+            props.setProperty("jcs.default.cacheattributes.UseLateral","false");
+            props.setProperty("jcs.default.cacheattributes.UseRemote","false");
+            ccm.configure(props);
+            cache = JCS.getInstance("default");
+        }
+        return cache;
     }
 }

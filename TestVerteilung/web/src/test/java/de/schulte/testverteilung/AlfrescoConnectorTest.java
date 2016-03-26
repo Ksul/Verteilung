@@ -210,12 +210,6 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
     }
 
     @Test
-    public void testTest() throws Exception {
-        CmisObject cmisObject = con.getNode("/Archiv/Fehler/00000a54.pdf");
-        System.out.println(((AlfrescoDocument) cmisObject).getType());
-    }
-
-    @Test
     public void testUpdateDocument() throws Exception {
         CmisObject folder = con.getNode("/Archiv");
         assertNotNull(folder);

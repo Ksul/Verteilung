@@ -238,6 +238,9 @@
             <li><a href="#tab1">Archiv</a></li>
             <li><a href="#tab2">Suche</a></li>
             <li><a href="#tab3">Verteilung</a></li>
+            <input  style="float:right" onclick="startSettingsDialog();"
+                    name="settings" id="settings" type="submit" class="settings"
+                    title="Open Settings" value=""/>
         </ul>
         <!--Tab Panels-->
         <div id="tabPanels" class="container ui-state-active">
@@ -349,11 +352,6 @@
                         <tr>
                             <td width="30%"><input id="filesinput" name="filesinput"
                                                    type="file" multiple="multiple" size="50"/>
-                            </td>
-                            <td width="60px" align="center"><input
-                                    onclick="startSettingsDialog();"
-                                    name="settings" id="settings" type="submit" class="settings"
-                                    title="Open Settings" value=""/>
                             </td>
                             <td width="60px" align="center"><input onclick="work();"
                                                                    name="play" id="play" type="submit" class="play"

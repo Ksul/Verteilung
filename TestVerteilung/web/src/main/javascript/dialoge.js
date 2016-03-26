@@ -44,6 +44,13 @@ function startSettingsDialog() {
                 }
             },
             "options": {
+                "renderForm": true,
+                "form": {
+                    "buttons": {
+                        "submit": {"value": "Sichern"},
+                        "reset": {"value": "Abbrechen"}
+                    }
+                },
                 "fields": {
                     "server": {
                         "size": 60
@@ -91,57 +98,38 @@ function startSettingsDialog() {
                 control.on("invalidated", function (e) {
                     $("#btn-ok").button("option", "disabled", true);
                 });
-            }
-        };
-        $('head').append('<link href="./src/main/resource/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
-        $("<div>", {id: "dialogBox", class:"grid gridpad" }).appendTo("body");
-        $('#dialogBox').alpaca( dialogSettings).dialog({
-            autoOpen: true,
-            modal: true,
-            width: 480,
-            height: 'auto',
-            open: function () {
-                $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
-            },
-            buttons: {
-                "Save": {
-                    "id": "btn-ok",
-                    "text": "Save",
-                    "click": function () {
-                        try {
-                            var server = $("[name='server']").val(),
-                                binding = $("[name='binding']").val(),
-                                user = $("[name='user']").val(),
-                                password = $("[name='password']").val();
-                            if (!server.endsWith("/"))
-                                server = server + "/";
-                            settings = {"settings": [
-                                {"key": "server", "value": server},
-                                {"key": "user", "value": user},
-                                {"key": "password", "value": password},
-                                {"key": "binding", "value": binding}
-                            ]};
-                            $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
-                            REC.log(INFORMATIONAL, "Einstellungen gesichert");
-                            fillMessageBox(true);
-                            $('dialogBox').dialog().dialog('close');
-                            init();
-                            loadAlfrescoTree();
-                        } catch (e) {
-                            errorHandler(e);
+                var form = renderedField.form;
+                if (form) {
+                    form.registerSubmitHandler(function (e) {
+                        if (form.isFormValid()) {
+                            try {
+                                var server = $("[name='server']").val(),
+                                    binding = $("[name='binding']").val(),
+                                    user = $("[name='user']").val(),
+                                    password = $("[name='password']").val();
+                                if (!server.endsWith("/"))
+                                    server = server + "/";
+                                settings = {"settings": [
+                                    {"key": "server", "value": server},
+                                    {"key": "user", "value": user},
+                                    {"key": "password", "value": password},
+                                    {"key": "binding", "value": binding}
+                                ]};
+                                $.cookie("settings", JSON.stringify(settings), { expires: 9999 });
+                                REC.log(INFORMATIONAL, "Einstellungen gesichert");
+                                fillMessageBox(true);
+                                $('dialogBox').dialog().dialog('close');
+                                init();
+                                loadAlfrescoTree();
+                            } catch (e) {
+                                errorHandler(e);
+                            }
                         }
-                    }},
-
-                "Cancel": {
-                    "id": "btn-cancel",
-                    "text": "Abbrechen",
-                    "click": function () {
-                       $('dialogBox').dialog().dialog('close');
-                    }
+                    });
                 }
             }
-        });
-
+        };
+        startDialog(dialogSettings, 480);
     } catch (e) {
         errorHandler(e);
     }

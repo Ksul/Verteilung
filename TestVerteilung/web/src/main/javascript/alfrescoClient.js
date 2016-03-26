@@ -728,15 +728,18 @@ function loadAlfrescoTable() {
                     }
 
                     for ( var index = 0; index < selected.length; ++index) {
-                       nodes.push(selected[index].objectID)
+                        if (selected[index])
+                            nodes.push(selected[index].objectID)
                     }
-                    var title = (selected.length > 1 ? (selected.length + " Dokumente") : exist(selected[0].title) ? selected[0].title : selected[0].name);
-                    return $.vakata.dnd.start(event, {
-                        'jstree': false,
-                        'table' : "alfrescoTabelle",
-                        'obj': $(this),
-                        'nodes': nodes
-                    }, '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + title + '</div>');
+                    if (nodes.length) {
+                        var title = (selected.length > 1 ? (selected.length + " Dokumente") : exist(selected[0].title) ? selected[0].title : selected[0].name);
+                        return $.vakata.dnd.start(event, {
+                            'jstree': false,
+                            'table': "alfrescoTabelle",
+                            'obj': $(this),
+                            'nodes': nodes
+                        }, '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + title + '</div>');
+                    }
                 } catch (e) {
                     errorHandler(e);
                 }
@@ -856,15 +859,18 @@ function loadAlfrescoFolderTable() {
                     }
 
                     for( var index = 0; index < selected.length; ++index) {
-                        nodes.push(selected[index].objectID)
+                        if (selected[index])
+                            nodes.push(selected[index].objectID)
                     }
-                    var title = (selected.length > 1 ? (selected.length + " Ordner") : exist(selected[0].title) ? selected[0].title : selected[0].name);
-                    return $.vakata.dnd.start(event, {
-                        'jstree': false,
-                        'table' : "alfrescoFolderTabelle",
-                        'obj': $(this),
-                        'nodes': nodes
-                    }, '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + title + '</div>');
+                    if (nodes.length) {
+                        var title = (selected.length > 1 ? (selected.length + " Ordner") : exist(selected[0].title) ? selected[0].title : selected[0].name);
+                        return $.vakata.dnd.start(event, {
+                            'jstree': false,
+                            'table': "alfrescoFolderTabelle",
+                            'obj': $(this),
+                            'nodes': nodes
+                        }, '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + title + '</div>');
+                    }
                 } catch (e) {
                     errorHandler(e);
                 }
