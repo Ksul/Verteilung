@@ -21,7 +21,7 @@
     </jar>
     <signjar destDir="web/WEB-INF/lib" keystore="keystore.jks" alias="SignerPair" storepass="Rethymon" >
       <path>
-           <fileset dir="web/WEB-INF/lib" includes="vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-io-2.4.jar,commons-collections4-4.1.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,slf4j-api-1.7.5.jar,alfresco-opencmis-extension-1.0.jar,chemistry-opencmis-client-api-0.13.0.jar,chemistry-opencmis-client-bindings-0.13.0.jar,chemistry-opencmis-client-impl-0.13.0.jar,chemistry-opencmis-commons-api-0.13.0.jar,chemistry-opencmis-commons-impl-0.13.0.jar,bcprov-jdk15on-150.jar,stax2-api-3.1.4.jar,woodstox-core-asl-4.4.0.jar" />
+           <fileset dir="web/WEB-INF/lib" includes="vt.jar,pdfbox-1.6.0.jar,plugin.jar,commons-codec-1.6.jar,commons-io-2.4.jar,commons-jcs-core-2.0-beta-1.jar,commons-logging-1.1.1.jar,fontbox-1.6.0.jar,jempbox-1.6.0.jar,slf4j-api-1.7.5.jar,alfresco-opencmis-extension-1.0.jar,chemistry-opencmis-client-api-0.13.0.jar,chemistry-opencmis-client-bindings-0.13.0.jar,chemistry-opencmis-client-impl-0.13.0.jar,chemistry-opencmis-commons-api-0.13.0.jar,chemistry-opencmis-commons-impl-0.13.0.jar,bcprov-jdk15on-150.jar,stax2-api-3.1.4.jar,woodstox-core-asl-4.4.0.jar" />
            <!--<fileset dir="web/WEB-INF/lib" includes="vt.jar" /> -->
     </path>
        <flattenmapper />

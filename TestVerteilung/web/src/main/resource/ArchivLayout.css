@@ -618,3 +618,7 @@ h2 {
     float: left;
 }
 
+.alpaca-form-buttons-container.ui-dialog-buttonpane.ui-widget-content {
+    margin-top: 96%;
+}
+
