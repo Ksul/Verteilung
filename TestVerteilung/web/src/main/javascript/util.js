@@ -377,9 +377,11 @@ function uuid() {
  */
 function executeService(service, params, messages, ignoreError) {
     var json;
+    var index;
     var errorMessage;
     var successMessage;
     var longParameter = false;
+    var times = [];
     try {
         if (exist(messages)) {
             if (typeof messages == "object") {
@@ -393,13 +395,15 @@ function executeService(service, params, messages, ignoreError) {
                 errorMessage = messages;
             }
         }
+        REC.log(DEBUG, "Execute: " + service);
+        times.push(new Date().getTime());
         if (isLocal()) {
             // Aufruf über Applet
             var maxLen = 1100000;
             var execute = "document.reader." + service + "(";
             var first = true;
             if (exist(params)) {
-                for ( var index = 0; index < params.length; ++index) {
+                for ( index = 0; index < params.length; ++index) {
                     // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
                        // params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
@@ -422,13 +426,14 @@ function executeService(service, params, messages, ignoreError) {
             execute = execute + ")";
             var obj = eval(execute);
             json = jQuery.parseJSON(obj);
+            times.push(new Date().getTime());
         } else {
             // Aufruf über Servlet
             var dataString = {
                 "function": service
             };
             if (exist(params)) {
-                for (var index = 0; index < params.length; ++index) {
+                for (index = 0; index < params.length; ++index) {
                     // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
                         params[index].value = btoa(params[index].value);
@@ -459,6 +464,7 @@ function executeService(service, params, messages, ignoreError) {
                 }
             });
         }
+        times.push(new Date().getTime());
         if (!json.success) {
             if (exist(errorMessage))
                 errorString = errorMessage + "<br>" + json.result;
@@ -478,12 +484,14 @@ function executeService(service, params, messages, ignoreError) {
                 fillMessageBox(true);
             }
         }
+        REC.log(DEBUG, "Execution of Service: " + service + " duration "+ (times[1] -times[0]) + " ms");
+        fillMessageBox(true);
         return json;
     } catch (e) {
         var p = "Service: " + service + "<br>";
         if (exist(params)) {
-            for (var index = 0; index < params.length; ++index) {
-                p = p + "Parameter: " + params[index].name
+            for (index = 0; index < params.length; ++index) {
+                p = p + "Parameter: " + params[index].name;
                 if (exist(params[index].value) && typeof params[index].value =="string")
                     p = p + " : " + params[index].value.substr(0, 40) + "<br>";
                 else

@@ -427,6 +427,10 @@ function loadLayout() {
         tabLayout = $("#tabs").tabs({
             // using callback addon
             activate: $.layout.callbacks.resizeTabLayout,
+            beforeActivate: function (event, ui) {
+                if (ui.newPanel.attr('id') == "tab2")
+                    $('#alfrescoSearch').focus().select();
+            },
             active : 1
 
             /* OR with a custom callback
@@ -676,7 +680,9 @@ function loadAlfrescoTable() {
                 },
                 {
                     targets: [8],
-                    mRender: alfrescoAktionFieldFormatter,
+                    render: function(data, types, row) {
+                        return alfrescoAktionFieldFormatter(data, types, row).outerHTML;
+                    },
                     orderable: false
                 }
             ],
@@ -835,7 +841,9 @@ function loadAlfrescoFolderTable() {
                 },
                 {
                     targets: [3],
-                    mRender: alfrescoFolderAktionFieldFormatter,
+                    render: function(data, type, row) {
+                        return alfrescoFolderAktionFieldFormatter(data, type, row).outerHTML;
+                    },
                     orderable: false
                 }
             ],
@@ -1097,7 +1105,22 @@ function loadAlfrescoSearchTable() {
                 },
                 {
                     targets: [8],
-                    mRender: alfrescoAktionFieldFormatter,
+                    render: function(data, type, row) {
+                        
+                        var container = alfrescoAktionFieldFormatter(data, type, row);
+                        var image = document.createElement("div");
+                        image.href = "#";
+                        image.className = "detailAim";
+                        image.style.backgroundImage = "url(src/main/resource/images/ziel.png)";
+                        image.title = "Dokument im Ordner anzeigen";
+                        image.style.cursor = "pointer";
+                        image.style.width = "16px";
+                        image.style.height = "16px";
+                        image.style.cssFloat = "left";
+                        image.style.marginRight = "5px";
+                        container.appendChild(image);
+                        return container.outerHTML;
+                    },
                     orderable: false
                 }
             ],
@@ -1199,7 +1222,8 @@ function loadVerteilungTable() {
                 },
                 {
                     "targets": [3],
-                    "mRender": imageFieldFormatter,
+                    "render": function(data,types, row) { 
+                        return imageFieldFormatter(data, types, row).outerHTML;},
                     "sortable": false
                 },
                 {
@@ -1308,8 +1332,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             container.appendChild(image);
         }
 
-
-        return container.outerHTML;
+        return container;
     } catch (e) {
         errorHandler(e);
     }
@@ -1378,7 +1401,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image.style.marginRight = "5px";
         container.appendChild(image);
 
-        return container.outerHTML;
+        return container;
     } catch (e) {
         errorHandler(e);
     }
@@ -1463,7 +1486,7 @@ function imageFieldFormatter(data, type, full) {
         // image.style.marginRight = "5px";
         image.title = "Zur Inbox verschieben";
         container.appendChild(image);
-        return container.outerHTML;
+        return container;
     } catch (e) {
         errorHandler(e);
     }
@@ -1568,15 +1591,12 @@ function switchAlfrescoDirectory(data) {
             objectID = data.objectID;
         else
             objectID = "-1";
-        REC.log(DEBUG, "switchAlfrescoDirectory: " + objectID);
         times.push(new Date().getTime());
         var json = executeService("listFolder", [
             {"name": "filePath", "value": objectID},
             {"name": "withFolder", "value": -1}
         ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
         if (json.success) {
-            times.push(new Date().getTime());
-            REC.log(DEBUG, "Folder gelesen: " + (times[1] -times[0]) + " ms");
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
             calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
@@ -1635,20 +1655,15 @@ function switchAlfrescoDirectory(data) {
             //$("#tree").jstree(true).refresh_node(objectID);
             $("#tree").jstree('select_node', objectID);
         }
-        times.push(new Date().getTime());
         json = executeService("listFolder", [
             {"name": "filePath", "value": objectID},
             {"name": "withFolder", "value": "1"}
         ], "Dokumente konnten nicht aus dem Server gelesen werden:");
         if (json.success) {
-            times.push(new Date().getTime());
-            REC.log(DEBUG, "Dokumente gelesen: " + (times[3] -times[2]) + " ms");
             alfrescoTabelle.clear();
-            times.push(new Date().getTime());
             alfrescoTabelle.rows.add(json.result).draw();
             times.push(new Date().getTime());
-            REC.log(DEBUG, "Tabelle gefüllt: " + (times[5] -times[4]) + " ms");
-            REC.log(DEBUG, "Insgesamt: " + (times[5] -times[0]) + " ms");
+            REC.log(DEBUG, "SwitchDirectory: " + (times[1] -times[0]) + " ms");
             fillMessageBox(true);
             calculateTableHeight("alfrescoCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             $.fn.dataTable.makeEditable( alfrescoTabelle, {
@@ -1723,12 +1738,12 @@ function switchAlfrescoDirectory(data) {
 }
 
 /**
- * startet die Suche
+ * startet eine Suche im Alfresco Repository
  * @param searchText    der zu suchende Text
  */
 function startSearch(searchText) {
     try {
-        var sql = "SELECT * FROM my:archivContent WHERE CONTAINS('" + searchText + "')";
+        var sql = "SELECT * FROM cmis:document WHERE IN_TREE('" + archivFolderId + "') AND CONTAINS('" + searchText + "')";
         var json = executeService("findDocument", [
             {"name": "cmisQuery", "value": sql}
         ], null, true);
@@ -1856,7 +1871,7 @@ function handleAlfrescoImageClicks() {
     $(document).on("click", ".detailEdit", function () {
         try {
             var tr = $(this).closest('tr');
-            startDocumentDialog($('#'+tr[0].parentElement.parentElement.id).DataTable().row(tr));
+            startDocumentDialog($('#' + tr[0].parentElement.parentElement.id).DataTable().row(tr));
         } catch (e) {
             errorHandler(e);
         }
@@ -1869,7 +1884,10 @@ function handleAlfrescoImageClicks() {
             var obj = executeService("getTicket");
             if (obj.success) {
                 var json = executeService("getComments", [
-                    {"name": "documentId", "value": $('#'+tr[0].parentElement.parentElement.id).DataTable().row(tr).data().objectID},
+                    {
+                        "name": "documentId",
+                        "value": $('#' + tr[0].parentElement.parentElement.id).DataTable().row(tr).data().objectID
+                    },
                     {"name": "ticket", "value": obj.result.data.ticket}
                 ], ["Kommentare konnten nicht gelesen werden!"]);
                 if (json.success) {
@@ -1884,7 +1902,7 @@ function handleAlfrescoImageClicks() {
     $(document).on("click", ".deleteDocument", function () {
         try {
             var tr = $(this).closest('tr');
-            var tabelle = $('#'+tr[0].parentElement.parentElement.id).DataTable();
+            var tabelle = $('#' + tr[0].parentElement.parentElement.id).DataTable();
             var id = tabelle.row(tr).data().objectID;
             var $dialog = $('<div></div>').html("Ausgewähltes Dokument " + tabelle.row(tr).data().name + " löschen?").dialog({
                 autoOpen: true,
@@ -1900,7 +1918,7 @@ function handleAlfrescoImageClicks() {
                                 {"name": "documentId", "value": tabelle.row(tr).data().objectID}
                             ], ["Dokument konnte nicht gelöscht werden!"]);
                             if (erg.success) {
-                               tabelle.rows().invalidate();
+                                tabelle.rows().invalidate();
                             }
                         } catch (e) {
                             errorHandler(e);
@@ -1915,25 +1933,110 @@ function handleAlfrescoImageClicks() {
             errorHandler(e);
         }
     });
-        // Regeln
-        $(document).on("click", ".rulesDocument", function () {
-            try {
-                var tr = $(this).closest('tr');
-                var tabelle = $('#'+tr[0].parentElement.parentElement.id).DataTable();
-                var id = $('#'+tr[0].parentElement.parentElement.id).DataTable().row(tr).data().objectID;
-                var json = executeService("getDocumentContent", [
-                    {"name": "documentId", "value": tabelle.row(tr).data().objectID},
-                    {"name": "extract", "value": "true"}
-                ], ["Dokument konnten nicht gelesen werden!"]);
-                if (json.success) {
-                    loadText(json.result, json.result, tabelle.row(tr).data().name, tabelle.row(tr).data().contentStreamMimeType, null);
-                    tabLayout.tabs("option", "active", 2);
+    // Regeln
+    $(document).on("click", ".rulesDocument", function () {
+        try {
+            var tr = $(this).closest('tr');
+            var tabelle = $('#' + tr[0].parentElement.parentElement.id).DataTable();
+            var id = tabelle.row(tr).data().objectID;
+            var json = executeService("getDocumentContent", [
+                {"name": "documentId", "value": tabelle.row(tr).data().objectID},
+                {"name": "extract", "value": "true"}
+            ], ["Dokument konnten nicht gelesen werden!"]);
+            if (json.success) {
+                loadText(json.result, json.result, tabelle.row(tr).data().name, tabelle.row(tr).data().contentStreamMimeType, null);
+                tabLayout.tabs("option", "active", 2);
+            }
+        } catch (e) {
+            errorHandler(e);
+        }
+
+    });
+    // Ziel im Ordner suchen
+    $(document).on("click", ".detailAim", function () {
+        try {
+            var results = [];
+            var tree = $('#tree').jstree(true);
+            var tr = $(this).closest('tr');
+            var tabelle = $('#' + tr[0].parentElement.parentElement.id).DataTable();
+            var data = tabelle.row(tr).data();
+            var id = data.objectID;
+            if (data && data.parents) {
+                var node = tree.get_node(data.parents[0]);
+                while (!node) {
+                    var json = executeService("getNodeById", [
+                        {"name": "documentId", "value": data.parents[0]}
+                    ], ["Dokument konnten nicht gelesen werden!"]);
+                    if (json.success) {
+                        data = json.result;
+                        results.push(data);
+                        if (data && data.parents )
+                            node = tree.get_node(data.parents[0]);
+                    } else {
+                        break;
+                    }
                 }
-            } catch (e) {
-                errorHandler(e);
+            }
+            if (node) {
+                if (!results.length) {
+                    tree.deselect_all(true);
+                    tree.select_node(node, true);
+                    tree.open_node(node, function(){
+                        switchAlfrescoDirectory(node.data);
+                        var row = alfrescoTabelle.row('#' + id);
+                        if (row) {
+                            row.draw().show().draw(false);
+                            row.select();
+                        }    
+                    });
+            
+                }
+                else {
+                    results.push(node.data);
+                    results.reverse();
+                    // Hier muss mit einem Deferred Object gearbeitet werden, denn der open im Tree
+                    // bewirkt einen asynchronen Aufruf, so das die nachfolgenden Operationen sonst nicht
+                    // die notwendigen Daten haben.
+                    var deffereds = $.Deferred(function (def) {
+                        def.resolve();
+                    });
+
+                    for(var index = 0; index < results.length; index++) {
+                        deffereds = (function(name, last, id, deferreds) {
+                            return deferreds.then(function () {
+                                return $.Deferred(function(def) {
+                                    var node = tree.get_node(name.objectID);
+                                    tree.open_node(node, function (last) {
+                                        def.resolve();
+                                        if (last){
+                          
+                                            node = tree.get_node(results[results.length - 1].objectID);
+                                            tree.deselect_all(true);
+                                            tree.select_node(node, true);
+                                            tree.open_node(node, function(){
+                                                switchAlfrescoDirectory(node.data);
+                                                var row = alfrescoTabelle.row('#' + id);
+                                                if (row) {
+                                                    row.draw().show().draw(false);
+                                                    row.select();
+                                                }
+                                            });
+                                        }
+                                           
+                                    });
+                                });
+                            });
+                        })(results[index], index == results.length -1, id, deffereds);
+                    }
+       
+                }
+                tabLayout.tabs("option", "active", 0);
             }
 
-        });
+        } catch (e) {
+            errorHandler(e);
+        }
+    });
 }
 
 /**
@@ -2352,6 +2455,8 @@ function loadAlfrescoTree() {
                         errorHandler(e);
                     }
                 },
+                error : function (err) {  message("Fehler", err);
+                },
                 'check_callback': function (op, node, par, pos, more) {
                     try {
                         var erg = false;
@@ -2427,7 +2532,7 @@ function loadAlfrescoTree() {
                 "select_node" : false
             },
             'plugins': ["dnd", "types", "contextmenu"]
-        }).on("select_node.jstree", function (event, data) {
+        }).on("changed.jstree",  function (event, data){
             try {
                 var tree =  $("#tree").jstree(true);
                 var evt =  window.event || event;
@@ -2437,7 +2542,7 @@ function loadAlfrescoTree() {
                 if( button != 1 && ( typeof button != "undefined")){
                     return false;
                 }
-                if (!exist(data.node.data))
+                if (!data.node || !data.node.data)
                     switchAlfrescoDirectory(null);
                 else {
                     if (data.node.data.baseTypeId == "cmis:folder") {

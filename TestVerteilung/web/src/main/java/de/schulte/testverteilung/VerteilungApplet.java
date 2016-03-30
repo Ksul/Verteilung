@@ -271,6 +271,28 @@ public class VerteilungApplet extends Applet {
         return obj;
     }
 
+    /**
+     * liefert einen Knoten als JSON Objekt zurück
+     * @param path         der Pfad zum Knoten, der der Knoten gesucht werden soll
+     * @return obj         ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            der Knoten als JSON Objekt
+     */
+    public JSONObject getNode(final String path) {
+
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    return services.getNode(path);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
 
     /**
      * liefert eine NodeID als String zurück
@@ -287,6 +309,29 @@ public class VerteilungApplet extends Applet {
 
                 public JSONObject run() throws JSONException {
                     return services.getNodeId(path);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * liefert eine NodeID als String zurück
+     * @param documentId   die Id des Knotens
+     * @return obj         ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            der Knoten als JSONObject
+     */
+    public JSONObject getNodeById(final String documentId) {
+
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    return services.getNodeId(documentId);
                 }
             });
         } catch (PrivilegedActionException e) {

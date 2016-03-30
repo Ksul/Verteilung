@@ -32,8 +32,9 @@
     <script type="text/javascript" src="./src/main/javascript/moment.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/datetime-moment.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jquery.jeditable.js" charset="utf-8"></script>
-    <script type="text/javascript" src="./src/main/javascript/dataTables.select.js"></script>
-    <script type="text/javascript" src="./src/main/javascript/jquery.DataTables.editable.js"></script>
+    <script type="text/javascript" src="./src/main/javascript/dataTables.rowShow.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./src/main/javascript/dataTables.select.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./src/main/javascript/jquery.DataTables.editable.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jquery.price-format.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jquery.easing.1.3.js" charset="utf-8"></script>
     <script type="text/javascript" src="./src/main/javascript/jquery.jBreadCrumb.1.1.js" charset="utf-8"></script>
@@ -235,9 +236,9 @@
     <div id="tabs" class="container">
         <!--Tabulatoren-->
         <ul id="tabButtons" class="container">
-            <li><a href="#tab1">Archiv</a></li>
-            <li><a href="#tab2">Suche</a></li>
-            <li><a href="#tab3">Verteilung</a></li>
+            <li id="tabArchiv" ><a href="#tab1">Archiv</a></li>
+            <li id="tabSuche" ><a href="#tab2">Suche</a></li>
+            <li id="tabVerteilung"><a  href="#tab3">Verteilung</a></li>
             <input  style="float:right" onclick="startSettingsDialog();"
                     name="settings" id="settings" type="submit" class="settings"
                     title="Open Settings" value=""/>

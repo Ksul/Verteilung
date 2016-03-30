@@ -237,7 +237,7 @@ public class VerteilungServices {
      * reine Wrapper Methode, die hier nichts zusätzliches mehr machen muss.
      *
      * @param  path         der Pfad zum Dokument
-     * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     * @return obj          ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                              false   ein Fehler ist aufgetreten
      *                                                     result   die Id des Knotens
      */
@@ -247,6 +247,46 @@ public class VerteilungServices {
         try {
             obj.put("success", true);
             obj.put("result", con.getNode(path).getId());
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * liefert einen Knoten
+     * reine Wrapper Methode, die hier nichts zusätzliches mehr machen muss.
+     *
+     * @param  path         der Pfad zum Dokument
+     * @return obj          ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                              false   ein Fehler ist aufgetreten
+     *                                                     result   der Knoten als JSON Object
+     */
+    public JSONObject getNode(String path) {
+
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("success", true);
+            obj.put("result", convertPropertiesToJSON(con.getNode(path)));
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * sucht ein Objekt nach seiner ObjektId
+     * @param  nodeId                die Id des Objektes
+     * @return obj          ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                              false   ein Fehler ist aufgetreten
+     *                                                     result   der Knoten als JSON Objekt
+     */
+    public JSONObject getNodeById(String nodeId) {
+
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("success", true);
+            obj.put("result", convertPropertiesToJSON(con.getNodeById(nodeId)));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -268,7 +308,7 @@ public class VerteilungServices {
         JSONArray list = new JSONArray();
         try {
             for (CmisObject cmisObject : con.findDocument(cmisQuery)) {
-                o = convertPropertiesToJSON(cmisObject.getProperties());
+                o = convertPropertiesToJSON(cmisObject);
                 list.put(o);
 
             }
@@ -416,7 +456,7 @@ public class VerteilungServices {
                 if (document != null) {
                     clearCache(document);
                     obj.put("success", true);
-                    obj.put("result", convertPropertiesToJSON(document.getProperties()).toString());
+                    obj.put("result", convertPropertiesToJSON(document).toString());
                 } else {
                     obj.put("success", false);
                     obj.put("result", "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!");
@@ -464,7 +504,7 @@ public class VerteilungServices {
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
                 clearCache(document);
                 obj.put("success", true);
-                obj.put("result", convertPropertiesToJSON(document.getProperties()).toString());
+                obj.put("result", convertPropertiesToJSON(document).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
@@ -503,7 +543,7 @@ public class VerteilungServices {
                 clearCache(cmisObject);
 
                 obj.put("success", true);
-                obj.put("result", convertPropertiesToJSON(cmisObject.getProperties()).toString());
+                obj.put("result", convertPropertiesToJSON(cmisObject).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result","Ein Document mit der Id " + documentId + " ist nicht vorhanden!");
@@ -535,15 +575,15 @@ public class VerteilungServices {
             if (node != null && node instanceof Document || node instanceof Folder) {
                 if (oldFolder != null && oldFolder instanceof Folder) {
                     if (newFolder != null && newFolder instanceof Folder) {
+                        clearCache(node);
                         FileableCmisObject fileableCmisObject = con.moveNode((FileableCmisObject) node, (Folder) oldFolder, (Folder) newFolder);
                         logger.fine("Knoten " + node.getId() + " von " + ((FileableCmisObject) node).getPaths().get(0) + " nach " + fileableCmisObject.getPaths().get(0) + " verschoben!");
-                        clearCache(oldFolder);
-                        clearCache(newFolder);
+                        clearCache(fileableCmisObject);
                         obj.put("success", true);
                         obj.put("result", convertObjectToJson(newFolderId, fileableCmisObject).toString());
                         // Quell und Zielordner zurückgeben
-                        obj.put("source", convertPropertiesToJSON(oldFolder.getProperties()).toString());
-                        obj.put("target", convertPropertiesToJSON(newFolder.getProperties()).toString());
+                        obj.put("source", convertPropertiesToJSON(oldFolder).toString());
+                        obj.put("target", convertPropertiesToJSON(newFolder).toString());
                     } else {
                         obj.put("success", false);
                         obj.put("result", "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
@@ -594,7 +634,7 @@ public class VerteilungServices {
                 if (folder != null ) {
                     clearCache(folder);
                     obj.put("success", true);
-                    JSONObject o = convertPropertiesToJSON(folder.getProperties());
+                    JSONObject o = convertPropertiesToJSON(folder);
                     // neu definierter Folder kann keine Children haben
                     o.put("hasChildren", false);
                     o.put("hasChildFolder", false);
@@ -1099,12 +1139,13 @@ public class VerteilungServices {
 
     /**
      * konvertiert die Properties eines Documentes in ein JSON Objekt
-     * @param  properties    die Properties des Objektes
+     * @param  cmisObject    das Objekt
      * @return obj1          das Object als JSON Objekt
      * @throws JSONException
      */
-    private JSONObject convertPropertiesToJSON(List<Property<?>> properties) throws JSONException {
+    private JSONObject convertPropertiesToJSON(CmisObject cmisObject) throws JSONException {
 
+        List<Property<?>> properties = cmisObject.getProperties();
         JSONObject obj1 = new JSONObject();
         for (Property prop : properties) {
             // falls Datumswert dann konvertieren
@@ -1124,6 +1165,17 @@ public class VerteilungServices {
             } else
                 obj1.put(prop.getLocalName(), prop.getValueAsString());
         }
+
+        // Parents suchen
+        List<Folder> parents = ((FileableCmisObject) cmisObject).getParents();
+        if (parents != null && parents.size() > 0) {
+            JSONObject obj = new JSONObject();
+            int i = 0;
+            for (Folder folder:parents) {
+                obj.put(Integer.toString(i++), folder.getId());
+            }
+            obj1.put("parents", obj);
+        }
         return obj1;
     }
 
@@ -1138,7 +1190,7 @@ public class VerteilungServices {
     private JSONObject convertObjectToJson(String parentId,
                                            CmisObject cmisObject) throws JSONException, VerteilungException {
 
-        JSONObject o = convertPropertiesToJSON(cmisObject.getProperties());
+        JSONObject o = convertPropertiesToJSON(cmisObject);
         // prüfen, ob Children vorhanden sind
         if (cmisObject instanceof Folder) {
             ItemIterable<CmisObject> children = con.listFolder(cmisObject.getId());

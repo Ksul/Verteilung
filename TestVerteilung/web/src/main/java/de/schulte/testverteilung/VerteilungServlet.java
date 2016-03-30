@@ -64,7 +64,9 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_FINDDOCUMENT = "findDocument";
     public static final String FUNCTION_GETDATAFROMINTERNALSTORAGE = "getDataFromInternalStorage";
     public static final String FUNCTION_GETDOCUMENTCONTENT = "getDocumentContent";
+    public static final String FUNCTION_GETNODE = "getNode";
     public static final String FUNCTION_GETNODEID = "getNodeId";
+    public static final String FUNCTION_GETNODEBYID = "getNodeById";
     public static final String FUNCTION_ISURLAVAILABLE = "isURLAvailable";
     public static final String FUNCTION_LISTFOLDERASJSON = "listFolder";
     public static final String FUNCTION_LISTFOLDERASJSONWITHPAGINATION = "listFolderWithPagination";
@@ -185,8 +187,12 @@ public class VerteilungServlet extends HttpServlet {
                     obj = getComments(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_TICKET, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_ADDCOMMENT)) {
                     obj = addComment(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_TICKET, true), getURLParameter(req, PARAMETER_COMMENT, true));
+                } else if (value.equalsIgnoreCase(FUNCTION_GETNODE)) {
+                    obj = getNode(getURLParameter(req, PARAMETER_FILEPATH, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_GETNODEID)) {
                     obj = getNodeId(getURLParameter(req, PARAMETER_FILEPATH, true));
+                } else if (value.equalsIgnoreCase(FUNCTION_GETNODEBYID)) {
+                    obj = getNodeById(getURLParameter(req, PARAMETER_DOCUMENTID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
                     obj = findDocument(getURLParameter(req, PARAMETER_CMISQUERY, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPLOADDOCUMENT)) {
@@ -318,16 +324,42 @@ public class VerteilungServlet extends HttpServlet {
     }
 
     /**
-     * liefert eine NodeID als String zurück
-     * @param path         der Pfad zum Knoten, der der Knoten gesucht werden soll
+     * liefert einen Knoten als JSON Objekt zurück
+     * @param path         der Pfad zum Knoten
      * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
-     *                                                    result            die NodeId als String
+     *                                                    result            der Node als JSONObject
+     */
+    protected JSONObject getNodeById(String path)  {
+
+        return services.getNodeById(path);
+    }
+
+    /**
+     * liefert die ID eines Knoten zurück
+     * @param path         der Pfad zum Knoten
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            der Id des Knotens als String
      */
     protected JSONObject getNodeId(String path)  {
 
         return services.getNodeId(path);
     }
+
+    /**
+     * liefert einen Knoten als JSON Objekt zurück
+     * @param documentId   die Id des Knotens
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            der Node als JSONObject
+     */
+    protected JSONObject getNode(String documentId)  {
+
+        return services.getNodeById(documentId);
+    }
+
+
 
     /**
      * liefert den Inhalt eines Dokumentes. Wenn es sich um eine PDF Dokument handelt, dann wird

@@ -81,6 +81,24 @@ public class VerteilungAppletTest extends AlfrescoTest {
     }
 
     @Test
+    public void testGetNodeById() throws Exception {
+        JSONObject obj = applet.getNodeById("abcde");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+    }
+
+    @Test
+    public void testGetNode() throws Exception {
+        JSONObject obj = applet.getNode("/Archiv");
+        assertNotNull(obj);
+        assertTrue(obj.length() >= 2);
+        assertNotNull(obj.get("result"));
+        assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
+    }
+
+    @Test
     public void testFindDocument() throws Exception {
         JSONObject obj = applet.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'") ;
         assertNotNull(obj);
