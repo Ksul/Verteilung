@@ -2165,6 +2165,7 @@ function buildObjectForTree(data) {
         item["icon"] = "";
         item["state"] = {"opened": false, "disabled": false, "selected": false};
         // Typen definieren
+        item["type"] = "documentFolderStandard";
         if (data.objectID == alfrescoRootFolderId) {
             // Alfresco Root Folder
             item["type"] = "alfrescoRootFolderStandard";
@@ -2184,7 +2185,7 @@ function buildObjectForTree(data) {
         }
         if (data.objectID == doubleFolderId) {
             // Fehler Folder
-            item["type"] = "archivFolderStandard";
+            item["type"] = "archivDoubleFolderStandard";
         }
         if (data.objectID == documentFolderId) {
             // Fehler Folder
@@ -2455,7 +2456,9 @@ function loadAlfrescoTree() {
                         errorHandler(e);
                     }
                 },
-                error : function (err) {  message("Fehler", err);
+                error : function (err) {  
+                    REC.log(DEBUG, err.reason);
+                    fillMessageBox(true);
                 },
                 'check_callback': function (op, node, par, pos, more) {
                     try {
@@ -2514,17 +2517,26 @@ function loadAlfrescoTree() {
                 }
             },
             'types' : {
+                '#' : {
+                    "max_children" : 1
+                },
                 'archivRootStandard' : {
                     "valid_children" : ["archivFolderStandard", "archivDocumentFolderStandard", "archivFehlerFolderStandard"]
                 },
                 'archivFolderStandard' : {
-                    "valid_children" : -1
+                    "valid_children" : []
+                },
+                'archivDoubleFolderStandard' : {
+                    "valid_children" : []
                 },
                 'archivFehlerFolderStandard' : {
-                    "valid_children" : ["archivFolderStandard"]
+                    "valid_children" : ["archivDoubleFolderStandard"]
                 },
                 'archivDocumentFolderStandard' : {
-                    "valid_children" : []
+                    "valid_children" : ["documentFolderStandard"]
+                },
+                'documentFolderStandard' : {
+                    "valid_children" : -1
                 }
             },
             "contextmenu": {
