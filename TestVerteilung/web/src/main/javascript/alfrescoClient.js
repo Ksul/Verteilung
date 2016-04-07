@@ -1676,7 +1676,11 @@ function switchAlfrescoDirectory(data) {
                         placeholder: ""
                     },
                     {
-                        placeholder: ""
+                        placeholder: "",
+                        type: 'datepicker',
+                        datepicker: {
+                            "dateFormat": "dd.mm.yy" 
+                        }
                     },
                     {
                         placeholder: ""
@@ -1699,6 +1703,7 @@ function switchAlfrescoDirectory(data) {
                         } else if (this.cellIndex == 3) {
                             // Datum geändert
                             data.documentDate = $.datepicker.parseDate("dd.mm.yy", value).getTime();
+                            value = data.documentDate;
                         } else if (this.cellIndex == 4) {
                             // Person geändert
                             data.person = value;

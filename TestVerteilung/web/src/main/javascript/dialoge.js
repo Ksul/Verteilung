@@ -259,13 +259,13 @@ function startDocumentDialog(tableRow) {
                         "disallowOnlyEmptySpaces": false,
                         "dateFormatRegex": "/(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19|20)\d\d$/",
                         "picker": {
-                            "useCurrent": false,
+                            "useCurrent": true,
                             "format": "DD.MM.YYYY",
                             "locale": "de_DE",
                             "dayViewHeaderFormat": "DD.MM.YYYY",
                             "extraFormats": []
                         },
-                        "dateFormat": "dd.mm.yy",
+                        "dateFormat": "DD.MM.YYYY",
                         "manualEntry": true
                     }
                 }
