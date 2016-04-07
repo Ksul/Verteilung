@@ -37,16 +37,16 @@ th {
 
 /*Child Rows*/
 td.details-control {
-    background: url('images/details_open.png') no-repeat center center;
+    background: url('./../images/details_open.png') no-repeat center center;
     cursor: pointer;
 }
 
 tr.shown td.details-control {
-    background: url('images/details_close.png') no-repeat center center;
+    background: url('./../images/details_close.png') no-repeat center center;
 }
 
 td.folder-control {
-    background: url('images/folder1.png') no-repeat center center;
+    background: url('./../images/folder1.png') no-repeat center center;
     cursor: pointer;
 }
 
@@ -122,7 +122,7 @@ h1 {
 
 input.search {
     background-color: transparent;
-    background-image: url('./images/search.png');
+    background-image: url('./../images/search.png');
     width: 24px;
     height: 24px;
     border: 0;
@@ -130,7 +130,7 @@ input.search {
 }
 
 input.search:disabled {
-    background-image: url('./images/search-bw.png');
+    background-image: url('./../images/search-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -140,7 +140,7 @@ input.search:disabled {
 }
 
 input.save {
-    background-image: url('./images/save.png');
+    background-image: url('./../images/save.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -149,7 +149,7 @@ input.save {
 }
 
 input.save:disabled {
-    background-image: url('./images/save-bw.png');
+    background-image: url('./../images/save-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -159,7 +159,7 @@ input.save:disabled {
 }
 
 input.play {
-    background-image: url('./images/play.png');
+    background-image: url('./../images/play.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -168,7 +168,7 @@ input.play {
 }
 
 input.play:disabled {
-    background-image: url('./images/play-bw.png');
+    background-image: url('./../images/play-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -178,7 +178,7 @@ input.play:disabled {
 }
 
 input.maximize {
-    background-image: url('./images/maximize.png');
+    background-image: url('./../images/maximize.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -187,7 +187,7 @@ input.maximize {
 }
 
 input.maximize:disabled {
-    background-image: url('./images/maximize-bw.png');
+    background-image: url('./../images/maximize-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -197,7 +197,7 @@ input.maximize:disabled {
 }
 
 input.minimize {
-    background-image: url('./images/minimize.png');
+    background-image: url('./../images/minimize.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -206,7 +206,7 @@ input.minimize {
 }
 
 input.minimize:disabled {
-    background-image: url('./images/minimize-bw.png');
+    background-image: url('./../images/minimize-bw.png');
     width: 24px;
     height: 24px;
     border: 0;
@@ -215,7 +215,7 @@ input.minimize:disabled {
 }
 
 input.upload {
-    background-image: url('./images/upload.png');
+    background-image: url('./../images/upload.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -224,7 +224,7 @@ input.upload {
 }
 
 input.upload:disabled {
-    background-image: url('./images/upload-bw.png');
+    background-image: url('./../images/upload-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -234,7 +234,7 @@ input.upload:disabled {
 }
 
 input.download {
-    background-image: url('./images/download.png');
+    background-image: url('./../images/download.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -243,7 +243,7 @@ input.download {
 }
 
 input.download:disabled {
-    background-image: url('./images/download-bw.png');
+    background-image: url('./../images/download-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -253,7 +253,7 @@ input.download:disabled {
 }
 
 input.beautify {
-    background-image: url('./images/beautify.png');
+    background-image: url('./../images/beautify.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -262,7 +262,7 @@ input.beautify {
 }
 
 input.beautify:disabled {
-    background-image: url('./images/beautify-bw.png');
+    background-image: url('./../images/beautify-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -272,7 +272,7 @@ input.beautify:disabled {
 }
 
 input.pdf {
-    background-image: url('./images/file_pdf.png');
+    background-image: url('./../images/file_pdf.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -281,7 +281,7 @@ input.pdf {
 }
 
 input.pdf:disabled {
-    background-image: url('./images/file_pdf-bw.png');
+    background-image: url('./../images/file_pdf-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -291,7 +291,7 @@ input.pdf:disabled {
 }
 
 input.close {
-    background-image: url('./images/exit.png');
+    background-image: url('./../images/exit.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -300,7 +300,7 @@ input.close {
 }
 
 input.test {
-    background-image: url('./images/tabicon_pipette.png');
+    background-image: url('./../images/tabicon_pipette.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -309,7 +309,7 @@ input.test {
 }
 
 input.reload {
-    background-image: url('./images/refresh.png');
+    background-image: url('./../images/refresh.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -318,7 +318,7 @@ input.reload {
 }
 
 input.docAlfresco {
-    background-image: url('./images/alfresco.png');
+    background-image: url('./../images/alfresco.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -327,7 +327,7 @@ input.docAlfresco {
 }
 
 input.docAlfresco:disabled {
-    background-image: url('./images/alfresco-bw.png');
+    background-image: url('./../images/alfresco-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -337,7 +337,7 @@ input.docAlfresco:disabled {
 }
 
 input.edit {
-    background-image: url('./images/file_edit.png');
+    background-image: url('./../images/file_edit.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -346,7 +346,7 @@ input.edit {
 }
 
 input.edit:disabled {
-    background-image: url('./images/file_edit-bw.png');
+    background-image: url('./../images/file_edit-bw.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -356,7 +356,7 @@ input.edit:disabled {
 }
 
 input.settings {
-    background-image: url('./images/settings.png');
+    background-image: url('./../images/settings.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -365,7 +365,7 @@ input.settings {
 }
 
 input.themes {
-    background-image: url('./images/themes.png');
+    background-image: url('./../images/themes.png');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -374,7 +374,7 @@ input.themes {
 }
 
 input.sendToInbox {
-    background-image: url('./images/inbox_icon.jpg');
+    background-image: url('./../images/inbox_icon.jpg');
     background-color: transparent;
     width: 24px;
     height: 24px;
@@ -579,7 +579,7 @@ input[type='checkbox'] {
 
 h2 {
     background-color: transparent;
-    background-image: url("images/alfresco.png");
+    background-image: url("./../images/alfresco.png");
     background-repeat: no-repeat;
     background-position: left;
     height: 24px;

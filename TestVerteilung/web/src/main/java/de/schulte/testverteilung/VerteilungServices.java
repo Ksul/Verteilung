@@ -1154,10 +1154,7 @@ public class VerteilungServices {
             } else if (prop.getLocalName().equals("objectId")) {
                 String id = prop.getValueAsString();
                 obj1.put(prop.getLocalName(), id);
-                if (id.contains(";"))
-                    id = id.substring(0, id.lastIndexOf(';'));
-                if (id.startsWith("workspace://SpacesStore/"))
-                    id = id.substring(24);
+                id = VerteilungHelper.getRealId(id);
                 // die modifizierte ObjectId diese ist auch eindeutig und kann im DOM benutzt werden.
                 obj1.put("objectID", id);
                 // Row Id für Datatables
@@ -1178,6 +1175,8 @@ public class VerteilungServices {
         }
         return obj1;
     }
+
+
 
     /**
      * konvertiert ein Objekt in ein JSON Objekt
@@ -1225,10 +1224,7 @@ public class VerteilungServices {
         List<Folder> folders = ((FileableCmisObject) cmisObject).getParents();
         for (Folder folder : folders) {
             String id = folder.getId();
-            if (id.contains(";"))
-                id = id.substring(0, id.lastIndexOf(';'));
-            if (id.startsWith("workspace://SpacesStore/"))
-                id = id.substring(24);
+            id = VerteilungHelper.getRealId(id);
             getCache().remove(id);
         }
     }

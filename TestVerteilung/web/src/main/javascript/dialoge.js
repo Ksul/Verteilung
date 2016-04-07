@@ -193,9 +193,9 @@ function startDocumentDialog(tableRow) {
                         "required": false
                     },
                     "documentDate": {
-                        "type": "date",
-                        "format": "date",
+                        "type": "string",
                         "title": "Datum",
+                        "format": "date",
                         "required": true
                     },
                     "idvalue": {
@@ -246,10 +246,28 @@ function startDocumentDialog(tableRow) {
                         "rightLabel": "relevant"
                     },
                     "documentDate": {
+                        "type": "date",
+                        "label": "Dokumentdatum",
+                        "helpers": [],
+                        "validate": true,
+                        "disabled": false,
+                        "showMessages": true,
+                        "renderButtons": true,
+                        "allowOptionalEmpty": true,
+                        "autocomplete": false,
+                        "disallowEmptySpaces": false,
+                        "disallowOnlyEmptySpaces": false,
                         "dateFormatRegex": "/(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19|20)\d\d$/",
-                        "dateFormat": "dd.mm.yy"
+                        "picker": {
+                            "useCurrent": false,
+                            "format": "DD.MM.YYYY",
+                            "locale": "de_DE",
+                            "dayViewHeaderFormat": "DD.MM.YYYY",
+                            "extraFormats": []
+                        },
+                        "dateFormat": "dd.mm.yy",
+                        "manualEntry": true
                     }
-
                 }
             },
             "view": {
@@ -333,7 +351,7 @@ function startDocumentDialog(tableRow) {
 
         };
 
-        startDialog(dialogDocumentDetailsSettings, 420);
+        startDialog(dialogDocumentDetailsSettings, 450);
     } catch (e) {
         errorHandler(e);
     }
@@ -642,8 +660,8 @@ function closeDialog() {
  */
 function startDialog(dialogSettings, width) {
 
-    $('head').append('<link href="./src/main/resource/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
-    $("<div>", {id: "dialogBox", class:"grid gridpad" }).appendTo("body");
+    $('head').append('<link href="./src/main/resource/css/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
+     $("<div>", {id: "dialogBox", class:"grid gridpad" }).appendTo("body");
     $('#dialogBox').alpaca( dialogSettings).dialog({
         autoOpen: true,
         width: width,

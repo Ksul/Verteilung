@@ -3,6 +3,7 @@ package de.schulte.testverteilung;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -52,5 +53,28 @@ public class VerteilungHelper {
         if (id.startsWith("workspace://SpacesStore/"))
             id = id.substring(24);
         return id;
+    }
+
+    /**
+     * liefert die wirkliche Id. Entfernt die Version und andere nicht benötigten Informationen
+     * @param id    die ObjectId
+     * @return      die modifizierte ObjectId
+     */
+    public static String getRealId(String id) {
+        if (id.contains(";"))
+            id = id.substring(0, id.lastIndexOf(';'));
+        if (id.startsWith("workspace://SpacesStore/"))
+            id = id.substring(24);
+        return id;
+    }
+
+    public static boolean isEmpty(Object o) {
+        if (o == null)  return true;
+        if (o instanceof Collection) return ((Collection) o).size() == 0;
+        if (o instanceof String) return ((String) o).length() == 0;
+        if (o instanceof Long) return ((Long) o).longValue() == 0;
+        if (o instanceof Integer) return ((Integer) o).intValue() == 0;
+        if (o instanceof Double) return ((Double) o).doubleValue() == 0;
+        return false;
     }
 }

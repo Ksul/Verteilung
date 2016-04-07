@@ -1,5 +1,6 @@
 package de.schulte.testverteilung;
 
+import org.alfresco.cmis.client.AlfrescoAspects;
 import org.alfresco.cmis.client.AlfrescoDocument;
 import org.alfresco.cmis.client.AlfrescoFolder;
 import org.apache.chemistry.opencmis.client.api.*;
@@ -12,19 +13,13 @@ import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -365,6 +360,18 @@ public class AlfrescoConnector {
     }
 
     /**
+     * füllt den Inhalt eines Dokumentes
+     * @param document          das Dokument
+     * @param contentStream     der Contentstream mit dem neuen Inhalt
+     * @param overwrite         legt fest, ob der Inhalt überschrieben werden soll
+     * @param refresh           legt fest, ob das Dokument nach der Operation gefresht werden soll
+     * @return
+     */
+    public CmisObject setContent(Document document,  ContentStream contentStream, boolean overwrite, boolean refresh){
+        return session.getObject(document.setContentStream(contentStream, overwrite, refresh));
+    }
+
+    /**
      * aktualisiert den Inhalt eines Dokumentes
      * @param  document                  das zu aktualisierende Dokument
      * @param  documentContent           der neue Inhalt. Falls der Content <null> ist, dann werden nur die Properties upgedated.
@@ -389,72 +396,80 @@ public class AlfrescoConnector {
         }
         Map<String, Object> properties = null;
 
-        if (extraCMSProperties != null)
-            properties = buildProperties(extraCMSProperties);
-
-        ObjectId id = new IdHelper( document.getId());
-        ObjectId id1 = null;
+        CmisObject obj = document;
         if (versionState.equals(VersioningState.MAJOR) || versionState.equals(VersioningState.MINOR)) {
-            id = checkOutDocument(document);
-            if (id != null) {
-                if (extraCMSProperties != null && extraCMSProperties.size() > 0) {
-                    id = createAspectsFromProperties(extraCMSProperties, (Document) session.getObject(id));
-                }
+            if (extraCMSProperties != null && extraCMSProperties.size() > 0) {
+                obj = manageAspectsFromProperties(extraCMSProperties, obj);
+            }
+            // leider kann man bei einem ausgecheckten Dokument keine Aspekte ändern. Deshalb werden die davor gemanaged
+            obj = checkOutDocument((Document) obj);
+            if (obj != null) {
+
+                if (extraCMSProperties != null)
+                    properties = buildProperties(extraCMSProperties);
+
                 if (properties != null && properties.size() > 0) {
-                    session.getObject(id).updateProperties(properties, true);
+                    obj.updateProperties(properties, true);
                 }
-                id = ((Document) session.getObject(id)).checkIn(versionState.equals(VersioningState.MAJOR), properties, contentStream, versionComment);
+                obj = checkInDocument((Document) obj, versionState.equals(VersioningState.MAJOR), properties, contentStream, versionComment);
                 session.clear();
+
             } else {
+
                 if (contentStream != null) {
-                    id1 = document.setContentStream(contentStream, true, true);
-                    id = id1 != null ? id1 : id;
+                    obj = setContent(document, contentStream, true, true);
                     session.clear();
                 }
-                id = createAspectsFromProperties(extraCMSProperties, id == null ? document : (Document) session.getObject(id));
-                id = (Document) session.getObject(id).updateProperties(properties, true);
+                obj = manageAspectsFromProperties(extraCMSProperties, obj == null ? document : obj);
+
+                if (extraCMSProperties != null)
+                    properties = buildProperties(extraCMSProperties);
+
+                obj = session.getObject( obj.updateProperties(properties, true));
             }
         } else {
-            //Update ohne Versionierung (das funktioniert wohl nur genau einmal denn Alfresco lässt bei Documenten mit Versionierung kein
-            // Update ohnen dieses zu.
+            // Update ohne Versionierung (das funktioniert wohl nur genau einmal denn Alfresco lässt bei Documenten mit Versionierung kein
+            // Update ohnen diese zu.
+            obj = document;
             if (contentStream != null) {
-                id1 = document.setContentStream(contentStream, true, true);
-                id = id1 != null ? id1 : id;
+                obj = setContent(document, contentStream, true, true);
                 session.clear();
             }
             if (extraCMSProperties != null && extraCMSProperties.size() > 0)
-                id = createAspectsFromProperties(extraCMSProperties, id == null ? document : (Document) session.getObject(id));
+                obj = manageAspectsFromProperties(extraCMSProperties, obj == null ? document : obj);
+
+            if (extraCMSProperties != null)
+                properties = buildProperties(extraCMSProperties);
 
             if (properties != null && properties.size() > 0)
-                id = ((Document) session.getObject(id)).updateProperties(properties, true);
+                obj = session.getObject(obj.updateProperties(properties, true));
 
 
         }
-        return (Document) session.getObject(id);
+        return (Document) obj;
     }
 
     /**
      * aktualisiert die Metadaten eines Dokumentes
-     * @param  object                    das zu aktualisierende Objekt
+     * @param  obj                       das zu aktualisierende Objekt
      * @param  extraCMSProperties        zusätzliche Properties
      * @return CmisObject                das geänderte Objekt
      */
 
-    public CmisObject updateProperties(CmisObject object,
+    public CmisObject updateProperties(CmisObject obj,
                                      Map<String, Object> extraCMSProperties) throws VerteilungException {
 
 
         Map<String, Object> properties = null;
-        ObjectId id = null;
-        if (extraCMSProperties != null) {
 
+        if (extraCMSProperties != null && extraCMSProperties.size() > 0)
+            obj = manageAspectsFromProperties(extraCMSProperties, obj);
+        if (extraCMSProperties != null) {
             properties = buildProperties(extraCMSProperties);
         }
-        if (extraCMSProperties != null && extraCMSProperties.size() > 0)
-            id = createAspectsFromProperties(extraCMSProperties, object);
-        id = session.getObject(id).updateProperties(properties, true);
+        obj = session.getObject(obj.updateProperties(properties, true));
 
-        return session.getObject(id);
+        return obj;
     }
 
     /**
@@ -469,11 +484,27 @@ public class AlfrescoConnector {
     /**
      * checked ein Dokument aus
      * @param  document                 das auszucheckende Dokument
-     * @return objectId                 die Id des Objectes, oder null falls es nicht auszuchecken ist.
+     * @return obj                      das Objekt, oder null falls es nicht auszuchecken ist.
      */
-    public ObjectId checkOutDocument(Document document) {
+    public CmisObject checkOutDocument(Document document) {
         if (isDocumentVersionable(document))
-            return document.checkOut();
+            return session.getObject(document.checkOut());
+        else
+            return null;
+    }
+
+    /**
+     * checked ein Dokument ein
+     * @param document          das einzucheckende Dokument
+     * @param major             Major Version
+     * @param properties        die properties zum Dokument
+     * @param contentStream     der Content des Dokumentes
+     * @param checkinComment    der Versionskommentar
+     * @return                  das eingecheckte Dokument
+     */
+    public CmisObject checkInDocument(Document document, boolean major, Map<String, ?> properties, ContentStream contentStream, String checkinComment) {
+        if (isDocumentVersionable(document))
+            return session.getObject(document.checkIn( major, properties, contentStream, checkinComment));
         else
             return null;
     }
@@ -558,20 +589,58 @@ public class AlfrescoConnector {
         return props;
     }
 
-    private ObjectId createAspectsFromProperties(Map<String, Object> Properties,
+    /**
+     * analysiert die Properties und fügt oder entferntdem Dokument die noch fehlenden Aspekte hin zu
+     * @param properties     die Properties
+     * @param obj            der Knoten
+     * @return               die Object Id des Knotens
+     */
+    private CmisObject manageAspectsFromProperties(Map<String, Object> properties,
                                                  CmisObject obj) {
-        ObjectId id = null;
-        for (String key : Properties.keySet()) {
+
+        ArrayList<String> removedAspects = new ArrayList<>();
+        // prüfen, welche Aspekte noch gebraucht werden
+        for (String key : properties.keySet()) {
+            ArrayList<Object> members = new ArrayList<>();
+            // Welche properties hat das Objekt
+            for (Property prop: obj.getProperties()){
+                ObjectType aspect =  ((AlfrescoAspects) obj).findAspect(prop.getId());
+                // prüfen, ob das Property zum Aspect gehört
+                if ( aspect != null && aspect.getId().equalsIgnoreCase(key) && !VerteilungHelper.isEmpty(obj.getPropertyValue(prop.getId())))
+                    members.add(prop.getId());
+            }
+            if (properties.containsKey(key) ){
+                for ( Object o: ((HashMap) properties.get(key)).keySet())  {
+                    if ( VerteilungHelper.isEmpty(((HashMap) properties.get(key)).get(o))) {
+                        if (members.contains(o))
+                            members.remove(o);
+                    } else if (!members.contains(o))
+                        members.add(o);
+                }
+            }
+
             if (!key.isEmpty() && key.startsWith("P:")) {
-                if (obj instanceof Folder)
-                    id = ((AlfrescoFolder) obj).addAspect(key);
-                if (obj instanceof Document)
-                    id = ((AlfrescoDocument) obj).addAspect(key);
-                obj =  session.getObject(id);
-                obj.refresh();
+
+                // Aspekte hinzufügen oder entfernen. Danach das Objekt neu lesen, weil sonst die alte Version
+                // benutzt würde
+                if (!((AlfrescoAspects)obj).hasAspect(key)  && members.size() > 0) {
+                    obj = ((AlfrescoAspects) obj).addAspect(key);
+                    if (!((Document) obj).isVersionSeriesCheckedOut())
+                        obj = session.getObject(VerteilungHelper.getRealId(obj.getId()));
+                } else if (((AlfrescoAspects)obj).hasAspect(key) && members.size() == 0) {
+                    obj = ((AlfrescoAspects) obj).removeAspect(key);
+                    // Aspekt merken
+                    if (properties.containsKey(key))
+                        removedAspects.add(key);
+                    if (!((Document) obj).isVersionSeriesCheckedOut())
+                        obj = session.getObject(VerteilungHelper.getRealId(obj.getId()));
+                }
             }
         }
-        return id;
+        // gelöschte Aspekte aus den Properties entfernen
+        for (String aspect : removedAspects)
+            properties.remove(aspect);
+        return obj;
     }
 
     /**

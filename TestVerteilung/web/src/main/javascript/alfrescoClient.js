@@ -1856,7 +1856,7 @@ function handleAlfrescoFolderImageClicks() {
     $(document).on("click", ".folderEdit", function () {
         try {
             var tr = $(this).closest('tr');
-            startFolderDialog(alfrescoFolderTabelle.row(tr).data(), "web-edit");
+            startFolderDialog(alfrescoFolderTabelle.row(tr), "web-edit");
         } catch (e) {
             errorHandler(e);
         }

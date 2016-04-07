@@ -1,9 +1,9 @@
 package de.schulte.testverteilung;
 
-import java.io.InputStream;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripper;
+
+import java.io.InputStream;
 
 public class PDFConnector {
 	
