@@ -56,7 +56,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
     @Test
     public void testIsURLAvailable() throws Exception {
         String urlString = "http://www.spiegel.de";
-        JSONObject obj = applet.isURLAvailable(urlString);
+        JSONObject obj = applet.isURLAvailable(urlString, "10000");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -82,7 +82,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
 
     @Test
     public void testGetNodeById() throws Exception {
-        JSONObject obj = applet.getNodeById("abcde");
+        JSONObject obj = applet.getNodeById("/abcde");
         assertNotNull(obj);
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
@@ -224,7 +224,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
+        assertTrue(obj.getString("result").startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
     }
 
     @Test
@@ -236,7 +236,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         assertTrue(obj.length() >= 2);
         assertNotNull(obj.get("result"));
         assertTrue(obj.get("result").toString(), obj.getBoolean("success"));
-        assertTrue(obj.getString("result").startsWith("HerrKlaus SchulteBredeheide 3348161 Münster"));
+        assertTrue(obj.getString("result").startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
     }
 
     @Test

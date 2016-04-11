@@ -49,6 +49,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_COMMENT = "comment";
     public static final String PARAMETER_MAXITEMSPERPAGE = "maxItemsPerPage";
     public static final String PARAMETER_PAGESTOSKIP = "pagesToSkip";
+    public static final String PARAMETER_TIMEOUT = "timeout";
 
     public static final String FUNCTION_CLEARINTERNALSTORAGE = "clearInternalStorage";
     public static final String FUNCTION_CREATEDOCUMENT = "createDocument";
@@ -180,7 +181,7 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_SETPARAMETER)) {
                     obj = setParameter(getURLParameter(req, PARAMETER_SERVER, true), getURLParameter(req, PARAMETER_BINDING, true), getURLParameter(req, PARAMETER_USERNAME, true), getURLParameter(req, PARAMETER_PASSWORD, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_ISURLAVAILABLE)) {
-                    obj = isURLAvailable(getURLParameter(req, PARAMETER_SERVER, true));
+                    obj = isURLAvailable(getURLParameter(req, PARAMETER_SERVER, true), getURLParameter(req, PARAMETER_TIMEOUT, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_GETTICKET)) {
                     obj = getTicket();
                 } else if (value.equalsIgnoreCase(FUNCTION_GETCOMMENTS)) {
@@ -313,13 +314,14 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * prüft, ob eine Url verfügbar ist
      * @param urlString    URL des Servers
+     * @param timeout      der Timeout
      * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            true, wenn die URL verfügbar ist
      */
-    protected JSONObject isURLAvailable(String urlString) {
+    protected JSONObject isURLAvailable(String urlString, String timeout) {
 
-        return services.isURLAvailable(urlString);
+        return services.isURLAvailable(urlString, Integer.parseInt(timeout));
 
     }
 

@@ -1283,7 +1283,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
         image.href = "#";
         image.className = "folderEdit";
         image.style.backgroundImage = "url(src/main/resource/images/beautify16.png)";
-        image.title = "Details bearbeiten";
+        image.title = "Ordner Details bearbeiten";
         image.style.cursor = "pointer";
         image.style.width = "16px";
         image.style.height = "16px";
@@ -1301,8 +1301,8 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             image = document.createElement("div");
             image.href = "#";
             image.className = "folderCreate";
-            image.style.backgroundImage = "url(src/main/resource/images/details_open.png)";
-            image.title = "neuen Folder anlegen";
+            image.style.backgroundImage = "url(src/main/resource/images/folder_add.png)";
+            image.title = "neuen Ordner anlegen";
             image.style.cursor = "pointer";
             image.style.width = "16px";
             image.style.height = "16px";
@@ -1322,10 +1322,10 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             image = document.createElement("div");
             image.href = "#";
             image.className = "folderRemove";
-            image.style.backgroundImage = "url(src/main/resource/images/deleteDocument.gif)";
-            image.title = "Folder löschen";
+            image.style.backgroundImage = "url(src/main/resource/images/folder_remove.png)";
+            image.title = "Ordner löschen";
             image.style.cursor = "pointer";
-            image.style.width = "13px";
+            image.style.width = "16px";
             image.style.height = "16px";
             image.style.cssFloat = "left";
             image.style.marginRight = "5px";
@@ -1340,7 +1340,9 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
 
 /**
  * formatiert die Iconspalte in der AlfrescoTabelle
- * @param o
+ * @param data
+ * @param type
+ * @param full
  * @returns {string}
  */
 function alfrescoAktionFieldFormatter(data, type, full) {
@@ -1383,7 +1385,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image.style.backgroundImage = "url(src/main/resource/images/deleteDocument.gif)";
         image.title = "Dokument löschen";
         image.style.cursor = "pointer";
-        image.style.width = "13px";
+        image.style.width = "16px";
         image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
@@ -1395,7 +1397,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image.style.backgroundImage = "url(src/main/resource/images/rules.png)";
         image.title = "Dokument Regel erstellen";
         image.style.cursor = "pointer";
-        image.style.width = "13px";
+        image.style.width = "16px";
         image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
@@ -1845,7 +1847,7 @@ function handleAlfrescoFolderImageClicks() {
     $(document).on("click", ".folderCreate", function () {
         try {
             var tr = $(this).closest('tr');
-            startFolderDialog(alfrescoFolderTabelle.row(tr), "web-create");
+            startFolderDialog(alfrescoFolderTabelle.row(tr).data(), "web-create");
         } catch (e) {
             errorHandler(e);
         }
@@ -1853,7 +1855,7 @@ function handleAlfrescoFolderImageClicks() {
     $(document).on("click", ".folderRemove", function () {
         try {
             var tr = $(this).closest('tr');
-            startFolderDialog(alfrescoFolderTabelle.row(tr), "web-display");
+            startFolderDialog(alfrescoFolderTabelle.row(tr).data(), "web-display");
         } catch (e) {
             errorHandler(e);
         }
@@ -1861,7 +1863,7 @@ function handleAlfrescoFolderImageClicks() {
     $(document).on("click", ".folderEdit", function () {
         try {
             var tr = $(this).closest('tr');
-            startFolderDialog(alfrescoFolderTabelle.row(tr), "web-edit");
+            startFolderDialog(alfrescoFolderTabelle.row(tr).data(), "web-edit");
         } catch (e) {
             errorHandler(e);
         }

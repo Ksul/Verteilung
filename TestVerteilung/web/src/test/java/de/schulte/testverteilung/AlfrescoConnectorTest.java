@@ -203,7 +203,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         assertThat(document, Matchers.notNullValue());
         assertThat(((AlfrescoDocument) document).hasAspect("P:cm:titled"), Matchers.is(true));
         assertThat(((BigDecimal) document.getProperty("my:amount").getValue()).doubleValue(), Matchers.equalTo(new BigDecimal(25.33).doubleValue()));
-        assertThat(document.getProperty("my:tax").getValue(), Matchers.is(true));
+        assertThat((boolean) document.getProperty("my:tax").getValue(), Matchers.is(true));
         document.delete(true);
     }
 
@@ -218,7 +218,6 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         archivModelMap.put("my:person", "Klaus");
         archivModelMap.put("my:documentDate", new Date().getTime());
         properties.put("D:my:archivContent", archivModelMap);
-
         Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR);   // NONE führt zu einem Fehler
         assertThat(document, Matchers.notNullValue());
         assertThat(document, Matchers.instanceOf( Document.class));

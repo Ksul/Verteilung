@@ -6,7 +6,7 @@
  */
 function checkServerStatus(url) {
 
-        var obj = executeService("isURLAvailable", [{"name":"server", "value":url}], null, true);
+        var obj = executeService("isURLAvailable", [{"name":"server", "value":url}, {"name":"timeout", "value":"5000"}], null, true);
     return obj.result.toString() == "true";
 }
 
@@ -25,8 +25,11 @@ function getSettings(key) {
         var urlPar = getUrlParam(key);
         if (urlPar == null)
             return null;
-        else
+        else {
+            if (!settings)
+                settings = {settings:[]};
             settings.settings.push({"key": key, "value": urlPar});
+        }
     }
     return settings.settings.filter(function (o) {
         return o.key.indexOf(key) >= 0;
@@ -854,7 +857,7 @@ function openRules() {
     try {
         if (rulesID != null && typeof rulesID =="string") {
             id = rulesID.substring(rulesID.lastIndexOf('/') + 1);
-            getRules(id, !alfrescoServerAvailable);
+            getRules(id, isLocal());
             document.getElementById('headerCenter').textContent = "Regeln (Server: doc.xml)";
         } else {
             if (isLocal()) {
@@ -862,7 +865,7 @@ function openRules() {
                 getRules("doc.xml", true);
             } else {
                 $.get('src/main/resource/rules/doc.xml', function (msg) {
-                    rulesEditor.getSession().setValue((new XMLSerializer()).serializeToString($(msg)[0]));
+                    rulesEditor.getSession().setValue(new XMLSerializer().serializeToString(msg));
                     rulesEditor.getSession().foldAll(1);
                     currentRules = "doc.xml";
                 });
@@ -1184,6 +1187,8 @@ function checkAndBuidAlfrescoEnvironment() {
     // prüfen, ob Server ansprechbar ist
     if (exist(getSettings("server")))
         alfrescoServerAvailable = checkServerStatus(getSettings("server"));
+    if (alfrescoServerAvailable && exist(getSettings("binding")))
+        alfrescoServerAvailable = checkServerStatus(getSettings("binding"));
     // falls ja, dann Server Parameter eintragen
     if (alfrescoServerAvailable) {
         var erg;
@@ -1340,7 +1345,10 @@ function checkAndBuidAlfrescoEnvironment() {
             }
         }
         if (erg.success) {
-            tabLayout.tabs("option", "active", 0);
+            tabLayout.tabs({
+                disabled: [],
+                active: 0
+            });
             ret = erg.success;
         }
     } else {
@@ -1397,8 +1405,7 @@ function init() {
                 // Cookie ist vorhanden, also die Daten aus diesem verwenden
                 settings = $.parseJSON(cookie);
             } else {
-                settings = {};
-                settings.settings = [];
+                settings = {settings:[]};
                 // Settings aus test.properties laden. Das wird nur lokal mit Applet funktionieren
                 var obj = executeService("loadProperties", [
                         {"name": "filePath", "value": convertPath("../test.properties")}

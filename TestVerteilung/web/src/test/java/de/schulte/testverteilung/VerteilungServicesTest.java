@@ -714,13 +714,13 @@ public class VerteilungServicesTest extends AlfrescoTest {
     @Test
     public void testIsURLAvailable() throws Exception {
         String urlString = "http://www.spiegel.de";
-        JSONObject obj = services.isURLAvailable(urlString);
+        JSONObject obj = services.isURLAvailable(urlString, 5000);
         assertThat(obj, notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("result"), notNullValue());
         assertTrue(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"));
         urlString = "http://www.spiegel.dumm";
-        obj = services.isURLAvailable(urlString);
+        obj = services.isURLAvailable(urlString, 5000);
         assertThat(obj, notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("result"), notNullValue());

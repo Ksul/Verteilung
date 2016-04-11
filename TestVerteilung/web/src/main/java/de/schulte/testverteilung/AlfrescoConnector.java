@@ -625,14 +625,12 @@ public class AlfrescoConnector {
                 // benutzt würde
                 if (!((AlfrescoAspects)obj).hasAspect(key)  && members.size() > 0) {
                     obj = ((AlfrescoAspects) obj).addAspect(key);
-                    if (!((Document) obj).isVersionSeriesCheckedOut())
-                        obj = session.getObject(VerteilungHelper.getRealId(obj.getId()));
+                    obj = session.getObject(VerteilungHelper.getRealId(obj.getId()));
                 } else if (((AlfrescoAspects)obj).hasAspect(key) && members.size() == 0) {
                     obj = ((AlfrescoAspects) obj).removeAspect(key);
                     // Aspekt merken
                     if (properties.containsKey(key))
                         removedAspects.add(key);
-                    if (!((Document) obj).isVersionSeriesCheckedOut())
                         obj = session.getObject(VerteilungHelper.getRealId(obj.getId()));
                 }
             }

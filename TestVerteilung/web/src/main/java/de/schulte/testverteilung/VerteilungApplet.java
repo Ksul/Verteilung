@@ -196,19 +196,20 @@ public class VerteilungApplet extends Applet {
 
     /**
      * prüft, ob eine Url verfügbar ist
-     * @param  urlString   URL des Servers
+     * @param urlString       URL des Servers
+     * @param timeout         der Timeout
      * @return obj            ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                false    ein Fehler ist aufgetreten
      *                                                       result            true, wenn die URL verfügbar ist
      */
-    public JSONObject isURLAvailable(final String urlString) {
+    public JSONObject isURLAvailable(final String urlString, final String timeout) {
 
         JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws VerteilungException, IOException, JSONException {
-                    return services.isURLAvailable(urlString);
+                    return services.isURLAvailable(urlString, Integer.parseInt(timeout));
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -318,7 +319,7 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
-     * liefert eine NodeID als String zurück
+     * liefert einen Knoten zurück
      * @param documentId   die Id des Knotens
      * @return obj         ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
@@ -331,7 +332,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.getNodeId(documentId);
+                    return services.getNodeById(documentId);
                 }
             });
         } catch (PrivilegedActionException e) {

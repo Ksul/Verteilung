@@ -709,28 +709,32 @@ public class VerteilungServices {
     /**
      * prüft, ob eine Url verfügbar ist
      * @param urlString    URL des Servers
-     * @return             ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     * @param timeout      der Tiemout in Millisekunden
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    result            true, wenn die URL verfügbar ist
      */
-    public JSONObject isURLAvailable(String urlString) {
+    public JSONObject isURLAvailable(String urlString, int timeout) {
 
         JSONObject obj = new JSONObject();
         URL url;
         try {
+            logger.fine("check availibility of: " + urlString);
             url = new URL(urlString);
             HttpURLConnection httpUrlConn;
             httpUrlConn = (HttpURLConnection) url.openConnection();
             httpUrlConn.setRequestMethod("HEAD");
             // Set timeouts in milliseconds
-            httpUrlConn.setConnectTimeout(30000);
-            httpUrlConn.setReadTimeout(30000);
+            httpUrlConn.setConnectTimeout(timeout);
+            httpUrlConn.setReadTimeout(timeout);
 
             int erg = httpUrlConn.getResponseCode();
-            if (erg == HttpURLConnection.HTTP_OK) {
+            if (erg == HttpURLConnection.HTTP_OK || erg == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                logger.fine("URL is available: " + urlString);
                 obj.put("success", true);
                 obj.put("result", true);
             } else {
+                logger.fine("URL is not available: " + urlString);
                 obj.put("success", false);
                 obj.put("result", httpUrlConn.getResponseMessage());
             }
