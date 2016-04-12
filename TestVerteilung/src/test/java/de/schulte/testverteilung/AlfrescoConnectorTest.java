@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.*;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -30,13 +29,13 @@ import static org.junit.Assert.assertThat;
  */
 public class AlfrescoConnectorTest extends AlfrescoTest{
 
-    AlfrescoConnector con;
+    private AlfrescoConnector con;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         con = new AlfrescoConnector(properties.getProperty("user"), properties.getProperty("password"), properties.getProperty("server"), properties.getProperty("bindingUrl"));
-        assertNotNull(con);
+        assertThat(con, Matchers.notNullValue());
         CmisObject cmisObject = con.getNode("/Archiv/TestDocument.txt");
 
         if (cmisObject != null && cmisObject instanceof AlfrescoDocument) {
@@ -69,11 +68,9 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         assertThat(list.getTotalNumItems(), Matchers.is(4L));
         list = con.listFolder(con.getNode("/Archiv/Fehler").getId());
         int count = 0;
-        Iterator<CmisObject> it = list.iterator();
-        while (it.hasNext()){
-            CmisObject obj = it.next();
+        for (CmisObject obj : list) {
             if (obj instanceof Folder)
-              count++;
+                count++;
         }
         assertThat(count, Matchers.is(1));
     }
@@ -81,7 +78,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testGetNode() throws Exception {
-        CmisObject cmisObject = null;
+        CmisObject cmisObject;
         cmisObject = con.getNode("/Archiv");
         assertThat(cmisObject, Matchers.notNullValue());
         assertThat(cmisObject, Matchers.instanceOf(Folder.class));
@@ -137,7 +134,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> titledMap = new HashMap<>();
         titledMap.put("cm:description","Testdokument");
-        //properties.put("P:cm:titled", titledMap);
+        properties.put("P:cm:titled", titledMap);
         Document document = con.createDocument((Folder) folder, "TestDocument.txt", content.getBytes(), CMISConstants.DOCUMENT_TYPE_TEXT, properties, VersioningState.MINOR);
         assertThat(document, Matchers.notNullValue());
         assertThat(document, Matchers.instanceOf( Document.class));
@@ -349,6 +346,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         JSONObject ticket = con.getTicket();
         assertThat(ticket, Matchers.notNullValue());
         JSONObject abd = con.addComment(document, ((JSONObject) ticket.get("data")).getString("ticket"), "Testkommentar");
+        assertThat(abd, Matchers.notNullValue());
         JSONObject result =  con.getComments(document, ((JSONObject) ticket.get("data")).getString("ticket"));
         assertThat(((JSONObject) ((JSONArray) result.get("items")).get(0)).getString("content"), Matchers.equalTo("Testkommentar"));
         document.delete(true);

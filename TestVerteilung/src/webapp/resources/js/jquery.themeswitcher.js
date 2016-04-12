@@ -17,7 +17,7 @@
             height: 200,
             width: 175,
             rounded: true,
-            imgpath: "./src/main/resource/images/",
+            imgpath: "resources/images/",
             themepath: "https://ajax.googleapis.com/ajax/libs/jqueryui/",
             jqueryuiversion: "1.11.2",
             initialtext: "Switch Theme",
@@ -49,145 +49,145 @@
                     title: "Black Tie",
                     name: "black-tie",
                     icon: "theme_90_black_tie.png",
-                    url:  "./src/main/resource/themes/black-tie/jquery-ui.css"
+                    url:  "resources/themes/black-tie/jquery-ui.css"
                 },
                 {
                     title: "Blitzer",
                     name: "blitzer",
                     icon: "theme_90_blitzer.png",
-                    url:  "./src/main/resource/themes/blitzer/jquery-ui.css"
+                    url:  "resources/themes/blitzer/jquery-ui.css"
                 },
                 {
                     title: "Cupertino",
                     name: "cupertino",
                     icon: "theme_90_cupertino.png",
-                    url:  "./src/main/resource/themes/cupertino/jquery-ui.css"
+                    url:  "resources/themes/cupertino/jquery-ui.css"
                 },
                 {
                     title: "Dark Hive",
                     name: "dark-hive",
                     icon: "theme_90_dark_hive.png",
-                    url:  "./src/main/resource/themes/dark-hive/jquery-ui.css"
+                    url:  "resources/themes/dark-hive/jquery-ui.css"
                 },
                 {
                     title: "Dot Luv",
                     name: "dot-luv",
                     icon: "theme_90_dot_luv.png",
-                    url:  "./src/main/resource/themes/dot-luv/jquery-ui.css"
+                    url:  "resources/themes/dot-luv/jquery-ui.css"
                 },
                 {
                     title: "Eggplant",
                     name: "eggplant",
                     icon: "theme_90_eggplant.png",
-                    url:  "./src/main/resource/themes/eggplant/jquery-ui.css"
+                    url:  "resources/themes/eggplant/jquery-ui.css"
                 },
                 {
                     title: "Excite Bike",
                     name: "excite-bike",
                     icon: "theme_90_excite_bike.png",
-                    url:  "./src/main/resource/themes/excite-bike/jquery-ui.css"
+                    url:  "resources/themes/excite-bike/jquery-ui.css"
                 },
                 {
                     title: "Flick",
                     name: "flick",
                     icon: "theme_90_flick.png",
-                    url:  "./src/main/resource/themes/flick/jquery-ui.css"
+                    url:  "resources/themes/flick/jquery-ui.css"
                 },
                 {
                     title: "Hot Sneaks",
                     name: "hot-sneaks",
                     icon: "theme_90_hot_sneaks.png",
-                    url:  "./src/main/resource/themes/hot-sneaks/jquery-ui.css"
+                    url:  "resources/themes/hot-sneaks/jquery-ui.css"
                 },
                 {
                     title: "Humanity",
                     name: "humanity",
                     icon: "theme_90_humanity.png",
-                    url:  "./src/main/resource/themes/humanity/jquery-ui.css"
+                    url:  "resources/themes/humanity/jquery-ui.css"
                 },
                 {
                     title: "Le Frog",
                     name: "le-frog",
                     icon: "theme_90_le_frog.png",
-                    url:  "./src/main/resource/themes/le-frog/jquery-ui.css"
+                    url:  "resources/themes/le-frog/jquery-ui.css"
                 },
                 {
                     title: "Mint Choc",
                     name: "mint-choc",
                     icon: "theme_90_mint_choco.png",
-                    url:  "./src/main/resource/themes/mint-chock/jquery-ui.css"
+                    url:  "resources/themes/mint-chock/jquery-ui.css"
                 },
                 {
                     title: "Overcast",
                     name: "overcast",
                     icon: "theme_90_overcast.png",
-                    url:  "./src/main/resource/themes/overcast/jquery-ui.css"
+                    url:  "resources/themes/overcast/jquery-ui.css"
                 },
                 {
                     title: "Pepper Grinder",
                     name: "pepper-grinder",
                     icon: "theme_90_pepper_grinder.png",
-                    url:  "./src/main/resource/themes/pepper-grinder/jquery-ui.css"
+                    url:  "resources/themes/pepper-grinder/jquery-ui.css"
                 },
                 {
                     title: "Redmond",
                     name: "redmond",
                     icon: "theme_90_windoze.png",
-                    url:  "./src/main/resource/themes/redmond/jquery-ui.css"
+                    url:  "resources/themes/redmond/jquery-ui.css"
                 },
                 {
                     title: "Smoothness",
                     name: "smoothness",
                     icon: "theme_90_smoothness.png",
-                    url:  "./src/main/resource/themes/smoothness/jquery-ui.css"
+                    url:  "resources/themes/smoothness/jquery-ui.css"
                 },
                 {
                     title: "South Street",
                     name: "south-street",
                     icon: "theme_90_south_street.png",
-                    url:  "./src/main/resource/themes/south-street/jquery-ui.css"
+                    url:  "resources/themes/south-street/jquery-ui.css"
                 },
                 {
                     title: "Start",
                     name: "start",
                     icon: "theme_90_start_menu.png",
-                    url:  "./src/main/resource/themes/start/jquery-ui.css"
+                    url:  "resources/themes/start/jquery-ui.css"
                 },
                 {
                     title: "Sunny",
                     name: "sunny",
                     icon: "theme_90_sunny.png",
-                    url:  "./src/main/resource/themes/sunny/jquery-ui.css"
+                    url:  "resources/themes/sunny/jquery-ui.css"
                 },
                 {
                     title: "Swanky Purse",
                     name: "swanky-purse",
                     icon: "theme_90_swanky_purse.png",
-                    url:  "./src/main/resource/themes/swanky-purse/jquery-ui.css"
+                    url:  "resources/themes/swanky-purse/jquery-ui.css"
                 },
                 {
                     title: "Trontastic",
                     name: "trontastic",
                     icon: "theme_90_trontastic.png",
-                    url:  "./src/main/resource/themes/trontastic/jquery-ui.css"
+                    url:  "resources/themes/trontastic/jquery-ui.css"
                 },
                 {
                     title: "UI Darkness",
                     name: "ui-darkness",
                     icon: "theme_90_ui_dark.png",
-                    url:  "./src/main/resource/themes/ui-darkness/jquery-ui.css"
+                    url:  "resources/themes/ui-darkness/jquery-ui.css"
                 },
                 {
                     title: "UI Lightness",
                     name: "ui-lightness",
                     icon: "theme_90_ui_light.png",
-                    url:  "./src/main/resource/themes/ui-lightness/jquery-ui.css"
+                    url:  "resources/themes/ui-lightness/jquery-ui.css"
                 },
                 {
                     title: "Vader",
                     name: "vader",
                     icon: "theme_90_black_matte.png",
-                    url:  "./src/main/resource/themes/vader/jquery-ui.css"
+                    url:  "resources/themes/vader/jquery-ui.css"
                 }
             ]
         } else {
@@ -206,7 +206,7 @@
             "font-family": "'Trebuchet MS', Verdana, sans-serif",
             "font-size": "11px",
             "color": "#666",
-            "background-image": "url('./src/main/resource/images/themes.png')" ,
+            "background-image": "url('resources/images/themes.png')" ,
             "border": "1px solid #CCC",
             "text-decoration": "none",
             "display": "block",
@@ -228,13 +228,13 @@
             .bind({
                 mouseenter: function () {
                     $(this).css({
-                        "background-image": "url('./src/main/resource/images/themes.png')"
+                        "background-image": "url('resources/images/themes.png')"
                     })
                 },
                 mouseleave: function () {
                     if (!switcherDiv.find(".jquery-ui-switcher-list-hldr").is(":visible")) {
                         $(this).css({
-                            "background-image": "url('./src/main/resource/images/themes.png')"
+                            "background-image": "url('resources/images/themes.png')"
                         })
                     }
                 },

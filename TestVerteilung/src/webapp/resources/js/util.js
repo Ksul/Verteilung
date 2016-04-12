@@ -239,7 +239,7 @@ function loadApplet(level, server, bindingUrl, user, password) {
         obj.setAttribute('id', 'reader');
         obj.setAttribute('width', '1');
         obj.setAttribute('height', '1');
-        obj.setAttribute('codebase', './WEB-INF/lib');
+        obj.setAttribute('codebase', './applet');
         if (typeof level != "undefined" && level != null ){
             param = document.createElement( "param" );
             param.setAttribute('name', 'debug');
@@ -270,26 +270,7 @@ function loadApplet(level, server, bindingUrl, user, password) {
             param.setAttribute('value', password);
             obj.appendChild(param);
         }
-        obj.setAttribute('archive',
-                'vt.jar, ' +
-                'pdfbox-1.6.0.jar, ' +
-                'plugin.jar, ' +
-                'bcprov-jdk15on-150.jar, ' +
-                'commons-codec-1.6.jar, ' +
-                'commons-logging-1.1.1.jar, ' +
-                'fontbox-1.6.0.jar, ' +
-                'jempbox-1.6.0.jar, ' +
-                'slf4j-api-1.7.5.jar, ' +
-                'commons-io-2.4.jar,' +
-                'commons-jcs-core-2.0-beta-1.jar, ' +
-                'alfresco-opencmis-extension-1.0.jar, ' +
-                'chemistry-opencmis-client-api-0.13.0.jar, ' +
-                'chemistry-opencmis-client-bindings-0.13.0.jar, ' +
-                'chemistry-opencmis-client-impl-0.13.0.jar, ' +
-                'chemistry-opencmis-commons-api-0.13.0.jar, ' +
-                'chemistry-opencmis-commons-impl-0.13.0.jar, ' +
-                'stax2-api-3.1.4.jar, ' +
-                'woodstox-core-asl-4.4.0.jar');
+        obj.setAttribute('archive', 'TestVerteilung-1.0-SNAPSHOT-jar-with-dependencies.jar');
         obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
         document.getElementById('appl').appendChild(obj);
         var app =  $('#reader').get(0);

@@ -592,7 +592,7 @@ function loadAlfrescoTable() {
                         try {
                                 if (exist(data) && data == "application/pdf") {
                                     var span = document.createElement("span");
-                                    var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/src/main/resource/images/pdf.png";
+                                    var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/resources/images/pdf.png";
                                     var image = document.createElement('img');
                                     image.id = "alfrescoTableIcon" + row.objectID;
                                     image.className = "alfrescoTableIconEvent alfrescoTableDragable treeDropable";
@@ -1018,7 +1018,7 @@ function loadAlfrescoSearchTable() {
                         try {
                             if (exist(data) && data == "application/pdf") {
                                 var span = document.createElement("span");
-                                var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/src/main/resource/images/pdf.png";
+                                var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/resources/images/pdf.png";
                                 var image = document.createElement('img');
                                 image.id = "alfrescoSearchTableIcon" + row.objectID;
                                 image.className = "alfrescoSearchTableIconEvent";
@@ -1111,7 +1111,7 @@ function loadAlfrescoSearchTable() {
                         var image = document.createElement("div");
                         image.href = "#";
                         image.className = "detailAim";
-                        image.style.backgroundImage = "url(src/main/resource/images/ziel.png)";
+                        image.style.backgroundImage = "url(resources/images/ziel.png)";
                         image.title = "Dokument im Ordner anzeigen";
                         image.style.cursor = "pointer";
                         image.style.width = "16px";
@@ -1282,7 +1282,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
         image = document.createElement("div");
         image.href = "#";
         image.className = "folderEdit";
-        image.style.backgroundImage = "url(src/main/resource/images/beautify16.png)";
+        image.style.backgroundImage = "url(resources/images/beautify16.png)";
         image.title = "Ordner Details bearbeiten";
         image.style.cursor = "pointer";
         image.style.width = "16px";
@@ -1301,7 +1301,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             image = document.createElement("div");
             image.href = "#";
             image.className = "folderCreate";
-            image.style.backgroundImage = "url(src/main/resource/images/folder_add.png)";
+            image.style.backgroundImage = "url(resources/images/folder_add.png)";
             image.title = "neuen Ordner anlegen";
             image.style.cursor = "pointer";
             image.style.width = "16px";
@@ -1322,7 +1322,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             image = document.createElement("div");
             image.href = "#";
             image.className = "folderRemove";
-            image.style.backgroundImage = "url(src/main/resource/images/folder_remove.png)";
+            image.style.backgroundImage = "url(resources/images/folder_remove.png)";
             image.title = "Ordner löschen";
             image.style.cursor = "pointer";
             image.style.width = "16px";
@@ -1351,7 +1351,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         var image = document.createElement("div");
         image.href = "#";
         image.className = "detailEdit";
-        image.style.backgroundImage = "url(src/main/resource/images/beautify16.png)";
+        image.style.backgroundImage = "url(resources/images/beautify16.png)";
         image.title = "Details bearbeiten";
         image.style.cursor = "pointer";
         image.style.width = "16px";
@@ -1364,12 +1364,12 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image.href = "#";
 
         if (data.commentCount > 0) {
-            image.style.backgroundImage = "url(src/main/resource/images/forum-16.gif)";
+            image.style.backgroundImage = "url(resources/images/forum-16.gif)";
             image.style.cursor = "pointer";
             image.className = "showComments";
         }
         else {
-            image.style.backgroundImage = "url(src/main/resource/images/forum-16-bw.gif)";
+            image.style.backgroundImage = "url(resources/images/forum-16-bw.gif)";
             image.style.cursor = "none";
         }
         image.title = "Kommentare";
@@ -1382,7 +1382,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image = document.createElement("div");
         image.href = "#";
         image.className = "deleteDocument";
-        image.style.backgroundImage = "url(src/main/resource/images/deleteDocument.gif)";
+        image.style.backgroundImage = "url(resources/images/deleteDocument.gif)";
         image.title = "Dokument löschen";
         image.style.cursor = "pointer";
         image.style.width = "16px";
@@ -1394,7 +1394,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image = document.createElement("div");
         image.href = "#";
         image.className = "rulesDocument";
-        image.style.backgroundImage = "url(src/main/resource/images/rules.png)";
+        image.style.backgroundImage = "url(resources/images/rules.png)";
         image.title = "Dokument Regel erstellen";
         image.style.cursor = "pointer";
         image.style.width = "16px";
@@ -1423,10 +1423,10 @@ function imageFieldFormatter(data, type, full) {
         image.href = "#";
         image.className = "run";
         if (full[3].error) {
-            image.style.backgroundImage = "url(src/main/resource/images/error.png)";
+            image.style.backgroundImage = "url(resources/images/error.png)";
             image.title = "Verteilung fehlerhaft";
         } else {
-            image.style.backgroundImage = "url(src/main/resource/images/ok.png)";
+            image.style.backgroundImage = "url(resources/images/ok.png)";
             image.title = "Verteilung erfolgreich";
         }
         image.style.cursor = "pointer";
@@ -1439,7 +1439,7 @@ function imageFieldFormatter(data, type, full) {
         image.href = "#";
         image.className = "glass";
         image.title = "Ergebnis anzeigen";
-        image.style.backgroundImage = "url(src/main/resource/images/glass.png)";
+        image.style.backgroundImage = "url(resources/images/glass.png)";
         image.style.width = "16px";
         image.style.height = "16px";
         image.style.cursor = "pointer";
@@ -1451,11 +1451,11 @@ function imageFieldFormatter(data, type, full) {
         image.className = "loeschen";
         image.title = "Ergebnis löschen";
         if (daten[full[1]]["notDeleteable"] != "true") {
-            image.style.backgroundImage = "url(src/main/resource/images/delete.png)";
+            image.style.backgroundImage = "url(resources/images/delete.png)";
             image.style.cursor = "pointer";
         }
         else {
-            image.style.backgroundImage = "url(src/main/resource/images/delete-bw.png)";
+            image.style.backgroundImage = "url(resources/images/delete-bw.png)";
             image.style.cursor = "not-allowed";
         }
         image.style.width = "16px";
@@ -1466,10 +1466,10 @@ function imageFieldFormatter(data, type, full) {
         image = document.createElement("div");
         image.className = "pdf";
         if (full[1].toLowerCase().endsWith(".pdf")) {
-            image.style.backgroundImage = "url(src/main/resource/images/pdf.png)";
+            image.style.backgroundImage = "url(resources/images/pdf.png)";
             image.style.cursor = "pointer";
         } else {
-            image.style.backgroundImage = "url(src/main/resource/images/pdf-bw.png)";
+            image.style.backgroundImage = "url(resources/images/pdf-bw.png)";
             image.style.cursor = "not-allowed";
         }
         image.style.cssFloat = "left";
@@ -1480,7 +1480,7 @@ function imageFieldFormatter(data, type, full) {
         container.appendChild(image);
         image = document.createElement("div");
         image.className = "moveToInbox";
-        image.style.backgroundImage = "url(src/main/resource/images/move-file.png)";
+        image.style.backgroundImage = "url(resources/images/move-file.png)";
         image.style.cursor = "pointer";
         image.style.cssFloat = "left";
         image.style.width = "16px";
@@ -2385,7 +2385,7 @@ function loadAlfrescoTree() {
                 "separator_before": false,
                 "separator_after": false,
                 "label": "Erstellen",
-                "icon" : "src/main/resource/images/details_open.png",
+                "icon" : "resources/images/details_open.png",
                 "action": function (obj) {
                     try {
                         startFolderDialog($.jstree.reference('#tree').get_node(obj.reference[0]).data, "web-create");
@@ -2398,7 +2398,7 @@ function loadAlfrescoTree() {
                 "separator_before": false,
                 "separator_after": false,
                 "label": "Ändern",
-                "icon" : "src/main/resource/images/beautify16.png",
+                "icon" : "resources/images/beautify16.png",
                 "action": function (obj) {
                     try {
                         startFolderDialog($.jstree.reference('#tree').get_node(obj.reference[0]).data, "web-edit");
@@ -2411,7 +2411,7 @@ function loadAlfrescoTree() {
                 "separator_before": false,
                 "separator_after": false,
                 "label": "Löschen",
-                "icon" : "src/main/resource/images/deleteDocument.gif",
+                "icon" : "resources/images/deleteDocument.gif",
                 "action": function (obj) {
                     try {
                         startFolderDialog($.jstree.reference('#tree').get_node(obj.reference[0]).data, "web-display");

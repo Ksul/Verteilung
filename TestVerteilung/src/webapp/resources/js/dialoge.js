@@ -663,7 +663,7 @@ function closeDialog() {
  */
 function startDialog(dialogSettings, width) {
 
-    $('head').append('<link href="./src/main/resource/css/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
+    $('head').append('<link href="resources/css/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
      $("<div>", {id: "dialogBox", class:"grid gridpad" }).appendTo("body");
     $('#dialogBox').alpaca( dialogSettings).dialog({
         autoOpen: true,

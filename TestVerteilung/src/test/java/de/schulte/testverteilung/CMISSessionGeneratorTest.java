@@ -1,6 +1,7 @@
 package de.schulte.testverteilung;
 
-import junit.framework.Assert;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class CMISSessionGeneratorTest extends AlfrescoTest{
     public void testGenerateSession() throws Exception {
       CMISSessionGenerator gen = new CMISSessionGenerator(properties.getProperty("user"), properties.getProperty("password"), properties.getProperty("bindingUrl"), "Archiv");
       Session ses = gen.generateSession();
-      Assert.assertNotNull(ses);
-      Assert.assertEquals("Archiv", gen.getRepositoryName());
+      Assert.assertThat(ses, Matchers.notNullValue());
+      Assert.assertThat(gen.getRepositoryName(), Matchers.equalTo("Archiv"));
     }
 }

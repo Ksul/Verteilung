@@ -1,17 +1,14 @@
 package de.schulte.testverteilung;
 
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Before;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.Properties;
-import java.util.TimeZone;
-
-import static junit.framework.TestCase.assertNotNull;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,11 +24,11 @@ public class AlfrescoTest {
     public void setUp() throws Exception {
         properties = new Properties();
         FileInputStream fileInputStream = new FileInputStream("test.properties");
-        assertNotNull(fileInputStream);
+        Assert.assertThat(fileInputStream, Matchers.notNullValue());
         properties.load(fileInputStream);
-        assertNotNull(properties.getProperty("server"));
-        assertNotNull(properties.getProperty("password"));
-        assertNotNull(properties.getProperty("testPDF"));
+        Assert.assertThat(properties.getProperty("server"), Matchers.notNullValue());
+        Assert.assertThat(properties.getProperty("password"), Matchers.notNullValue());
+        Assert.assertThat(properties.getProperty("testPDF"), Matchers.notNullValue());
         properties.put("bindingUrl", properties.getProperty("bindingUrl"));
         if (needsProxy()) {
             System.getProperties().put("proxySet", "true");

@@ -311,7 +311,7 @@ function readMultiFile(evt) {
 function readFiles(files) {
     try {
         if (currentRules == null || !currentRules.endsWith("doc.xml")) {
-            var open = openFile("src/main/resource/rules/doc.xml");
+            var open = openFile("resources/rules/doc.xml");
             currentRules = open[1];
             rulesEditor.getSession().setValue(open[0]);
             rulesEditor.getSession().foldAll(1);
@@ -825,7 +825,7 @@ function getRules(rulesId, loadLocal) {
     try {
         var ret;
         if (loadLocal) {
-            var open = openFile("src/main/resource/rules/doc.xml");
+            var open = openFile("resources/rules/doc.xml");
             rulesEditor.getSession().setValue(open);
             rulesEditor.getSession().foldAll(1);
             REC.log(INFORMATIONAL, "Regeln erfolgreich lokal gelesen!");
@@ -864,7 +864,7 @@ function openRules() {
                 //TODO Muss hier nicht eine ID übergeben werden?
                 getRules("doc.xml", true);
             } else {
-                $.get('src/main/resource/rules/doc.xml', function (msg) {
+                $.get('resources/rules/doc.xml', function (msg) {
                     rulesEditor.getSession().setValue(new XMLSerializer().serializeToString(msg));
                     rulesEditor.getSession().foldAll(1);
                     currentRules = "doc.xml";
@@ -1259,10 +1259,10 @@ function checkAndBuidAlfrescoEnvironment() {
             if (!erg.success) {
                 var doc;
                 if (isLocal())
-                    doc = openFile('src/main/resource/rules/doc.xml');
+                    doc = openFile('resources/rules/doc.xml');
                 else {
                     doc = $.ajax({
-                        url: createPathToFile("src/main/resource/rules/doc.xml"),
+                        url: createPathToFile("resources/rules/doc.xml"),
                         async: false
                     }).responseText;
                 }
