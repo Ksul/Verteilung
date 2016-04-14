@@ -17,11 +17,49 @@
 
     <properties>
         <de.lvm.appName>testverteilung</de.lvm.appName>
+        <jasmine.version>2.1</jasmine.version>
+        <js.source.dir>${basedir}/src/webapp/resources/js</js.source.dir>
     </properties>
 
 
     <build>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.github.searls</groupId>
+                    <artifactId>jasmine-maven-plugin</artifactId>
+                    <version>${jasmine.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <!-- Quellcode Verzeichnis der JavaScript Dateien -->
+                        <!--<jsSrcDir>src/webapp/resources/js</jsSrcDir>-->
+                        <!-- Quellcode Verzeichnis der Testfälle  -->
+                        <jsTestSrcDir>${basedir}/src/test/webapp/js/specs</jsTestSrcDir>
+                        <preloadSources>
+                            <!-- Zusätzliche Bibliotheken welche für den Testfall benötigt werden, zbsp. jQuery -->
+                            <source>${js.source.dir}/util.js</source>
+                            <source>${js.source.dir}/recognition.js</source>
+                        </preloadSources>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
+
+
+            <plugin>
+                <groupId>com.github.searls</groupId>
+                <artifactId>jasmine-maven-plugin</artifactId>
+                <version>${jasmine.version}</version>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
