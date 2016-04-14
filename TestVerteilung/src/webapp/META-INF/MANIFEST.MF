@@ -1,2 +1,7 @@
 Manifest-Version: 1.0
-
+Built-By: ${user.name}
+Main-Class: de.schulte.testverteilung.VerteilungApplet
+Permissions: all-permissions
+Application-Name: Archiv
+Caller-Allowable-Codebase: ksul.spdns.de localhost 127.0.0.1
+Class-Path: .
