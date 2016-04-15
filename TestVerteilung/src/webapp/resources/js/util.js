@@ -239,7 +239,7 @@ function loadApplet(level, server, bindingUrl, user, password) {
         obj.setAttribute('id', 'reader');
         obj.setAttribute('width', '1');
         obj.setAttribute('height', '1');
-        obj.setAttribute('codebase', './applet');
+        //obj.setAttribute('codebase', './applet');
         if (typeof level != "undefined" && level != null ){
             param = document.createElement( "param" );
             param.setAttribute('name', 'debug');
@@ -270,7 +270,7 @@ function loadApplet(level, server, bindingUrl, user, password) {
             param.setAttribute('value', password);
             obj.appendChild(param);
         }
-        obj.setAttribute('archive', 'TestVerteilung-1.0-SNAPSHOT-jar-with-dependencies.jar');
+        obj.setAttribute('archive', './applet/TestVerteilung-1.0-SNAPSHOT-jar-with-dependencies.jar');
         obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
         document.getElementById('appl').appendChild(obj);
         var app =  $('#reader').get(0);

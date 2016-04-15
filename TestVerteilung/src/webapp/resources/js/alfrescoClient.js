@@ -603,7 +603,6 @@ function loadAlfrescoTable() {
                                     $('#alfrescoTabelle tbody').on( 'click', '#' + image.id, function (event) {
                                         openDocument(this, event);
                                     });
-
                                     span.appendChild(image);
                                     return span.outerHTML;
                                 } else
@@ -1667,7 +1666,7 @@ function switchAlfrescoDirectory(data) {
             times.push(new Date().getTime());
             REC.log(DEBUG, "SwitchDirectory: " + (times[1] -times[0]) + " ms");
             fillMessageBox(true);
-            calculateTableHeight("alfrescoCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+            calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             $.fn.dataTable.makeEditable( alfrescoTabelle, {
                 "fnShowError" : function(text, aktion){
                     message("Fehler", text);

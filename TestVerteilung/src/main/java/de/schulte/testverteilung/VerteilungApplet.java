@@ -1246,4 +1246,6 @@ public class VerteilungApplet extends Applet {
 		return "Hier ist das Verteilungs Applet!";
 	}
 
+    public static void main(String[] args) {System.out.println("Hier ist das Verteilungs Applet!"); }
+
 }
