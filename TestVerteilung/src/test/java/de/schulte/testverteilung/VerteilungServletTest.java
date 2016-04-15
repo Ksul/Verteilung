@@ -544,7 +544,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         doc = new JSONObject(obj.getString("result"));
         assertThat(doc, Matchers.notNullValue());
         // wegen der 2 Aspekte nicht 2.1 sondern 2.3
-        assertThat(doc.getString("versionLabel"), Matchers.equalTo("2."));
+        assertThat(doc.getString("versionLabel"), Matchers.equalTo("2.3"));
         assertThat(doc.getString("checkinComment"), Matchers.equalTo("1. Versionskommentar"));
         assertThat(doc.getString("amount"), Matchers.equalTo("25.33"));
         assertThat(doc.getBoolean("tax"), Matchers.is(true));

@@ -250,7 +250,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         String encodedContent =  Base64.encodeBase64String(content);
         for (int k = 0; k <= Math.ceil(encodedContent.length() / 1000); k++)
             applet.fillParameter(encodedContent.substring(k * 1000, Math.min(encodedContent.length(), k * 1000 + 1000)), k == 0);
-        JSONObject obj = applet.extractPDFToInternalStorage(fileName, System.getProperty("user.dir"));
+        JSONObject obj = applet.extractPDFToInternalStorage(System.getProperty("user.dir"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("result"), Matchers.notNullValue());

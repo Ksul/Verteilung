@@ -855,7 +855,7 @@ public class VerteilungApplet extends Applet {
 
     /**
      * extrahiert eine PDF Datei und trägt den Inhalt in den internen Speicher ein.
-     * der Inhalt der ZIP Datei muss vorher mit @see fillParamter gefüllt worden sein.
+     * der Inhalt der ZIP Datei muss vorher mit @see fillParameter gefüllt worden sein.
      * @param fileName          der Name der PDF Datei
      * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
@@ -879,7 +879,6 @@ public class VerteilungApplet extends Applet {
 
     /**
      * extrahiert eine PDF Datei und trägt den Inhalt in den internen Speicher ein.
-     * der Inhalt der ZIP Datei muss vorher mit @see fillParamter gefüllt worden sein.
      * @param content           der Content der Datei als Base64 encodeter String
      * @param fileName          der Name der PDF Datei
      * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich

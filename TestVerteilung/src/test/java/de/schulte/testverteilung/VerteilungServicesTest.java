@@ -341,7 +341,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         JSONObject result = new JSONObject(obj.getString("result"));
         assertThat(result, notNullValue());
-        assertThat(document.getString("versionLabel"), Matchers.equalTo("2.0"));
+        assertThat(result.getString("versionLabel"), Matchers.equalTo("2.0"));
         assertThat(result.getString("checkinComment"), Matchers.equalTo("neuer Versionskommentar"));
         extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().getTime() + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
         obj = services.updateDocument(result.getString("objectId"), null, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MAJOR.value(), "2. Versionskommentar");
@@ -351,7 +351,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         result = new JSONObject(obj.getString("result"));
         assertThat(result, notNullValue());
-        assertThat(document.getString("versionLabel"), Matchers.equalTo("3.0"));
+        assertThat(result.getString("versionLabel"), Matchers.equalTo("3.0"));
         assertThat(result.getString("checkinComment"), Matchers.equalTo("2. Versionskommentar"));
         assertThat(result.getString("amount"), Matchers.equalTo("25.33"));
         assertThat(result.getBoolean("tax"), Matchers.is(true));
