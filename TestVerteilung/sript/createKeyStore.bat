@@ -1,0 +1,3 @@
+del ..\certdb\keystore.jks
+"C:\Program Files\Java\jdk1.8.0_73\jre\..\bin\keytool.exe" -genkey -alias applet -keystore ..\certdb\keystore.jks -storepass Rethymon -keypass Rethymon -validity 3600 -keyalg RSA -keysize 2048 -dname "CN=Klaus Schulte, OU=Schulte 3, O=Schulte.org, L=NRW, ST=Germany, C=DE"
+"C:\Program Files\Java\jdk1.8.0_73\jre\..\bin\keytool.exe" -selfcert -alias applet -keystore ..\certdb\keystore.jks -storepass Rethymon -keypass Rethymon

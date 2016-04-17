@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Table Example</title>
+
+    <script type="text/javascript" src="./src/main/javascript/jquery-ui/js/jquery-1.10.2.js"></script>
+
+    <script type="text/javascript" src="./src/main/javascript/jquery.dataTables.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./src/main/javascript/jquery.jeditable.js" charset="utf-8"></script>
+    <script type="text/javascript" src="src/main/javascript/jquery.DataTables.editable.js"></script>
+    <link type="text/css" href="./src/main/resource/ArchivLayout.css" rel="stylesheet"/>
+    <link type="text/css" href="./src/main/javascript/jquery-ui/css/cupertino/jquery-ui-1.10.4.custom.css" rel="stylesheet"/>
+
+    <script type="text/javascript" charset="utf-8">
+    /* Data set - can contain whatever information you want */
+
+    var data = [
+        {
+            "name":       "Tiger Nixon",
+            "position":   "System Architect",
+            "salary":     "$3,120",
+            "start_date": "2011/04/25",
+            "office":     "",
+            "extn":       "5421"
+        },
+        {
+            "name":       "Garrett Winters",
+            "position":   "Director",
+            "salary":     "$5,300",
+            "start_date": "2011/07/25",
+            "office":     "Edinburgh",
+            "extn":       "8422"
+        }
+    ];
+
+
+    $(document).ready(function() {
+        $('#dynamic').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>' );
+        var tabelle = $('#example').DataTable( {
+            data: data,
+             columns: [
+                { data: 'name' },
+                { data: 'position' },
+                { data: 'salary' },
+                { data: 'office' }
+            ]
+        });
+        $.fn.dataTable.makeEditable( tabelle,  {
+            sUpdateURL: function(value, settings)
+            {
+                alert(value);
+            }
+        } );
+
+
+    } );
+</script>
+</head>
+<body id="dt_example">
+
+<div id="dynamic"></div>
+
+</body>
+</html>

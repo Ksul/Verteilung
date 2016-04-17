@@ -6,7 +6,7 @@
     <artifactId>TestVerteilung</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>${project.artifactId}</name>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
 
     <scm>
@@ -23,7 +23,7 @@
 
 
     <build>
-
+        <finalName>${project.artifactId}</finalName>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -70,24 +70,34 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-a-jar</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2.1</version>
+                <version>2.6</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <archive>
                         <index>true</index>
-                            <manifestFile>${project.basedir}/src/webapp/META-INF/MANIFEST.MF</manifestFile>
-
+                        <manifestFile>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}META-INF${file.separator}MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-my-applet-jar</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
@@ -97,12 +107,20 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jarsigner-plugin</artifactId>
-                <version>1.2</version>
+                <version>1.4</version>
                 <executions>
                     <execution>
                         <id>sign</id>
+                        <phase>install</phase>
                         <goals>
                             <goal>sign</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>verify</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -111,7 +129,35 @@
                     <alias>applet</alias>
                     <storepass>Rethymon</storepass>
                     <keypass>Rethymon</keypass>
+                    <arguments>
+                        <argument>-sigalg</argument><argument>MD5withRSA</argument>
+                        <argument>-digestalg</argument><argument>SHA1</argument>
+                    </arguments>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <execution>
+                        <id>copy-resource-one</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}applet</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}${file.separator}target</directory>
+                                    <includes>
+                                        <include>*-jar-with-dependencies.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

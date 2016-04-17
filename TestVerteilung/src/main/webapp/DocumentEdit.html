@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <script>
+/*
+        $('#container').layout({zIndex: 0, resizeWithWindow: false, closable: false, resizable: false, slidable: false});
+        $('#oben').layout({zIndex: 0, resizeWithWindow: false, closable: false, resizable: false, slidable: false, west__size: 26});
+        $('#central').layout({zIndex: 0, resizeWithWindow: false, closable: false, resizable: false, slidable: false});
+        $('#inner-central-oben').layout({zIndex: 0, resizeWithWindow: false, closable: false, resizable: false, slidable: false});
+        $('#inner-central-central').layout({zIndex: 0, resizeWithWindow: false, closable: false, resizable: false, slidable: false});
+        $('#inner-central-unten').layout({zIndex: 0, resizeWithWindow: false, closable: false, resizable: false, slidable: false});
+*/
+        $('#inner-central-unten-central').layout();
+/*
+        $('#inner-central-unten-south').layout({zIndex: 0, resizeWithWindow: false, closable: false, resizable: false, slidable: false});
+*/
+        $(function () {
+            $( "#tax" ).button();
+            $("#date").datepicker({
+                showOn: "button",
+                buttonImage: "images/calendar.gif",
+                buttonImageOnly: true
+            });
+        });
+    </script>
+    <style>
+        .settings-headline {
+            top: 5px !important;
+        }
+
+        .ui-layout-pane-center {
+            right: 10px !important;
+            width: auto !important;
+
+        }
+
+        .text {
+            height: 18px !important;
+        }
+    </style>
+</head>
+
+<!--<div class="ui-layout-center" id="container">
+    <div class="ui-layout-north" id="oben">
+        <div class="ui-layout-west">
+            <img alt="" src="resource/alfresco.png">
+        </div>
+        <div class="ui-layout-center settings-headline">Dokument bearbeiten
+        </div>
+    </div>
+
+    <div class="ui-layout-center" id="central">
+        <div class="ui-layout-center" id="inner-central">
+            <div class="ui-layout-north" id="inner-central-oben">Titel
+                <input maxlength="255" tabindex="1" name="titel" id="titel"
+                       class="text ui-widget-content ui-corner-all">
+            </div>
+            <div class="ui-layout-central" id="inner-central-central">Beschreibung
+                <input tabindex="1" name="description" id="description" class="text ui-widget-content ui-corner-all">
+            </div>
+            <div class="ui-layout-south" id="inner-central-unten">-->
+                <div class="ui-layout-center" id="inner-central-unten-central">
+                    <div class="ui-layout-west" id="inner-central-unten-central-links">ID
+                        <input maxlength="20" tabindex="3" name="id" id="id"
+                               class="text ui-widget-content ui-corner-all">
+                    </div>
+                    <div class="ui-layout-center" id="inner-central-unten-central-central">Betrag
+                        <input maxlength="20" style="" tabindex="4" name="amount" id="amount"
+                               class="text ui-widget-content ui-corner-all">
+                    </div>
+                    <div class="ui-layout-east" id="inner-central-unten-central-rechts">
+
+                        <fieldset>
+                            <label for="tax">Steuerrelevant</label>
+                            <input name="tax" value="tax" type="checkbox" id="tax" class=" text ui-widget-content ui-corner-all">
+
+                        </fieldset>
+
+                    </div>
+                </div><!--
+                <div class="ui-layout-south" id="inner-central-unten-unten">
+                    <div class="ui-layout-east" id="inner-central-unten-unten-links">Datum
+                        <input maxlength="20" tabindex="6" name="date" id="date"
+                               class="text ui-widget-content ui-corner-all">
+                    </div>
+                    <div class="ui-layout-center" id="inner-central-unten-unten-central">Person
+                        <select>
+                            <option value="klaus">Klaus</option>
+                            <option value="katja">Katja</option>
+                            <option value="till">Till</option>
+                            <option value="kilian">Kilian</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>-->
+</html>
