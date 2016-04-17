@@ -79,6 +79,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_UPLOADDOCUMENT = "uploadDocument";
     public static final String FUNCTION_UPDATEPROPERTIES = "updateproperties";
     public static final String FUNCTION_GETTICKET = "getTicket";
+    public static final String FUNCTION_GETTICKETWITHUSERANDPASSWORD = "getTicketWithUserAndPassword";
     public static final String FUNCTION_GETCOMMENTS = "getComments";
     public static final String FUNCTION_ADDCOMMENT = "addComment";
 
@@ -184,6 +185,8 @@ public class VerteilungServlet extends HttpServlet {
                     obj = isURLAvailable(getURLParameter(req, PARAMETER_SERVER, true), getURLParameter(req, PARAMETER_TIMEOUT, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_GETTICKET)) {
                     obj = getTicket();
+                } else if (value.equalsIgnoreCase(FUNCTION_GETTICKETWITHUSERANDPASSWORD)) {
+                    obj = getTicketWithUserAndPassword(getURLParameter(req, PARAMETER_USERNAME, true), getURLParameter(req, PARAMETER_PASSWORD, true), getURLParameter(req, PARAMETER_SERVER, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_GETCOMMENTS)) {
                     obj = getComments(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_TICKET, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_ADDCOMMENT)) {
@@ -197,7 +200,7 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
                     obj = findDocument(getURLParameter(req, PARAMETER_CMISQUERY, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPLOADDOCUMENT)) {
-                    obj = uploadDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true),  getURLParameter(req, PARAMETER_VERSIONSTATE, true));
+                    obj = uploadDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true), getURLParameter(req, PARAMETER_VERSIONSTATE, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_DELETEDOCUMENT)) {
                     obj = deleteDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_CREATEDOCUMENT)) {
@@ -217,7 +220,7 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_LISTFOLDERASJSON)) {
                     obj = listFolder(getURLParameter(req, PARAMETER_FILEPATH, true), getURLParameter(req, PARAMETER_WITHFOLDER, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_LISTFOLDERASJSONWITHPAGINATION)) {
-                    obj = listFolderWithPagination(getURLParameter(req, PARAMETER_FILEPATH, true), getURLParameter(req, PARAMETER_WITHFOLDER, true),  getURLParameter(req, PARAMETER_MAXITEMSPERPAGE, true),  getURLParameter(req, PARAMETER_PAGESTOSKIP, true));
+                    obj = listFolderWithPagination(getURLParameter(req, PARAMETER_FILEPATH, true), getURLParameter(req, PARAMETER_WITHFOLDER, true), getURLParameter(req, PARAMETER_MAXITEMSPERPAGE, true), getURLParameter(req, PARAMETER_PAGESTOSKIP, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_EXTRACTPDFCONTENT)) {
                     obj = extractPDFContent(getURLParameter(req, PARAMETER_DOCUMENTTEXT, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_EXTRACTPDFFILE)) {
@@ -268,6 +271,21 @@ public class VerteilungServlet extends HttpServlet {
         if (param == null && neccesary)
             throw new VerteilungException("Parameter " + parameter + " fehlt");
         return param;
+    }
+
+    /**
+     * liefert ein Ticket zur Authentifizierung
+     * @param user         der Name des Users
+     * @param password     das Password
+     * @param server       der Alfresco Server
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            das Ticket als String
+     */
+    protected JSONObject getTicketWithUserAndPassword(String user, String password, String server) {
+
+        return services.getTicketWithUserAndPassword(user, password, server);
+
     }
 
     /**

@@ -143,6 +143,32 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
+     * liefert ein Alfresco Ticket zur Authentifizierung
+     * @param user               der Name des Users
+     * @param password           das Password
+     * @param server             der Alfresco Server
+     * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                              false    ein Fehler ist aufgetreten
+     *                                                     result            das Ticket als String
+     */
+    public JSONObject getTicketWithUserAndPassword(final String user,
+                                                   final String password,
+                                                   final String server) {
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    return services.getTicketWithUserAndPassword(user, password, server);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
      * liefert die Kommentare zu einem Knoten
      * @param documentId   die Id des Knoten
      * @param ticket       das Ticket zur Identifizierung am Alfresco

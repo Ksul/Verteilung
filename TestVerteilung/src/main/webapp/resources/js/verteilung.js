@@ -160,6 +160,7 @@ function manageControls() {
  * Öffnet ein PDF
  * @param name       Name des Dokuments
  * @param fromServer legt fest, ob das Dokument vom Server geholt werden soll
+ * TODO Dass muss überarbeitet werden!!
  */
 function openPDF(name, fromServer) {
     try {
@@ -1183,15 +1184,29 @@ function closeScript() {
  * TODO Regel für die Inbox
  */
 function checkAndBuidAlfrescoEnvironment() {
-    var ret;
+    var ret, erg;
     // prüfen, ob Server ansprechbar ist
     if (exist(getSettings("server")))
         alfrescoServerAvailable = checkServerStatus(getSettings("server"));
-    if (alfrescoServerAvailable && exist(getSettings("binding")))
-        //alfrescoServerAvailable = checkServerStatus(getSettings("binding"));
+    // Ticket besorgen
+    if (exist(getSettings("user")) && exist(getSettings("password")) && exist(getSettings("server"))) {
+        erg = executeService("getTicketWithUserAndPassword",
+            [   {"name": "user", "value": getSettings("user")},
+                {"name": "password", "value": getSettings("password")},
+                {"name": "server", "value": getSettings("server")}
+            ]);
+        if (erg.success) {
+            // Binding prüfen
+            if (alfrescoServerAvailable && exist(getSettings("binding")))
+                alfrescoServerAvailable = checkServerStatus(getSettings("binding") + "?alf_ticket=" + erg.result.data.ticket);
+        } else {
+            alfrescoServerAvailable = false;
+        }
+    } else {
+        alfrescoServerAvailable = false;
+    }
     // falls ja, dann Server Parameter eintragen
     if (alfrescoServerAvailable) {
-        var erg;
         var extraProperties;
         erg = executeService("setParameter", [
             {"name": "server", "value": getSettings("server")},

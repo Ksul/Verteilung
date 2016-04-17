@@ -99,6 +99,30 @@ public class VerteilungServices {
     }
 
     /**
+     * liefert ein Ticket zur Authentifizierung
+     * @param user               der Name des Users
+     * @param password           das Password
+     * @param server             der Alfresco Server
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            das Ticket als JSON Objekt
+     */
+    public JSONObject getTicketWithUserAndPassword( String user,
+                                                    String password,
+                                                    String server) {
+        JSONObject obj = new JSONObject();
+        try {
+            AlfrescoConnector connector = new AlfrescoConnector();
+            obj.put("success", true);
+            obj.put("result", connector.getTicket(user, password, server));
+
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
      * liefert die Kommentare zu einem Knoten
      * @param documentId    die Id des Knoten/Folder
      * @param ticket        das Ticket zur Identifizierung

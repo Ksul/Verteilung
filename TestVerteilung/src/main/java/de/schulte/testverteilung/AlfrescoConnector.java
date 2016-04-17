@@ -88,16 +88,33 @@ public class AlfrescoConnector {
     }
 
     /**
+     * Konstruktor
+     */
+    public AlfrescoConnector() {}
+
+    /**
      * liefert ein Ticket zur Authenfizierung
      * @return             das Ticket als JSON Objekt
      * @throws IOException
      */
     public JSONObject getTicket() throws IOException, JSONException{
 
-        URL url = new URL(this.server + (this.server.endsWith("/") ? "" : "/") + LOGIN_URL);
-        String urlParameters = "{ \"username\" : \"" + this.user + "\", \"password\" : \"" + this.password + "\" }";
+        return getTicket(this.user, this.password, this.server);
+    }
+
+    /**
+     * liefert ein Ticket zur Authentifizierung
+     * @param user         der Name des Users
+     * @param password     das Password
+     * @param server       der Alfresco Server
+     * @return             das Ticket als JSON Objekt
+     * @throws IOException
+     */
+    public JSONObject getTicket(String user, String password, String server) throws IOException, JSONException{
+        URL url = new URL(server + (server.endsWith("/") ? "" : "/") + LOGIN_URL);
+        String urlParameters = "{ \"username\" : \"" + user + "\", \"password\" : \"" + password + "\" }";
         JSONObject obj = new JSONObject(startRequest(url, RequestType.POST, urlParameters));
-        logger.info(("Ticket für User " + this.user + " und Passord " + this.password + " ausgestellt."));
+        logger.info(("Ticket für User " + user + " und Password " + password + " ausgestellt."));
         return obj;
     }
 
