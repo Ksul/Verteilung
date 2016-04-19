@@ -107,15 +107,15 @@ function startSettingsDialog() {
             "ui": "jquery-ui",
 
             "postRender": function (renderedField) {
-                renderedField.on("validated", function (e) {
+                renderedField.on("validated", function () {
                     $("#btn-ok").button("option", "disabled", false);
                 });
-                renderedField.on("invalidated", function (e) {
+                renderedField.on("invalidated", function () {
                     $("#btn-ok").button("option", "disabled", true);
                 });
                 var form = renderedField.form;
                 if (form) {
-                    form.registerSubmitHandler(function (e) {
+                    form.registerSubmitHandler(function () {
                         if (form.isFormValid()) {
                             try {
                                 var input = $("#dialogBox").alpaca().getValue();
@@ -318,13 +318,14 @@ function startDocumentDialog(data, modus) {
             "postRender": function (renderedField) {
                 var form = renderedField.form;
                 if (form) {
-                    form.registerSubmitHandler(function (e) {
+                    form.registerSubmitHandler(function () {
                         if (form.isFormValid()) {
                             try {
+                                var alpaca = $("#dialogBox").alpaca();
                                 // Werte übertragen
-                                var input = $("#dialogBox").alpaca().getValue();
+                                var input = alpaca.getValue();
                                 // die original Daten sichern.
-                                var origData = $("#dialogBox").alpaca().data;
+                                var origData = alpaca.data;
                                 // Wurde was geändert?
                                 if (origData.title != input.title || origData.description != input.description || origData.person != input.person || origData.documentDate != input.documentDate
                                     || origData.amount != input.amount || origData.tax != origData.tax) {
@@ -414,7 +415,14 @@ function startFolderDialog(data, modus) {
                     "buttons": {
                         "submit": {
                             "value": function () {
-                                if (modus == "web-display") return "Löschen"; else return "Sichern"
+                                switch(true) {
+                                    case /display/.test(modus):
+                                        return "Löschen";
+                                    case /create/.test(modus):
+                                        return "Erstellen";
+                                    default:
+                                        return "Sichern";    
+                                }
                             }
                         },
                         "reset": {"value": "Abbrechen"}
@@ -460,14 +468,16 @@ function startFolderDialog(data, modus) {
             "postRender": function (renderedField) {
                 var form = renderedField.form;
                 if (form) {
-                    form.registerSubmitHandler(function (e) {
+                    form.registerSubmitHandler(function () {
                         if (form.isFormValid()) {
                             try {
-                                var tree, row, node, lastElement, origData, newData, dataChanged, extraProperties, erg;
+                                var tree, row, node, lastElement, newData, dataChanged, extraProperties, erg;
                                 dataChanged = false;
+                                var alpaca = $("#dialogBox").alpaca();
+                                // Werte übertragen
+                                var input = alpaca.getValue();
                                 // die original Daten sichern.
-                                origData = $("#dialogBox").alpaca().data;
-                                var input = $("#dialogBox").alpaca().getValue();
+                                var origData = alpaca.data;
                                 extraProperties = {
                                     'cmis:folder': {
                                         'cmis:objectTypeId': 'cmis:folder',
