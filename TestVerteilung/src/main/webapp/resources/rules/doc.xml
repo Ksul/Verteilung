@@ -194,12 +194,10 @@
         <category name="Rechnung/Rechnung Kortenbrede" />
         <searchItem name="person" fix="Klaus" target="my:person" />
         <searchItem name="title" fix="Robert Kortenbrede" target="cm:title" />
-        <searchItem name="datum" text="Datum" objectTyp="date" target="my:documentDate">
-            <delimitter typ="start" text="&#0032;" count="1" />
+        <searchItem name="datum" kind="date,2" objectTyp="date" target="my:documentDate">
             <check lowerValue="01/01/2000" upperValue="01/01/2020" />
         </searchItem>
-        <searchItem name="id" text="Belegnummer" target="my:idvalue">
-            <delimitter typ="start" text="&#0032;" count="1" />
+        <searchItem name="id" text="Kasse" word="1" target="my:idvalue">
             <archivZiel aspect="my:idable" />
             <check lowerValue="0" upperValue="99999" />
         </searchItem>

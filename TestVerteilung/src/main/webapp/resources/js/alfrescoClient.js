@@ -1877,7 +1877,7 @@ function handleAlfrescoImageClicks() {
     $(document).on("click", ".detailEdit", function () {
         try {
             var tr = $(this).closest('tr');
-            startDocumentDialog($('#' + tr[0].parentElement.parentElement.id).DataTable().row(tr));
+            startDocumentDialog($('#' + tr[0].parentElement.parentElement.id).DataTable().row(tr).data(), "web-edit");
         } catch (e) {
             errorHandler(e);
         }
