@@ -153,7 +153,7 @@ function startSettingsDialog() {
 
 
 /**
- * startet den Detaildialog für Documente
+ * startet den Detaildialog für Dokumente
  * @param data     die Daten welche bearbeitet werden sollen
  * @param modus    der Modus web-edit    Dokument editieren
  */
@@ -167,6 +167,8 @@ function startDocumentDialog(data, modus) {
             else
                 data.documentDate = $.datepicker.formatDate("dd.mm.yy", new Date());
         }
+        if (data.amount && data.amount.indexOf(',') != -1)
+            data.amount = data.amount.replace(/\./g, '').replace(/,/g, ".");
         if (!exist(data.tax))
             data.tax = false;
 

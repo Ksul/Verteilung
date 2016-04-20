@@ -678,6 +678,18 @@ function loadAlfrescoTable() {
                     visible: true
                 },
                 {
+                    targets: [6],
+                    render: function (data, type, row) {
+                        if (data) {
+                            if (data.indexOf(',') != -1)
+                                return data;
+                            else
+                                return $.format.number(parseFloat(data), '#,##0.00');
+                        }
+                    },
+                    visible: true
+                },
+                {
                     targets: [8],
                     render: function(data, types, row) {
                         return alfrescoAktionFieldFormatter(data, types, row).outerHTML;
@@ -1694,6 +1706,7 @@ function switchAlfrescoDirectory(data) {
                     },
                     null
                 ],
+                sSuccessResponse: "IGNORE", // keine Meldungen nach dem Editieren
                 sUpdateURL: function (value, settings) {
                     try {
                         var extraProperties;
@@ -1710,7 +1723,12 @@ function switchAlfrescoDirectory(data) {
                             data.person = value;
                         } else if (this.cellIndex == 5) {
                             // Betrag geändert
-                            data.amount = value;
+                            if (value.indexOf(',' != -1)) {
+                                data.amount = value.replace(/\./g, '').replace(/,/g, ".");  	
+                                value = data.amount;
+                            }
+                            else 
+                                data.amount = value;
                         } else if (this.cellIndex == 6) {
                             // Id geändert
                             data.idvalue = value;
@@ -2785,6 +2803,13 @@ function start() {
         var zone = document.getElementById('inTxt');
         zone.addEventListener('dragover', handleDragOver, false);
         zone.addEventListener('drop', handleFileSelect, false);
+
+        $.format.locale({
+            number: {
+                groupingSeparator: '.',
+                decimalSeparator: ','
+            }
+        });
 
         loadAlfrescoTable();
         loadAlfrescoFolderTable();
