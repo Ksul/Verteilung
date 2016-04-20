@@ -348,8 +348,12 @@ function startDocumentDialog(data, modus) {
                                 if (origData.amount && typeof origData.amount == "string")
                                     origData.amount = origData.amount.replace(/\./g, '').replace(/,/g, ".");
                                 // Wurde was geändert?
-                                if (origData.title != input.title || origData.description != input.description || origData.person != input.person || origData.documentDate != input.documentDate
-                                    || origData.amount != input.amount || origData.tax != origData.tax) {
+                                if ((input.title && origData.title != input.title) || 
+                                    (input.description && origData.description != input.description) || 
+                                    (input.person && origData.person != input.person) || 
+                                    (input.documentDate && origData.documentDate != input.documentDate) || 
+                                    (input.amount && origData.amount != input.amount) || 
+                                    (origData.tax && origData.tax != origData.tax)) {
 
                                     var extraProperties = {
                                         'P:cm:titled': {'cm:title': input.title, 'cm:description': input.description},
@@ -504,7 +508,9 @@ function startFolderDialog(data, modus) {
                                         'cm:description': input.description
                                     }
                                 };
-                                if (input.name != origData.name || input.title != origData.title || input.description != origData.description)
+                                if ((input.name && input.name != origData.name) || 
+                                    (input.title && input.title != origData.title) || 
+                                    (input.description && input.description != origData.description))
                                     dataChanged = true;
                                 lastElement = $("#breadcrumblist").children().last();
                                 if (modus == "web-create") {
