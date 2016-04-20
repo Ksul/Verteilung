@@ -681,7 +681,7 @@ function loadAlfrescoTable() {
                     targets: [6],
                     render: function (data, type, row) {
                         if (data) {
-                            if (data.indexOf(',') != -1)
+                            if (typeof data == "string" && data.indexOf(',') != -1)
                                 return data;
                             else
                                 return $.format.number(parseFloat(data), '#,##0.00');
@@ -1111,6 +1111,18 @@ function loadAlfrescoSearchTable() {
                             return $.datepicker.formatDate("dd.mm.yy", new Date(Number(row.creationDate)));
                         else
                             return "";
+                    },
+                    visible: true
+                },
+                {
+                    targets: [6],
+                    render: function (data, type, row) {
+                        if (data) {
+                            if (data instanceof String && data.indexOf(',') != -1)
+                                return data;
+                            else
+                                return $.format.number(parseFloat(data), '#,##0.00');
+                        }
                     },
                     visible: true
                 },
@@ -1706,7 +1718,7 @@ function switchAlfrescoDirectory(data) {
                     },
                     null
                 ],
-                sSuccessResponse: "IGNORE", // keine Meldungen nach dem Editieren
+                //sSuccessResponse: "IGNORE", // keine Meldungen nach dem Editieren
                 sUpdateURL: function (value, settings) {
                     try {
                         var extraProperties;
@@ -1723,9 +1735,9 @@ function switchAlfrescoDirectory(data) {
                             data.person = value;
                         } else if (this.cellIndex == 5) {
                             // Betrag geändert
-                            if (value.indexOf(',' != -1)) {
+                            if (value.indexOf(',') != -1) {
                                 data.amount = value.replace(/\./g, '').replace(/,/g, ".");  	
-                                value = data.amount;
+                                //value = data.amount;
                             }
                             else 
                                 data.amount = value;
@@ -1739,12 +1751,13 @@ function switchAlfrescoDirectory(data) {
                             'P:my:amountable': {'my:amount': data.amount, "my:tax": data.tax},
                             'P:my:idable': {'my:idvalue': data.idvalue}
                         };
-                        erg = executeService("updateProperties", [
+                        var erg = executeService("updateProperties", [
                             {"name": "documentId", "value": data.objectID},
                             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                         ], null, true);
                         if (erg.success) {
-                            data.objectID = $.parseJSON(erg.result).objectID;
+                            data = $.parseJSON(erg.result);
+                            alfrescoTabelle.row($(this).closest('tr')).data(data);
                             return(value);
                         }
                         else
@@ -1815,7 +1828,10 @@ function startSearch(searchText) {
                             data.person = value;
                         } else if (this.cellIndex == 5) {
                             // Betrag geändert
-                            data.amount = value;
+                            if (value.indexOf(',' != -1)) {
+                                data.amount = value.replace(/\./g, '').replace(/,/g, ".");
+                                value = data.amount;
+                            }
                         } else if (this.cellIndex == 6) {
                             // Id geändert
                             data.idvalue = value;
@@ -1831,8 +1847,9 @@ function startSearch(searchText) {
                             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                         ], null, true);
                         if (erg.success) {
-                            data.objectID = $.parseJSON(erg.result).objectID;
-                            return (value);
+                            data = $.parseJSON(erg.result);
+                            alfrescoSearchTabelle.row($(this).closest('tr')).data(data);
+                            return(value);
                         }
                         else
                             return "Dokument konnte nicht aktualisiert werden!" + "<br>" + erg.result;

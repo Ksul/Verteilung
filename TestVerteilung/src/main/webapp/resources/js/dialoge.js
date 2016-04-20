@@ -167,8 +167,8 @@ function startDocumentDialog(data, modus) {
             else
                 data.documentDate = $.datepicker.formatDate("dd.mm.yy", new Date());
         }
-        if (data.amount && data.amount.indexOf(',') != -1)
-            data.amount = data.amount.replace(/\./g, '').replace(/,/g, ".");
+        if (data.amount && typeof data.amount == "string" && data.amount.indexOf(',') == -1)
+            data.amount =$.format.number(parseFloat(data.amount), '#,##0.00');
         if (!exist(data.tax))
             data.tax = false;
 
@@ -207,9 +207,9 @@ function startDocumentDialog(data, modus) {
                         "default": "Klaus"
                     },
                     "amount": {
-                        "type": "number",
-                        "title": "Betrag",
-                        "required": false
+                        "type": "string",
+                        "required": false,
+                        "properties": {}
                     },
                     "documentDate": {
                         "type": "string",
@@ -253,13 +253,30 @@ function startDocumentDialog(data, modus) {
                         "type": "textarea",
                         "size": 60
                     },
-                    /*                        "amount":{
-                     "type": "currency",
-                     "centsSeparator": ",",
-                     "prefix": "",
-                     "suffix": " €",
-                     "thousandsSeparator": "."
-                     },*/
+                    "amount": {
+                        "type": "currency",
+                        "label": "Betrag",
+                        "centsLimit": 2,
+                        "centsSeparator": ",",
+                        "prefix": "",
+                        "round": "none",
+                        "thousandsSeparator": ".",
+                        "suffix": "",
+                        "unmask": true,
+                        "allowNegative" : true,
+                        "helpers": [],
+                        "validate": true,
+                        "disabled": false,
+                        "showMessages": true,
+                        "renderButtons": true,
+                        "data": {},
+                        "attributes": {},
+                        "allowOptionalEmpty": true,
+                        "autocomplete": false,
+                        "disallowEmptySpaces": false,
+                        "disallowOnlyEmptySpaces": false,
+                        "fields": {}
+                    },
                     "tax": {
                         "rightLabel": "relevant"
                     },
@@ -328,6 +345,8 @@ function startDocumentDialog(data, modus) {
                                 var input = alpaca.getValue();
                                 // die original Daten sichern.
                                 var origData = alpaca.data;
+                                if (origData.amount && typeof origData.amount == " string")
+                                    origData.amount = origData.amount.replace(/\./g, '').replace(/,/g, ".");
                                 // Wurde was geändert?
                                 if (origData.title != input.title || origData.description != input.description || origData.person != input.person || origData.documentDate != input.documentDate
                                     || origData.amount != input.amount || origData.tax != origData.tax) {
@@ -344,17 +363,13 @@ function startDocumentDialog(data, modus) {
                                         {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                                     ], "Dokument konnte nicht aktualisiert werden!", false);
                                     if (erg.success) {
-                                        // Daten in die Tabelle übertragen
-                                        data.title = input.title;
-                                        data.description = input.description;
-                                        data.person = input.person;
-                                        data.documentDate = $.datepicker.parseDate("dd.mm.yy", input.documentDate).getTime();
-                                        data.amount = input.amount;
-                                        data.idvalue = input.idvalue;
-                                        data.tax = input.tax;
+                                        var newData = $.parseJSON(erg.result);
+                                        // Tabelle updaten
+                                         var row = alfrescoTabelle.row('#' + newData.objectID);
+                                         if (row) 
+                                             row.data(newData).invalidate();
                                     }
                                 }
-                                alfrescoTabelle.rows().invalidate();
                                 closeDialog();
                             } catch (e) {
                                 errorHandler(e);
@@ -365,7 +380,6 @@ function startDocumentDialog(data, modus) {
             }
 
         };
-
         startDialog(dialogDocumentDetailsSettings, 450);
     } catch (e) {
         errorHandler(e);
@@ -535,11 +549,7 @@ function startFolderDialog(data, modus) {
                                         if (lastElement && lastElement.get(0).id == newData.parentId) {
                                             row = alfrescoFolderTabelle.row('#' + newData.objectID);
                                             if (row) {
-                                                var dat = row.data();
-                                                dat.name = newData.name;
-                                                dat.title = newData.title;
-                                                dat.description = newData.description;
-                                                row.invalidate();
+                                                row.data(newData).invalidate();
                                             }
                                         }
                                         // BreadCrumb aktualisieren
