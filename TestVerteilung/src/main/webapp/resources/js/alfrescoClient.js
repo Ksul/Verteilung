@@ -1118,7 +1118,7 @@ function loadAlfrescoSearchTable() {
                     targets: [6],
                     render: function (data, type, row) {
                         if (data) {
-                            if (data instanceof String && data.indexOf(',') != -1)
+                            if (typeof data == "string" && data.indexOf(',') != -1)
                                 return data;
                             else
                                 return $.format.number(parseFloat(data), '#,##0.00');

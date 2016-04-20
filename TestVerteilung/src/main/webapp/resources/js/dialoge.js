@@ -345,7 +345,7 @@ function startDocumentDialog(data, modus) {
                                 var input = alpaca.getValue();
                                 // die original Daten sichern.
                                 var origData = alpaca.data;
-                                if (origData.amount && typeof origData.amount == " string")
+                                if (origData.amount && typeof origData.amount == "string")
                                     origData.amount = origData.amount.replace(/\./g, '').replace(/,/g, ".");
                                 // Wurde was geändert?
                                 if (origData.title != input.title || origData.description != input.description || origData.person != input.person || origData.documentDate != input.documentDate
