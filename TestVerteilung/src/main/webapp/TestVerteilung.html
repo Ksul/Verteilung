@@ -61,13 +61,12 @@
 
             if (location.href.startsWith("file")) {
                 if (loadApplet()) {
-                    var text = document.reader.openResources("resources/templates/resource.template");
+                    var text = document.reader.openResources(document.URL.slice(0, document.URL.lastIndexOf('/')+1)+"resources/templates/resource.template");
                     if (text)
                         loadResources(atob(text));
                 }
             } else {
                 var ajax = new XMLHttpRequest();
-
                 if (ajax != null) {
                     ajax.open("GET", "resources/templates/resource.template", true);
                     ajax.setRequestHeader("X-Test", "test1");
@@ -180,8 +179,8 @@
                 obj.setAttribute('archive', './applet/TestVerteilung-jar-with-dependencies.jar');
                 obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
                 document.getElementById('appl').appendChild(obj);
-                var app = $('#reader').get(0);
-                return (app.isActive != null && app.isActive());
+                var app =  document.applets[0];
+                return ( app.isActive());
             }
 
         };
