@@ -223,60 +223,20 @@ function message(title, str, autoClose, height, width) {
 }
 
 /**
- * lädt das Applet
- * @param level         der Level für die Log Ausgaben
- * @param server        der Alfresco Server
- * @param bindingUrl    die Binding Url für den Alfresco Server (optional)
- * @param user          der User für den Alfresco Server (optional)
- * @param password      das Password für den Alfresco Server (optional)
- * @returns             true, wenn das Applet geladen werden konnte, ansonsten false
+ * setzt die Alfresco Parameter im Applet
+ * @ return      true   Operation war erfolgreich
+ *               false  Operation war nicht erfolgreich
  */
-function loadApplet(level, server, bindingUrl, user, password) {
-    if (isLocal()) {
-        var obj = document.createElement('applet');
-        var param;
-        obj.setAttribute('name', 'reader');
-        obj.setAttribute('id', 'reader');
-        obj.setAttribute('width', '1');
-        obj.setAttribute('height', '1');
-        //obj.setAttribute('codebase', './applet');
-        if (typeof level != "undefined" && level != null ){
-            param = document.createElement( "param" );
-            param.setAttribute('name', 'debug');
-            param.setAttribute('value', level);
-            obj.appendChild(param);
-        }
-        if (typeof server != "undefined" && server != null ){
-            param = document.createElement( "param" );
-            param.setAttribute('name', 'server');
-            param.setAttribute('value', server);
-            obj.appendChild(param);
-        }
-        if (typeof bindingUrl != "undefined" && bindingUrl != null ){
-            param = document.createElement( "param" );
-            param.setAttribute('name', 'url');
-            param.setAttribute('value', bindingUrl);
-            obj.appendChild(param);
-        }
-        if (typeof user != "undefined" && user != null ){
-            param = document.createElement( "param" );
-            param.setAttribute('name', 'user');
-            param.setAttribute('value', user);
-            obj.appendChild(param);
-        }
-        if (typeof password != "undefined" && password != null ){
-            param = document.createElement( "param" );
-            param.setAttribute('name', 'password');
-            param.setAttribute('value', password);
-            obj.appendChild(param);
-        }
-        obj.setAttribute('archive', './applet/TestVerteilung-jar-with-dependencies.jar');
-        obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
-        document.getElementById('appl').appendChild(obj);
-        var app =  $('#reader').get(0);
-        return (app.isActive != null && app.isActive());
-    }
+function setAppletParameter(){
+    var json = executeService("setParameter", [
+        {"name": "server", "value": server},
+        {"name": "bindingUrl", "value": bindingUrl},
+        {"name": "user", "value": user},
+        {"name": "password", "value": password}
+    ], "Alfresco Parameter konnten nicht im Applet gesetzt werden:");
+    return json.success;
 }
+
 
 /**
  * konvertiert Bytes zu einem String

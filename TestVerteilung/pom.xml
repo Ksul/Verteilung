@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.schulte.testverteilung</groupId>
@@ -18,12 +19,123 @@
     <properties>
         <de.lvm.appName>testverteilung</de.lvm.appName>
         <jasmine.version>2.1</jasmine.version>
-        <js.source.dir>${basedir}/src/webapp/resources/js</js.source.dir>
+        <js.source.dir>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}resources${file.separator}js</js.source.dir>
+        <css.source.dir>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}resources${file.separator}css</css.source.dir>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <java.version>1.8</java.version>
+                <maven.compiler.source>${java.version}</maven.compiler.source>
+                <maven.compiler.target>${java.version}</maven.compiler.target>
+                <js.ending>.js</js.ending>
+                <css.ending>.css</css.ending>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>2.6</version>
+                        <configuration>
+                            <webResources>
+                                <resource>
+                                    <directory>src${file.separator}main${file.separator}webapp${file.separator}resources</directory>
+                                    <targetPath>resources</targetPath>
+                                    <filtering>true</filtering>
+                                    <excludes>
+                                        <exclude>**/css</exclude>
+                                        <exclude>**/js</exclude>
+                                        <exclude>**/images</exclude>
+                                        <exclude>**/fonts</exclude>
+                                        <exclude>**/themes</exclude>
+                                    </excludes>
+                                </resource>
+                            </webResources>
+                            <packagingExcludes>applet/**</packagingExcludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>production</id>
+            <properties>
+                <java.version>1.7</java.version>
+                <maven.compiler.source>${java.version}</maven.compiler.source>
+                <maven.compiler.target>${java.version}</maven.compiler.target>
+                <js.ending>-min.js</js.ending>
+                <css.ending>-min.css</css.ending>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>2.6</version>
+                        <configuration>
+                            <webResources>
+                                <resource>
+                                    <directory>src${file.separator}main${file.separator}webapp${file.separator}resources</directory>
+                                    <targetPath>resources</targetPath>
+                                    <filtering>true</filtering>
+                                    <excludes>
+                                        <exclude>**/css</exclude>
+                                        <exclude>**/js</exclude>
+                                        <exclude>**/images</exclude>
+                                        <exclude>**/fonts</exclude>
+                                        <exclude>**/themes</exclude>
+                                    </excludes>
+                                </resource>
+                            </webResources>
+                            <packagingExcludes>applet/**</packagingExcludes>
+                            <warSourceExcludes>%regex[.*(?&lt;!min)(\.css)]>, %regex[.*(?&lt;!min)(\.js)]>
+                            </warSourceExcludes>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.samaxes.maven</groupId>
+                        <artifactId>minify-maven-plugin</artifactId>
+                        <version>1.7.4</version>
+                        <executions>
+                            <execution>
+                                <id>default-minify</id>
+                                <phase>prepare-package</phase>
+                                <configuration>
+                                    <skipMerge>true</skipMerge>
+                                    <charset>UTF-8</charset>
+                                    <cssSourceDir>resources${file.separator}css</cssSourceDir>
+                                    <cssSourceIncludes>
+                                        <cssSourceInclude>**</cssSourceInclude>
+                                    </cssSourceIncludes>
+                                    <jsSourceDir>resources${file.separator}js</jsSourceDir>
+                                    <jsSourceIncludes>
+                                        <jsSourceInclude>**</jsSourceInclude>
+                                    </jsSourceIncludes>
+                                    <jsEngine>CLOSURE</jsEngine>
+                                    <closureLanguage>ECMASCRIPT5</closureLanguage>
+                                </configuration>
+                                <goals>
+                                    <goal>minify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 
     <build>
         <finalName>${project.artifactId}</finalName>
+
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -41,18 +153,17 @@
                         <!-- Quellcode Verzeichnis der JavaScript Dateien -->
                         <!--<jsSrcDir>src/webapp/resources/js</jsSrcDir>-->
                         <!-- Quellcode Verzeichnis der Testfälle  -->
-                        <jsTestSrcDir>${basedir}/src/test/webapp/js/specs</jsTestSrcDir>
+                        <jsTestSrcDir>${basedir}${file.separator}src${file.separator}test${file.separator}webapp${file.separator}js${file.separator}specs</jsTestSrcDir>
                         <preloadSources>
                             <!-- Zusätzliche Bibliotheken welche für den Testfall benötigt werden, zbsp. jQuery -->
-                            <source>${js.source.dir}/util.js</source>
-                            <source>${js.source.dir}/recognition.js</source>
+                            <source>${js.source.dir}${file.separator}util.js</source>
+                            <source>${js.source.dir}${file.separator}recognition.js</source>
                         </preloadSources>
                     </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
-
 
             <plugin>
                 <groupId>com.github.searls</groupId>
@@ -73,6 +184,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
                 <executions>
                     <execution>
                         <id>make-a-jar</id>
@@ -92,7 +204,9 @@
                     </descriptorRefs>
                     <archive>
                         <index>true</index>
-                        <manifestFile>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}META-INF${file.separator}MANIFEST.MF</manifestFile>
+                        <manifestFile>
+                            ${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}META-INF${file.separator}MANIFEST.MF
+                        </manifestFile>
                     </archive>
                 </configuration>
                 <executions>
@@ -130,34 +244,12 @@
                     <storepass>Rethymon</storepass>
                     <keypass>Rethymon</keypass>
                     <arguments>
-                        <argument>-sigalg</argument><argument>MD5withRSA</argument>
-                        <argument>-digestalg</argument><argument>SHA1</argument>
+                        <argument>-sigalg</argument>
+                        <argument>MD5withRSA</argument>
+                        <argument>-digestalg</argument>
+                        <argument>SHA1</argument>
                     </arguments>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
-                <executions>
-                    <execution>
-                        <id>copy-resource-one</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}applet</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}${file.separator}target</directory>
-                                    <includes>
-                                        <include>*-jar-with-dependencies.jar</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

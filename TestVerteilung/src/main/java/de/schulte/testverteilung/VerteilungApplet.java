@@ -58,7 +58,7 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
-     * gibt einen vorher häppchenweise übertragenen Parameter
+     * gibt einen vorher häppchenweise übertragenen Parameter zurück
      * @return  der Parameter als String
      * @throws VerteilungException
      */
@@ -1233,6 +1233,27 @@ public class VerteilungApplet extends Applet {
             });
         } catch (PrivilegedActionException e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * öffnet die Datei mit den eingetragenen Resourccen (CSS und JS Dateien)
+     * @param filePath    der Pfad zu Datei
+     * @return            der Inhalt der Datei als Base64 dekodierter String
+     */
+    public String openResources(final String filePath) {
+
+        String obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
+
+                public String run() throws IOException, JSONException, URISyntaxException {
+                    return services.openFile(filePath).getString("result");
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = null;
         }
         return obj;
     }

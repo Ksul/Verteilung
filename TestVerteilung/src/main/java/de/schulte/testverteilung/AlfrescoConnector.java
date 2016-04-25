@@ -642,9 +642,11 @@ public class AlfrescoConnector {
                 // benutzt würde
                 if (!((AlfrescoAspects)obj).hasAspect(key)  && members.size() > 0) {
                     obj = ((AlfrescoAspects) obj).addAspect(key);
+                    logger.fine("Add aspect " + key + " to node " +obj.getId());
                     obj = session.getObject(VerteilungHelper.getRealId(obj.getId()));
                 } else if (((AlfrescoAspects)obj).hasAspect(key) && members.size() == 0) {
                     obj = ((AlfrescoAspects) obj).removeAspect(key);
+                    logger.fine("Remove aspect " + key + " from node " +obj.getId());
                     // Aspekt merken
                     if (properties.containsKey(key))
                         removedAspects.add(key);

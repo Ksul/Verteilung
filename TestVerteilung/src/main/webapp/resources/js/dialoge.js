@@ -163,12 +163,11 @@ function startDocumentDialog(data, modus) {
         // Konversion
         if (exist(data.documentDate)) {
             if (data.documentDate != "null")
-                data.documentDate = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data.documentDate)));
+                data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data.documentDate)));
             else
-                data.documentDate = $.datepicker.formatDate("dd.mm.yy", new Date());
+                data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date());
         }
-        if (data.amount && typeof data.amount == "string" && data.amount.indexOf(',') == -1)
-            data.amount =$.format.number(parseFloat(data.amount), '#,##0.00');
+        data.amountDisplay = $.format.number(parseFloat(data.amount), '#,##0.00');
         if (!exist(data.tax))
             data.tax = false;
 
@@ -206,12 +205,12 @@ function startDocumentDialog(data, modus) {
                         "required": true,
                         "default": "Klaus"
                     },
-                    "amount": {
+                    "amountDisplay": {
                         "type": "string",
                         "required": false,
                         "properties": {}
                     },
-                    "documentDate": {
+                    "documentDateDisplay": {
                         "type": "string",
                         "title": "Datum",
                         "format": "date",
@@ -253,7 +252,7 @@ function startDocumentDialog(data, modus) {
                         "type": "textarea",
                         "size": 60
                     },
-                    "amount": {
+                    "amountDisplay": {
                         "type": "currency",
                         "label": "Betrag",
                         "centsLimit": 2,
@@ -280,7 +279,7 @@ function startDocumentDialog(data, modus) {
                     "tax": {
                         "rightLabel": "relevant"
                     },
-                    "documentDate": {
+                    "documentDateDisplay": {
                         "type": "date",
                         "label": "Dokumentdatum",
                         "helpers": [],
@@ -314,8 +313,8 @@ function startDocumentDialog(data, modus) {
                         "title": "column-1-1",
                         "description": "column-1-1",
                         "person": "column-1-2",
-                        "documentDate": "column-2-2",
-                        "amount": "column-1-2",
+                        "documentDateDisplay": "column-2-2",
+                        "amountDisplay": "column-1-2",
                         "idvalue": "column-2-2",
                         "tax": "column-1-b"
 
@@ -345,20 +344,20 @@ function startDocumentDialog(data, modus) {
                                 var input = alpaca.getValue();
                                 // die original Daten sichern.
                                 var origData = alpaca.data;
-                                if (origData.amount && typeof origData.amount == "string")
-                                    origData.amount = origData.amount.replace(/\./g, '').replace(/,/g, ".");
+                                if (origData.amountDisplay && typeof origData.amountDisplay == "string")
+                                    origData.amountDisplay = origData.amountDisplay.replace(/\./g, '').replace(/,/g, ".");
                                 // Wurde was geändert?
                                 if ((input.title && origData.title != input.title) || 
                                     (input.description && origData.description != input.description) || 
                                     (input.person && origData.person != input.person) || 
-                                    (input.documentDate && origData.documentDate != input.documentDate) || 
-                                    (input.amount && origData.amount != input.amount) || 
+                                    (input.documentDateDisplay && origData.documentDateDisplay != input.documentDateDisplay) || 
+                                    (input.amountDisplay && origData.amountDisplay != input.amountDisplay) || 
                                     (origData.tax && origData.tax != origData.tax)) {
 
                                     var extraProperties = {
                                         'P:cm:titled': {'cm:title': input.title, 'cm:description': input.description},
-                                        'D:my:archivContent': {'my:documentDate': $.datepicker.parseDate("dd.mm.yy", input.documentDate).getTime(), 'my:person': input.person},
-                                        'P:my:amountable': {'my:amount': input.amount, "my:tax": input.tax},
+                                        'D:my:archivContent': {'my:documentDate': $.datepicker.parseDate("dd.mm.yy", input.documentDateDisplay).getTime(), 'my:person': input.person},
+                                        'P:my:amountable': {'my:amount': input.amountDisplay, "my:tax": input.tax},
                                         'P:my:idable': {'my:idvalue': input.idvalue}
                                     };
 
@@ -367,11 +366,11 @@ function startDocumentDialog(data, modus) {
                                         {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
                                     ], "Dokument konnte nicht aktualisiert werden!", false);
                                     if (erg.success) {
-                                        var newData = $.parseJSON(erg.result);
+                                        data = $.parseJSON(erg.result);
                                         // Tabelle updaten
-                                         var row = alfrescoTabelle.row('#' + newData.objectID);
+                                         var row = alfrescoTabelle.row('#' + data.objectID);
                                          if (row) 
-                                             row.data(newData).invalidate();
+                                             row.data(data).invalidate();
                                     }
                                 }
                                 closeDialog();
