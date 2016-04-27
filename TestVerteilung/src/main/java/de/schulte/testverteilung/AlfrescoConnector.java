@@ -239,6 +239,7 @@ public class AlfrescoConnector {
             String objectId = qResult.getPropertyValueByQueryName("cmis:objectId");
             erg.add(getSession().getObject(getSession().createObjectId(objectId)));
         }
+        logger.fine("Start Search with " + queryString + " Found " + erg.size() + " Entries!");
         return erg;
     }
 
@@ -520,8 +521,11 @@ public class AlfrescoConnector {
      * @return                  das eingecheckte Dokument
      */
     public CmisObject checkInDocument(Document document, boolean major, Map<String, ?> properties, ContentStream contentStream, String checkinComment) {
-        if (isDocumentVersionable(document))
-            return session.getObject(document.checkIn( major, properties, contentStream, checkinComment));
+        if (isDocumentVersionable(document)) {
+            CmisObject cmisObject = session.getObject(document.checkIn(major, properties, contentStream, checkinComment));
+            logger.fine("Object " + cmisObject.getId() + " checked in with Version " + cmisObject.getPropertyValue("versionLabel"));
+            return cmisObject;
+        }
         else
             return null;
     }

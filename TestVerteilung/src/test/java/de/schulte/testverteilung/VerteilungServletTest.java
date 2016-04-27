@@ -546,7 +546,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         // wegen der 2 Aspekte nicht 2.1 sondern 2.3
         assertThat(doc.getString("versionLabel"), Matchers.equalTo("2.3"));
         assertThat(doc.getString("checkinComment"), Matchers.equalTo("1. Versionskommentar"));
-        assertThat(doc.getString("amount"), Matchers.equalTo("25.33"));
+        assertThat(doc.getDouble("amount"), Matchers.equalTo(25.33));
         assertThat(doc.getBoolean("tax"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         // und das Dokument wieder löschen

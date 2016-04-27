@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -353,7 +354,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(result, notNullValue());
         assertThat(result.getString("versionLabel"), Matchers.equalTo("3.0"));
         assertThat(result.getString("checkinComment"), Matchers.equalTo("2. Versionskommentar"));
-        assertThat(result.getString("amount"), Matchers.equalTo("25.33"));
+        assertThat(result.getDouble("amount"), Matchers.equalTo(25.33));
         assertThat(result.getBoolean("tax"), Matchers.is(true));
         obj = services.deleteDocument(document.getString("objectId"));
         assertThat(obj, notNullValue());
@@ -412,7 +413,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         JSONObject result = new JSONObject(obj.getString("result"));
         assertThat(result, notNullValue());
-        assertThat(result.getString("amount"), Matchers.equalTo("25.33"));
+        assertThat(result.getDouble("amount"), Matchers.equalTo(25.33));
         assertThat(result.getBoolean("tax"), is(true));
         document = new JSONObject(obj.getString("result"));
         extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.34', 'my:tax':'true'}}";
@@ -423,7 +424,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         result = new JSONObject(obj.getString("result"));
         assertThat(result, notNullValue());
-        assertThat(result.getString("amount"), Matchers.equalTo("25.34"));
+        assertThat(result.getDouble("amount"), Matchers.equalTo(25.34));
         assertThat(result.getBoolean("tax"), is(true));
         document = new JSONObject(obj.getString("result"));
         extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'', 'my:tax':''}}";

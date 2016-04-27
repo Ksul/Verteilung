@@ -160,60 +160,6 @@ function startSettingsDialog() {
  */
 function startDocumentDialog(data, modus) {
 
-    /**
-     * ändert ein Dokument
-     * @param input             die neu einzutragenden Daten
-     * @param origData          die original Daten
-     */
-    function editDocument(input, origData) {
-        try {
-            var extraProperties = {
-                'P:cm:titled': {
-                    'cm:title': input.title,
-                    'cm:description': input.description
-                },
-                'D:my:archivContent': {
-                    'my:documentDate': input.documentDateDisplay,
-                    'my:person': input.person
-                },
-                'P:my:amountable': {'my:amount': input.amount, "my:tax": input.tax},
-                'P:my:idable': {'my:idvalue': input.idvalue}
-            };
-
-            var erg = executeService("updateProperties", [
-                {"name": "documentId", "value": origData.objectId},
-                {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-            ], "Dokument konnte nicht aktualisiert werden!", false);
-            if (erg.success) {
-                var data = $.parseJSON(erg.result);
-                // Tabelle updaten
-                var row = alfrescoTabelle.row('#' + data.objectID);
-                if (row)
-                    row.data(data).invalidate();
-            }
-        } catch (e) {
-            errorHandler(e);
-        }
-    }
-
-    /**
-     * löscht ein Dokument
-     */
-    function deleteDocument() {
-        try {
-            var origData = $("#dialogBox").alpaca().data;
-            var erg = executeService("deleteDocument", [
-                {"name": "documentId", "value": origData.objectID}
-            ], ["Dokument konnte nicht gelöscht werden!"]);
-            if (erg.success) {
-                alfrescoTabelle.row('#' + origData.objectID).remove().draw(false);
-            }
-        } catch (e) {
-            errorHandler(e);
-        }
-    }
-
-
     try {
         // Konversion
         if (exist(data.documentDate)) {
@@ -289,7 +235,6 @@ function startDocumentDialog(data, modus) {
 
                 }
             },
-
             "options": {
                 "renderForm": true,
                 "form": {
@@ -436,7 +381,7 @@ function startDocumentDialog(data, modus) {
                                         (input.documentDate && origData.documentDate != input.documentDate) ||
                                         (input.amount && origData.amount != input.amount) ||
                                         (input.tax != origData.tax))
-                                        editDocument(input, origData);
+                                        editDocument(input, origData.objectID);
                                 } else if (modus == "web-display") {
                                     deleteDocument(origData);
                                 }
@@ -468,135 +413,7 @@ function startDocumentDialog(data, modus) {
  *                           web-display    Ordner löschen
  */
 function startFolderDialog(data, modus) {
-
-    /**
-     * erzeugt einen neuen Ordner
-     * @param input         die Daten des neuen Ordners
-     * @param origData      die übergebenen Daten
-     */
-    function createFolder(input, origData) {
-        try {
-            var extraProperties = {
-                'cmis:folder': {
-                    'cmis:objectTypeId': 'cmis:folder',
-                    'cmis:name': input.name
-                },
-                'P:cm:titled': {
-                    'cm:title': input.title,
-                    'cm:description': input.description
-                }
-            };
-            var erg = executeService("createFolder", [
-                {"name": "documentId", "value": origData.objectId},
-                {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-            ], "Ordner konnte nicht erstellt werden!", false);
-            if (erg.success) {
-                var lastElement = $("#breadcrumblist").children().last();
-                var newData = $.parseJSON(erg.result);
-                var tree = $.jstree.reference('#tree');
-                // Tree updaten
-                var node = tree.get_node(newData.parentId);
-                if (node) {
-                    tree.create_node(node, buildObjectForTree(newData));
-                }
-                // Tabelle updaten
-                if (lastElement && lastElement.get(0).id == newData.parentId) {
-                    alfrescoFolderTabelle.rows.add([newData]).draw();
-                }
-                // BreadCrumb aktualisieren
-                if (lastElement)
-                    fillBreadCrumb(lastElement.data().data);
-            }
-        } catch (e) {
-            errorHandler(e);
-        }
-    }
-
-    /**
-     * editiert einen Ordner
-     * @param input         die neuen Daten des Ordners
-     * @param origData      die originalen Daten des Ordners
-     */
-    function editFolder(input, origData) {
-        try {
-            var extraProperties = {
-                'cmis:folder': {
-                    'cmis:objectTypeId': 'cmis:folder',
-                    'cmis:name': input.name
-                },
-                'P:cm:titled': {
-                    'cm:title': input.title,
-                    'cm:description': input.description
-                }
-            };
-            var erg = executeService("updateProperties", [
-                {"name": "documentId", "value": origData.objectId},
-                {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-            ], "Ordner konnte nicht aktualisiert werden!", false);
-            if (erg.success) {
-                var lastElement = $("#breadcrumblist").children().last();
-                var newData = $.parseJSON(erg.result);
-                // Tree updaten
-                var tree = $.jstree.reference('#tree');
-                var node = tree.get_node(newData.objectID);
-                if (node) {
-                    tree.rename_node(node, newData.name);
-                    node.data = newData;
-                }
-                // Tabelle updaten
-                if (lastElement && lastElement.get(0).id == newData.parentId) {
-                    var row = alfrescoFolderTabelle.row('#' + newData.objectID);
-                    if (row) {
-                        row.data(newData).invalidate();
-                    }
-                }
-                // BreadCrumb aktualisieren
-                if (lastElement && lastElement.get(0).id == origData.objectID) {
-                    fillBreadCrumb(input);
-                } else if (lastElement)
-                    fillBreadCrumb(lastElement.data().data);
-            }
-        } catch (e) {
-            errorHandler(e);
-        }
-    }
-
-    /**
-     * löscht einen Ordner
-     */
-    function deleteFolder() {
-        try {
-            var origData = $("#dialogBox").alpaca().data;
-            var erg = executeService("deleteFolder", [
-                {"name": "documentId", "value": origData.objectID}
-            ], "Ordner konnte nicht gelöscht werden!", false);
-            if (erg.success) {
-                var lastElement = $("#breadcrumblist").children().last();
-                // Tree updaten
-                var tree = $.jstree.reference('#tree');
-                tree.delete_node(origData.objectID);
-                // Tabelle updaten
-                if (lastElement && lastElement.get(0).id == origData.parentId) {
-                    var row = alfrescoFolderTabelle.row('#' + origData.objectID);
-                    if (row) {
-                        row.remove().draw();
-                    }
-                }
-                // der aktuelle Ordner ist der zu löschende
-                if (lastElement && lastElement.get(0).id == origData.objectID) {
-                    tree.select_node(origData.parentId);
-                } else {
-                    // BreadCrumb aktualisieren
-                    if (lastElement)
-                        fillBreadCrumb(lastElement.data().data);
-                }
-            }
-        } catch (e) {
-            errorHandler(e);
-        }
-    }
- 
- 
+    
     try {
 
         // Einstellungen für den Folder Dialog
@@ -711,7 +528,7 @@ function startFolderDialog(data, modus) {
                                     if ((input.name && input.name != origData.name) ||
                                         (input.title && input.title != origData.title) ||
                                         (input.description && input.description != origData.description))
-                                        editFolder(input, origData);
+                                        editFolder(input, origData.objectID);
                                 }
                                 closeDialog();
                             } catch (e) {

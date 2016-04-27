@@ -229,10 +229,10 @@ public class VerteilungServices {
                 filePath = con.getNode("/Archiv").getId();
                 result = getCache().get(filePath);
             if (result != null) {
-                logger.fine("listFolder: Result für Id " + filePath + " wurde im Cache gefunden!");
+                logger.fine("listFolder: Result for Id " + filePath + " found in Cache!");
             }
             else {
-                logger.fine("listFolder: Result für Id " + filePath + " nicht im Cache gefunden! Lese neu...");
+                logger.fine("listFolder: Result for Id " + filePath + " -> not <- found in Cache! Read...");
                 result = new JSONArray();
                 for (CmisObject cmisObject : con.listFolder(filePath)){
                     result.put(convertObjectToJson(filePath, cmisObject));
