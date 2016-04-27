@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -1179,7 +1180,11 @@ public class VerteilungServices {
             // falls Datumswert dann konvertieren
             if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null) {
                 obj1.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
-            } else if (prop.getLocalName().equals("objectId")) {
+            } else if (prop.getDefinition().getPropertyType().equals(PropertyType.DECIMAL) && prop.getValue() != null) {
+                obj1.put(prop.getLocalName(), (BigDecimal) prop.getValue());
+            } else if (prop.getDefinition().getPropertyType().equals(PropertyType.BOOLEAN) && prop.getValue() != null) {
+                obj1.put(prop.getLocalName(), (Boolean) prop.getValue());
+            }else if (prop.getLocalName().equals("objectId")) {
                 String id = prop.getValueAsString();
                 obj1.put(prop.getLocalName(), id);
                 id = VerteilungHelper.getRealId(id);

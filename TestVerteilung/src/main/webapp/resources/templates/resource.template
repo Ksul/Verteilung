@@ -10,6 +10,7 @@ resources/css/jquery.wysiwyg${css.ending}
 resources/css/alpaca${css.ending}
 resources/css/style${css.ending}
 resources/css/ArchivLayout${css.ending}
+resources/css/simplegrid${css.ending}
 
 
 resources/js/jquery/jquery-1.12.1${js.ending}

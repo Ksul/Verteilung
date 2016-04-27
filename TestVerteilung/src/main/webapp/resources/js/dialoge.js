@@ -152,14 +152,69 @@ function startSettingsDialog() {
 
 
 
+
 /**
  * startet den Detaildialog für Dokumente
  * @param data     die Daten welche bearbeitet werden sollen
  * @param modus    der Modus web-edit    Dokument editieren
  */
 function startDocumentDialog(data, modus) {
-    try {
 
+    /**
+     * ändert ein Dokument
+     * @param input             die neu einzutragenden Daten
+     * @param origData          die original Daten
+     */
+    function editDocument(input, origData) {
+        try {
+            var extraProperties = {
+                'P:cm:titled': {
+                    'cm:title': input.title,
+                    'cm:description': input.description
+                },
+                'D:my:archivContent': {
+                    'my:documentDate': input.documentDateDisplay,
+                    'my:person': input.person
+                },
+                'P:my:amountable': {'my:amount': input.amount, "my:tax": input.tax},
+                'P:my:idable': {'my:idvalue': input.idvalue}
+            };
+
+            var erg = executeService("updateProperties", [
+                {"name": "documentId", "value": origData.objectId},
+                {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+            ], "Dokument konnte nicht aktualisiert werden!", false);
+            if (erg.success) {
+                var data = $.parseJSON(erg.result);
+                // Tabelle updaten
+                var row = alfrescoTabelle.row('#' + data.objectID);
+                if (row)
+                    row.data(data).invalidate();
+            }
+        } catch (e) {
+            errorHandler(e);
+        }
+    }
+
+    /**
+     * löscht ein Dokument
+     */
+    function deleteDocument() {
+        try {
+            var origData = $("#dialogBox").alpaca().data;
+            var erg = executeService("deleteDocument", [
+                {"name": "documentId", "value": origData.objectID}
+            ], ["Dokument konnte nicht gelöscht werden!"]);
+            if (erg.success) {
+                alfrescoTabelle.row('#' + origData.objectID).remove().draw(false);
+            }
+        } catch (e) {
+            errorHandler(e);
+        }
+    }
+
+
+    try {
         // Konversion
         if (exist(data.documentDate)) {
             if (data.documentDate != "null")
@@ -167,7 +222,7 @@ function startDocumentDialog(data, modus) {
             else
                 data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date());
         }
-        data.amountDisplay = $.format.number(parseFloat(data.amount), '#,##0.00');
+        data.amountDisplay = $.format.number(data.amount, '#,##0.00');
         if (!exist(data.tax))
             data.tax = false;
 
@@ -175,7 +230,12 @@ function startDocumentDialog(data, modus) {
         var dialogDocumentDetailsSettings = { "id": "detailDialog",
             "schema": {
                 "type": "object",
-                "title": "Dokument Eigenschaften",
+                "title": function() {
+                    if (modus == "web-display")
+                        return "Dokument löschen?";
+                    else
+                        return "Dokument Eigenschaften";
+                },
                 "properties": {
                     "name": {
                         "type": "string",
@@ -233,9 +293,28 @@ function startDocumentDialog(data, modus) {
             "options": {
                 "renderForm": true,
                 "form": {
-                    "buttons": {
-                        "submit": {"value": "Sichern"},
-                        "reset": {"value": "Abbrechen"}
+                    "buttons": function () {
+                        switch (true) {
+                            case /display/.test(modus):
+                                return {
+                                    "delete": {
+                                        "type": "button",
+                                        "styles": " ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ",
+                                        "value": "Löschen"
+                                    },
+                                    "reset": {"value": "Abbrechen"}
+                                };
+                            case /create/.test(modus):
+                                return {
+                                    "submit": {"value": "Erstellen"},
+                                    "reset": {"value": "Abbrechen"}
+                                };
+                            default:
+                                return {
+                                    "submit": {"value": "Sichern"},
+                                    "reset": {"value": "Abbrechen"}
+                                };
+                        }
                     }
                 },
                 "fields": {
@@ -344,34 +423,22 @@ function startDocumentDialog(data, modus) {
                                 var input = alpaca.getValue();
                                 // die original Daten sichern.
                                 var origData = alpaca.data;
-                                if (origData.amountDisplay && typeof origData.amountDisplay == "string")
-                                    origData.amountDisplay = origData.amountDisplay.replace(/\./g, '').replace(/,/g, ".");
-                                // Wurde was geändert?
-                                if ((input.title && origData.title != input.title) || 
-                                    (input.description && origData.description != input.description) || 
-                                    (input.person && origData.person != input.person) || 
-                                    (input.documentDateDisplay && origData.documentDateDisplay != input.documentDateDisplay) || 
-                                    (input.amountDisplay && origData.amountDisplay != input.amountDisplay) || 
-                                    (origData.tax && origData.tax != origData.tax)) {
-
-                                    var extraProperties = {
-                                        'P:cm:titled': {'cm:title': input.title, 'cm:description': input.description},
-                                        'D:my:archivContent': {'my:documentDate': $.datepicker.parseDate("dd.mm.yy", input.documentDateDisplay).getTime(), 'my:person': input.person},
-                                        'P:my:amountable': {'my:amount': input.amountDisplay, "my:tax": input.tax},
-                                        'P:my:idable': {'my:idvalue': input.idvalue}
-                                    };
-
-                                    erg = executeService("updateProperties", [
-                                        {"name": "documentId", "value": origData.objectId},
-                                        {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                                    ], "Dokument konnte nicht aktualisiert werden!", false);
-                                    if (erg.success) {
-                                        data = $.parseJSON(erg.result);
-                                        // Tabelle updaten
-                                         var row = alfrescoTabelle.row('#' + data.objectID);
-                                         if (row) 
-                                             row.data(data).invalidate();
-                                    }
+                                if (modus == "web-edit") {
+                                    // Konvertierung
+                                    if (input.amountDisplay && typeof input.amountDisplay == "string")
+                                        input.amount = parseFloat(input.amountDisplay.replace(/\./g, '').replace(/,/g, "."));
+                                    if (input.documentDateDisplay && typeof input.documentDateDisplay == "string")
+                                        input.documentDate = $.datepicker.parseDate("dd.mm.yy", input.documentDateDisplay).getTime();
+                                    // Wurde was geändert?
+                                    if ((input.title && origData.title != input.title) ||
+                                        (input.description && origData.description != input.description) ||
+                                        (input.person && origData.person != input.person) ||
+                                        (input.documentDate && origData.documentDate != input.documentDate) ||
+                                        (input.amount && origData.amount != input.amount) ||
+                                        (input.tax != origData.tax))
+                                        editDocument(input, origData);
+                                } else if (modus == "web-display") {
+                                    deleteDocument(origData);
                                 }
                                 closeDialog();
                             } catch (e) {
@@ -383,11 +450,14 @@ function startDocumentDialog(data, modus) {
             }
 
         };
-        startDialog(dialogDocumentDetailsSettings, 450);
+        var additionalButton =[{"id":".alpaca-form-button-delete", "function": deleteDocument }];
+        startDialog(dialogDocumentDetailsSettings, 450, additionalButton);
     } catch (e) {
         errorHandler(e);
     }
 }
+
+
 
 
 /**
@@ -398,6 +468,135 @@ function startDocumentDialog(data, modus) {
  *                           web-display    Ordner löschen
  */
 function startFolderDialog(data, modus) {
+
+    /**
+     * erzeugt einen neuen Ordner
+     * @param input         die Daten des neuen Ordners
+     * @param origData      die übergebenen Daten
+     */
+    function createFolder(input, origData) {
+        try {
+            var extraProperties = {
+                'cmis:folder': {
+                    'cmis:objectTypeId': 'cmis:folder',
+                    'cmis:name': input.name
+                },
+                'P:cm:titled': {
+                    'cm:title': input.title,
+                    'cm:description': input.description
+                }
+            };
+            var erg = executeService("createFolder", [
+                {"name": "documentId", "value": origData.objectId},
+                {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+            ], "Ordner konnte nicht erstellt werden!", false);
+            if (erg.success) {
+                var lastElement = $("#breadcrumblist").children().last();
+                var newData = $.parseJSON(erg.result);
+                var tree = $.jstree.reference('#tree');
+                // Tree updaten
+                var node = tree.get_node(newData.parentId);
+                if (node) {
+                    tree.create_node(node, buildObjectForTree(newData));
+                }
+                // Tabelle updaten
+                if (lastElement && lastElement.get(0).id == newData.parentId) {
+                    alfrescoFolderTabelle.rows.add([newData]).draw();
+                }
+                // BreadCrumb aktualisieren
+                if (lastElement)
+                    fillBreadCrumb(lastElement.data().data);
+            }
+        } catch (e) {
+            errorHandler(e);
+        }
+    }
+
+    /**
+     * editiert einen Ordner
+     * @param input         die neuen Daten des Ordners
+     * @param origData      die originalen Daten des Ordners
+     */
+    function editFolder(input, origData) {
+        try {
+            var extraProperties = {
+                'cmis:folder': {
+                    'cmis:objectTypeId': 'cmis:folder',
+                    'cmis:name': input.name
+                },
+                'P:cm:titled': {
+                    'cm:title': input.title,
+                    'cm:description': input.description
+                }
+            };
+            var erg = executeService("updateProperties", [
+                {"name": "documentId", "value": origData.objectId},
+                {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+            ], "Ordner konnte nicht aktualisiert werden!", false);
+            if (erg.success) {
+                var lastElement = $("#breadcrumblist").children().last();
+                var newData = $.parseJSON(erg.result);
+                // Tree updaten
+                var tree = $.jstree.reference('#tree');
+                var node = tree.get_node(newData.objectID);
+                if (node) {
+                    tree.rename_node(node, newData.name);
+                    node.data = newData;
+                }
+                // Tabelle updaten
+                if (lastElement && lastElement.get(0).id == newData.parentId) {
+                    var row = alfrescoFolderTabelle.row('#' + newData.objectID);
+                    if (row) {
+                        row.data(newData).invalidate();
+                    }
+                }
+                // BreadCrumb aktualisieren
+                if (lastElement && lastElement.get(0).id == origData.objectID) {
+                    fillBreadCrumb(input);
+                } else if (lastElement)
+                    fillBreadCrumb(lastElement.data().data);
+            }
+        } catch (e) {
+            errorHandler(e);
+        }
+    }
+
+    /**
+     * löscht einen Ordner
+     */
+    function deleteFolder() {
+        try {
+            var origData = $("#dialogBox").alpaca().data;
+            var erg = executeService("deleteFolder", [
+                {"name": "documentId", "value": origData.objectID}
+            ], "Ordner konnte nicht gelöscht werden!", false);
+            if (erg.success) {
+                var lastElement = $("#breadcrumblist").children().last();
+                // Tree updaten
+                var tree = $.jstree.reference('#tree');
+                tree.delete_node(origData.objectID);
+                // Tabelle updaten
+                if (lastElement && lastElement.get(0).id == origData.parentId) {
+                    var row = alfrescoFolderTabelle.row('#' + origData.objectID);
+                    if (row) {
+                        row.remove().draw();
+                    }
+                }
+                // der aktuelle Ordner ist der zu löschende
+                if (lastElement && lastElement.get(0).id == origData.objectID) {
+                    tree.select_node(origData.parentId);
+                } else {
+                    // BreadCrumb aktualisieren
+                    if (lastElement)
+                        fillBreadCrumb(lastElement.data().data);
+                }
+            }
+        } catch (e) {
+            errorHandler(e);
+        }
+    }
+ 
+ 
     try {
 
         // Einstellungen für den Folder Dialog
@@ -431,20 +630,28 @@ function startFolderDialog(data, modus) {
             "options": {
                 "renderForm": true,
                 "form": {
-                    "buttons": {
-                        "submit": {
-                            "value": function () {
-                                switch(true) {
-                                    case /display/.test(modus):
-                                        return "Löschen";
-                                    case /create/.test(modus):
-                                        return "Erstellen";
-                                    default:
-                                        return "Sichern";    
-                                }
-                            }
-                        },
-                        "reset": {"value": "Abbrechen"}
+                    "buttons": function () {
+                        switch (true) {
+                            case /display/.test(modus):
+                                return {
+                                    "delete": {
+                                        "type": "button",
+                                        "styles": "btn btn-primary",
+                                        "value": "Löschen"
+                                    },
+                                    "reset": {"value": "Abbrechen"}
+                                };
+                            case /create/.test(modus):
+                                return {
+                                    "submit": {"value": "Erstellen"},
+                                    "reset": {"value": "Abbrechen"}
+                                };
+                            default:
+                                return {
+                                    "submit": {"value": "Sichern"},
+                                    "reset": {"value": "Abbrechen"}
+                                };
+                        }
                     }
                 },
                 "fields": {
@@ -490,105 +697,21 @@ function startFolderDialog(data, modus) {
                     form.registerSubmitHandler(function () {
                         if (form.isFormValid()) {
                             try {
-                                var tree, row, node, lastElement, newData, dataChanged, extraProperties, erg;
-                                dataChanged = false;
                                 var alpaca = $("#dialogBox").alpaca();
                                 // Werte übertragen
                                 var input = alpaca.getValue();
                                 // die original Daten sichern.
                                 var origData = alpaca.data;
-                                extraProperties = {
-                                    'cmis:folder': {
-                                        'cmis:objectTypeId': 'cmis:folder',
-                                        'cmis:name': input.name
-                                    },
-                                    'P:cm:titled': {
-                                        'cm:title': input.title,
-                                        'cm:description': input.description
-                                    }
-                                };
-                                if ((input.name && input.name != origData.name) || 
-                                    (input.title && input.title != origData.title) || 
-                                    (input.description && input.description != origData.description))
-                                    dataChanged = true;
-                                lastElement = $("#breadcrumblist").children().last();
                                 if (modus == "web-create") {
                                     // ein neuer Ordner wird erstellt
-                                    erg = executeService("createFolder", [
-                                        {"name": "documentId", "value": origData.objectId},
-                                        {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                                    ], "Dokument konnte nicht aktualisiert werden!", false);
-                                    if (erg.success) {
-                                        newData = $.parseJSON(erg.result);
-                                        tree = $.jstree.reference('#tree');
-                                        // Tree updaten
-                                        node = tree.get_node(newData.parentId);
-                                        if (node) {
-                                            tree.create_node(node, buildObjectForTree(newData));
-                                        }
-                                        // Tabelle updaten
-                                        if (lastElement && lastElement.get(0).id == newData.parentId) {
-                                            alfrescoFolderTabelle.rows.add([newData]).draw();
-                                        }
-                                        // BreadCrumb aktualisieren
-                                        if (lastElement)
-                                            fillBreadCrumb(lastElement.data().data);
-                                    }
+                                    createFolder(input, origData);
                                 }
                                 else if (modus == "web-edit" && dataChanged) {
                                     // bestehender Ordner wird editiert
-                                    erg = executeService("updateProperties", [
-                                        {"name": "documentId", "value": origData.objectId},
-                                        {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                                    ], "Ordner konnte nicht aktualisiert werden!", false);
-                                    if (erg.success) {
-                                        newData = $.parseJSON(erg.result);
-                                        // Tree updaten
-                                        tree = $.jstree.reference('#tree');
-                                        node = tree.get_node(newData.objectID);
-                                        if (node) {
-                                            tree.rename_node(node, newData.name);
-                                            node.data = newData;
-                                        }
-                                        // Tabelle updaten
-                                        if (lastElement && lastElement.get(0).id == newData.parentId) {
-                                            row = alfrescoFolderTabelle.row('#' + newData.objectID);
-                                            if (row) {
-                                                row.data(newData).invalidate();
-                                            }
-                                        }
-                                        // BreadCrumb aktualisieren
-                                        if (lastElement && lastElement.get(0).id == origData.objectID) {
-                                            fillBreadCrumb(input);
-                                        } else if (lastElement)
-                                            fillBreadCrumb(lastElement.data().data);
-                                    }
-                                } else if (modus == "web-display") {
-                                    // Ordner wird gelöscht
-                                    erg = executeService("deleteFolder", [
-                                        {"name": "documentId", "value": origData.objectID}
-                                    ], "Ordner konnte nicht gelöscht werden!", false);
-                                    if (erg.success) {
-                                        // Tree updaten
-                                        tree = $.jstree.reference('#tree');
-                                        tree.delete_node(origData.objectID);
-                                        // Tabelle updaten
-                                        if (lastElement && lastElement.get(0).id == origData.parentId) {
-                                            row = alfrescoFolderTabelle.row('#' + origData.objectID);
-                                            if (row) {
-                                                row.remove().draw();
-                                            }
-                                        }
-                                        // der aktuelle Ordner ist der zu löschende
-                                        if (lastElement && lastElement.get(0).id == origData.objectID) {
-                                            tree.select_node(origData.parentId);
-                                        } else {
-
-                                            // BreadCrumb aktualisieren
-                                            if (lastElement)
-                                                fillBreadCrumb(lastElement.data().data);
-                                        }
-                                    }
+                                    if ((input.name && input.name != origData.name) ||
+                                        (input.title && input.title != origData.title) ||
+                                        (input.description && input.description != origData.description))
+                                        editFolder(input, origData);
                                 }
                                 closeDialog();
                             } catch (e) {
@@ -599,8 +722,8 @@ function startFolderDialog(data, modus) {
                 }
             }
         };
-
-        startDialog(folderDialogSettings, 460);
+        var additionalButton =[{"id":".alpaca-form-button-delete", "function": deleteFolder }];
+        startDialog(folderDialogSettings, 460, additionalButton);
     } catch (e) {
         errorHandler(e);
     }
@@ -679,51 +802,62 @@ function startCommentsDialog(comments) {
         errorHandler(e);
     }
 }
-/**
- * schliesst den Dialog
- */
-function closeDialog() {
-    var dialogBox = $('#dialogBox');
-    if (dialogBox) {
-        dialogBox.dialog("close");
-        dialogBox.remove();
-    }
-    $('#simpleGrid').remove();
-}
+
+
+
 /**
  * startet den eigentlichen Dialog
  * @param dialogSettings            die Settings für den Dialog
  * @param width                     die Weite des Fensters
+ * @param callbacks                 Array mit Callbacks für weitere Buttons
  */
-function startDialog(dialogSettings, width) {
+function startDialog(dialogSettings, width, callbacks) {
 
-    $('head').append('<link href="resources/css/simplegrid.css" rel="stylesheet" id="simpleGrid" />');
-     $("<div>", {id: "dialogBox", class:"grid gridpad" }).appendTo("body");
-    $('#dialogBox').alpaca( dialogSettings).dialog({
-        autoOpen: true,
-        width: width,
-        height: 'auto',
-        modal: true,
-        position: {
-            my: "top",
-            at: "center center-20%",
-            of: window,
-            collision: "fit",
+    /**
+     * schliesst den Dialog
+     */
+    function closeDialog() {
+        var dialogBox = $('#dialogBox');
+        if (dialogBox) {
+            dialogBox.dialog("close");
+            dialogBox.remove();
+        }
+    }
+
+    $("<div>", {id: "dialogBox", class: "grid gridpad"}).appendTo("body");
+    $('#dialogBox').alpaca(dialogSettings).dialog({
+        "autoOpen": true,
+        "width": width,
+        "height": 'auto',
+        "modal": true,
+        "position": {
+            "my": "top",
+            "at": "center center-20%",
+            "of": window,
+            "collision": "fit",
             // Ensure the titlebar is always visible
-            using: function( pos ) {
-                var topOffset = $( this ).css( pos ).offset().top;
-                if ( topOffset < 0 ) {
-                    $( this ).css( "top", pos.top - topOffset );
+            "using": function (pos) {
+                var topOffset = $(this).css(pos).offset().top;
+                if (topOffset < 0) {
+                    $(this).css("top", pos.top - topOffset);
                 }
             }
         },
-        open: function () {
+        "open": function () {
             $(".alpaca-form-buttons-container").addClass("ui-dialog-buttonpane ui-widget-content");
             $(".alpaca-form-button-submit").button();
             $(".alpaca-form-button-reset").button().click(function () {
                 closeDialog();
             });
+            if (callbacks) {
+                for (var i = 0; i < callbacks.length; i++) {
+                    var obj = callbacks[i];
+                    $(obj.id).button().click(function () {
+                        obj.function();
+                        closeDialog();
+                    });
+                }
+            }
         }
     });
-
 }

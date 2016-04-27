@@ -705,10 +705,11 @@ function loadAlfrescoTable() {
                     "targets": [6],
                     "render": function (data, type, row) {
                         if (row.amount) {
-                            row.amountDisplay = $.format.number(parseFloat(row.amount), '#,##0.00');
+                            row.amountDisplay = $.format.number(row.amount, '#,##0.00');
                         } else {
                             row.amountDisplay = "";
                         }
+                        return row.amountDisplay;
                     },
                     "visible": true
                 },
@@ -1628,6 +1629,71 @@ function fillBreadCrumb(data) {
 }
 
 /**
+ * führt das Inline editieren in den Dokumententabellen durch
+ * @param value         der neue Value für das Feld
+ * @param settings      die Settings
+ * @return {*}
+ */
+function updateInlineDocument(value, settings) {
+    try {
+        var extraProperties;
+        var changed = false;
+        var convValue;
+        var row = $(this.parentElement.parentElement.parentElement).DataTable().row(this);
+        var data = row.data();
+        if (this.cellIndex == 2) {        // Titel geändert
+            if ( value != data.title) {
+                data.title = value;
+                changed = true;
+            }
+        } else if (this.cellIndex == 3) {  // Datum geändert
+            convValue = $.datepicker.parseDate("dd.mm.yy", value).getTime();
+            if (convValue != data.documentDate){
+                data.documentDate = convValue;
+                changed = true;
+            }
+        } else if (this.cellIndex == 4) {  // Person geändert
+            if (value != data.person){
+                data.person = value;
+                changed = true;
+            }
+        } else if (this.cellIndex == 5) {  // Betrag geändert
+            convValue = parseFloat(value.replace(/\./g, '').replace(/,/g, "."));
+            if (convValue != data.amount) {
+                data.amount = convValue;
+                changed = true;
+            }
+        } else if (this.cellIndex == 6) {  // Id geändert
+            if (value != data.idvalue){
+                data.idvalue = value;
+                changed = true;
+            }
+        }
+        if (changed) {
+            extraProperties = {
+                'P:cm:titled': {'cm:title': data.title, 'cm:description': data.description},
+                'D:my:archivContent': {'my:documentDate': data.documentDate, 'my:person': data.person},
+                'P:my:amountable': {'my:amount': data.amount, "my:tax": data.tax},
+                'P:my:idable': {'my:idvalue': data.idvalue}
+            };
+            var erg = executeService("updateProperties", [
+                {"name": "documentId", "value": data.objectID},
+                {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
+            ], null, true);
+            if (erg.success) {
+                data = $.parseJSON(erg.result);
+                row.data(data);
+            }
+            else
+                value = "Dokument konnte nicht aktualisiert werden!" + "<br>" + erg.result;
+        }
+        return value;
+    } catch (e) {
+        errorHandler(e);
+    }
+}
+
+/**
  * führt die Aktualisierungen für eine Verzeichniswechsel im Alfresco durch
  * @param data      das Datenobjekt des ausgewählten Folders
  */
@@ -1742,63 +1808,7 @@ function switchAlfrescoDirectory(data) {
                     null
                 ],
                 //sSuccessResponse: "IGNORE", // keine Meldungen nach dem Editieren
-                sUpdateURL: function (value, settings) {
-                    try {
-                        var extraProperties;
-                        var row = alfrescoTabelle.row($(this).closest('tr'));
-                        var data = row.data();
-                        if (this.cellIndex == 2) {
-                            // Titel geändert
-                            data.title = value
-                        } else if (this.cellIndex == 3) {
-                            // Datum geändert
-                            data.documentDate = $.datepicker.parseDate("dd.mm.yy", value).getTime();
-                        } else if (this.cellIndex == 4) {
-                            // Person geändert
-                            data.person = value;
-                        } else if (this.cellIndex == 5) {
-                            // Betrag geändert
-                            if (value.indexOf(',') != -1) {
-                                data.amount = value.replace(/\./g, '').replace(/,/g, ".");  	
-                            }
-                            else 
-                                data.amount = value;
-                        } else if (this.cellIndex == 6) {
-                            // Id geändert
-                            data.idvalue = value;
-                        }
-                        extraProperties = {
-                            'P:cm:titled': {'cm:title': data.title, 'cm:description': data.description},
-                            'D:my:archivContent': {'my:documentDate':data.documentDate, 'my:person': data.person},
-                            'P:my:amountable': {'my:amount': data.amount, "my:tax": data.tax},
-                            'P:my:idable': {'my:idvalue': data.idvalue}
-                        };
-                        var erg = executeService("updateProperties", [
-                            {"name": "documentId", "value": data.objectID},
-                            {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                        ], null, true);
-                        if (erg.success) {
-                            data = $.parseJSON(erg.result);
-                            // Display Spalten anreichern
-                            if (data.documentDate) {
-                                data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data.documentDate)));
-                            } else if (data.creationDate)
-                                data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data.creationDate)));
-                            else
-                                data.documentDateDisplay = "";
-                            if (data.amount)
-                                data.amountDisplay = $.format.number(parseFloat(data.amount), '#,##0.00');
-                            else
-                                data.amountDisplay = "";
-                            row.data(data);
-                            return (value);
-                        }
-                        else
-                            return "Dokument konnte nicht aktualisiert werden!" + "<br>" + erg.result;
-                    } catch (e) {
-                        errorHandler(e);
-                    }
-                }
+                sUpdateURL: updateInlineDocument 
             });
 
         }
@@ -1846,51 +1856,7 @@ function startSearch(searchText) {
                     },
                     null
                 ],
-                sUpdateURL: function (value, settings) {
-                    try {
-                        var extraProperties;
-                        var data = alfrescoSearchTabelle.row($(this).closest('tr')).data();
-                        if (this.cellIndex == 2) {
-                            // Titel geändert
-                            data.title = value
-                        } else if (this.cellIndex == 3) {
-                            // Datum geändert
-                            data.documentDate = $.datepicker.parseDate("dd.mm.yy", value).getTime();
-                            value = data.documentDate;
-                        } else if (this.cellIndex == 4) {
-                            // Person geändert
-                            data.person = value;
-                        } else if (this.cellIndex == 5) {
-                            // Betrag geändert
-                            if (value.indexOf(',' != -1)) {
-                                data.amount = value.replace(/\./g, '').replace(/,/g, ".");
-                                value = data.amount;
-                            }
-                        } else if (this.cellIndex == 6) {
-                            // Id geändert
-                            data.idvalue = value;
-                        }
-                        extraProperties = {
-                            'P:cm:titled': {'cm:title': data.title, 'cm:description': data.description},
-                            'D:my:archivContent': {'my:documentDate': data.documentDate, 'my:person': data.person},
-                            'P:my:amountable': {'my:amount': data.amount, "my:tax": data.tax},
-                            'P:my:idable': {'my:idvalue': data.idvalue}
-                        };
-                        erg = executeService("updateProperties", [
-                            {"name": "documentId", "value": data.objectID},
-                            {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-                        ], null, true);
-                        if (erg.success) {
-                            data = $.parseJSON(erg.result);
-                            alfrescoSearchTabelle.row($(this).closest('tr')).data(data);
-                            return(value);
-                        }
-                        else
-                            return "Dokument konnte nicht aktualisiert werden!" + "<br>" + erg.result;
-                    } catch (e) {
-                        errorHandler(e);
-                    }
-                }
+                sUpdateURL: updateInlineDocument
             });
         }
     } catch (e) {
@@ -1977,33 +1943,7 @@ function handleAlfrescoImageClicks() {
     $(document).on("click", ".deleteDocument", function () {
         try {
             var tr = $(this).closest('tr');
-            var tabelle = $('#' + tr[0].parentElement.parentElement.id).DataTable();
-            var id = tabelle.row(tr).data().objectID;
-            var $dialog = $('<div></div>').html("Ausgewähltes Dokument " + tabelle.row(tr).data().name + " löschen?").dialog({
-                autoOpen: true,
-                title: "Dokument löschen",
-                modal: true,
-                height: 150,
-                width: 400,
-                buttons: {
-                    "Ok": function () {
-                        try {
-                            $(this).dialog("destroy");
-                            var erg = executeService("deleteDocument", [
-                                {"name": "documentId", "value": tabelle.row(tr).data().objectID}
-                            ], ["Dokument konnte nicht gelöscht werden!"]);
-                            if (erg.success) {
-                                tabelle.rows().invalidate();
-                            }
-                        } catch (e) {
-                            errorHandler(e);
-                        }
-                    },
-                    "Abbrechen": function () {
-                        $(this).dialog("destroy");
-                    }
-                }
-            });
+            startDocumentDialog($('#' + tr[0].parentElement.parentElement.id).DataTable().row(tr).data(), "web-display");
         } catch (e) {
             errorHandler(e);
         }
