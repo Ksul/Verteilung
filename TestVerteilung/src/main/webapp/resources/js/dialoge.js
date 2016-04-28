@@ -134,7 +134,7 @@ function startSettingsDialog() {
                                     fillMessageBox(true);
                                 }
                                 closeDialog();
-                                init();
+                                initApplication();
                                 loadAlfrescoTree();
                             } catch (e) {
                                 errorHandler(e);
@@ -149,8 +149,6 @@ function startSettingsDialog() {
         errorHandler(e);
     }
 }
-
-
 
 
 /**
@@ -430,7 +428,15 @@ function startFolderDialog(data, modus) {
                     "name": {
                         "type": "string",
                         "title": "Name",
-                        "required": true
+                        "required": true,
+                        "readonly": (data.objectID != alfrescoRootFolderId &&
+                        data.objectID != archivFolderId &&
+                        data.objectID != fehlerFolderId &&
+                        data.objectID != unknownFolderId &&
+                        data.objectID != doubleFolderId &&
+                        data.objectID != inboxFolderId) ?
+                            false :
+                            true
                     },
                     "title": {
                         "type": "string",
