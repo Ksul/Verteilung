@@ -69,8 +69,8 @@
                 <java.version>1.7</java.version>
                 <maven.compiler.source>${java.version}</maven.compiler.source>
                 <maven.compiler.target>${java.version}</maven.compiler.target>
-                <js.ending>-min.js</js.ending>
-                <css.ending>-min.css</css.ending>
+                <js.ending>.min.js</js.ending>
+                <css.ending>.min.css</css.ending>
             </properties>
             <build>
                 <plugins>
