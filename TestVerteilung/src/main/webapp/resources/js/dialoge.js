@@ -168,7 +168,10 @@ function startDocumentDialog(data, modus) {
             else
                 data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date());
         }
-        data.amountDisplay = $.format.number(data.amount, '#,##0.00');
+        if (data.amount)
+            data.amountDisplay = $.format.number(data.amount, '#,##0.00');
+        else
+            data.amountDisplay = ""
         if (!exist(data.tax))
             data.tax = false;
 
@@ -401,9 +404,6 @@ function startDocumentDialog(data, modus) {
         errorHandler(e);
     }
 }
-
-
-
 
 /**
  * startet den Detaildialog für Folder

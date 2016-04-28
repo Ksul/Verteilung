@@ -764,7 +764,7 @@ function loadAlfrescoTable() {
                     //prüfen, ob überhaupt etwas selektiert worden ist
                     if (!selected.length) {
                         var row = alfrescoTabelle.row($(this).closest(('tr')));
-                        if (row)
+                        if (row && row.length)
                          selected.push(row.data());
                     }
 
@@ -897,7 +897,7 @@ function loadAlfrescoFolderTable() {
                     //prüfen, ob überhaupt etwas selektiert worden ist
                     if (!selected.length) {
                         var row = alfrescoFolderTabelle.row($(this).closest(('tr')));
-                        if (row)
+                        if (row && row.length)
                             selected.push(row.data());
                     }
 
@@ -1000,10 +1000,10 @@ function loadAlfrescoSearchTable() {
                     "class": "alignLeft"
                 },
                 {
-                    "data": "documentDate",
+                    "data": "documentDateDisplay",
                     "title": "Datum",
                     "defaultContent": '',
-                    //type: "date",
+                    "type": "string",
                     "class": "alignLeft"
                 },
                 {
@@ -1014,10 +1014,10 @@ function loadAlfrescoSearchTable() {
                     "class": "alignLeft"
                 },
                 {
-                    "data": "amount",
+                    "data": "amountDisplay",
                     "title": "Betrag",
                     "defaultContent": '',
-                    "type": "numeric",
+                    "type": "string",
                     "class": "alignLeft"
                 },
                 {
@@ -1122,31 +1122,25 @@ function loadAlfrescoSearchTable() {
                 {
                     "targets": [4],
                     "render": function (data, type, row) {
-                        if (exist(data)) {
-                            var datum;
-                            try {
-                                // editierte Datumwerte haben das falsche Format, deshalb werden sie erstmal wieder geparst
-                                data = $.datepicker.parseDate("dd.mm.yy", data).getTime();
-                            } catch(e){}
-                            datum = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data)));
-                            return datum
-                        }
-                        else if (exist(row.creationDate))
-                            return $.datepicker.formatDate("dd.mm.yy", new Date(Number(row.creationDate)));
+                        if (row.documentDate) {
+                            row.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date(Number(row.documentDate)));
+                        }  else if (row.creationDate)
+                            row.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date(Number(row.creationDate)));
                         else
-                            return "";
+                            row.documentDateDisplay = "";
+                        return row.documentDateDisplay;
                     },
                     "visible": true
                 },
                 {
                     "targets": [6],
                     "render": function (data, type, row) {
-                        if (data) {
-                            if (typeof data == "string" && data.indexOf(',') != -1)
-                                return data;
-                            else
-                                return $.format.number(parseFloat(data), '#,##0.00');
+                        if (row.amount) {
+                            row.amountDisplay = $.format.number(row.amount, '#,##0.00');
+                        } else {
+                            row.amountDisplay = "";
                         }
+                        return row.amountDisplay;
                     },
                     "visible": true
                 },
@@ -1653,8 +1647,8 @@ function updateInlineFolder (value, settings) {
             }
         }
         if (changed) {
-            var success = editDocument(data, data.objectID);
-            if (!success)
+            var erg = editFolder(data, data.objectID);
+            if (!erg.success)
                 value = "Folder konnte nicht aktualisiert werden!" + "<br>" + erg.result;
         }
         return value;
@@ -1705,8 +1699,8 @@ function updateInlineDocument(value, settings) {
             }
         }
         if (changed) {
-            var success = editDocument(data, data.objectID);
-            if (!success) 
+            var erg = editDocument(data, data.objectID);
+            if (!erg.success) 
                 value = "Dokument konnte nicht aktualisiert werden!" + "<br>" + erg.result;
         }
         return value;
@@ -1722,6 +1716,7 @@ function updateInlineDocument(value, settings) {
  * @return                  true, wenn erfolgreich   
  **/
 function editDocument(input, id) {
+    var erg = {"success": false};
     try {
         var extraProperties = {
             'P:cm:titled': {
@@ -1736,7 +1731,7 @@ function editDocument(input, id) {
             'P:my:idable': {'my:idvalue': input.idvalue}
         };
 
-        var erg = executeService("updateProperties", [
+        erg = executeService("updateProperties", [
             {"name": "documentId", "value": id},
             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
         ], "Dokument konnte nicht aktualisiert werden!", false);
@@ -1744,17 +1739,17 @@ function editDocument(input, id) {
             var data = $.parseJSON(erg.result);
             // Tabelle updaten
             var row = alfrescoTabelle.row('#' + data.objectID);
-            if (row)
+            if (row && row.length)
                 row.data(data).invalidate();
             // Suchergebnis eventuell updaten
             row = alfrescoSearchTabelle.row('#' + data.objectID);
-            if (row)
+            if (row && row.length)
                 row.data(data).invalidate();
         }
-        return erg.success;
     } catch (e) {
         errorHandler(e);
     }
+    return erg;
 }
 
 /**
@@ -1768,10 +1763,10 @@ function deleteDocument() {
         ], ["Dokument konnte nicht gelöscht werden!"]);
         if (erg.success) {
             var row = alfrescoTabelle.row('#' + origData.objectID);
-            if (row)
+            if (row && row.length)
                 row.remove().draw(false);
             row = alfrescoSearchTabelle.row('#' + data.objectID);
-            if (row)
+            if (row && row.length)
                 row.remove().draw(false);
         }
     } catch (e) {
@@ -1829,6 +1824,7 @@ function createFolder(input, origData) {
  * @return              true, wenn erfolgreich
  */
 function editFolder(input, id) {
+    var erg = {"success": false};
     try {
         var extraProperties = {
             'cmis:folder': {
@@ -1840,7 +1836,7 @@ function editFolder(input, id) {
                 'cm:description': input.description
             }
         };
-        var erg = executeService("updateProperties", [
+        erg = executeService("updateProperties", [
             {"name": "documentId", "value": id},
             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
         ], "Ordner konnte nicht aktualisiert werden!", false);
@@ -1857,7 +1853,7 @@ function editFolder(input, id) {
             // Tabelle updaten
             if (lastElement && lastElement.get(0).id == newData.parentId) {
                 var row = alfrescoFolderTabelle.row('#' + newData.objectID);
-                if (row) {
+                if (row && row.length) {
                     row.data(newData).invalidate();
                 }
             }
@@ -1867,10 +1863,10 @@ function editFolder(input, id) {
             } else if (lastElement)
                 fillBreadCrumb(lastElement.data().data);
         }
-        return erg.success;
     } catch (e) {
         errorHandler(e);
     }
+    return erg;
 }
 
 /**
@@ -1892,7 +1888,7 @@ function deleteFolder() {
             // Tabelle updaten
             if (lastElement && lastElement.get(0).id == origData.parentId) {
                 var row = alfrescoFolderTabelle.row('#' + origData.objectID);
-                if (row) {
+                if (row && row.length) {
                     row.remove().draw();
                 }
             }
@@ -2179,7 +2175,7 @@ function handleAlfrescoImageClicks() {
                     tree.open_node(node, function(){
                         switchAlfrescoDirectory(node.data);
                         var row = alfrescoTabelle.row('#' + id);
-                        if (row) {
+                        if (row && row.length) {
                             row.draw().show().draw(false);
                             row.select();
                         }    
@@ -2211,7 +2207,7 @@ function handleAlfrescoImageClicks() {
                                             tree.open_node(node, function(){
                                                 switchAlfrescoDirectory(node.data);
                                                 var row = alfrescoTabelle.row('#' + id);
-                                                if (row) {
+                                                if (row && row.length) {
                                                     row.draw().show().draw(false);
                                                     row.select();
                                                 }
@@ -2501,7 +2497,7 @@ function loadAlfrescoTree() {
                     // Ziel ist die Tabelle
                     // die Ziel Zeile
                     var row = alfrescoFolderTabelle.row(t.closest('.treeDropable')[0].parentElement);
-                    if (row)
+                    if (row && row.length)
                         targetData = row.data();
                 }
                 // Object darf nicht in die Standard Ordner geschoben werden und die Standard Ordner dürfen generell nicht verschoben werden
@@ -2790,7 +2786,7 @@ function loadAlfrescoTree() {
                     fillMessageBox(true);
                     // Bei Bedarf den Ordner aus der Tabelle entfernen
                     var row = alfrescoFolderTabelle.row('#' + nodeId);
-                    if (row) {
+                    if (row && row.length) {
                         row.remove();
                         alfrescoFolderTabelle.draw();
                     }
@@ -2827,7 +2823,7 @@ function loadAlfrescoTree() {
             }).on('dnd_stop.vakata', function (e, data) {
             // das eigentliche verschieben per Drag and Drop
             try {
-                // nochmal die Zulääsigkeit des Drop prüfen!!
+                // nochmal die Zulässigkeit des Drop prüfen!!
                 if (checkMove(data)) {
                     var sourceData, targetData;
                     var t = $(data.event.target);
@@ -2845,7 +2841,7 @@ function loadAlfrescoTree() {
                                     sourceData = alfrescoFolderTabelle.row('#' + data.data.nodes[index]).data();
                                 } else if (data.data.table == "alfrescoTabelle") {
                                     var row = alfrescoTabelle.row('#' + data.data.nodes[index]);
-                                    if (row)
+                                    if (row && row.length)
                                         sourceData = row.data();
                                 }
                             }
@@ -2978,7 +2974,7 @@ function start() {
         var zone = document.getElementById('inTxt');
         zone.addEventListener('dragover', handleDragOver, false);
         zone.addEventListener('drop', handleFileSelect, false);
-
+        // Zahlenformat festlegen
         $.format.locale({
             number: {
                 groupingSeparator: '.',

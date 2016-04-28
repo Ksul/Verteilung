@@ -81,10 +81,6 @@ public class AlfrescoConnector {
         this.password = password;
         this.server = server;
         this.bindingUrl = bindingUrl;
-        logger.info("Server: " + this.server);
-        logger.info("Binding: " + this.bindingUrl);
-        logger.info("User: " + this.user);
-        logger.info("Password: " + this.password);
     }
 
     /**
@@ -114,7 +110,7 @@ public class AlfrescoConnector {
         URL url = new URL(server + (server.endsWith("/") ? "" : "/") + LOGIN_URL);
         String urlParameters = "{ \"username\" : \"" + user + "\", \"password\" : \"" + password + "\" }";
         JSONObject obj = new JSONObject(startRequest(url, RequestType.POST, urlParameters));
-        logger.info(("Ticket für User " + user + " und Password " + password + " ausgestellt."));
+        logger.fine("Ticket für User " + user + " und Password " + password + " ausgestellt.");
         return obj;
     }
 
@@ -209,7 +205,9 @@ public class AlfrescoConnector {
      */
     public CmisObject getNode(String path) throws VerteilungException {
         try {
-            return getSession().getObjectByPath(path);
+            CmisObject cmisObject = getSession().getObjectByPath(path);
+            logger.fine("getNode with " + path + " found " + cmisObject.getId());
+            return cmisObject;
         } catch (CmisObjectNotFoundException e) {
             return null;
         }
@@ -222,7 +220,9 @@ public class AlfrescoConnector {
      * @throws VerteilungException
      */
     public CmisObject getNodeById(String nodeId) throws VerteilungException {
-        return getSession().getObject(getSession().createObjectId(nodeId));
+        CmisObject cmisObject = getSession().getObject(getSession().createObjectId(nodeId));
+        logger.fine("getNodeById with " + nodeId + " found " + cmisObject.getId());
+        return cmisObject;
     }
 
     /**
@@ -251,7 +251,6 @@ public class AlfrescoConnector {
      */
     public byte[] getDocumentContent(Document document)  throws IOException{
         byte fileBytes[] = null;
-
         fileBytes = IOUtils.toByteArray(document.getContentStream().getStream());
         return fileBytes;
     }
@@ -350,7 +349,9 @@ public class AlfrescoConnector {
                                Folder oldFolder,
                                Folder newFolder) {
 
-         return fileableCmisObject.move(oldFolder, newFolder);
+        FileableCmisObject object = fileableCmisObject.move(oldFolder, newFolder);
+        logger.fine("Object " + fileableCmisObject.getId() + " moved from " + oldFolder.getId() + " to folder " + newFolder.getId());
+        return object;
     }
 
 
@@ -486,7 +487,7 @@ public class AlfrescoConnector {
             properties = buildProperties(extraCMSProperties);
         }
         obj = session.getObject(obj.updateProperties(properties, true));
-
+        logger.fine("updateProperties for node " + obj.getId());
         return obj;
     }
 
@@ -505,8 +506,11 @@ public class AlfrescoConnector {
      * @return obj                      das Objekt, oder null falls es nicht auszuchecken ist.
      */
     public CmisObject checkOutDocument(Document document) {
-        if (isDocumentVersionable(document))
-            return session.getObject(document.checkOut());
+        if (isDocumentVersionable(document)) {
+            CmisObject cmisObject = session.getObject(document.checkOut());
+            logger.fine("Object " + cmisObject.getId() + " checked out!");
+            return cmisObject;
+        }
         else
             return null;
     }
