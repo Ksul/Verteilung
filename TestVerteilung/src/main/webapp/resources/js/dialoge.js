@@ -523,7 +523,7 @@ function startFolderDialog(data, modus) {
                                     // ein neuer Ordner wird erstellt
                                     createFolder(input, origData);
                                 }
-                                else if (modus == "web-edit" && dataChanged) {
+                                else if (modus == "web-edit") {
                                     // bestehender Ordner wird editiert
                                     if ((input.name && input.name != origData.name) ||
                                         (input.title && input.title != origData.title) ||
