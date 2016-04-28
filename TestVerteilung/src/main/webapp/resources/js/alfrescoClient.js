@@ -1724,7 +1724,7 @@ function editDocument(input, id) {
                 'cm:description': input.description
             },
             'D:my:archivContent': {
-                'my:documentDate': input.documentDateDisplay,
+                'my:documentDate': input.documentDate,
                 'my:person': input.person
             },
             'P:my:amountable': {'my:amount': input.amount, "my:tax": input.tax},

@@ -620,7 +620,16 @@ function startCommentsDialog(comments) {
     }
 }
 
-
+/**
+ * schliesst den Dialog
+ */
+function closeDialog() {
+    var dialogBox = $('#dialogBox');
+    if (dialogBox) {
+        dialogBox.dialog("close");
+        dialogBox.remove();
+    }
+}
 
 /**
  * startet den eigentlichen Dialog
@@ -629,17 +638,6 @@ function startCommentsDialog(comments) {
  * @param callbacks                 Array mit Callbacks für weitere Buttons
  */
 function startDialog(dialogSettings, width, callbacks) {
-
-    /**
-     * schliesst den Dialog
-     */
-    function closeDialog() {
-        var dialogBox = $('#dialogBox');
-        if (dialogBox) {
-            dialogBox.dialog("close");
-            dialogBox.remove();
-        }
-    }
 
     $("<div>", {id: "dialogBox", class: "grid gridpad"}).appendTo("body");
     $('#dialogBox').alpaca(dialogSettings).dialog({
