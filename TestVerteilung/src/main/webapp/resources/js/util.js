@@ -224,7 +224,7 @@ function message(title, str, autoClose, height, width) {
 
 /**
  * setzt die Alfresco Parameter im Applet
- * @ return      true   Operation war erfolgreich
+ * @return       true   Operation war erfolgreich
  *               false  Operation war nicht erfolgreich
  */
 function setAppletParameter(){
@@ -254,7 +254,7 @@ function hex2String(hexx) {
 /**
  * konvertiert einen String zu einem Bytearray
  * @param str        der zu konvertierende String
- * @returns {Array}  der String als Bytearray
+ * @return {Array}   der String als Bytearray
  */
 function stringToBytes(str) {
     var ch, st, re = [], j = 0;
@@ -284,7 +284,7 @@ function stringToBytes(str) {
 
 /**
  * generiert eine eindeutige Id
- * @returns {string}
+ * @return  {string}
  */
 function uuid() {
     var chars = '0123456789abcdef'.split('');

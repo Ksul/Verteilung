@@ -848,6 +848,18 @@ function loadAlfrescoFolderTable() {
                     "title": "Name",
                     "defaultContent": '',
                     "type": "string",
+                    "createdCell": function(tableData, value, data, row, column) {
+                        if (data.objectID == alfrescoRootFolderId ||
+                            data.objectID == archivFolderId ||
+                            data.objectID == fehlerFolderId ||
+                            data.objectID == unknownFolderId ||
+                            data.objectID == doubleFolderId ||
+                            data.objectID == documentFolderId ||
+                            data.objectID == inboxFolderId)
+                            $(tableData).addClass("read_only");
+                        else
+                            $(tableData).removeClass("read_only");
+                    },
                     "class": "alignLeft alfrescoFolderTableDragable treeDropable"
                 },
                 {
@@ -1667,6 +1679,29 @@ function updateInLineDocumentFieldDefinition () {
     };
 }
 
+
+/**
+ * liefert die Felddefinitionen fürs InlineEdititing der Foldertabellen
+ * @return  JSON Struktur mit der Definition
+ */
+function updateInLineFolderFieldFieldDefinition() {
+    return {
+        "fnShowError": function (text, aktion) {
+            message("Fehler", text);
+        },
+        "aoColumns": [null,
+            {
+                "placeholder": ""
+            },
+            {
+                "placeholder": ""
+            },
+            null
+        ],
+        "sUpdateURL": updateInlineFolder
+    };
+}
+
 /**
  * führt das Inline editieren in der Foldertabellen durch
  * @param value         der neue Value für das Feld
@@ -1950,6 +1985,7 @@ function deleteFolder() {
     }
 }
 
+
 /**
  * führt die Aktualisierungen für eine Verzeichniswechsel im Alfresco durch
  * @param data      das Datenobjekt des ausgewählten Folders
@@ -1971,21 +2007,7 @@ function switchAlfrescoDirectory(data) {
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
             calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
-            $.fn.dataTable.makeEditable( alfrescoFolderTabelle, {
-                "fnShowError" : function(text, aktion){
-                    message("Fehler", text);
-                },
-                "aoColumns": [ null,
-                    {
-                        "placeholder": ""
-                    },
-                    {
-                        "placeholder": ""
-                    },
-                    null
-                    ],
-                "sUpdateURL": updateInlineFolder 
-            });
+            $.fn.dataTable.makeEditable( alfrescoFolderTabelle, updateInLineFolderFieldFieldDefinition());
             fillBreadCrumb(data);
             //$("#tree").jstree(true).refresh_node(objectID);
             $("#tree").jstree('select_node', objectID);

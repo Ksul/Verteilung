@@ -79,6 +79,9 @@
                         <artifactId>maven-war-plugin</artifactId>
                         <version>2.6</version>
                         <configuration>
+                            <packagingExcludes>
+                                applet/**,%regex[.*(?&lt;!min)\.css],%regex[.*(?&lt;!min)\.js]
+                            </packagingExcludes>
                             <webResources>
                                 <resource>
                                     <directory>src${file.separator}main${file.separator}webapp${file.separator}resources</directory>
@@ -93,9 +96,6 @@
                                     </excludes>
                                 </resource>
                             </webResources>
-                            <packagingExcludes>applet/**</packagingExcludes>
-                            <warSourceExcludes>%regex[.*(?&lt;!min)(\.css)]>, %regex[.*(?&lt;!min)(\.js)]>
-                            </warSourceExcludes>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -257,7 +257,7 @@
                 <executions>
                     <execution>
                         <id>copy-resource-one</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>

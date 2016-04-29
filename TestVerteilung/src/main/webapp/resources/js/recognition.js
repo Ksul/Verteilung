@@ -3497,7 +3497,7 @@ REC = {
      * formatiert Zahlen
      * @param   formatNumber    die zu formatierende Zahl
      * @param   formatString    der Format String
-     * @ return die formatierte Zahl als String
+     * @return  die formatierte Zahl als String
      * */
     numberFormat: function (formatNumber, formatString) {
         var c, d, e, f, g, h, i, j, k;

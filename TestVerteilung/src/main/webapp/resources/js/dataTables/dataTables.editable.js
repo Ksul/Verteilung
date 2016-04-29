@@ -18,15 +18,15 @@
  * @sDeleteURL                       String      URL of the server-side page used to delete row by id. Default value is "DeleteData".
  * @fnShowError                      Function    function(message, action){...}  used to show error message. Action value can be "update", "add" or "delete".
  * @sAddNewRowFormId                 String      Id of the form for adding new row. Default id is "formAddNewRow".
- * @oAddNewRowFormOptions            Object        Options that will be set to the "Add new row" dialog
+ * @oAddNewRowFormOptions            Object      Options that will be set to the "Add new row" dialog
  * @sAddNewRowButtonId               String      Id of the button for adding new row. Default id is "btnAddNewRow".
- * @oAddNewRowButtonOptions            Object        Options that will be set to the "Add new" button
+ * @oAddNewRowButtonOptions          Object      Options that will be set to the "Add new" button
  * @sAddNewRowOkButtonId             String      Id of the OK button placed in add new row dialog. Default value is "btnAddNewRowOk".
- * @oAddNewRowOkButtonOptions        Object        Options that will be set to the Ok button in the "Add new row" form
+ * @oAddNewRowOkButtonOptions        Object      Options that will be set to the Ok button in the "Add new row" form
  * @sAddNewRowCancelButtonId         String      Id of the Cancel button placed in add new row dialog. Default value is "btnAddNewRowCancel".
- * @oAddNewRowCancelButtonOptions    Object        Options that will be set to the Cancel button in the "Add new row" form
+ * @oAddNewRowCancelButtonOptions    Object      Options that will be set to the Cancel button in the "Add new row" form
  * @sDeleteRowButtonId               String      Id of the button for adding new row. Default id is "btnDeleteRow".
- * @oDeleteRowButtonOptions            Object        Options that will be set to the Delete button
+ * @oDeleteRowButtonOptions          Object      Options that will be set to the Delete button
  * @sSelectedRowClass                String      Class that will be associated to the selected row. Default class is "row_selected".
  * @sReadOnlyCellClass               String      Class of the cells that should not be editable. Default value is "read_only".
  * @sAddDeleteToolbarSelector        String      Selector used to identify place where add and delete buttons should be placed. Default value is ".add_delete_toolbar".
@@ -38,27 +38,27 @@
  * @sDeleteHttpMethod                String      Method used for the Delete AJAX request (default is 'POST')
  * @sDeleteDataType                  String      Data type expected from the server when deleting a row; allowed values are the same as those accepted by JQuery's "datatype" parameter, e.g. 'text' and 'json'. The default is 'text'.
  * @fnOnDeleting                     Function    function(tr, id, fnDeleteRow){...} Function called before row is deleted.
- tr isJQuery object encapsulating row that will be deleted
- id is an id of the record that will be deleted.
- fnDeleteRow(id) callback function that should be called to delete row with id
- returns true if plugin should continue with deleting row, false will abort delete.
+                                                 tr isJQuery object encapsulating row that will be deleted
+                                                 id is an id of the record that will be deleted.
+                                                 fnDeleteRow(id) callback function that should be called to delete row with id
+                                                 returns true if plugin should continue with deleting row, false will abort delete.
  * @fnOnDeleted                      Function    function(status){...} Function called after delete action. Status can be "success" or "failure"
  * @fnOnAdding                       Function    function(){...} Function called before row is added.
- returns true if plugin should continue with adding row, false will abort add.
- * @fnOnNewRowPosted                    Function    function(data) Function that can override default function that is called when server-side sAddURL returns result
- You can use this function to add different behaviour when server-side page returns result
+                                                 returns true if plugin should continue with adding row, false will abort add.
+ * @fnOnNewRowPosted                 Function    function(data) Function that can override default function that is called when server-side sAddURL returns result
+                                                 You can use this function to add different behaviour when server-side page returns result
  * @fnOnAdded                        Function    function(status){...} Function called after add action. Status can be "success" or "failure"
  * @fnOnEditing                      Function    function(input){...} Function called before cell is updated.
- input JQuery object wrapping the input element used for editing value in the cell.
- returns true if plugin should continue with sending AJAX request, false will abort update.
+                                                 input JQuery object wrapping the input element used for editing value in the cell.
+                                                 returns true if plugin should continue with sending AJAX request, false will abort update.
  * @fnOnEdited                       Function    function(status){...} Function called after edit action. Status can be "success" or "failure"
  * @sEditorHeight                    String      Default height of the cell editors
  * @sEditorWidth                     String      Default width of the cell editors
  * @oDeleteParameters                Object      Additonal objects added to the DELETE Ajax request
  * @oUpdateParameters                Object      Additonal objects added to the UPDATE Ajax request
  * @sIDToken                         String      Token in the add new row dialog that will be replaced with a returned id of the record that is created eg DT_RowId
- * @sSuccessResponse                 String        Text returned from the server if record is successfully deleted or edited. Default "ok"
- * @sFailureResponsePrefix            String        Prefix of the error message returned form the server during edit action
+ * @sSuccessResponse                 String      Text returned from the server if record is successfully deleted or edited. Default "ok"
+ * @sFailureResponsePrefix           String      Prefix of the error message returned form the server during edit action
  */
 var makeEditable;
 

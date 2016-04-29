@@ -433,6 +433,7 @@ function startFolderDialog(data, modus) {
                         data.objectID != archivFolderId &&
                         data.objectID != fehlerFolderId &&
                         data.objectID != unknownFolderId &&
+                        data.objectID != documentFolderId &&
                         data.objectID != doubleFolderId &&
                         data.objectID != inboxFolderId) ?
                             false :
