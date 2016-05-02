@@ -722,13 +722,22 @@ function loadAlfrescoTable() {
                 }
             ],
             "language": {
-                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_",
-                "emptyTable": " ",
+                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_ \f",
+                "emptyTable": "",
+                "zeroRecords": "Keine Einträge!",
+                "infoEmpty":    "",
                 "paginate": {
                     "first": "Erste ",
                     "last":  "Letzte ",
                     "next":  "Nächste ",
                     "previous": "Vorherige "
+                },
+                "select": {
+                    "rows": {
+                        "_": " %d Zeilen markiert",
+                        "1": " 1 Zeile markiert",
+                        "0": ""
+                    }
                 }
             }
         });
@@ -895,8 +904,23 @@ function loadAlfrescoFolderTable() {
                 }
             ],
             "language": {
-                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_" ,
-                "emptyTable": " "
+                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_ \f",
+                "emptyTable": "",
+                "zeroRecords": "Keine Einträge!",
+                "infoEmpty":    "",
+                "paginate": {
+                    "first": "Erste ",
+                    "last":  "Letzte ",
+                    "next":  "Nächste ",
+                    "previous": "Vorherige "
+                },
+                "select": {
+                    "rows": {
+                        "_": " %d Zeilen markiert",
+                        "1": " 1 Zeile markiert",
+                        "0": ""
+                    }
+                }
             }
         });
 
@@ -1178,13 +1202,22 @@ function loadAlfrescoSearchTable() {
                 }
             ],
             "language": {
-                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_",
+                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_ \f",
                 "emptyTable": "Keine Ergebnisse gefunden",
+                "zeroRecords": "Keine Einträge!",
+                "infoEmpty":   "",
                 "paginate": {
                     "first": "Erste ",
                     "last":  "Letzte ",
                     "next":  "Nächste ",
                     "previous": "Vorherige "
+                },
+                "select": {
+                    "rows": {
+                        "_": " %d Zeilen markiert",
+                        "1": " 1 Zeile markiert",
+                        "0": ""
+                    }
                 }
             }
         });
@@ -1713,22 +1746,33 @@ function updateInlineFolder (value, settings) {
     try {
         var extraProperties;
         var changed = false;
+        var oldValue = "";
         var data = alfrescoFolderTabelle.row($(this).closest('tr')).data();
-        if (this.cellIndex == 1) {             // Name geändert
-            if (value != data.name) {
-                data.name = value
-                changed = true;
+        switch (this.cellIndex) {
+            case 1: {                           // Name geändert
+                if (value != data.name) {
+                    if (data.name)
+                        oldValue = data.name;
+                    data.name = value;
+                    changed = true;
+                }
+                break;
             }
-        } else if (this.cellIndex == 2) {     // Beschreibung geändert
-            if (value != data.description) {
-                data.description = value;
-                changed = true;
+            case 2: {                           // Beschreibung geändert
+                if (value != data.description) {
+                    if (data.description)
+                        oldValue = data.description;
+                    data.description = value;
+                    changed = true;
+                }
+                break;
             }
         }
         if (changed) {
             var erg = editFolder(data, data.objectID);
-            if (!erg.success)
-                value = "Folder konnte nicht aktualisiert werden!" + "<br>" + erg.result;
+            if (!erg.success) {
+                value = oldValue;
+            }
         }
         return value;
     } catch (e) {
@@ -1747,40 +1791,63 @@ function updateInlineDocument(value, settings) {
     try {
         var changed = false;
         var convValue;
+        var oldValue = "";
         var row = $(this.parentElement.parentElement.parentElement).DataTable().row(this);
         var data = row.data();
-        if (this.cellIndex == 2) {        // Titel geändert
-            if ( value != data.title) {
-                data.title = value;
-                changed = true;
+        switch (this.cellIndex) {
+            case 2: {                                // Titel geändert
+                if ( value != data.title) {
+                    if (data.titel)
+                        oldValue = data.title;
+                    data.title = value;
+                    changed = true;
+                }
+                break;
             }
-        } else if (this.cellIndex == 3) {  // Datum geändert
-            convValue = $.datepicker.parseDate("dd.mm.yy", value).getTime();
-            if (convValue != data.documentDate){
-                data.documentDate = convValue;
-                changed = true;
+            case 3: {                               // Datum geändert
+                convValue = $.datepicker.parseDate("dd.mm.yy", value).getTime();
+                if (convValue != data.documentDate){
+                    if (data.documentDateDisplay)
+                        oldValue = data.documentDateDisplay;
+                    data.documentDate = convValue;
+                    changed = true;
+                }
+                break;
             }
-        } else if (this.cellIndex == 4) {  // Person geändert
-            if (value != data.person){
-                data.person = value;
-                changed = true;
+            case 4: {                              // Person geändert
+                if (value != data.person){
+                    if (data.person)
+                        oldValue = data.person;
+                    data.person = value;
+                    changed = true;
+                }
+                break;
             }
-        } else if (this.cellIndex == 5) {  // Betrag geändert
-            convValue = parseFloat(value.replace(/\./g, '').replace(/,/g, "."));
-            if (convValue != data.amount) {
-                data.amount = convValue;
-                changed = true;
+            case 5: {                             // Betrag geändert
+                convValue = parseFloat(value.replace(/\./g, '').replace(/,/g, "."));
+                if (convValue != data.amount) {
+                    if (data.amountDisplay)
+                        oldValue = data.amountDisplay;
+                    data.amount = convValue;
+                    changed = true;
+                }
+                break;
             }
-        } else if (this.cellIndex == 6) {  // Id geändert
-            if (value != data.idvalue){
-                data.idvalue = value;
-                changed = true;
+            case 6:{                             // Id geändert
+                if (value != data.idvalue){
+                    if (data.idvalue)
+                        oldValue = data.idvalue;
+                    data.idvalue = value;
+                    changed = true;
+                }
+                break;
             }
         }
         if (changed) {
             var erg = editDocument(data, data.objectID);
-            if (!erg.success) 
-                value = "Dokument konnte nicht aktualisiert werden!" + "<br>" + erg.result;
+            if (!erg.success) {
+                value = oldValue;
+            }
         }
         return value;
     } catch (e) {

@@ -12,6 +12,7 @@
 
     $.fn.themeswitcher = function (options) {
         var switcherDiv = this, switcherOptions = {};
+        var themes;
         var settings = {
             loadtheme: "",
             height: 200,
@@ -44,154 +45,154 @@
         }
 
         if (!settings.themes.length) {
-            var themes = [
+            themes = [
                 {
                     title: "Black Tie",
                     name: "black-tie",
                     icon: "theme_90_black_tie.png",
-                    url:  "resources/themes/black-tie/jquery-ui.css"
+                    url:  "resources/themes/black-tie/jquery-ui${css.ending}"
                 },
                 {
                     title: "Blitzer",
                     name: "blitzer",
                     icon: "theme_90_blitzer.png",
-                    url:  "resources/themes/blitzer/jquery-ui.css"
+                    url:  "resources/themes/blitzer/jquery-ui${css.ending}"
                 },
                 {
                     title: "Cupertino",
                     name: "cupertino",
                     icon: "theme_90_cupertino.png",
-                    url:  "resources/themes/cupertino/jquery-ui.css"
+                    url:  "resources/themes/cupertino/jquery-ui${css.ending}"
                 },
                 {
                     title: "Dark Hive",
                     name: "dark-hive",
                     icon: "theme_90_dark_hive.png",
-                    url:  "resources/themes/dark-hive/jquery-ui.css"
+                    url:  "resources/themes/dark-hive/jquery-ui${css.ending}"
                 },
                 {
                     title: "Dot Luv",
                     name: "dot-luv",
                     icon: "theme_90_dot_luv.png",
-                    url:  "resources/themes/dot-luv/jquery-ui.css"
+                    url:  "resources/themes/dot-luv/jquery-ui${css.ending}"
                 },
                 {
                     title: "Eggplant",
                     name: "eggplant",
                     icon: "theme_90_eggplant.png",
-                    url:  "resources/themes/eggplant/jquery-ui.css"
+                    url:  "resources/themes/eggplant/jquery-ui${css.ending}"
                 },
                 {
                     title: "Excite Bike",
                     name: "excite-bike",
                     icon: "theme_90_excite_bike.png",
-                    url:  "resources/themes/excite-bike/jquery-ui.css"
+                    url:  "resources/themes/excite-bike/jquery-ui${css.ending}"
                 },
                 {
                     title: "Flick",
                     name: "flick",
                     icon: "theme_90_flick.png",
-                    url:  "resources/themes/flick/jquery-ui.css"
+                    url:  "resources/themes/flick/jquery-ui${css.ending}"
                 },
                 {
                     title: "Hot Sneaks",
                     name: "hot-sneaks",
                     icon: "theme_90_hot_sneaks.png",
-                    url:  "resources/themes/hot-sneaks/jquery-ui.css"
+                    url:  "resources/themes/hot-sneaks/jquery-ui${css.ending}"
                 },
                 {
                     title: "Humanity",
                     name: "humanity",
                     icon: "theme_90_humanity.png",
-                    url:  "resources/themes/humanity/jquery-ui.css"
+                    url:  "resources/themes/humanity/jquery-ui${css.ending}"
                 },
                 {
                     title: "Le Frog",
                     name: "le-frog",
                     icon: "theme_90_le_frog.png",
-                    url:  "resources/themes/le-frog/jquery-ui.css"
+                    url:  "resources/themes/le-frog/jquery-ui${css.ending}"
                 },
                 {
                     title: "Mint Choc",
                     name: "mint-choc",
                     icon: "theme_90_mint_choco.png",
-                    url:  "resources/themes/mint-chock/jquery-ui.css"
+                    url:  "resources/themes/mint-chock/jquery-ui${css.ending}"
                 },
                 {
                     title: "Overcast",
                     name: "overcast",
                     icon: "theme_90_overcast.png",
-                    url:  "resources/themes/overcast/jquery-ui.css"
+                    url:  "resources/themes/overcast/jquery-ui${css.ending}"
                 },
                 {
                     title: "Pepper Grinder",
                     name: "pepper-grinder",
                     icon: "theme_90_pepper_grinder.png",
-                    url:  "resources/themes/pepper-grinder/jquery-ui.css"
+                    url:  "resources/themes/pepper-grinder/jquery-ui${css.ending}"
                 },
                 {
                     title: "Redmond",
                     name: "redmond",
                     icon: "theme_90_windoze.png",
-                    url:  "resources/themes/redmond/jquery-ui.css"
+                    url:  "resources/themes/redmond/jquery-ui${css.ending}"
                 },
                 {
                     title: "Smoothness",
                     name: "smoothness",
                     icon: "theme_90_smoothness.png",
-                    url:  "resources/themes/smoothness/jquery-ui.css"
+                    url:  "resources/themes/smoothness/jquery-ui${css.ending}"
                 },
                 {
                     title: "South Street",
                     name: "south-street",
                     icon: "theme_90_south_street.png",
-                    url:  "resources/themes/south-street/jquery-ui.css"
+                    url:  "resources/themes/south-street/jquery-ui${css.ending}"
                 },
                 {
                     title: "Start",
                     name: "start",
                     icon: "theme_90_start_menu.png",
-                    url:  "resources/themes/start/jquery-ui.css"
+                    url:  "resources/themes/start/jquery-ui${css.ending}"
                 },
                 {
                     title: "Sunny",
                     name: "sunny",
                     icon: "theme_90_sunny.png",
-                    url:  "resources/themes/sunny/jquery-ui.css"
+                    url:  "resources/themes/sunny/jquery-ui${css.ending}"
                 },
                 {
                     title: "Swanky Purse",
                     name: "swanky-purse",
                     icon: "theme_90_swanky_purse.png",
-                    url:  "resources/themes/swanky-purse/jquery-ui.css"
+                    url:  "resources/themes/swanky-purse/jquery-ui${css.ending}"
                 },
                 {
                     title: "Trontastic",
                     name: "trontastic",
                     icon: "theme_90_trontastic.png",
-                    url:  "resources/themes/trontastic/jquery-ui.css"
+                    url:  "resources/themes/trontastic/jquery-ui${css.ending}"
                 },
                 {
                     title: "UI Darkness",
                     name: "ui-darkness",
                     icon: "theme_90_ui_dark.png",
-                    url:  "resources/themes/ui-darkness/jquery-ui.css"
+                    url:  "resources/themes/ui-darkness/jquery-ui${css.ending}"
                 },
                 {
                     title: "UI Lightness",
                     name: "ui-lightness",
                     icon: "theme_90_ui_light.png",
-                    url:  "resources/themes/ui-lightness/jquery-ui.css"
+                    url:  "resources/themes/ui-lightness/jquery-ui${css.ending}"
                 },
                 {
                     title: "Vader",
                     name: "vader",
                     icon: "theme_90_black_matte.png",
-                    url:  "resources/themes/vader/jquery-ui.css"
+                    url:  "resources/themes/vader/jquery-ui${css.ending}"
                 }
             ]
         } else {
-            var themes = settings.themes;
+            themes = settings.themes;
         }
 
         if (settings.additionalthemes.length) {
@@ -214,7 +215,7 @@
             "width": "24px",
             "height": "24px"
 
-        }
+        };
 
         if (settings.rounded) {
             switcherLinkStyle['border-radius'] = "6px";
@@ -347,15 +348,15 @@
         });
 
         function getAllLinkUrls() {
-            var urls = new Array();
+            var urls = [];
             var urlPrefix = settings.themepath + settings.jqueryuiversion + "/themes/";
             $.each(themes, function (k, v) {
                 if (themes[k].url)
                     // URL ist im Theme bereits angegben
-                    urls.push(themes[k].url)
+                    urls.push(themes[k].url);
                 else
                     // Themes vom jQuery Server
-                    urls.push(urlPrefix + themes[k].name + "/jquery-ui.css");
+                    urls.push(urlPrefix + themes[k].name + "/jquery-ui${css.ending}");
             });
             if (settings.additionalthemes.length) {
                 $.each(settings.additionalthemes, function (k, v) {
@@ -363,10 +364,10 @@
                 });
             }
             return urls;
-        };
+        }
 
         function findCurrentStyle() {
-            var currentStyle = new Array();
+            var currentStyle = [];
             var links = $("head link[rel='stylesheet']");
             $.each(links, function (k, v) {
                 if ($.inArray(v.attributes["href"].value, allUrls) != -1) {
@@ -375,18 +376,18 @@
                 }
             });
             return currentStyle;
-        };
+        }
 
         function updateTheme(data) {
             if (settings.onselect !== null)
                 settings.onselect();
 
-            var currentStyle = [];
+            var currentStyle;
             var url = data.url;
 
             if (!url) {
                 var urlPrefix = settings.themepath + settings.jqueryuiversion + "/themes/";
-                url = urlPrefix + data.name + "/jquery-ui.css";
+                url = urlPrefix + data.name + "/jquery-ui${css.ending}";
             }
             currentStyle = findCurrentStyle();
 

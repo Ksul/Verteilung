@@ -703,7 +703,8 @@ function work() {
                         start: range,
                         regExp: false
                     });
-                    range.setStart(start.start);
+                    if (start)
+                        range.setStart(start.start);
                 }
                 if (!sel.endsWith("/>")) {
                     var end = rulesEditor.find('>', {
@@ -714,7 +715,8 @@ function work() {
                         start: new Range(range.end.row, range.end.column, range.end.row, range.end.column),
                         regExp: false
                     });
-                    range.setEnd(end.end);
+                    if (end)
+                        range.setEnd(end.end);
                 }
                 sel = rulesEditor.getSession().getTextRange(range);
                 if (!sel.endsWith("/>")) {
@@ -743,7 +745,8 @@ function work() {
                             start: range,
                             regExp: false
                         });
-                        range.setStart(start.start);
+                        if (start)
+                            range.setStart(start.start);
                         end = rulesEditor.find('</searchItem>', {
                             backwards: false,
                             wrap: false,
@@ -752,7 +755,8 @@ function work() {
                             start: new Range(range.end.row, range.end.column, range.end.row, range.end.column),
                             regExp: false
                         });
-                        range.setEnd(end.end);
+                        if (end)
+                            range.setEnd(end.end);
                         rulesEditor.selection.setSelectionRange(range);
                         sel = rulesEditor.getSession().getTextRange(range);
                     }

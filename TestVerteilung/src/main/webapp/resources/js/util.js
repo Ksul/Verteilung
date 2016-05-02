@@ -378,7 +378,7 @@ function executeService(service, params, messages, ignoreError) {
                     // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
                         params[index].value = btoa(params[index].value);
-                    eval("dataString." + params[index].name + " = params[" + index + "].value");
+                    dataString[params[index].name] = params[index].value;
                 }
             }
             $.ajax({

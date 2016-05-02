@@ -485,12 +485,13 @@
                     return(select);
                 },
                 content : function(data, settings, original) {
+                    var json;
                     /* If it is string assume it is json. */
                     if (String == data.constructor) {
-                        eval ('var json = ' + data);
+                        json = $.parseJSON(data.replace(/'/g, "\""));
                     } else {
                         /* Otherwise assume it is a hash already. */
-                        var json = data;
+                        json = data;
                     }
                     for (var key in json) {
                         if (!json.hasOwnProperty(key)) {

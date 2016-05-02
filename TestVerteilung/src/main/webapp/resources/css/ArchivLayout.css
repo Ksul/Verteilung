@@ -565,7 +565,8 @@ input {
 
 select {
     max-width: 100%;
-    min-width: 10%
+    min-width: 10%;
+    background-color: white;
 }
 
 .alpaca-controlfield-checkbox input {
@@ -623,3 +624,6 @@ h2 {
     margin-top: 96%;
 }
 
+.alpaca-control {
+    background-color: white;
+}
