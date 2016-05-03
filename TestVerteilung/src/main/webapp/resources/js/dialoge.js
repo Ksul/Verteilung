@@ -21,7 +21,6 @@ function startSettingsDialog() {
                 "type": "object",
                 "title": "Server Einstellungen",
                 "properties": {
-
                     "user": {
                         "type": "string",
                         "title": "Benutzer",
@@ -63,7 +62,15 @@ function startSettingsDialog() {
                 "fields": {
                     "server": {
                         "size": 60,
-                        "placeholder": "z.B.: http://[host]:[port]/alfresco/"
+                        "placeholder": "z.B.: http://[host]:[port]/alfresco/",
+                        "events": {
+                            "change": function(){
+                                if (!this.getValue().endsWith("/")) {
+                                    this.setValue(this.getValue() + "/");
+                                    this.refresh();
+                                }
+                            }
+                        }
                     },
                     "binding": {
                         "size": 100,
@@ -87,11 +94,11 @@ function startSettingsDialog() {
                 "layout": {
                     "template": "columnGridLayout",
                     "bindings": {
-                        "server": "server",
-                        "binding": "binding",
-                        "user": "user",
-                        "password": "password",
-                        "store": "store"
+                        "server":    "server",
+                        "binding":   "binding",
+                        "user":      "user",
+                        "password":  "password",
+                        "store":     "store"
                     }
                 },
                 "templates": {
@@ -107,40 +114,48 @@ function startSettingsDialog() {
             "ui": "jquery-ui",
 
             "postRender": function (renderedField) {
-                renderedField.on("validated", function () {
-                    $("#btn-ok").button("option", "disabled", false);
-                });
-                renderedField.on("invalidated", function () {
-                    $("#btn-ok").button("option", "disabled", true);
-                });
-                var form = renderedField.form;
-                if (form) {
-                    form.registerSubmitHandler(function () {
-                        if (form.isFormValid()) {
-                            try {
-                                var input = $("#dialogBox").alpaca().getValue();
-                                if (!input.server.endsWith("/"))
-                                    input.server = input.server + "/";
-                                settings = {"settings": [
-                                    {"key": "server", "value": input.server},
-                                    {"key": "user", "value": input.user},
-                                    {"key": "password", "value": input.password},
-                                    {"key": "binding", "value": input.binding},
-                                    {"key": "store", "value": input.store}
-                                ]};
-                                if (store) {
-                                    $.cookie("settings", JSON.stringify(settings), {expires: 9999});
-                                    REC.log(INFORMATIONAL, "Einstellungen gesichert");
-                                    fillMessageBox(true);
-                                }
-                                closeDialog();
-                                initApplication();
-                                loadAlfrescoTree();
-                            } catch (e) {
-                                errorHandler(e);
-                            }
-                        }
+                try {
+                    var server = renderedField.childrenByPropertyId["server"];
+                    var binding = renderedField.childrenByPropertyId["binding"];
+                    binding.subscribe(server, function (val) {
+                        if (!this.getValue().trim().length)
+                            this.setValue(server.data + "api/-default-/public/cmis/versions/1.0/atom");
+                        this.refresh();
                     });
+                    var form = renderedField.form;
+                    if (form) {
+                        form.registerSubmitHandler(function () {
+                            if (form.isFormValid()) {
+                                try {
+                                    var input = $("#dialogBox").alpaca().getValue();
+                                    if (!input.server.endsWith("/"))
+                                        input.server = input.server + "/";
+                                    settings = {
+                                        "settings": [
+                                            {"key": "server", "value": input.server},
+                                            {"key": "user", "value": input.user},
+                                            {"key": "password", "value": input.password},
+                                            {"key": "binding", "value": input.binding},
+                                            {"key": "store", "value": input.store}
+                                        ]
+                                    };
+                                    if (store) {
+                                        $.cookie("settings", JSON.stringify(settings), {expires: 9999});
+                                        REC.log(INFORMATIONAL, "Einstellungen gesichert");
+                                        fillMessageBox(true);
+                                    }
+                                    closeDialog();
+                                    initApplication();
+                                    loadAlfrescoTree();
+                                } catch (e) {
+                                    errorHandler(e);
+                                }
+                            }
+                        });
+                    }
+
+                } catch (e) {
+                    errorHandler(e);
                 }
             }
         };
@@ -169,7 +184,7 @@ function startDocumentDialog(data, modus) {
         if (data.amount)
             data.amountDisplay = $.format.number(data.amount, '#,##0.00');
         else
-            data.amountDisplay = ""
+            data.amountDisplay = "";
         if (!exist(data.tax))
             data.tax = false;
 
@@ -264,7 +279,6 @@ function startDocumentDialog(data, modus) {
                     }
                 },
                 "fields": {
-
                     "title": {
                         "size": 30
 
@@ -364,6 +378,7 @@ function startDocumentDialog(data, modus) {
                     form.registerSubmitHandler(function () {
                         if (form.isFormValid()) {
                             try {
+                                var erg;
                                 var alpaca = $("#dialogBox").alpaca();
                                 // Werte übertragen
                                 var input = alpaca.getValue();
@@ -381,8 +396,11 @@ function startDocumentDialog(data, modus) {
                                         (input.person && origData.person != input.person) ||
                                         (input.documentDate && origData.documentDate != input.documentDate) ||
                                         (input.amount && origData.amount != input.amount) ||
-                                        (input.tax != origData.tax))
-                                        editDocument(input, origData.objectID);
+                                        (input.tax != origData.tax)) {
+                                        erg = editDocument(input, origData.objectID);
+                                        if (!erg.success)
+                                            message("Fehler", erg.error);
+                                    }
                                 } else if (modus == "web-display") {
                                     deleteDocument(origData);
                                 }
@@ -394,7 +412,6 @@ function startDocumentDialog(data, modus) {
                     });
                 }
             }
-
         };
         var additionalButton =[{"id":".alpaca-form-button-delete", "function": deleteDocument }];
         startDialog(dialogDocumentDetailsSettings, 450, additionalButton);
@@ -429,15 +446,13 @@ function startFolderDialog(data, modus) {
                         "type": "string",
                         "title": "Name",
                         "required": true,
-                        "readonly": (data.objectID != alfrescoRootFolderId &&
+                        "readonly": !(data.objectID != alfrescoRootFolderId &&
                         data.objectID != archivFolderId &&
                         data.objectID != fehlerFolderId &&
                         data.objectID != unknownFolderId &&
                         data.objectID != documentFolderId &&
                         data.objectID != doubleFolderId &&
-                        data.objectID != inboxFolderId) ?
-                            false :
-                            true
+                        data.objectID != inboxFolderId) 
                     },
                     "title": {
                         "type": "string",
@@ -516,10 +531,12 @@ function startFolderDialog(data, modus) {
             },
             "ui": "jquery-ui",
             "postRender": function (renderedField) {
+
                 var form = renderedField.form;
                 if (form) {
                     form.registerSubmitHandler(function () {
                         if (form.isFormValid()) {
+                            var erg;
                             try {
                                 var alpaca = $("#dialogBox").alpaca();
                                 // Werte übertragen
@@ -529,13 +546,17 @@ function startFolderDialog(data, modus) {
                                 if (modus == "web-create") {
                                     // ein neuer Ordner wird erstellt
                                     createFolder(input, origData);
+                                    
                                 }
                                 else if (modus == "web-edit") {
                                     // bestehender Ordner wird editiert
                                     if ((input.name && input.name != origData.name) ||
                                         (input.title && input.title != origData.title) ||
-                                        (input.description && input.description != origData.description))
-                                        editFolder(input, origData.objectID);
+                                        (input.description && input.description != origData.description)) {
+                                        erg = editFolder(input, origData.objectID);
+                                        if (!erg.success)
+                                            message("Fehler", erg.error);
+                                    }
                                 }
                                 closeDialog();
                             } catch (e) {

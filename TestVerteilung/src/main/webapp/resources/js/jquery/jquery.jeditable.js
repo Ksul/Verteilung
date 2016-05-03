@@ -18,6 +18,8 @@
  * Version 1.7.3
  *
  * ** means there is basic unit tests for this parameter.
+ * ACHTUNG modifiziert in Zeile 490. eval() macht Probleme beim minify...
+ *         generellen submit beim select entfernt
  *
  * @name  Jeditable
  * @type  jQuery
@@ -514,7 +516,7 @@
                     if (!settings.submit) {
                         var form = this;
                         $('select', this).change(function() {
-                            form.submit();
+                            //form.submit();
                         });
                     }
                 }

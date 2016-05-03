@@ -375,7 +375,7 @@ function executeService(service, params, messages, ignoreError) {
             };
             if (exist(params)) {
                 for (index = 0; index < params.length; ++index) {
-                    // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
+                    // falls Bytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
                         params[index].value = btoa(params[index].value);
                     dataString[params[index].name] = params[index].value;
@@ -412,13 +412,16 @@ function executeService(service, params, messages, ignoreError) {
             else
                 errorString = json.result;
             // gibt es eine Fehlermeldung aus dem Service?
-            if (exist(json.error)) {
+            if (json.error && !ignoreError) {
                 errorString = errorString + "<br>" + json.error;
                 REC.log(ERROR, json.error);
             }
-            REC.log(ERROR, json.result);
-            fillMessageBox(true);
-            throw new Error(errorString);
+            if (!ignoreError) {
+                REC.log(ERROR, json.result);
+                fillMessageBox(true);
+            } else 
+                json.error = errorString;
+            return json;
         } else {
             if (exist(successMessage)) {
                 REC.log(INFORMATIONAL, successMessage);

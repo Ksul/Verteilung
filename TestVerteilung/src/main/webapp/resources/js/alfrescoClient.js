@@ -1771,7 +1771,7 @@ function updateInlineFolder (value, settings) {
         if (changed) {
             var erg = editFolder(data, data.objectID);
             if (!erg.success) {
-                value = oldValue;
+                value = erg.error;
             }
         }
         return value;
@@ -1846,7 +1846,7 @@ function updateInlineDocument(value, settings) {
         if (changed) {
             var erg = editDocument(data, data.objectID);
             if (!erg.success) {
-                value = oldValue;
+                value = erg.error;
             }
         }
         return value;
@@ -1880,7 +1880,7 @@ function editDocument(input, id) {
         erg = executeService("updateProperties", [
             {"name": "documentId", "value": id},
             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-        ], "Dokument konnte nicht aktualisiert werden!", false);
+        ], "Dokument konnte nicht aktualisiert werden!", true);
         if (erg.success) {
             var data = $.parseJSON(erg.result);
             // Tabelle updaten
@@ -1985,7 +1985,7 @@ function editFolder(input, id) {
         erg = executeService("updateProperties", [
             {"name": "documentId", "value": id},
             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
-        ], "Ordner konnte nicht aktualisiert werden!", false);
+        ], "Ordner konnte nicht aktualisiert werden!", true);
         if (erg.success) {
             var lastElement = $("#breadcrumblist").children().last();
             var newData = $.parseJSON(erg.result);
