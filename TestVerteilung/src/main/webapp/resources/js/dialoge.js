@@ -91,6 +91,7 @@ function startSettingsDialog() {
 
             "view": {
                 "parent": "web-edit",
+                "locale": "de_DE",
                 "layout": {
                     "template": "columnGridLayout",
                     "bindings": {
@@ -187,6 +188,7 @@ function startDocumentDialog(data, modus) {
             data.amountDisplay = "";
         if (!exist(data.tax))
             data.tax = false;
+
 
         // Einstellungen für den Dokumentendialog
         var dialogDocumentDetailsSettings = { "id": "detailDialog",
@@ -291,6 +293,11 @@ function startDocumentDialog(data, modus) {
                         "type": "textarea",
                         "size": 60
                     },
+                    "person": {
+                        "type": "select",
+                        "hideInitValidationError": true,
+                        "emptySelectFirst": true
+                    },
                     "amountDisplay": {
                         "type": "currency",
                         "label": "Betrag",
@@ -345,6 +352,7 @@ function startDocumentDialog(data, modus) {
             },
             "view": {
                 "parent": modus,
+                "locale": "de_DE",
                 "layout": {
                     "template": "threeColumnGridLayout",
                     "bindings": {
@@ -510,6 +518,7 @@ function startFolderDialog(data, modus) {
             "data": data,
             "view": {
                 "parent": modus,
+                "locale": "de_DE",
                 "layout": {
                     "template": "threeColumnGridLayout",
                     "bindings": {
