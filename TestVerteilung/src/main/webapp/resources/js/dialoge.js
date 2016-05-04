@@ -188,7 +188,8 @@ function startDocumentDialog(data, modus) {
             data.amountDisplay = "";
         if (!exist(data.tax))
             data.tax = false;
-
+        if (!data.person)
+            data.person = "Klaus";
 
         // Einstellungen für den Dokumentendialog
         var dialogDocumentDetailsSettings = { "id": "detailDialog",
