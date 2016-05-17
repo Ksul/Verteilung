@@ -5,15 +5,42 @@
     <title>Title</title>
 </head>
 <body>
-<applet
 
-        archive = "./applet/TestVerteilung-1.0-SNAPSHOT-jar-with-dependencies.jar"
-        code =  "de.schulte.testverteilung.VerteilungApplet.class"
-        name = appletInstanceName
-        width = 500
-        height = 500
->
+<script type="text/javascript" charset="utf-8">
 
-</applet>
+    // <![CDATA[
+
+
+
+    window.onload = function() {
+        loadApplet();
+        var r = "reader";
+        var f = "test";
+        reader[f]();
+        /**
+         * lädt das Applet
+         * @returns             true, wenn das Applet geladen werden konnte, ansonsten false
+         */
+        function loadApplet() {
+            var obj = document.createElement('applet');
+            var param;
+            obj.setAttribute('name', 'reader');
+            obj.setAttribute('id', 'reader');
+            obj.setAttribute('width', '1');
+            obj.setAttribute('height', '1');
+            //obj.setAttribute('codebase', './applet');
+            obj.setAttribute('archive', './applet/TestVerteilung-jar-with-dependencies.jar');
+            obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
+            document.getElementById('appl').appendChild(obj);
+            var app =  document.applets[0];
+            return ( app.isActive());
+        }
+
+    };
+
+    // ]]>
+
+</script>
+<div id ="appl"></div>
 </body>
 </html>

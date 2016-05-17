@@ -60,11 +60,8 @@
         window.onload = function() {
 
             if (location.href.startsWith("file")) {
-                if (loadApplet()) {
-                    var text = document.reader.openResources(document.URL.slice(0, document.URL.lastIndexOf('/')+1)+"resources/templates/resource.template");
-                    if (text)
-                        loadResources(atob(text));
-                }
+                loadApplet();
+                registerAppletStateHandler();
             } else {
                 var ajax = new XMLHttpRequest();
                 if (ajax != null) {
@@ -174,7 +171,10 @@
              */
             function loadApplet() {
                 var obj = document.createElement('applet');
-                var param;
+                var param = document.createElement('param');
+                param.setAttribute('name', 'java_status_events');
+                param.setAttribute('value', 'true');
+                obj.appendChild(param);
                 obj.setAttribute('name', 'reader');
                 obj.setAttribute('id', 'reader');
                 obj.setAttribute('width', '1');
@@ -184,7 +184,28 @@
                 obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
                 document.getElementById('appl').appendChild(obj);
                 var app =  document.applets[0];
-                return ( app.isActive());
+                return;
+            }
+
+            /**
+             * registriert einen Handler der aufgerufen wird wenn das Applet geladen ist
+             */
+            function registerAppletStateHandler() {
+                if (reader.status < 2)  {
+                    reader.onLoad = onLoadHandler;
+                } else if (reader.status >= 2) {
+                    // Applet ist schon geladen
+                    onLoadHandler();
+                }
+            }
+
+            /**
+             * Handler der aufgerufen wird wenn das Applet geladen ist
+             */
+            function onLoadHandler() {
+                var text = document.reader.openResources(document.URL.slice(0, document.URL.lastIndexOf('/')+1)+"resources/templates/resource.template");
+                if (text)
+                    loadResources(atob(text));
             }
 
         };

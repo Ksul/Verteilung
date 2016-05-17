@@ -341,11 +341,10 @@ function executeService(service, params, messages, ignoreError) {
         if (isLocal()) {
             // Aufruf über Applet
             var maxLen = 1100000;
-            var execute = "document.reader." + service + "(";
-            var first = true;
+            var paramValues = [];
             if (exist(params)) {
-                for ( index = 0; index < params.length; ++index) {
-                    // falls Baytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
+                for (  index = params.length; index--;) {
+                    // falls Bytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
                        // params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
                         params[index].value = btoa(params[index].value);
@@ -355,17 +354,13 @@ function executeService(service, params, messages, ignoreError) {
                         longParameter = true;
                         for (var k = 0; k < Math.ceil(params[index].value.length / maxLen); k++)
                             document.reader.fillParameter(params[index].value.substr(k * maxLen, maxLen), k == 0);
-                    } else {
-                        // der Inhalt ist nicht zu lang und kann direkt zum Applet übertragen werden
-                        if (!first)
-                            execute = execute + ", ";
-                        execute = execute + "params[" + index + "].value";
-                        first = false;
-                    }
+                        // Parameter entfernen
+                        params.splice(index, 1);
+                    } else
+                        paramValues.push(params[index].value);
                 }
             }
-            execute = execute + ")";
-            var obj = eval(execute);
+            var obj = document.reader[service](...paramValues.reverse());
             json = jQuery.parseJSON(obj);
             times.push(new Date().getTime());
         } else {
