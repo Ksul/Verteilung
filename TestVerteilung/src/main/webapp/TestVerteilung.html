@@ -208,9 +208,12 @@
             <li id="tabArchiv" ><a href="#tab1">Archiv</a></li>
             <li id="tabSuche" ><a href="#tab2">Suche</a></li>
             <li id="tabVerteilung"><a  href="#tab3">Verteilung</a></li>
-            <input  style="float:right" onclick="startSettingsDialog();"
-                    name="settings" id="settings" type="submit" class="settings"
-                    title="Open Settings" value=""/>
+            <div style="float:right">
+                <input style="float:right" onclick="startSettingsDialog();"
+                       name="settings" id="settings" type="submit" class="settings"
+                       title="Open Settings" value=""/>
+                <div style="float:right" id="switcher"  class="themes" title="Farbschema"></div>
+            </div>
         </ul>
         <!--Tab Panels-->
         <div id="tabPanels" class="container ui-state-active">
@@ -430,9 +433,6 @@
                                     onclick="save(currentRules, vkbeautify.xml(rulesEditor.getSession().getValue()));"
                                     name="saveRules" id="saveRules" type="submit" class="save" title="Save"
                                     value=""/>
-                            </td>
-                            <td width="60px" align="center">
-                                <div id="switcher" class="themes" title="Test"></div>
                             </td>
                         </tr>
                     </table>
