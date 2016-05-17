@@ -301,6 +301,8 @@ function uuid() {
     return uuid.join('');
 }
 
+
+
 /**
  * führt einen Service aus
  * die Methode prüft dabei im Appletzweig, ob ein String Parameter zu lang ist und überträgt ihn dann häppchenweise.
@@ -315,6 +317,10 @@ function uuid() {
  * @param messages          Array mit Meldungen. Die erste ist die Fehlermeldung, der zweite Eintrag ist eine Erfolgsmeldung
  * @param ignoreError       Flag, ob ein Fehler ignoriert werden soll
  * @return das Ergebnis als JSON Objekt
+ * TODO Diese Methode ist nur deswegen hier definiert weil der Minifier noch kein ECMA6 kann und deshalb aussteigt.
+ * Diese methode kann nicht aufgerufen werdeb bevor die abhängigen Bibliotheken geladen werden weil diese auch von der Methode
+ * benutzt werden. Dies ist unter anderem jQuery.
+ * Wenn der Minifier aktualisiert worden ist sollte diese methode wieder nach util.js wandern!
  */
 function executeService(service, params, messages, ignoreError) {
     var json;
@@ -346,7 +352,7 @@ function executeService(service, params, messages, ignoreError) {
                 for (  index = params.length; index--;) {
                     // falls Bytecode übertragen werden soll, dann Umwandlung damit es nicht zu Konvertierungsproblemen kommt
                     if (exist(params[index].type) && params[index].type == "byte")
-                       // params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
+                    // params[index].value = base64EncArr(strToUTF8Arr(params[index].value));
                         params[index].value = btoa(params[index].value);
                     // prüfen, ob Parameter zu lang ist
                     if (typeof params[index].value == "String" && params[index].value.length > maxLen) {
@@ -360,7 +366,7 @@ function executeService(service, params, messages, ignoreError) {
                         paramValues.push(params[index].value);
                 }
             }
-            var obj = document.reader[service](...paramValues.reverse());
+            var obj = document.reader[service]( ...paramValues.reverse() );
             json = jQuery.parseJSON(obj);
             times.push(new Date().getTime());
         } else {
@@ -414,7 +420,7 @@ function executeService(service, params, messages, ignoreError) {
             if (!ignoreError) {
                 REC.log(ERROR, json.result);
                 fillMessageBox(true);
-            } else 
+            } else
                 json.error = errorString;
             return json;
         } else {
