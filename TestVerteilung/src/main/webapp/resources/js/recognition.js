@@ -2077,32 +2077,27 @@ function Delimitter(srch) {
             if (typeof erg[i].text == "string") {
                 REC.log(DEBUG, "resolve Delimitter: current String is " + REC.printTrace(erg[i].text, direction));
                 var txtSave = erg[i].text;
-                var tmp = "erg[i].text = erg[i].text";
-                var tmpPos = "txtSave";
+                var tmpPos;
                 if (this.typ == "start") {
                     if (this.count < 0) {
-                        tmp = tmp + ".split(this.text).reverse().slice(0, Math.abs(this.count)).reverse().join(this.text)";
-                        tmpPos = tmpPos + ".split(this.text).reverse().slice(Math.abs(this.count)).reverse().join(this.text).length + this.text.length";
+                        erg[i].text = erg[i].text.split(this.text).reverse().slice(0, Math.abs(this.count)).reverse().join(this.text);
+                        tmpPos = txtSave.split(this.text).reverse().slice(Math.abs(this.count)).reverse().join(this.text).length + this.text.length;
                     } else {
-                        tmp = tmp + ".split(this.text).slice(Math.abs(this.count)).join(this.text)";
-                        tmpPos = tmpPos + ".split(this.text).slice(0, Math.abs(this.count)).join(this.text).length + this.text.length";
+                        erg[i].text = erg[i].text.split(this.text).slice(Math.abs(this.count)).join(this.text);
+                        tmpPos = txtSave.split(this.text).slice(0, Math.abs(this.count)).join(this.text).length + this.text.length;
                     }
-                    tmpPos = "erg[i].setStart(erg[i].getStart() + " + tmpPos +")";
-                    eval(tmpPos);
+                    erg[i].setStart(erg[i].getStart() + tmpPos);
                 }
                 if (this.typ == "end") {
                     if (this.count < 0) {
-                        tmp = tmp + ".split(this.text).reverse().slice(Math.abs(this.count)).reverse().join(this.text)";
-                        tmpPos = tmpPos + ".split(this.text).reverse().slice(0, Math.abs(this.count)).reverse().join(this.text).length";
+                        erg[i].text = erg[i].text.split(this.text).reverse().slice(Math.abs(this.count)).reverse().join(this.text);
+                        tmpPos = txtSave.split(this.text).reverse().slice(0, Math.abs(this.count)).reverse().join(this.text).length;
                     } else {
-                        tmp = tmp + ".split(this.text).slice(0, Math.abs(this.count)).join(this.text)";
-                        tmpPos = tmpPos + ".split(this.text).slice(Math.abs(this.count)).join(this.text).length - this.text.length";
+                        erg[i].text = erg[i].text.split(this.text).slice(0, Math.abs(this.count)).join(this.text);
+                        tmpPos = txtSave.split(this.text).slice(Math.abs(this.count)).join(this.text).length + this.text.length;
                     }
-                    tmpPos = "erg[i].setEnd(erg[i].getEnd() - " + tmpPos + ")";
-                    eval(tmpPos);
+                    erg[i].setEnd(erg[i].getEnd() - tmpPos);
                 }
-                REC.log(TRACE, "Delimitter.resolve: eval with " + tmp + " and " + erg[i]);
-                eval(tmp);
                 REC.log(DEBUG, "Delimitter.resolve: result is " + REC.printTrace(erg[i].text, direction));
             }
         }
@@ -3195,8 +3190,8 @@ function XMLObject(ruleDocument) {
     for (var i = 0; i < count; i++) {
         var attribute = attributes[i];
         if (attribute.indexOf(":") == -1)
-            eval("this." + attribute + " = \"" + ruleDocument.getAttribute(attribute) + "\";");
-    }
+            this[attribute] = ruleDocument.getAttribute(attribute);
+     }
     var tmp = [];
     // for each(elem in rule.children()) {
     var elements = ruleDocument.getElements();
@@ -3210,7 +3205,7 @@ function XMLObject(ruleDocument) {
     }
 
     for (nam in tmp)
-        eval("this." + nam + " = tmp[\"" + nam + "\"];");
+        this[nam] = tmp[nam];
 }
 
 function DebugLevel(level, text) {
