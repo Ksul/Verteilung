@@ -128,11 +128,12 @@ function manageControls() {
     if (currentPDF)
         document.getElementById('pdf').removeAttribute("disabled");
 
-    if (runLocal || (scriptID == null && rulesID == null)) {
+    if (!alfrescoServerAvailable) {
         document.getElementById('sendScript').setAttribute("disabled", true);
         document.getElementById('getScript').setAttribute("disabled", true);
         document.getElementById('getRules').setAttribute("disabled", true);
         document.getElementById('sendRules').setAttribute("disabled", true);
+        document.getElementById('sendToInbox').setAttribute("disabled", true);
     }
     // Muss als letztes stehen
     if (scriptMode) {

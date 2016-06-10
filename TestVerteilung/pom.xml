@@ -116,6 +116,9 @@
                                     <jsSourceIncludes>
                                         <jsSourceInclude>**</jsSourceInclude>
                                     </jsSourceIncludes>
+                                    <jsExcludes>
+                                        <jsExclude>recognition.js</jsExclude>
+                                    </jsExcludes>
                                     <jsEngine>CLOSURE</jsEngine>
                                     <closureLanguage>ECMASCRIPT5</closureLanguage>
                                 </configuration>

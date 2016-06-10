@@ -410,10 +410,6 @@ function loadLayout() {
             initPanes: true,
             resizeWithWindow: false,
             contentSelector: ".ui-widget-content",
-            north: {
-                paneSelector: "#verteilungNorth",
-                minSize: 33
-            },
             west: {
                 paneSelector: "#verteilungWest",
                 size: .4,
@@ -438,7 +434,6 @@ function loadLayout() {
                 onresize: function () {
                     rulesEditor.resize();
                 }
-
             },
             east: {
                 size:.15,

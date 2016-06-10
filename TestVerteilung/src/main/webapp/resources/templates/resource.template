@@ -23,7 +23,7 @@ resources/js/ace/mode-text${js.ending}
 resources/js/alfrescoClient${js.ending}
 resources/js/dialoge${js.ending}
 resources/js/util${js.ending}
-resources/js/recognition${js.ending}
+resources/js/recognition.js
 resources/js/verteilung${js.ending}
 resources/js/jquery-ui/jquery-ui${js.ending}
 resources/js/jquery/jquery.tmpl${js.ending}

@@ -433,6 +433,30 @@ button.ui-dialog-titlebar-close span.ui-icon {
     margin-top: -8px !important;
 }
 
+.header {
+    background: #80ade5 url(../images/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
+    border-bottom: 1px solid #777;
+    font-weight: bold;
+    text-align: center;
+    padding: 2px 0 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer {
+    background: #d6d6d6 url(../images/d6d6d6_40x100_textures_02_glass_80.png) 0 50% repeat-x;
+    padding: 3px 10px;
+    font-size: 0.85em;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.subhead {
+    border-bottom: 1px solid #777;
+    background-color: white;
+}
+.footer  { border-top: 1px solid #777; }
+
 /*
  *	TAB CLASSES - STRUCTURAL, REQUIRED
  */
