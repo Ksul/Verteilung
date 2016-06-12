@@ -466,8 +466,6 @@ function loadLayout() {
              */
         });
 
-
-
         globalLayout = $('body').layout(clientPageLayoutSettings);
 
         $('#clientPage').layout(pageLayoutSettings);

@@ -3,6 +3,66 @@
  */
 
 /**
+ * Prüft, ob ein Alfresco Server antwortet
+ * @param url         URL des Servers
+ * @returns {boolean} true, wenn der Server verfügbar ist
+ */
+function checkServerStatus(url) {
+
+    var obj = executeService("isURLAvailable", [{"name":"server", "value":url}, {"name":"timeout", "value":"5000"}], null, true);
+    return obj.result.toString() == "true";
+}
+
+/**
+ * liefert die Einstellungen
+ * wenn noch keine Einstellungen gesetzt sind, dann sucht die Funktion einen passenden URL-Parameter
+ * und trägt diesen dann ein. Ist dieser auch nicht vorhanden, dann wird <null> zurück geliefert.
+ * @param key    Schlüssel der Einstellung
+ * @returns {*}  Den Wert der Einstellung
+ */
+function getSettings(key) {
+    var ret;
+    if (!exist(settings) || settings.settings.filter(function (o) {
+            return o.key.indexOf(key) >= 0;
+        }).length == 0) {
+        var urlPar = getUrlParam(key);
+        if (urlPar == null)
+            return null;
+        else {
+            if (!settings)
+                settings = {settings:[]};
+            settings.settings.push({"key": key, "value": urlPar});
+        }
+    }
+    return settings.settings.filter(function (o) {
+        return o.key.indexOf(key) >= 0;
+    })[0].value;
+}
+
+/**
+ * gibt einen aktuellen Timestamp zurück "m/d/yy h:MM:ss TT"
+ * @param withDate mit Datum
+ * @type {Date}
+ */
+function timeStamp(withDate) {
+    var returnString = "";
+    var now = new Date();
+    var time = [ now.getHours(), now.getMinutes(), now.getSeconds() ];
+    for ( var i = 1; i < 3; i++ ) {
+        if ( time[i] < 10 ) {
+            time[i] = "0" + time[i];
+        }
+    }
+    if (withDate){
+        var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
+        returnString = returnString + date.join(".") + " ";
+    }
+    returnString += time.join(":");
+    return returnString;
+}
+
+
+/**
  * such eine Key / Value Kombination aus einer Json Struktur
  * @param obj           das zu durchsuchende JSON Objekt
  * @param key           der Key

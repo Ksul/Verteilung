@@ -3633,6 +3633,7 @@ REC = {
         return str.length;
     },
     displayElement: function (domElement, strRet) {
+        var intLoop;
         if (domElement == null) {
             return;
         }
@@ -3643,7 +3644,7 @@ REC = {
         var tagInfo = "";
         tagInfo = "<" + tagName;
         var attributeList = domElement.getAttributeNames();
-        for (var intLoop = 0; intLoop < attributeList.length; intLoop++) {
+        for (intLoop = 0; intLoop < attributeList.length; intLoop++) {
             var attribute = attributeList[intLoop];
             tagInfo = tagInfo + " " + attribute + "=";
             tagInfo = tagInfo + "\"" + domElement.getAttribute(attribute) + "\"";
@@ -3651,18 +3652,19 @@ REC = {
         tagInfo = tagInfo + ">";
         strRet = strRet + tagInfo;
         if (domElement.children != null) {
+            var cont;
             var domElements = domElement.children;
-            for (var intLoop = 0; intLoop < domElements.length; intLoop++) {
+            for (intLoop = 0; intLoop < domElements.length; intLoop++) {
                 var childNode = domElements[intLoop];
                 if (childNode.nodeType == 'COMMENT') {
                     strRet = strRet + "<!--" + childNode.content + "-->";
                 }
                 else if (childNode.nodeType == 'TEXT') {
-                    var cont = REC.trim(childNode.content, true, true);
+                    cont = REC.trim(childNode.content, true, true);
                     strRet = strRet + childNode.content;
                 }
                 else if (childNode.nodeType == 'CDATA') {
-                    var cont = REC.trim(childNode.content, true, true);
+                    cont = REC.trim(childNode.content, true, true);
                     strRet = strRet + "<![CDATA[" + cont + "]]>";
                 }
                 else {

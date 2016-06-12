@@ -379,7 +379,7 @@
             <li id="tabArchiv" ><a href="#tab1">Archiv</a></li>
             <li id="tabSuche" ><a href="#tab2">Suche</a></li>
             <li id="tabVerteilung"><a  href="#tab3">Verteilung</a></li>
-            <div style="float:right">
+            <div>
                 <input style="float:right" onclick="startSettingsDialog();"
                        name="settings" id="settings" type="submit" class="settings"
                        title="Open Settings" value=""/>
@@ -474,6 +474,7 @@
                                         <a href="#icons" onclick="showAlfrescoSearchIconView();">Icons</a>
                                     </li>
                                 </ul>
+                            </li>
                         </ul>
                     </div>
                     <div>
@@ -489,29 +490,13 @@
             </div>
             <!--Tab Verteilung-->
             <div id="tab3" class="tabPanel ui-widget-content hidden">
-<!--                &lt;!&ndash;Buttons&ndash;&gt;
-                <div id="verteilungNorth" class="ui-layout-north container ui-widget-content"
-                     onmouseover="if (exist(verteilungLayout)) verteilungLayout.allowOverflow(this); if (exist(alfrescoLayout)) alfrescoLayout.allowOverflow(this);">
-                    <table style="">
-                        <tr>
-
-
-
-                            <td width="50%">
-                                <div id="progressbar" class="progressbar">
-                                    <div class="progress-label"></div>
-                                </div>
-                            </td>
-                         </tr>
-                    </table>
-                </div>-->
                 <!--Dokument-->
                 <div id="verteilungWest" class="ui-tab-layout-west container ui-widget-header hidden">
                     <div id="headerWest" class="header">Dokument</div>
                     <div id="subHeaderWest" class="subhead">
                         <table >
                             <tr>
-                                <td width="30%"><input id="filesinput" name="filesinput"
+                                <td width="70%"><input id="filesinput" name="filesinput"
                                                        type="file" multiple="multiple" size="50"/>
                                 </td>
                                 <td width="60px" align="center"><input onclick="work();"
@@ -532,6 +517,12 @@
                                         onclick="var needle = prompt('Find:', textEditor.getCopyText());textEditor.find(needle);"
                                         name="searchCont" id="searchCont" type="submit" class="search"
                                         title="Search" value=""/>
+                                </td>
+                                <td width="60px" align="center"><input onclick="sendToInbox();"
+                                                                       name="sendToInbox" id="sendToInbox" type="submit"
+                                                                       class="sendToInbox"
+                                                                       title="sendToInbox"
+                                                                       value="" style="display: none"/>
                                 </td>
                                 <td width="60px" align="center"><input onclick="formatScript();"
                                                                        name="beautifyScript" id="beautifyScript" type="submit"
@@ -562,12 +553,6 @@
                                                                        name="sendScript" id="sendScript" type="submit"
                                                                        class="upload"
                                                                        title="Upload"
-                                                                       value="" style="display: none"/>
-                                </td>
-                                <td width="60px" align="center"><input onclick="sendToInbox();"
-                                                                       name="sendToInbox" id="sendToInbox" type="submit"
-                                                                       class="sendToInbox"
-                                                                       title="sendToInbox"
                                                                        value="" style="display: none"/>
                                 </td>
                                 <td width="60px" align="center"><input onclick="closeScript();"

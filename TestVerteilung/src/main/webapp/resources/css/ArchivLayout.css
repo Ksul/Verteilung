@@ -374,12 +374,22 @@ input.themes {
 }
 
 input.sendToInbox {
-    background-image: url(../images/inbox_icon.jpg);
+    background-image: url(../images/inbox_icon.png);
     background-color: transparent;
     width: 24px;
     height: 24px;
     border: 0;
     cursor: pointer;
+}
+
+input.sendToInbox:disabled {
+    background-image: url(../images/inbox_icon-bw.png);
+    background-color: transparent;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: text;
+    disabled: true;
 }
 
 /* add padding and min/max sizes to BODY */

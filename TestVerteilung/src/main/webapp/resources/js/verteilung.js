@@ -1,41 +1,3 @@
-
-/**
- * Prüft, ob ein Alfresco Server antwortet
- * @param url         URL des Servers
- * @returns {boolean} true, wenn der Server verfügbar ist
- */
-function checkServerStatus(url) {
-
-        var obj = executeService("isURLAvailable", [{"name":"server", "value":url}, {"name":"timeout", "value":"5000"}], null, true);
-    return obj.result.toString() == "true";
-}
-
-/**
- * liefert die Einstellungen
- * wenn noch keine Einstellungen gesetzt sind, dann sucht die Funktion einen passenden URL-Parameter
- * und trägt diesen dann ein. Ist dieser auch nicht vorhanden, dann wird <null> zurück geliefert.
- * @param key    Schlüssel der Einstellung
- * @returns {*}  Den Wert der Einstellung
- */
-function getSettings(key) {
-    var ret;
-    if (!exist(settings) || settings.settings.filter(function (o) {
-        return o.key.indexOf(key) >= 0;
-    }).length == 0) {
-        var urlPar = getUrlParam(key);
-        if (urlPar == null)
-            return null;
-        else {
-            if (!settings)
-                settings = {settings:[]};
-            settings.settings.push({"key": key, "value": urlPar});
-        }
-    }
-    return settings.settings.filter(function (o) {
-        return o.key.indexOf(key) >= 0;
-    })[0].value;
-}
-
 /**
  * zeigt die Progressbar
  * wird momentan nicht verwendet
@@ -546,28 +508,6 @@ function fillMessageBox(reverse) {
 }
 
 /**
- * gibt einen aktuellen Timestamp zurück "m/d/yy h:MM:ss TT"
- * @param withDate mit Datum
- * @type {Date}
- */
-function timeStamp(withDate) {
-    var returnString = "";
-    var now = new Date();
-    var time = [ now.getHours(), now.getMinutes(), now.getSeconds() ];
-    for ( var i = 1; i < 3; i++ ) {
-        if ( time[i] < 10 ) {
-            time[i] = "0" + time[i];
-        }
-    }
-    if (withDate){
-        var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
-        returnString = returnString + date.join(".") + " ";
-    }
-    returnString = returnString +   time.join(":");
-    return returnString;
-}
-
-/**
  * löscht den Inhalt des Meldungsfensters
  */
 function clearMessageBox(){
@@ -1031,17 +971,17 @@ function getScript() {
     }
 }
 
-
-
 /**
  * öffnet den Editor für das Verteilungsskript
  */
 function openScript() {
     try {
         panelSizeReminder = verteilungLayout.state.west.size;
-        verteilungLayout.sizePane("west", "95%");
+        // 84% sind das Maximum, danach ist das Fenster mit den Regel ganz verschwunden und beim Schliessen
+        // des Scriptes die Darstellung der Regeln kaputt
+        verteilungLayout.sizePane("west", "84%");
         oldContent = textEditor.getSession().getValue();
-        var content, json;
+        var content, json, script;
         var read = false;
         if (REC.exist(modifiedScript) && modifiedScript.length > 0) {
             content = modifiedScript;
@@ -1060,19 +1000,16 @@ function openScript() {
             }
             else {
                 // SkriptID ist nicht vorhanden. Bei Applet kann das dann lokal geöffnet werden
-
                 if (isLocal())
-                    script = openFile('src/main/javascript/recognition.js');
+                    script = openFile('src/main/webapp/resources/js/recognition.js');
                 else {
-                    // wir laufen im Servlet und versuchen das Skript vom Server zu bekommen .
-                    // das dürfte eigentlich nie passieren, denn das Skript sollte beim Aufbau
-                    // des Alfresco Environment schon auf den Alfresco Server geladen worden sein.
+                    // wir laufen im Servlet und versuchen das Skript vom Server zu bekommen weil kein Alfresco Server da ist.
                     script = $.ajax({
-                        url: createPathToFile("src/main/javascript/recognition.js"),
+                        url: "resources/js/recognition.js",
                         async: false
                     }).responseText;
                 }
-                if (exist(script) && script.length > 0) {
+                if (script && script.length > 0) {
                     content = script;
                     read = true;
                     REC.log(INFORMATIONAL, "Script erfolgreich gelesen!");
@@ -1113,8 +1050,6 @@ function activateScriptToContext() {
         errorHandler(e);
     }
 }
-
-
 
 /**
  * sendet das Script zum Server
@@ -1181,9 +1116,6 @@ function closeScript() {
         errorHandler(e);
     }
 }
-
-
-
 
 var Range = require("ace/range").Range;
 var markers = [];
