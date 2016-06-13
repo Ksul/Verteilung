@@ -520,7 +520,7 @@ function loadAlfrescoTable() {
             "data": [],
             "scrollX": "100%",
             "scrollXInner": "100%",
-            "autoWidth": true,
+            "autoWidth": false,
             "deferRender": true,
             "processing": true,
             "lengthChange": false,
