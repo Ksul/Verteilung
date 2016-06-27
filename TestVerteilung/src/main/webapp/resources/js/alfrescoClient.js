@@ -413,16 +413,19 @@ function loadLayout() {
             west: {
                 paneSelector: "#verteilungWest",
                 size: .4,
-                fxSettings_open: {easing: "easeOutBounce"},
+                fxSettings_open: {
+                    easing: "easeOutBounce"
+                },
                 closable: true,
                 resizable: true,
                 slidable: true,
                 onresize: function () {
-                    textEditor.resize();
-                    $('div.dataTables_scrollBody').css('height', calcDataTableHeight());
-                    tabelle.fnSettings()._iDisplayLength = Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1);
-                    tabelle.fnDraw();
-                    tabelle.fnAdjustColumnSizing();
+                    try {
+                        textEditor.resize();
+                        calculateTableHeight("verteilungWest", tabelle, "dtable", "tabelle", "verteilungTabelleHeader", "verteilungTableFooter");
+                    } catch (e){
+                        errorHandler(e);
+                    }
                 }
             },
             center: {
@@ -1251,15 +1254,14 @@ function loadVerteilungTable() {
         $('#dtable').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="tabelle"></table>');
         tabelle = $('#tabelle').DataTable({
             "jQueryUI": true,
-            "pagingType": "full_numbers",
+            "pagingType": "paging_with_jqui_icons",
             "data": [],
             "scrollX": "100%",
             "scrollXInner": "100%",
-            "scrollY": calcDataTableHeight(),
             "autoWidth": true,
             "lengthChange": false,
             "searching": false,
-            "pageLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
+            //"pageLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
             "columns": [
                 {
                     "class": 'details-control',
@@ -1301,8 +1303,9 @@ function loadVerteilungTable() {
                 },
                 {
                     "targets": [3],
-                    "render": function(data,types, row) { 
-                        return imageFieldFormatter(data, types, row).outerHTML;},
+                    "render": function (data, types, row) {
+                        return imageFieldFormatter(data, types, row).outerHTML;
+                    },
                     "sortable": false
                 },
                 {
@@ -1311,7 +1314,16 @@ function loadVerteilungTable() {
                 }
             ],
             "language": {
-                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_"
+                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_ \f",
+                "emptyTable": "Keine Ergebnisse gefunden",
+                "zeroRecords": "Keine Einträge!",
+                "infoEmpty": "",
+                "paginate": {
+                    "first": "Erste ",
+                    "last": "Letzte ",
+                    "next": "Nächste ",
+                    "previous": "Vorherige "
+                }
             }
         });
         // Add event listener for opening and closing details
@@ -1323,25 +1335,19 @@ function loadVerteilungTable() {
                 // This row is already open - close it
                 row.child.hide();
                 tr.removeClass('shown');
+                calculateTableHeight("verteilungWest", tabelle, "dtable", "tabelle", "verteilungTabelleHeader", "verteilungTableFooter");
             }
             else {
                 // Open this row
                 row.child(formatVerteilungTabelleDetailRow(row.data())).show();
                 tr.addClass('shown');
+                calculateTableHeight("verteilungWest", tabelle, "dtable", "tabelle", "verteilungTabelleHeader", "verteilungTableFooter");
+
             }
         });
     } catch (e) {
         errorHandler(e);
     }
-}
-
-/**
- * berechnet die Höhe für die Tabelle
- * @returns {string}
- */
-function calcDataTableHeight()  {
-    var h = verteilungLayout.state.west.innerHeight -68;
-    return h + 'px';
 }
 
 /**
@@ -3275,7 +3281,7 @@ function start() {
         jQuery("#breadcrumb").jBreadCrumb();
         loadLayout();
         document.getElementById('filesinput').addEventListener('change', readMultiFile, false);
-
+        REC.init();
         propsEditor = ace.edit("inProps");
         propsEditor.setReadOnly(true);
         propsEditor.renderer.setShowGutter(false);

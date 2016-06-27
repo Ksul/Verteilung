@@ -212,7 +212,8 @@ function loadMultiText(content, txt, name, typ,  notDeleteable, container) {
     try {
         multiMode = true;
         var dat = [];
-        REC.currentDocument.setContent(txt);
+        REC.currentDocument.properties.content.write(txt);
+        REC.currentDocument.name = name;
         REC.testRules(rulesEditor.getSession().getValue());
         dat["text"] = txt;
         dat["file"] = name;
