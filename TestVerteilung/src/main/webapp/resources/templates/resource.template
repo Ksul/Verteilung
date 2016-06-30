@@ -37,6 +37,7 @@ resources/js/dataTables/dataTables${js.ending}
 resources/js/dataTables/dataTables.paging_with_jqui_icons${js.ending}
 resources/js/moment/moment-with-locales${js.ending}
 resources/js/bootstrap/bootstrap-datetimepicker${js.ending}
+resources/js/bootstrap/typeahead${js.ending}
 resources/js/dataTables/datetime-moment${js.ending}
 resources/js/jquery/jquery.jeditable${js.ending}
 resources/js/dataTables/dataTables.rowShow${js.ending}

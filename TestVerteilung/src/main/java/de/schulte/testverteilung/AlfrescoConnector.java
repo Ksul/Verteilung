@@ -1,8 +1,6 @@
 package de.schulte.testverteilung;
 
 import org.alfresco.cmis.client.AlfrescoAspects;
-import org.alfresco.cmis.client.AlfrescoDocument;
-import org.alfresco.cmis.client.AlfrescoFolder;
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.Ace;
@@ -229,19 +227,24 @@ public class AlfrescoConnector {
      * sucht Dokumente
      * @param queryString           die Abfragequery
      * @return                      eine Liste mit CmisObjekten
+     * //TODO Das hier unterstüzt keine Aliase ala SELECT * from cmis:document AS D!!!
      */
-    public List<CmisObject>  findDocument(String queryString) throws VerteilungException {
+    public List<CmisObject> findDocument(String queryString) throws VerteilungException {
         List<CmisObject> erg = new ArrayList<CmisObject>();
 
         ItemIterable<QueryResult> results =  getSession().query(queryString, false);
         for (Iterator<QueryResult> iterator = results.iterator(); iterator.hasNext(); ) {
             QueryResult qResult = iterator.next();
             String objectId = qResult.getPropertyValueByQueryName("cmis:objectId");
-            erg.add(getSession().getObject(getSession().createObjectId(objectId)));
+            if(objectId != null && objectId.length() != 0)
+                erg.add(getSession().getObject(getSession().createObjectId(objectId)));
+            else
+                logger.warning("Found object without Id!");
         }
         logger.fine("Start Search with " + queryString + " Found " + erg.size() + " Entries!");
         return erg;
     }
+
 
     /**
      * liefert den Inhalt eines Dokumentes

@@ -56,6 +56,7 @@
         var globalLayout;
         var alfrescoTicket;
         var anOpen = [];
+        var titleValues;
 
         window.onload = function() {
 
@@ -379,13 +380,14 @@
             <li id="tabArchiv" ><a href="#tab1">Archiv</a></li>
             <li id="tabSuche" ><a href="#tab2">Suche</a></li>
             <li id="tabVerteilung"><a  href="#tab3">Verteilung</a></li>
+        </ul>
             <div>
                 <input style="float:right" onclick="startSettingsDialog();"
                        name="settings" id="settings" type="submit" class="settings"
                        title="Open Settings" value=""/>
                 <div style="float:right" id="switcher"  class="themes" title="Farbschema"></div>
             </div>
-        </ul>
+
         <!--Tab Panels-->
         <div id="tabPanels" class="container ui-state-active">
             <!--Tab Archiv-->

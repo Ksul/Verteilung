@@ -346,6 +346,38 @@ public class VerteilungServices {
     }
 
     /**
+     * liefert eine unique Liste der vorhandenen eingetragenen Werte eines Property feldes
+     * @param field        der Feldname, z.B. cm:title
+     * @param treePosition die Id der Baumstruktur, unter der gesucht werden soll. Falls leer, dann wird alles
+     *                     durchsucht.
+     * @return obj         ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                             false   ein Fehler ist aufgetreten
+     *                                                    result           eine Liste mit Strings
+     */
+    public JSONObject getUniquePropertieValues(String field, String treePosition)  {
+
+        JSONObject obj = new JSONObject();
+        ArrayList<String> erg = new ArrayList<>();
+
+        try {
+            String cmisQuery = "SELECT * FROM cmis:document";
+            if (treePosition != null && treePosition.length() > 0)
+                cmisQuery += " WHERE IN_TREE('" + treePosition + "')";
+            for (CmisObject cmisObject : con.findDocument(cmisQuery)) {
+                String result = cmisObject.getPropertyValue(field);
+                if (result != null && result.length() > 0 && !erg.contains(result))
+                    erg.add(result);
+
+            }
+            obj.put("success", true);
+            obj.put("result", new JSONArray(erg));
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
      * liefert den Inhalt eines Dokumentes als String
      * @param  documentId            die Document Id als String
      * @param  extract               wenn gesetzt, wird der Inhalt als lesbarer String zuürckgegeben

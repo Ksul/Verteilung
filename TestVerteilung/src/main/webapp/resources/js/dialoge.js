@@ -1,8 +1,9 @@
 
 /**
  * Öffnet den Einstellungsdialog für die Alfresco Server Settings
+ * @param modal    boolean, der festlegt ob das Fenster modal sein soll
  */
-function startSettingsDialog() {
+function startSettingsDialog(modal) {
     try {
 
         var data =  {
@@ -160,7 +161,7 @@ function startSettingsDialog() {
                 }
             }
         };
-        startDialog(dialogSettings, 480);
+        startDialog(dialogSettings, 480, modal);
     } catch (e) {
         errorHandler(e);
     }
@@ -171,17 +172,16 @@ function startSettingsDialog() {
  * startet den Detaildialog für Dokumente
  * @param data     die Daten welche bearbeitet werden sollen
  * @param modus    der Modus web-edit    Dokument editieren
+ * @param modal    boolean, der festlegt ob das Fenster modal sein soll
  */
-function startDocumentDialog(data, modus) {
+function startDocumentDialog(data, modus, modal) {
 
     try {
         // Konversion
-        if (exist(data.documentDate)) {
-            if (data.documentDate != "null")
-                data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data.documentDate)));
-            else
-                data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date());
-        }
+        if (data.documentDate)
+            data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date(Number(data.documentDate)));
+        else
+            data.documentDateDisplay = $.datepicker.formatDate("dd.mm.yy", new Date());
         if (data.amount)
             data.amountDisplay = $.format.number(data.amount, '#,##0.00');
         else
@@ -283,8 +283,19 @@ function startDocumentDialog(data, modus) {
                 },
                 "fields": {
                     "title": {
-                        "size": 30
-
+                        "size": 30,
+                        "typeahead": {
+                            "config": {
+                                "autoselect": true,
+                                "highlight": true,
+                                "hint": true,
+                                "minLength": 3
+                            },
+                            "datasets": {
+                                "type": "local",
+                                "source": titleValues
+                            }
+                        }
                     },
                     "name": {
                         "size": 30,
@@ -423,7 +434,7 @@ function startDocumentDialog(data, modus) {
             }
         };
         var additionalButton =[{"id":".alpaca-form-button-delete", "function": deleteDocument }];
-        startDialog(dialogDocumentDetailsSettings, 450, additionalButton);
+        startDialog(dialogDocumentDetailsSettings, 450, modal, additionalButton);
     } catch (e) {
         errorHandler(e);
     }
@@ -435,8 +446,9 @@ function startDocumentDialog(data, modus) {
  * @param modus    der Modus web-create     neuen Ordner erzeugen
  *                           web-edit       Ordner editieren
  *                           web-display    Ordner löschen
+ * @param modal    boolean, der festlegt ob das Fenster modal sein soll                          
  */
-function startFolderDialog(data, modus) {
+function startFolderDialog(data, modus, modal) {
     
     try {
 
@@ -578,7 +590,7 @@ function startFolderDialog(data, modus) {
             }
         };
         var additionalButton =[{"id":".alpaca-form-button-delete", "function": deleteFolder }];
-        startDialog(folderDialogSettings, 460, additionalButton);
+        startDialog(folderDialogSettings, 460, modal, additionalButton);
     } catch (e) {
         errorHandler(e);
     }
@@ -673,16 +685,17 @@ function closeDialog() {
  * startet den eigentlichen Dialog
  * @param dialogSettings            die Settings für den Dialog
  * @param width                     die Weite des Fensters
+ * @param modal                     boolean der festlegt, ob das Fenster modal sein soll
  * @param callbacks                 Array mit Callbacks für weitere Buttons
  */
-function startDialog(dialogSettings, width, callbacks) {
+function startDialog(dialogSettings, width, modal, callbacks) {
 
     $("<div>", {id: "dialogBox", class: "grid gridpad"}).appendTo("body");
     $('#dialogBox').alpaca(dialogSettings).dialog({
         "autoOpen": true,
         "width": width,
         "height": 'auto',
-        "modal": true,
+        "modal": modal,
         "position": {
             "my": "top",
             "at": "center center-20%",

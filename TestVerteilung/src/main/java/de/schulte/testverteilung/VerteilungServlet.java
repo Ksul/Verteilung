@@ -34,6 +34,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_DOCUMENTTEXT = "documentText";
     public static final String PARAMETER_FILEPATH = "filePath";
     public static final String PARAMETER_FILENAME = "fileName";
+    public static final String PARAMETER_FIELDNAME = "fieldName";
     public static final String PARAMETER_CMISQUERY = "cmisQuery";
     public static final String PARAMETER_MIMETYPE = "mimeType";
     public static final String PARAMETER_SERVER = "server";
@@ -82,6 +83,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_GETTICKETWITHUSERANDPASSWORD = "getTicketWithUserAndPassword";
     public static final String FUNCTION_GETCOMMENTS = "getComments";
     public static final String FUNCTION_ADDCOMMENT = "addComment";
+    public static final String FUNCTION_GETUNIQUEPROPERTIESVALUES = "getUniquePropertieValues";
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -199,6 +201,8 @@ public class VerteilungServlet extends HttpServlet {
                     obj = getNodeById(getURLParameter(req, PARAMETER_DOCUMENTID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
                     obj = findDocument(getURLParameter(req, PARAMETER_CMISQUERY, true));
+                } else if (value.equalsIgnoreCase(FUNCTION_GETUNIQUEPROPERTIESVALUES)) {
+                    obj = getUniquePropertieValues(getURLParameter(req, PARAMETER_FIELDNAME, true), getURLParameter(req, PARAMETER_DOCUMENTID, false));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPLOADDOCUMENT)) {
                     obj = uploadDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true), getURLParameter(req, PARAMETER_VERSIONSTATE, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_DELETEDOCUMENT)) {
@@ -546,13 +550,27 @@ public class VerteilungServlet extends HttpServlet {
     }
 
     /**
-     * liefert die Dokumente eines Alfresco Folders als JSON Objekte
-     * @param filePath     der Pfad, der geliefert werden soll (als NodeId)
-     * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
-     *                                                             false    ein Fehler ist aufgetreten
-     *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
+     * liefert eine unique Liste der vorhandenen eingetragenen Werte eines Property feldes
+     * @param fieldName    der Feldname, z.B. cm:title
+     * @param objectId     die Id der Baumstruktur, unter der gesucht werden soll. Falls leer, dann wird alles
+     *                     durchsucht.
+     * @return obj         ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                             false   ein Fehler ist aufgetreten
+     *                                                    result           eine Liste mit Strings
      */
+    protected JSONObject getUniquePropertieValues(String fieldName, String objectId) throws VerteilungException {
+        return services.getUniquePropertieValues(fieldName, objectId);
+    }
+
+
+        /**
+         * liefert die Dokumente eines Alfresco Folders als JSON Objekte
+         * @param filePath     der Pfad, der geliefert werden soll (als NodeId)
+         * @param listFolder   was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
+         * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+         *                                                             false    ein Fehler ist aufgetreten
+         *                                                    result            der Inhalt des Verzeichnisses als JSON Objekte
+         */
     protected JSONObject listFolder(String filePath,
                                           String listFolder) throws VerteilungException {
 

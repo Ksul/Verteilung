@@ -111,6 +111,15 @@ public class VerteilungAppletTest extends AlfrescoTest {
     }
 
     @Test
+    public void testGetUniquePropertieValues() throws Exception {
+        JSONObject obj = applet.getUniquePropertieValues("cm:title", applet.getNodeId("/Archiv/Dokumente").getString("result")) ;
+        assertThat(obj, Matchers.notNullValue());
+        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
+        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+    }
+
+    @Test
     public void testGetDocumentContent() throws Exception {
         JSONObject obj = applet.getDocumentContent("abcde", "false");
         assertThat(obj, Matchers.notNullValue());

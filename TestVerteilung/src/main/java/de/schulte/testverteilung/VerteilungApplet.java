@@ -392,6 +392,31 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
+     * liefert eine unique Liste der vorhandenen eingetragenen Werte eines Property feldes
+     * @param fieldName    der Feldname, z.B. cm:title
+     * @param objectId     die Id der Baumstruktur, unter der gesucht werden soll. Falls leer, dann wird alles
+     *                     durchsucht.
+     * @return obj         ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                             false   ein Fehler ist aufgetreten
+     *                                                    result           eine Liste mit Strings
+     */
+    public JSONObject getUniquePropertieValues(final String fieldName,
+                                               final String objectId) {
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws JSONException {
+                    return services.getUniquePropertieValues(fieldName, objectId);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
      * liefert den Inhalt eines Dokumentes. Wenn es sich um eine PDF Dokument handelt, dann wird
      * der Text extrahiert.
      * @param docId                 die Id des Documentes

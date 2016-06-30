@@ -19,6 +19,7 @@
     <properties>
         <de.lvm.appName>testverteilung</de.lvm.appName>
         <jasmine.version>2.1</jasmine.version>
+        <opencmis.version>0.14.0</opencmis.version>
         <js.source.dir>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}resources${file.separator}js</js.source.dir>
         <css.source.dir>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}resources${file.separator}css</css.source.dir>
     </properties>
@@ -339,27 +340,27 @@
         <dependency>
             <groupId>org.apache.chemistry.opencmis</groupId>
             <artifactId>chemistry-opencmis-client-api</artifactId>
-            <version>0.13.0</version>
+            <version>${opencmis.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.chemistry.opencmis</groupId>
             <artifactId>chemistry-opencmis-client-bindings</artifactId>
-            <version>0.13.0</version>
+            <version>${opencmis.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.chemistry.opencmis</groupId>
             <artifactId>chemistry-opencmis-client-impl</artifactId>
-            <version>0.13.0</version>
+            <version>${opencmis.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.chemistry.opencmis</groupId>
             <artifactId>chemistry-opencmis-commons-api</artifactId>
-            <version>0.13.0</version>
+            <version>${opencmis.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.chemistry.opencmis</groupId>
             <artifactId>chemistry-opencmis-commons-impl</artifactId>
-            <version>0.13.0</version>
+            <version>${opencmis.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>

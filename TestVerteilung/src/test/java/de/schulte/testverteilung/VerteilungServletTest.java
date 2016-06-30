@@ -299,6 +299,26 @@ public class VerteilungServletTest extends AlfrescoTest {
     }
 
     @Test
+    public void testGetUniquePropertieValues() throws Exception {
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Dokumente");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertThat(sr, Matchers.notNullValue());
+        JSONObject obj = new JSONObject(sr.toString());
+        String archivId = obj.getString("result");
+        sr.getBuffer().delete(0, 9999);
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETUNIQUEPROPERTIESVALUES);
+        when(request.getParameter(VerteilungServlet.PARAMETER_FIELDNAME)).thenReturn("cm:title");
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(archivId);
+        servlet.doPost(request, response);
+        writer.flush(); // it may not have been flushed yet...
+        assertThat(sr, Matchers.notNullValue());
+        obj = new JSONObject(sr.toString());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+    }
+
+    @Test
     public void testGetDocumentContent() throws Exception {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Datenverzeichnis/Skripte/doc.xml");
