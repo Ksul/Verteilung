@@ -178,8 +178,8 @@ public class VerteilungServicesTest extends AlfrescoTest {
     }
 
     @Test
-    public void testGetUniquePropertieValues() throws Exception {
-        JSONObject obj = services.getUniquePropertieValues("cm:title", services.getNodeId("/Archiv/Dokumente").getString("result"));
+    public void testQuery() throws Exception {
+        JSONObject obj = services.query("SELECT cmis:objectId, cmis:name from cmis:document where cmis:name='backup.js.sample'");
         assertThat(obj, notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("result"), notNullValue());

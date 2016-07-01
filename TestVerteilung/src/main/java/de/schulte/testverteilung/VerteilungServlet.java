@@ -83,7 +83,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_GETTICKETWITHUSERANDPASSWORD = "getTicketWithUserAndPassword";
     public static final String FUNCTION_GETCOMMENTS = "getComments";
     public static final String FUNCTION_ADDCOMMENT = "addComment";
-    public static final String FUNCTION_GETUNIQUEPROPERTIESVALUES = "getUniquePropertieValues";
+    public static final String FUNCTION_QUERY = "query";
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -201,8 +201,8 @@ public class VerteilungServlet extends HttpServlet {
                     obj = getNodeById(getURLParameter(req, PARAMETER_DOCUMENTID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
                     obj = findDocument(getURLParameter(req, PARAMETER_CMISQUERY, true));
-                } else if (value.equalsIgnoreCase(FUNCTION_GETUNIQUEPROPERTIESVALUES)) {
-                    obj = getUniquePropertieValues(getURLParameter(req, PARAMETER_FIELDNAME, true), getURLParameter(req, PARAMETER_DOCUMENTID, false));
+                } else if (value.equalsIgnoreCase(FUNCTION_QUERY)) {
+                    obj = query(getURLParameter(req, PARAMETER_CMISQUERY, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPLOADDOCUMENT)) {
                     obj = uploadDocument(getURLParameter(req, PARAMETER_DOCUMENTID, true), getURLParameter(req, PARAMETER_FILENAME, true), getURLParameter(req, PARAMETER_VERSIONSTATE, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_DELETEDOCUMENT)) {
@@ -550,16 +550,14 @@ public class VerteilungServlet extends HttpServlet {
     }
 
     /**
-     * liefert eine unique Liste der vorhandenen eingetragenen Werte eines Property feldes
-     * @param fieldName    der Feldname, z.B. cm:title
-     * @param objectId     die Id der Baumstruktur, unter der gesucht werden soll. Falls leer, dann wird alles
-     *                     durchsucht.
+     * führt eien Query durch und liefert die Ergebnisse als JSON Objekte zurück
+     * @param cmisQuery    die Query als String
      * @return obj         ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                             false   ein Fehler ist aufgetreten
      *                                                    result           eine Liste mit Strings
      */
-    protected JSONObject getUniquePropertieValues(String fieldName, String objectId) throws VerteilungException {
-        return services.getUniquePropertieValues(fieldName, objectId);
+    protected JSONObject query(String cmisQuery) throws VerteilungException {
+        return services.query(cmisQuery);
     }
 
 

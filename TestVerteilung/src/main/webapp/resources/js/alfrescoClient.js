@@ -3207,12 +3207,15 @@ function checkAndBuidAlfrescoEnvironment() {
         }
         
         if (erg.success) {
-            var json = executeService("getUniquePropertieValues", [
-                {"name": "fieldName", "value": "cm:title"},
+            var json = executeService("query", [
+                {"name": "cmisQuery", "value": "SELECT T.cm:title FROM cmis:document AS D  JOIN cm:titled AS T ON D.cmis:objectId = T.cmis:objectId WHERE IN_TREE(D, '" + documentFolderId + "')"},
                 {"name": "documentId", "value": documentFolderId}
             ], null, true);
             if (json.success) {
-                titleValues = json.result;
+                for (var i = 0; i < json.result.length; ++i) {
+                    if ($.inArray(json.result[i], titleValues) == -1)
+                        titleValues.push(json.result[i]);
+                }
             }
             tabLayout.tabs({
                 disabled: [],

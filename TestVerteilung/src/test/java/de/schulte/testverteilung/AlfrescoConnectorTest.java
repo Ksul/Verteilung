@@ -4,6 +4,7 @@ import org.alfresco.cmis.client.AlfrescoAspects;
 import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
+import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.commons.io.IOUtils;
@@ -99,6 +100,14 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         assertThat(erg.size(), Matchers.is(1));
         Document doc = (Document) erg.get(0);
         assertThat(doc.getName(), Matchers.equalTo("doc.xml"));
+    }
+
+    @Test
+    public void testQuery() throws Exception {
+        List<List<PropertyData<?>>> erg = con.query("SELECT cmis:name from cmis:document where cmis:name='doc.xml'");
+        assertThat(erg, Matchers.notNullValue());
+        assertThat(erg.size(), Matchers.is(1));
+        assertThat((String) erg.get(0).get(0).getFirstValue(), Matchers.equalTo("doc.xml"));
     }
 
     @Test

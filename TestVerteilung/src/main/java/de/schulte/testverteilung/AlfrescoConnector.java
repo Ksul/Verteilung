@@ -5,6 +5,7 @@ import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.Ace;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDateTimeDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
@@ -245,6 +246,22 @@ public class AlfrescoConnector {
         return erg;
     }
 
+    /**
+     * führt eine Query durch
+     * @param query   der Select als String
+     * @return        eine Liste mit den jeweiligen Properties
+     * @throws VerteilungException
+     */
+    public List<List<PropertyData<?>>> query(String query) throws VerteilungException{
+
+        List<List<PropertyData<?>>> erg = new ArrayList<>();
+        ItemIterable<QueryResult> results =  getSession().query(query, false);
+        for (Iterator<QueryResult> iterator = results.iterator(); iterator.hasNext(); ) {
+            QueryResult qResult = iterator.next();
+            erg.add(qResult.getProperties());
+        }
+        return erg;
+    }
 
     /**
      * liefert den Inhalt eines Dokumentes

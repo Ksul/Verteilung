@@ -392,22 +392,19 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
-     * liefert eine unique Liste der vorhandenen eingetragenen Werte eines Property feldes
-     * @param fieldName    der Feldname, z.B. cm:title
-     * @param objectId     die Id der Baumstruktur, unter der gesucht werden soll. Falls leer, dann wird alles
-     *                     durchsucht.
+     * führt eien Query durch und liefert die Ergebnisse als JSON Objecte zurück
+     * @param cmisQuery    die Query als String
      * @return obj         ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                             false   ein Fehler ist aufgetreten
      *                                                    result           eine Liste mit Strings
      */
-    public JSONObject getUniquePropertieValues(final String fieldName,
-                                               final String objectId) {
+    public JSONObject query(final String cmisQuery) {
         JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws JSONException {
-                    return services.getUniquePropertieValues(fieldName, objectId);
+                    return services.query(cmisQuery);
                 }
             });
         } catch (PrivilegedActionException e) {

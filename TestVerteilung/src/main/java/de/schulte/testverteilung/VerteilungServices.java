@@ -1,6 +1,7 @@
 package de.schulte.testverteilung;
 
 import org.apache.chemistry.opencmis.client.api.*;
+import org.apache.chemistry.opencmis.commons.data.*;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
+import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -292,7 +294,7 @@ public class VerteilungServices {
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", true);
-            obj.put("result", convertPropertiesToJSON(con.getNode(path)));
+            obj.put("result", convertCmisObjectToJSON(con.getNode(path)));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -311,7 +313,7 @@ public class VerteilungServices {
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", true);
-            obj.put("result", convertPropertiesToJSON(con.getNodeById(nodeId)));
+            obj.put("result", convertCmisObjectToJSON(con.getNodeById(nodeId)));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -333,7 +335,7 @@ public class VerteilungServices {
         JSONArray list = new JSONArray();
         try {
             for (CmisObject cmisObject : con.findDocument(cmisQuery)) {
-                o = convertPropertiesToJSON(cmisObject);
+                o = convertCmisObjectToJSON(cmisObject);
                 list.put(o);
 
             }
@@ -346,31 +348,32 @@ public class VerteilungServices {
     }
 
     /**
-     * liefert eine unique Liste der vorhandenen eingetragenen Werte eines Property feldes
-     * @param field        der Feldname, z.B. cm:title
-     * @param treePosition die Id der Baumstruktur, unter der gesucht werden soll. Falls leer, dann wird alles
-     *                     durchsucht.
+     * führt eien Query durch und liefert die Ergebnisse als JSON Objekte zurück
+     * @param query        der String mit der Query
      * @return obj         ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                             false   ein Fehler ist aufgetreten
-     *                                                    result           eine Liste mit Strings
+     *                                                    result           eine Liste mit JSON Objekten
      */
-    public JSONObject getUniquePropertieValues(String field, String treePosition)  {
+    public JSONObject query(String query) {
 
         JSONObject obj = new JSONObject();
-        ArrayList<String> erg = new ArrayList<>();
-
+        JSONArray list = new JSONArray();
         try {
-            String cmisQuery = "SELECT * FROM cmis:document";
-            if (treePosition != null && treePosition.length() > 0)
-                cmisQuery += " WHERE IN_TREE('" + treePosition + "')";
-            for (CmisObject cmisObject : con.findDocument(cmisQuery)) {
-                String result = cmisObject.getPropertyValue(field);
-                if (result != null && result.length() > 0 && !erg.contains(result))
-                    erg.add(result);
+            for (List<PropertyData<?>> propData : con.query(query)) {
 
+                for (PropertyData prop : propData) {
+                    JSONObject o = new JSONObject();
+                    Object propObj = prop.getFirstValue();
+                    if (propObj != null) {
+                        o.put(prop.getLocalName(), propObj);
+                        list.put(o);
+                    }
+
+                }
+                obj.put("success", true);
+                obj.put("result", list);
             }
-            obj.put("success", true);
-            obj.put("result", new JSONArray(erg));
+
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -513,7 +516,7 @@ public class VerteilungServices {
                 if (document != null) {
                     clearCache(document);
                     obj.put("success", true);
-                    obj.put("result", convertPropertiesToJSON(document).toString());
+                    obj.put("result", convertCmisObjectToJSON(document).toString());
                 } else {
                     obj.put("success", false);
                     obj.put("result", "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!");
@@ -561,7 +564,7 @@ public class VerteilungServices {
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
                 clearCache(document);
                 obj.put("success", true);
-                obj.put("result", convertPropertiesToJSON(document).toString());
+                obj.put("result", convertCmisObjectToJSON(document).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
@@ -600,7 +603,7 @@ public class VerteilungServices {
                 clearCache(cmisObject);
 
                 obj.put("success", true);
-                obj.put("result", convertPropertiesToJSON(cmisObject).toString());
+                obj.put("result", convertCmisObjectToJSON(cmisObject).toString());
             } else {
                 obj.put("success", false);
                 obj.put("result","Ein Document mit der Id " + documentId + " ist nicht vorhanden!");
@@ -639,8 +642,8 @@ public class VerteilungServices {
                         obj.put("success", true);
                         obj.put("result", convertObjectToJson(newFolderId, fileableCmisObject).toString());
                         // Quell und Zielordner zurückgeben
-                        obj.put("source", convertPropertiesToJSON(oldFolder).toString());
-                        obj.put("target", convertPropertiesToJSON(newFolder).toString());
+                        obj.put("source", convertCmisObjectToJSON(oldFolder).toString());
+                        obj.put("target", convertCmisObjectToJSON(newFolder).toString());
                     } else {
                         obj.put("success", false);
                         obj.put("result", "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
@@ -691,7 +694,7 @@ public class VerteilungServices {
                 if (folder != null ) {
                     clearCache(folder);
                     obj.put("success", true);
-                    JSONObject o = convertPropertiesToJSON(folder);
+                    JSONObject o = convertCmisObjectToJSON(folder);
                     // neu definierter Folder kann keine Children haben
                     o.put("hasChildren", false);
                     o.put("hasChildFolder", false);
@@ -1204,29 +1207,10 @@ public class VerteilungServices {
      * @return obj1          das Object als JSON Objekt
      * @throws JSONException
      */
-    private JSONObject convertPropertiesToJSON(CmisObject cmisObject) throws JSONException {
+    private JSONObject convertCmisObjectToJSON(CmisObject cmisObject) throws JSONException {
 
         List<Property<?>> properties = cmisObject.getProperties();
-        JSONObject obj1 = new JSONObject();
-        for (Property prop : properties) {
-            // falls Datumswert dann konvertieren
-            if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null) {
-                obj1.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
-            } else if (prop.getDefinition().getPropertyType().equals(PropertyType.DECIMAL) && prop.getValue() != null) {
-                obj1.put(prop.getLocalName(), (BigDecimal) prop.getValue());
-            } else if (prop.getDefinition().getPropertyType().equals(PropertyType.BOOLEAN) && prop.getValue() != null) {
-                obj1.put(prop.getLocalName(), (Boolean) prop.getValue());
-            }else if (prop.getLocalName().equals("objectId")) {
-                String id = prop.getValueAsString();
-                obj1.put(prop.getLocalName(), id);
-                id = VerteilungHelper.getRealId(id);
-                // die modifizierte ObjectId diese ist auch eindeutig und kann im DOM benutzt werden.
-                obj1.put("objectID", id);
-                // Row Id für Datatables
-                obj1.put("DT_RowId", id);
-            } else
-                obj1.put(prop.getLocalName(), prop.getValueAsString());
-        }
+        JSONObject obj1 = convPropertiesToJSON(properties);
 
         // Parents suchen
         List<Folder> parents = ((FileableCmisObject) cmisObject).getParents();
@@ -1241,6 +1225,35 @@ public class VerteilungServices {
         return obj1;
     }
 
+    /**
+     *
+     * @param properties
+     * @return
+     * @throws JSONException
+     */
+    private JSONObject convPropertiesToJSON(List<Property<?>> properties) throws JSONException {
+        JSONObject obj = new JSONObject();
+        for (Property prop : properties) {
+            // falls Datumswert dann konvertieren
+            if (prop.getDefinition().getPropertyType().equals(PropertyType.DATETIME) && prop.getValue() != null) {
+                obj.put(prop.getLocalName(), ((GregorianCalendar) prop.getValue()).getTime().getTime());
+            } else if (prop.getDefinition().getPropertyType().equals(PropertyType.DECIMAL) && prop.getValue() != null) {
+                obj.put(prop.getLocalName(), (BigDecimal) prop.getValue());
+            } else if (prop.getDefinition().getPropertyType().equals(PropertyType.BOOLEAN) && prop.getValue() != null) {
+                obj.put(prop.getLocalName(), (Boolean) prop.getValue());
+            }else if (prop.getLocalName().equals("objectId")) {
+                String id = prop.getValueAsString();
+                obj.put(prop.getLocalName(), id);
+                id = VerteilungHelper.getRealId(id);
+                // die modifizierte ObjectId diese ist auch eindeutig und kann im DOM benutzt werden.
+                obj.put("objectID", id);
+                // Row Id für Datatables
+                obj.put("DT_RowId", id);
+            } else
+                obj.put(prop.getLocalName(), prop.getValueAsString());
+        }
+        return obj;
+    }
 
 
     /**
@@ -1254,7 +1267,7 @@ public class VerteilungServices {
     private JSONObject convertObjectToJson(String parentId,
                                            CmisObject cmisObject) throws JSONException, VerteilungException {
 
-        JSONObject o = convertPropertiesToJSON(cmisObject);
+        JSONObject o = convertCmisObjectToJSON(cmisObject);
         // prüfen, ob Children vorhanden sind
         if (cmisObject instanceof Folder) {
             ItemIterable<CmisObject> children = con.listFolder(cmisObject.getId());
