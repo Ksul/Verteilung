@@ -219,6 +219,8 @@
          * Applet aus dem internenen Spreicher besorgt werden. Bislang funktioniert dieses Verfahren aber nur mit einem
          * Parameter.
          * @param service           der Name des Service
+         * @param done              Funktion, die ausgeführt werden soll, wenn der Aufruf asynchron erfolgen soll. Funktioniert
+         *                          nur beim Servlet
          * @param params            die Parameter als JSON Objekt
          *                          name:  der Name des Parameters ( wird nur für das Servlet gebraucht)
          *                          value: der Inhalt des Paramaters
@@ -231,7 +233,7 @@
          * benutzt werden. Dies ist unter anderem jQuery.
          * Wenn der Minifier aktualisiert worden ist sollte diese methode wieder nach util.js wandern!
          */
-        function executeService(service, params, messages, ignoreError) {
+        function executeService(service, done, params, messages, ignoreError) {
             var json;
             var index;
             var errorMessage;
@@ -253,6 +255,13 @@
                 }
                 REC.log(DEBUG, "Execute: " + service);
                 times.push(new Date().getTime());
+                var asynchron = true;
+                if (!done) {
+                    asynchron = false;
+                    done = function (data) {
+                        json = data;
+                    }
+                }
                 if (isLocal()) {
                     // Aufruf über Applet
                     var maxLen = 1100000;
@@ -276,10 +285,11 @@
                         }
                     }
                     var obj = document.reader[service]( ...paramValues.reverse() );
-                    json = jQuery.parseJSON(obj);
+                    done(jQuery.parseJSON(obj));
                     times.push(new Date().getTime());
                 } else {
                     // Aufruf über Servlet
+
                     var dataString = {
                         "function": service
                     };
@@ -296,7 +306,7 @@
                         data: dataString,
                         datatype: "json",
                         cache: false,
-                        async: false,
+                        async: asynchron,
                         url: "/TestVerteilung/VerteilungServlet",
                         error: function (response) {
                             try {
@@ -310,13 +320,11 @@
                                 message("Fehler", str + "<br>" + response.responseText);
                             }
                         },
-                        success: function (data) {
-                            json = data;
-                        }
+                        success: done
                     });
                 }
                 times.push(new Date().getTime());
-                if (!json.success) {
+                if (! asynchron && !json.success) {
                     if (exist(errorMessage))
                         errorString = errorMessage + "<br>" + json.result;
                     else
@@ -338,7 +346,7 @@
                         fillMessageBox(true);
                     }
                 }
-                REC.log(DEBUG, "Execution of Service: " + service + " duration "+ (times[1] -times[0]) + " ms");
+                REC.log(INFORMATIONAL, "Execution of Service: " + service + " duration "+ (times[1] -times[0]) + " ms");
                 fillMessageBox(true);
                 return json;
             } catch (e) {

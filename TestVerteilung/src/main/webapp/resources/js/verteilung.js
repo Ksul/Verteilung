@@ -300,7 +300,7 @@ function readFiles(files) {
                         return function (evt) {
                             try {
                                 if (evt.target.readyState == FileReader.DONE) {// DONE == 2
-                                    var json = executeService("extractPDFContent", [
+                                    var json = executeService("extractPDFContent", null, [
                                         {"name": "documentText", "value": evt.target.result, "type": "byte"}
                                     ], "PDF Datei konte nicht geparst werden:");
                                     if (json.success) {
@@ -325,7 +325,7 @@ function readFiles(files) {
                         return function (evt) {
                             try {
                                 if (evt.target.readyState == FileReader.DONE) {
-                                    var json = executeService("extractZIPAndExtractPDFToInternalStorage", [
+                                    var json = executeService("extractZIPAndExtractPDFToInternalStorage", null, [
                                         {"name": "documentText", "value": evt.target.result, "type": "byte"}
                                     ], "ZIP Datei konte nicht entpackt werden:");
                                     if (json.success) {
@@ -742,7 +742,7 @@ function sendRules() {
         var erg = false;
         if (currentRules.endsWith("doc.xml")) {
             vkbeautify.xml(rulesEditor.getSession().getValue());
-            var json = executeService("updateDocument", [
+            var json = executeService("updateDocument", null, [
                 {"name": "documentId", "value": rulesID},
                 {"name": "documentText", "value": rulesEditor.getSession().getValue(), "type": "byte"},
                 {"name": "mimeType", "value": "text/xml"},
@@ -778,7 +778,7 @@ function getRules(rulesId, loadLocal) {
             REC.log(INFORMATIONAL, "Regeln erfolgreich lokal gelesen!");
             fillMessageBox(true);
         } else {
-            var json = executeService("getDocumentContent", [
+            var json = executeService("getDocumentContent", null, [
                 {"name": "documentId", "value": rulesID},
                 {"name": "extract", "value": "false"}
             ], "Regeln konnten nicht gelesen werden:");
@@ -864,7 +864,7 @@ function formatScript() {
 function openFile(file) {
     try {
         var name = convertPath(file);
-        var json = executeService("openFile", [
+        var json = executeService("openFile", null, [
             {"name": "filePath", "value": name}
         ], "Datei konnte nicht geöffnet werden:");
         if (json.success) {
@@ -888,7 +888,7 @@ function openFile(file) {
 function save(file, text) {
     try {
         var name =  convertPath(file);
-        var json = executeService("saveToFile", [
+        var json = executeService("saveToFile", null, [
             {"name": "filePath", "value": name},
             {"name": "documentText", "value": text}
         ], "Skript konnte nicht gespeichert werden:");
@@ -932,7 +932,7 @@ function handleRulesSelect(evt) {
  */
 function getScript() {
     var fetchScript = function () {
-        var json = executeService("getDocumentContent", [
+        var json = executeService("getDocumentContent", null, [
             {"name": "documentId", "value": scriptID},
             {"name": "extract", "value": "false"}
         ], "Skript konnte nicht gelesen werden:");
@@ -989,7 +989,7 @@ function openScript() {
         } else {
             if (REC.exist(scriptID)) {
                 // ScriptID ist vorhanden, wir versuchen das Skript vom Alfresco Server zu laden
-                json = executeService("getDocumentContent", [
+                json = executeService("getDocumentContent", null, [
                     {"name": "documentId", "value": scriptID},
                     {"name": "extract", "value": "false"}
                 ], "Skript konnte nicht gelesen werden:");
@@ -1060,7 +1060,7 @@ function sendScript() {
     try {
         var erg = false;
         if (workDocument.endsWith("recognition.js")) {
-            var json = executeService("updateDocument", [
+            var json = executeService("updateDocument", null, [
                 {"name": "documentId", "value": scriptID},
                 {"name": "documentText", "value": textEditor.getSession().getValue(), "type": "byte"},
                 {"name": "mimeType", "value": "application/javascript"},
@@ -1086,7 +1086,7 @@ function sendScript() {
  */
 function sendToInbox() {
     try {
-        var json = executeService("createDocument", [
+        var json = executeService("createDocument", null, [
             {"name": "documentId", "value": inboxFolderId},
             {"name": "fileName", "value": currentFile},
             {"name": "documentContent", "value": currentContent, "type": "byte"},

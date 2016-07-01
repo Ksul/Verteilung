@@ -9,7 +9,7 @@
  */
 function checkServerStatus(url) {
 
-    var obj = executeService("isURLAvailable", [{"name":"server", "value":url}, {"name":"timeout", "value":"5000"}], null, true);
+    var obj = executeService("isURLAvailable", null, [{"name":"server", "value":url}, {"name":"timeout", "value":"5000"}], null, true);
     return obj.result.toString() == "true";
 }
 
@@ -288,7 +288,7 @@ function message(title, str, autoClose, height, width) {
  *               false  Operation war nicht erfolgreich
  */
 function setAppletParameter(){
-    var json = executeService("setParameter", [
+    var json = executeService("setParameter", null, [
         {"name": "server", "value": server},
         {"name": "bindingUrl", "value": bindingUrl},
         {"name": "user", "value": user},
