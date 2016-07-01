@@ -2065,11 +2065,7 @@ function switchAlfrescoDirectory(data) {
         else
             objectID = "-1";
         times.push(new Date().getTime());
-        var json = executeService("listFolder", null, [
-            {"name": "filePath", "value": objectID},
-            {"name": "withFolder", "value": -1}
-        ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
-        if (json.success) {
+        var done = function(json){
             alfrescoFolderTabelle.clear();
             alfrescoFolderTabelle.rows.add(json.result).draw();
             calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
@@ -2077,12 +2073,13 @@ function switchAlfrescoDirectory(data) {
             fillBreadCrumb(data);
             //$("#tree").jstree(true).refresh_node(objectID);
             $("#tree").jstree('select_node', objectID);
-        }
-        json = executeService("listFolder", null, [
+
+        };
+        var json = executeService("listFolder", done, [
             {"name": "filePath", "value": objectID},
-            {"name": "withFolder", "value": "1"}
-        ], "Dokumente konnten nicht aus dem Server gelesen werden:");
-        if (json.success) {
+            {"name": "withFolder", "value": -1}
+        ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
+        var done1 = function(json) {
             alfrescoTabelle.clear();
             alfrescoTabelle.rows.add(json.result).draw();
             times.push(new Date().getTime());
@@ -2090,8 +2087,12 @@ function switchAlfrescoDirectory(data) {
             fillMessageBox(true);
             calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             $.fn.dataTable.makeEditable( alfrescoTabelle, updateInLineDocumentFieldDefinition());
+        };
+        json = executeService("listFolder", done1, [
+            {"name": "filePath", "value": objectID},
+            {"name": "withFolder", "value": "1"}
+        ], "Dokumente konnten nicht aus dem Server gelesen werden:");
 
-        }
     } catch (e) {
         errorHandler(e);
     }
