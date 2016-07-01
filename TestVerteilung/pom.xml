@@ -79,9 +79,9 @@
                         <artifactId>maven-war-plugin</artifactId>
                         <version>2.6</version>
                         <configuration>
-                            <packagingExcludes>
+<!--                            <packagingExcludes>
                                 applet/**,%regex[.*(?&lt;!min)\.css],%regex[.*(?&lt;!min)\.js]
-                            </packagingExcludes>
+                            </packagingExcludes>-->
                             <webResources>
                                 <resource>
                                     <directory>src${file.separator}main${file.separator}webapp${file.separator}resources</directory>
