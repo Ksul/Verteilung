@@ -289,7 +289,6 @@
                     times.push(new Date().getTime());
                 } else {
                     // Aufruf über Servlet
-
                     var dataString = {
                         "function": service
                     };
@@ -320,33 +319,36 @@
                                 message("Fehler", str + "<br>" + response.responseText);
                             }
                         },
-                        success: done
+                        success: function(json) {
+                            if (!json.success) {
+                                if (exist(errorMessage))
+                                    errorString = errorMessage + "<br>" + json.result;
+                                else
+                                    errorString = json.result;
+                                // gibt es eine Fehlermeldung aus dem Service?
+                                if (json.error && !ignoreError) {
+                                    errorString = errorString + "<br>" + json.error;
+                                    REC.log(ERROR, json.error);
+                                }
+                                if (!ignoreError) {
+                                    REC.log(ERROR, json.result);
+                                    fillMessageBox(true);
+                                } else
+                                    json.error = errorString;
+                                return json;
+                            } else {
+                                if (exist(successMessage)) {
+                                    REC.log(INFORMATIONAL, successMessage);
+                                    fillMessageBox(true);
+                                }
+                                done(json);
+                            }
+
+                        }
                     });
                 }
                 times.push(new Date().getTime());
-                if (! asynchron && !json.success) {
-                    if (exist(errorMessage))
-                        errorString = errorMessage + "<br>" + json.result;
-                    else
-                        errorString = json.result;
-                    // gibt es eine Fehlermeldung aus dem Service?
-                    if (json.error && !ignoreError) {
-                        errorString = errorString + "<br>" + json.error;
-                        REC.log(ERROR, json.error);
-                    }
-                    if (!ignoreError) {
-                        REC.log(ERROR, json.result);
-                        fillMessageBox(true);
-                    } else
-                        json.error = errorString;
-                    return json;
-                } else {
-                    if (exist(successMessage)) {
-                        REC.log(INFORMATIONAL, successMessage);
-                        fillMessageBox(true);
-                    }
-                }
-                REC.log(INFORMATIONAL, "Execution of Service: " + service + " duration "+ (times[1] -times[0]) + " ms");
+                               REC.log(INFORMATIONAL, "Execution of Service: " + service + " duration "+ (times[1] -times[0]) + " ms");
                 fillMessageBox(true);
                 return json;
             } catch (e) {

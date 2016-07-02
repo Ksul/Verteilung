@@ -2483,9 +2483,10 @@ function buildObjectForTree(data) {
  * oder falls nicht dann wird der Inhalt des Root Folders gelesen.
  * Die Gefundenen Objekte (also die entsprechenden Subfolder) werden in jstree kompatible JSON Obekte konvertiert
  * @param aNode      der ausgewählte Knoten
- * @return obj       die Daten als jstree kompatible JSON Objekte
+ * @param callBack   der Callback, der die Werte in den Tree einträgt
+ * @return
  */
-function loadAndConvertDataForTree(aNode) {
+function loadAndConvertDataForTree(aNode, callBack) {
     var obj = {};
 
     try {
@@ -2504,33 +2505,36 @@ function loadAndConvertDataForTree(aNode) {
         } else {
             if (alfrescoServerAvailable) {
                 // den Folder einlesen
-                var json = executeService("listFolder", null, [
+                var done = function (json) {
+                    if (json.success) {
+                        obj = [];
+                        for (var index = 0; index < json.result.length; index++) {
+                            obj.push(buildObjectForTree(json.result[index]));
+                        }
+                        if (aNode.id == "#")
+                            obj = [
+                                {
+                                    "icon": "",
+                                    "id": archivFolderId,
+                                    "text": "Archiv",
+                                    "state": {"opened": true, "disabled": false, "selected": true},
+                                    "children": obj,
+                                    "type": "archivRootStandard"
+                                }
+                            ];
+                        // CallBack ausführen
+                        if (obj) {
+                            callBack.call(this, obj);
+                        }
+                    }
+                    else {
+                        message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
+                    }    
+                };
+                var json = executeService("listFolder", done, [
                     {"name": "filePath", "value": aNode.id != "#" ? aNode.id : archivFolderId},
                     {"name": "withFolder", "value": -1}
                 ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
-                if (json.success) {
-                    obj = [];
-                    for (var index = 0; index < json.result.length; index++) {
-                        obj.push(buildObjectForTree(json.result[index]));
-                    }
-                    if (aNode.id == "#")
-                        return [
-                            {
-                                "icon": "",
-                                "id": archivFolderId,
-                                "text": "Archiv",
-                                "state": {"opened": true, "disabled": false, "selected": true},
-                                "children": obj,
-                                "type": "archivRootStandard"
-                            }
-                        ];
-                    else
-                        return obj;
-                }
-                else {
-                    message("Fehler", "Folder konnte nicht erfolgreich im Alfresco gelesen werden!");
-                    return null;
-                }
             }
         }
     } catch (e) {
@@ -2719,11 +2723,7 @@ function loadAlfrescoTree() {
                 'data': function (node, aFunction) {
                     try {
                         // relevante Knoten im Alfresco suchen
-                        var obj = loadAndConvertDataForTree(node);
-                        // CallBack ausführen
-                        if (exist(obj)) {
-                            aFunction.call(this, obj);
-                        }
+                        loadAndConvertDataForTree(node, aFunction);
                     } catch (e) {
                         errorHandler(e);
                     }
