@@ -38,7 +38,7 @@ public class AlfrescoConnector {
     private static Logger logger = Logger.getLogger(AlfrescoConnector.class.getName());
     private String user = null;
     private String password = null;
-    private String bindingUrl = null;
+    private String binding = null;
     private String server = null;
     private static enum RequestType {
         POST("POST"),
@@ -73,19 +73,51 @@ public class AlfrescoConnector {
      * @param user        der Username
      * @param password    das Password
      * @param server      die Server URL
-     * @param bindingUrl  die CMIS AtomPUB Binding Teil der URL
+     * @param binding     die CMIS AtomPUB Binding Teil der URL
      */
-    public AlfrescoConnector(String user, String password, String server, String bindingUrl)  {
+    public AlfrescoConnector(String user, String password, String server, String binding)  {
         this.user = user;
         this.password = password;
         this.server = server;
-        this.bindingUrl = bindingUrl;
+        this.binding = binding;
+        this.session = null;
     }
 
     /**
      * Konstruktor
      */
     public AlfrescoConnector() {}
+
+    /*
+    liefert den User
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * liefert das Password
+     * @return
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * liefert das Binding
+      * @return
+     */
+    public String getBinding() {
+        return binding;
+    }
+
+    /**
+     * liefert den Server
+     * @return
+     */
+    public String getServer() {
+        return server;
+    }
 
     /**
      * liefert ein Ticket zur Authenfizierung
@@ -117,19 +149,27 @@ public class AlfrescoConnector {
      * liefert die CMIS Session
      * @return  die CMIS Session
      */
-    private Session getSession() throws VerteilungException {
+    private Session getSession() {
         if (this.session != null)
           return this.session;
         else {
             try {
             this.session = initSession();
             } catch (Exception e) {
-                String error = " Mit den Parametern Server: " + this.server + " Binding: " + this.bindingUrl + " User: " + this.user + " Password: " + this.password + " konnte keine Cmis Session etabliert werden!";
-                throw new VerteilungException(error, e);
+                logger.severe(" Mit den Parametern Server: " + this.server + " Binding: " + this.binding + " User: " + this.user + " Password: " + this.password + " konnte keine Cmis Session etabliert werden!");
+                return null;
             }
-            logger.fine(" Mit den Parametern Server: " + this.server + " Binding: " + this.bindingUrl + " User: " + this.user + " Password: " + this.password + " konnte eine Cmis Session erfolgreich etabliert werden!");
+            logger.fine(" Mit den Parametern Server: " + this.server + " Binding: " + this.binding + " User: " + this.user + " Password: " + this.password + " konnte eine Cmis Session erfolgreich etabliert werden!");
             return this.session;
         }
+    }
+
+    /**
+     * gibt Auskunft ob eine Alfresco Verbindung besteht
+     * @return
+     */
+    public boolean isConnected(){
+        return getSession() != null;
     }
 
     /**
@@ -139,7 +179,7 @@ public class AlfrescoConnector {
     private Session initSession()  {
 
         // CMISSession Generator aufbauen
-        CMISSessionGenerator gen = new CMISSessionGenerator(this.user, this.password, this.bindingUrl, "Session");
+        CMISSessionGenerator gen = new CMISSessionGenerator(this.user, this.password, this.binding, "Session");
         return gen.generateSession();
     }
 

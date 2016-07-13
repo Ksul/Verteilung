@@ -3032,48 +3032,54 @@ function checkAndBuidAlfrescoEnvironment() {
 
     
     var ret, erg;
-    // prüfen, ob Server ansprechbar ist
-    if (exist(getSettings("server")))
-        alfrescoServerAvailable = checkServerStatus(getSettings("server"));
-    // Ticket besorgen
-    if (exist(getSettings("user")) && exist(getSettings("password")) && exist(getSettings("server"))) {
-        erg = executeService("getTicketWithUserAndPassword", null, 
-            [   {"name": "user", "value": getSettings("user")},
-                {"name": "password", "value": getSettings("password")},
-                {"name": "server", "value": getSettings("server")}
-            ]);
-        if (erg.success) {
-            // Binding prüfen
-            if (alfrescoServerAvailable && exist(getSettings("binding")))
-                alfrescoServerAvailable = checkServerStatus(getSettings("binding") + "?alf_ticket=" + erg.result.data.ticket);
+    // ist schon ein Alfresco Server verbunden?
+    erg = executeService("isConnected", null, []);
+    if (erg.success && erg.result)
+        alfrescoServerAvailable = true;
+    else {
+        // prüfen, ob Server ansprechbar ist
+        if (exist(getSettings("server")))
+            alfrescoServerAvailable = checkServerStatus(getSettings("server"));
+        // Ticket besorgen
+        if (exist(getSettings("user")) && exist(getSettings("password")) && exist(getSettings("server"))) {
+            erg = executeService("getTicketWithUserAndPassword", null,
+                [{"name": "user", "value": getSettings("user")},
+                    {"name": "password", "value": getSettings("password")},
+                    {"name": "server", "value": getSettings("server")}
+                ]);
+            if (erg.success) {
+                // Binding prüfen
+                if (alfrescoServerAvailable && exist(getSettings("binding")))
+                if (checkServerStatus(getSettings("binding") + "?alf_ticket=" + erg.result.data.ticket)) {
+                    erg = executeService("setParameter", null, [
+                        {"name": "server", "value": getSettings("server")},
+                        {"name": "binding", "value": getSettings("binding")},
+                        {"name": "user", "value": getSettings("user")},
+                        {"name": "password", "value": getSettings("password")}
+                    ], "Parameter für die Services konnten nicht gesetzt werden:");
+                    if (!erg.success) {
+                        REC.log(WARN, "Binding Parameter konnten nicht gesetzt werden!");
+                    } else
+                        alfrescoServerAvailable = false;    
+                }
+            } else {
+                alfrescoServerAvailable = false;
+            }
         } else {
             alfrescoServerAvailable = false;
         }
-    } else {
-        alfrescoServerAvailable = false;
     }
     // falls ja, dann Server Parameter eintragen
     if (alfrescoServerAvailable) {
         var extraProperties;
-        erg = executeService("setParameter", null, [
-            {"name": "server", "value": getSettings("server")},
-            {"name": "binding", "value": getSettings("binding")},
-            {"name": "user", "value": getSettings("user")},
-            {"name": "password", "value": getSettings("password")}
-        ], "Parameter für die Services konnten nicht gesetzt werden:");
-        if (!erg.success) {
-            REC.log(WARN, "Binding Parameter konnten nicht gesetzt werden!");
-        }
-        if (erg.success) {
-            // Skript Verzeichnis prüfen
-            erg = executeService("getNodeId", null, [
-                {"name": "filePath", "value": "/Datenverzeichnis/Skripte"}
-            ], null, true);
-            if (erg.success)
-                scriptFolderId = erg.result;
-            else {
-                REC.log(WARN, "Verzeichnis '/Datenverzeichnis/Skripte' auf dem Alfresco Server nicht gefunden!");
-            }
+        // Skript Verzeichnis prüfen
+        erg = executeService("getNodeId", null, [
+            {"name": "filePath", "value": "/Datenverzeichnis/Skripte"}
+        ], null, true);
+        if (erg.success)
+            scriptFolderId = erg.result;
+        else {
+            REC.log(WARN, "Verzeichnis '/Datenverzeichnis/Skripte' auf dem Alfresco Server nicht gefunden!");
         }
         // Verteilskript prüfen
         if (erg.success) {
@@ -3208,16 +3214,6 @@ function checkAndBuidAlfrescoEnvironment() {
         }
         
         if (erg.success) {
-            var done = function (data){
-                for (var i = 0; i < data.result.length; ++i) {
-                    if ($.inArray(data.result[i].title, titleValues) == -1)
-                        titleValues.push(data.result[i].title);
-                }    
-            };
-            var json = executeService("query", done, [
-                {"name": "cmisQuery", "value": "SELECT T.cm:title FROM cmis:document AS D  JOIN cm:titled AS T ON D.cmis:objectId = T.cmis:objectId WHERE IN_TREE(D, '" + documentFolderId + "')"},
-                {"name": "documentId", "value": documentFolderId}
-            ], null, true);
 
             tabLayout.tabs({
                 disabled: [],
@@ -3243,7 +3239,21 @@ function checkAndBuidAlfrescoEnvironment() {
  * initialisiert die Anwendung
  */
 function initApplication() {
+    var erg;
     try {
+        erg = executeService("isConnected", null, [], null, true);
+        if (erg.success && erg.result) {
+            erg = executeService("getConnection", null, [], null, true);
+            if (erg.success) {
+                settings = {
+                    "settings": [
+                        {"key": "server", "value": erg.result.server},
+                        {"key": "user", "value": erg.result.user},
+                        {"key": "password", "value": erg.result.password},
+                        {"key": "binding", "value": erg.result.binding}                    ]
+                };
+            }
+        }
         // Settings schon vorhanden?
         if (!exist(getSettings("server")) || !exist(getSettings("binding")) || !exist(getSettings("user")) || !exist(getSettings("password"))) {
             var cookie = $.cookie("settings");
@@ -3253,22 +3263,6 @@ function initApplication() {
                 settings = $.parseJSON(cookie);
             } else {
                 settings = {settings:[]};
-                // Settings aus test.properties laden. Das wird nur lokal mit Applet funktionieren
-                var obj = executeService("loadProperties", null[
-                        {"name": "filePath", "value": convertPath("../test.properties")}
-                    ],
-                    "", true);
-                if (obj.success) {
-                    // Datei wurde gefunden. Settings setzen, aber nur wenn diese noch nicht über URL Parameter gesetzt worden sind.
-                    if (!exist(getSettings("server")))
-                        settings.settings.push({"key": "server", "value": obj.result.server});
-                    if (!exist(getSettings("user")))
-                        settings.settings.push({"key": "user", "value": obj.result.user});
-                    if (!exist(getSettings("password")))
-                        settings.settings.push({"key": "password", "value": obj.result.password});
-                    if (!exist(getSettings("binding")))
-                        settings.settings.push({"key": "binding", "value": obj.result.bindingUrl});
-                }
             }
         }
         checkAndBuidAlfrescoEnvironment();
@@ -3285,9 +3279,6 @@ function initApplication() {
 function start() {
     try {
 
-        if (isLocal() && !setAppletParameter) {
-            throw new Error("Applet konnte nicht geladen werden!");
-        }
         $(document).tooltip();
         $('.ui-dialog-titlebar-close').tooltip('disable');
         $("#switcher").themeswitcher();

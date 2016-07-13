@@ -23,13 +23,13 @@ public class AlfrescoTest {
     @Before
     public void setUp() throws Exception {
         properties = new Properties();
-        FileInputStream fileInputStream = new FileInputStream("test.properties");
+        FileInputStream fileInputStream = new FileInputStream("src/test/resources/connection.properties");
         Assert.assertThat(fileInputStream, Matchers.notNullValue());
         properties.load(fileInputStream);
         Assert.assertThat(properties.getProperty("server"), Matchers.notNullValue());
+        Assert.assertThat(properties.getProperty("binding"), Matchers.notNullValue());
         Assert.assertThat(properties.getProperty("password"), Matchers.notNullValue());
         Assert.assertThat(properties.getProperty("testPDF"), Matchers.notNullValue());
-        properties.put("bindingUrl", properties.getProperty("bindingUrl"));
         if (needsProxy()) {
             System.getProperties().put("proxySet", "true");
             System.getProperties().put("proxyHost", "www-proxy");

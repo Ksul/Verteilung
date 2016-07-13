@@ -23,7 +23,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        JSONObject obj = applet.setParameter(properties.getProperty("server"), properties.getProperty("bindingUrl"), properties.getProperty("user"), properties.getProperty("password"));
+        JSONObject obj = applet.setParameter(properties.getProperty("server"), properties.getProperty("binding"), properties.getProperty("user"), properties.getProperty("password"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("result"), Matchers.notNullValue());
@@ -39,7 +39,27 @@ public class VerteilungAppletTest extends AlfrescoTest {
     }
 
     @Test
-    public void tesGgetComments() throws Exception {
+    public void testGetConnection() throws Exception {
+        JSONObject obj = applet.getConnection();
+        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
+        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("result"), Matchers.instanceOf(JSONObject.class));
+        JSONObject connection = (JSONObject) obj.get("result");
+        assertThat(connection.getString("server"), Matchers.equalTo(properties.getProperty("server")));
+        assertThat(connection.getString("binding"), Matchers.equalTo(properties.getProperty("binding")));
+        assertThat(connection.getString("user"), Matchers.equalTo(properties.getProperty("user")));
+        assertThat(connection.getString("password"), Matchers.equalTo(properties.getProperty("password")));
+        applet.setParameter(" ", " ", " ", " ");
+        obj = applet.getConnection();
+        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
+        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getBoolean("result"), Matchers.is(false));
+    }
+
+    @Test
+    public void tesGetComments() throws Exception {
         JSONObject obj = applet.getComments("a", "b");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));

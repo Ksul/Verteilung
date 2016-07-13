@@ -290,7 +290,7 @@ function message(title, str, autoClose, height, width) {
 function setAppletParameter(){
     var json = executeService("setParameter", null, [
         {"name": "server", "value": server},
-        {"name": "bindingUrl", "value": bindingUrl},
+        {"name": "binding", "value": binding},
         {"name": "user", "value": user},
         {"name": "password", "value": password}
     ], "Alfresco Parameter konnten nicht im Applet gesetzt werden:");

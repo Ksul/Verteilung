@@ -12,6 +12,7 @@ import org.mockito.stubbing.Answer;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -46,9 +47,19 @@ public class VerteilungServletTest extends AlfrescoTest {
      */
     private class StubServletOutputStream extends ServletOutputStream {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
+        @Override
         public void write(int i) throws IOException {
             baos.write(i);
+        }
+
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public void setWriteListener(WriteListener writeListener) {
+
         }
     }
 
@@ -76,7 +87,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         }).when(servletContext).getRealPath(anyString());
         when(response.getOutputStream()).thenReturn(servletOutputStream);
         when(request.getParameter(VerteilungServlet.PARAMETER_SERVER)).thenReturn(properties.getProperty("server"));
-        when(request.getParameter(VerteilungServlet.PARAMETER_BINDING)).thenReturn(properties.getProperty("bindingUrl"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_BINDING)).thenReturn(properties.getProperty("binding"));
         when(request.getParameter(VerteilungServlet.PARAMETER_USERNAME)).thenReturn(properties.getProperty("user"));
         when(request.getParameter(VerteilungServlet.PARAMETER_PASSWORD)).thenReturn(properties.getProperty("password"));
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_SETPARAMETER);
@@ -168,6 +179,62 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertThat(obj.get("result"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
         sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
+    public void testGetTitles() throws Exception{
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETTITLES);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertThat(sr, Matchers.notNullValue());
+        JSONObject obj = new JSONObject(sr.toString());
+        assertThat(obj, Matchers.notNullValue());
+        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
+        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("result"), Matchers.instanceOf(JSONArray.class));
+        sr.getBuffer().delete(0, 9999);
+    }
+
+    @Test
+    public void testGetConnection() throws Exception {
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETCONNECTION);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertThat(sr, Matchers.notNullValue());
+        JSONObject obj = new JSONObject(sr.toString());
+        sr.getBuffer().delete(0, 9999);
+        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
+        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject connection = (JSONObject) obj.get("result");
+        assertThat(connection.getString("server"), Matchers.equalTo(properties.getProperty("server")));
+        assertThat(connection.getString("binding"), Matchers.equalTo(properties.getProperty("binding")));
+        assertThat(connection.getString("user"), Matchers.equalTo(properties.getProperty("user")));
+        assertThat(connection.getString("password"), Matchers.equalTo(properties.getProperty("password")));
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_SETPARAMETER);
+        when(request.getParameter(VerteilungServlet.PARAMETER_SERVER)).thenReturn(" ");
+        when(request.getParameter(VerteilungServlet.PARAMETER_BINDING)).thenReturn(" ");
+        when(request.getParameter(VerteilungServlet.PARAMETER_USERNAME)).thenReturn(" ");
+        when(request.getParameter(VerteilungServlet.PARAMETER_PASSWORD)).thenReturn(" ");
+        servlet.doPost(request, response);
+        writer.flush();
+        assertThat(sr, Matchers.notNullValue());
+        obj = new JSONObject(sr.toString());
+        sr.getBuffer().delete(0, 9999);
+        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
+        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETCONNECTION);
+        servlet.doPost(request, response);
+        writer.flush();
+        assertThat(sr, Matchers.notNullValue());
+        obj = new JSONObject(sr.toString());
+        sr.getBuffer().delete(0, 9999);
+        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
+        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getBoolean("result"), Matchers.is(false));
     }
 
     @Test

@@ -34,10 +34,18 @@
                 <java.version>1.8</java.version>
                 <maven.compiler.source>${java.version}</maven.compiler.source>
                 <maven.compiler.target>${java.version}</maven.compiler.target>
-                <js.ending>.js</js.ending>
-                <css.ending>.css</css.ending>
             </properties>
             <build>
+                <filters>
+                    <filter>src/main/filters/dev.properties</filter>
+                </filters>
+                <resources>
+                    <resource>
+                        <directory>src${file.separator}main${file.separator}resources</directory>
+
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -46,8 +54,7 @@
                         <configuration>
                             <webResources>
                                 <resource>
-                                    <directory>src${file.separator}main${file.separator}webapp${file.separator}resources</directory>
-                                    <targetPath>resources</targetPath>
+                                    <directory>src${file.separator}main${file.separator}webapp</directory>
                                     <filtering>true</filtering>
                                     <excludes>
                                         <exclude>**/css</exclude>
@@ -69,10 +76,17 @@
                 <java.version>1.7</java.version>
                 <maven.compiler.source>${java.version}</maven.compiler.source>
                 <maven.compiler.target>${java.version}</maven.compiler.target>
-                <js.ending>.min.js</js.ending>
-                <css.ending>.min.css</css.ending>
             </properties>
             <build>
+                <filters>
+                    <filter>src/main/filters/production.properties</filter>
+                </filters>
+                <resources>
+                    <resource>
+                        <directory>src${file.separator}main${file.separator}resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -84,8 +98,7 @@
                             </packagingExcludes>-->
                             <webResources>
                                 <resource>
-                                    <directory>src${file.separator}main${file.separator}webapp${file.separator}resources</directory>
-                                    <targetPath>resources</targetPath>
+                                    <directory>src${file.separator}main${file.separator}webapp</directory>
                                     <filtering>true</filtering>
                                     <excludes>
                                         <exclude>**/css</exclude>
@@ -258,6 +271,14 @@
                 <version>2.7</version>
                 <executions>
                     <execution>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${build.directory}${file.separator}${project.artifactId}${file.separator}resources</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>copy-resource-one</id>
                         <phase>install</phase>
                         <goals>
@@ -323,7 +344,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -441,6 +462,12 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
             <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

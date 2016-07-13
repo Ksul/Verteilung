@@ -293,7 +293,17 @@ function startDocumentDialog(data, modus, modal) {
                             },
                             "datasets": {
                                 "type": "local",
-                                "source": titleValues
+                                "source": function(query) {
+                                    var results = [];
+                                    var json = executeService("getTitles", null, [
+                                    ], null, true);
+                                    for (var i = 0; i < json.result.length; i++) {
+                                        results.push({
+                                            "value": json.result[i]
+                                        });
+                                    }
+                                    return results;
+                                }
                             }
                         }
                     },

@@ -5,3 +5,11 @@
 .web-site-config
 
 TestVerteilung.iml
+
+/src/main/resources/filters/ksul.properties
+/src/main/resources/filters/local.properties
+/src/main/resources/filters/
+/src/test/resources/local.properties
+/src/main/filters/production.properties
+/src/main/filters/dev.properties
+/src/main/filters/

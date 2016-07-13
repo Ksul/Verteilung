@@ -1,14 +1,15 @@
 package de.schulte.testverteilung;
 
+import java.io.*;
 import java.net.*;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
+import java.util.Properties;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,10 +21,11 @@ import org.json.JSONObject;
 /**
  * Servlet implementation class VerteilungServlet
  */
+@WebServlet(name = "VerteilungServlet")
 public class VerteilungServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    private VerteilungServices services;
+    private VerteilungServices services = new VerteilungServices();
 
     private Logger logger = Logger.getLogger(VerteilungApplet.class.getName());
 
@@ -84,22 +86,39 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_GETCOMMENTS = "getComments";
     public static final String FUNCTION_ADDCOMMENT = "addComment";
     public static final String FUNCTION_QUERY = "query";
+    public static final String FUNCTION_GETTITLES = "getTitles";
+    public static final String FUNCTION_ISCONNECTED = "isConnected";
+    public static final String FUNCTION_GETCONNECTION = "getConnection";
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
-	public VerteilungServlet() {
-		super();
-        this.services = new VerteilungServices();
 
-	}
+    @Override
+    public void init() {
+        String server, binding, user, password;
+        try {
+            Properties properties = new Properties();
+            InputStream inputStream = getServletContext().getResourceAsStream("resources/connection.properties");
+            if (inputStream != null) {
+                properties.load(inputStream);
+                server = properties.getProperty("server");
+                password = properties.getProperty("password");
+                user = properties.getProperty("user");
+                binding = properties.getProperty("binding");
+                if (server != null && server.length() > 0 && password != null && password.length() > 0 &&
+                        user != null && user.length() > 0 && binding!= null && binding.length() > 0)
+                    services.setParameter(server,binding, user, password);
+            }
+        }catch (IOException e) {
+        System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     /**
      * liefert die Services
-     * nur für Testzwecke
+     * nur für Testzwecke!!!
      * @return  die Services
      */
-    public VerteilungServices getServices() {
+    protected VerteilungServices getServices() {
         return services;
     }
 
@@ -108,28 +127,29 @@ public class VerteilungServlet extends HttpServlet {
     /**
      * setzt die Parameter
      * @param server       die Server URL
-     * @param bindingUrl   der Binding Teil der Url
+     * @param binding      das Binding Teil
      * @param user         der Username
      * @param password     das Password
      * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
      *                                                    ret               die Parameter als String
      */
-    public JSONObject setParameter(String server,
-                                   String bindingUrl,
-                                   String user,
-                                   String password) {
+    protected JSONObject setParameter(String server,
+                                      String binding,
+                                      String user,
+                                      String password) {
 
         JSONObject obj = new JSONObject();
         try {
-            if (server != null && !server.isEmpty() && bindingUrl != null && !bindingUrl.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
-                services.setParameter(server, bindingUrl, user, password);
+            if (server != null && !server.isEmpty() && binding != null && !binding.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
+                services.setParameter(server, binding, user, password);
                 obj.put("success", true);
-                obj.put("result", "BindingUrl:" + bindingUrl + " User:" + user + " Password:" + password);
+                obj.put("result", "Server:" + server + " Binding:" + binding + " User:" + user + " Password:" + password);
             } else {
                 obj.put("success", false);
-                obj.put("result", "Parameter fehlt: BindingUrl:" + bindingUrl + " User: " + user + " Password:" + password);
-            }        } catch (Exception e) {
+                obj.put("result", "Parameter fehlt: Server: " + server + " Binding: " + binding + " User: " + user + " Password:" + password);
+            }
+        } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj;
@@ -178,6 +198,7 @@ public class VerteilungServlet extends HttpServlet {
                 obj.put("success", false);
                 obj.put("result", "Function Name is missing!\nPlease check for Tomcat maxPostSize and maxHeaderSizer Property for HTTPConnector");
             } else {
+                logger.info("Call of Method " + value);
                 if (value.equalsIgnoreCase(FUNCTION_OPENPDF)) {
                     openPDF(getURLParameter(req, PARAMETER_FILENAME, true), resp);
                     return;
@@ -237,6 +258,12 @@ public class VerteilungServlet extends HttpServlet {
                     obj = extractZIP(getURLParameter(req, PARAMETER_DOCUMENTTEXT, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_EXTRACTZIPANDEXTRACTPDFTOINTERNALSTORAGE)) {
                     obj = extractZIPAndExtractPDFToInternalStorage(getURLParameter(req, PARAMETER_DOCUMENTTEXT, true));
+                } else if (value.equalsIgnoreCase(FUNCTION_GETTITLES)) {
+                    obj = getTitles();
+                } else if (value.equalsIgnoreCase(FUNCTION_ISCONNECTED)) {
+                    obj = isConnected();
+                } else if (value.equalsIgnoreCase(FUNCTION_GETCONNECTION)) {
+                    obj = getConnection();
                 } else if (value.equalsIgnoreCase(FUNCTION_GETDATAFROMINTERNALSTORAGE)) {
                     String fileName = getURLParameter(req, PARAMETER_FILENAME, false);
                     if (fileName == null || fileName.isEmpty())
@@ -256,6 +283,27 @@ public class VerteilungServlet extends HttpServlet {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
         out.write(obj.toString());
+    }
+
+    /**
+     * liefert Informationen zur Connection
+     * @return obj               ein JSONObject mit den Feldern success: true        die Operation war erfolgreich
+     *                                                                   false       ein Fehler ist aufgetreten
+     *                                                          result   false       keine Connection
+     *                                                                   JSONObjekt  Die Verbindungsparameter
+     */
+    protected JSONObject getConnection() {
+        return services.getConnection();
+    }
+
+    /**
+     * prüft, ob schon eine Verbindung zu einem Alfresco Server besteht
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            true, wenn Verbindung vorhanden
+     */
+    protected JSONObject isConnected() {
+        return services.isConnected();
     }
 
     /**
@@ -290,6 +338,16 @@ public class VerteilungServlet extends HttpServlet {
 
         return services.getTicketWithUserAndPassword(user, password, server);
 
+    }
+
+    /**
+     * liefert die vorhandenen Titel
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            die Titel als String
+     */
+    protected JSONObject getTitles() {
+        return services.getTitles();
     }
 
     /**

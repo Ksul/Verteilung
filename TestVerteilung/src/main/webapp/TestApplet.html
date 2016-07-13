@@ -79,7 +79,7 @@
     const testTestReturn =                    "document.reader.testReturn('Test');";
     const testLoadProperties =                "document.reader.loadProperties(convertPath(\"../test.properties\"));";
     const testIsURLAvaiable =                 "document.reader.isURLAvailable(properties.host);";
-    const testSetParameter =                  "document.reader.setParameter(properties.bindingUrl, \"admin\", properties.password);";
+    const testSetParameter =                  "document.reader.setParameter(properties.binding, \"admin\", properties.password);";
     const testGetNodeId =                     "document.reader.getNodeId(\"/Archiv\");";
     const testGetNodeId1 =                    "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/doc.xml\");";
     const testGetNodeId2 =                    "document.reader.getNodeId(\"/Datenverzeichnis/Skripte/recognition.js\");";
@@ -109,7 +109,7 @@
         doTest("Lade Applet", testLoadApplet, "$('#reader').get(0).isActive()");
         doTest("Test Applet", testTest, "erg == 'Hier ist das Verteilungs Applet!'");
         doTest("Test Applet", testTestReturn,"var result = $.parseJSON(erg); result.success;");
-        var erg = doTest("Ermittlung Properties", testLoadProperties, "var result = $.parseJSON(erg.toString()); typeof result == 'object' &&  typeof result.result.host == 'string' && typeof result.result.bindingUrl == 'string' && typeof result.result.password == 'string' ;");
+        var erg = doTest("Ermittlung Properties", testLoadProperties, "var result = $.parseJSON(erg.toString()); typeof result == 'object' &&  typeof result.result.host == 'string' && typeof result.result.binding == 'string' && typeof result.result.password == 'string' ;");
         var properties = $.parseJSON(erg).result;
         doTest("Host erreichbar", testIsURLAvaiable, " var result = $.parseJSON(erg.toString()); if (result.success) result.result;");
         doTest("Setze Parameter", testSetParameter, "var result = $.parseJSON(erg.toString()); result.success;");

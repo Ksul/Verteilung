@@ -82,7 +82,7 @@ public class VerteilungApplet extends Applet {
             for (Handler h : log.getHandlers()) {
                 h.setLevel(Level.parse(level));
             }
-            setParameter(getParameter("server"), getParameter("url"), getParameter("user"), getParameter("password"));
+            setParameter(getParameter("server"), getParameter("binding"), getParameter("user"), getParameter("password"));
 			jsobject = JSObject.getWindow(this);
   		} catch (Exception jse) {
 			logger.severe(jse.getMessage());
@@ -93,7 +93,7 @@ public class VerteilungApplet extends Applet {
     /**
      * setzt die Parameter
      * @param server        die URL des Servers
-     * @param  bindingUrl   die Binding Url
+     * @param  binding      das Binding
      * @param  user         der Username
      * @param  password     das Password
      * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
@@ -101,21 +101,85 @@ public class VerteilungApplet extends Applet {
      *                                                     result            die Parameter als String
      */
     public JSONObject setParameter(String server,
-                                   String bindingUrl,
+                                   String binding,
                                    String user,
                                    String password) {
 
         JSONObject obj = new JSONObject();
         try {
-            if (bindingUrl != null && !bindingUrl.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
-                services.setParameter(server, bindingUrl, user, password);
+            if (binding != null && !binding.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
+                services.setParameter(server, binding, user, password);
                 obj.put("success", true);
-                obj.put("result", "BindingUrl:" + bindingUrl + " User:" + user + " Password:" + password);
+                obj.put("result", "Binding:" + binding + " User:" + user + " Password:" + password);
             } else {
                 obj.put("success", false);
-                obj.put("result", "Parameter fehlt: BindingUrl:" + bindingUrl + " User: " + user + " Password:" + password);
+                obj.put("result", "Parameter fehlt: Binding:" + binding + " User: " + user + " Password:" + password);
             }
         } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * prüft, ob schon eine Verbindung zu einem Alfresco Server besteht
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            true, wenn Verbindung vorhanden
+     */
+    public JSONObject isConnected() {
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    return services.isConnected();
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * liefert Informationen zur Connection
+     * @return obj               ein JSONObject mit den Feldern success: true        die Operation war erfolgreich
+     *                                                                   false       ein Fehler ist aufgetreten
+     *                                                          result   false       keine Connection
+     *                                                                   JSONObjekt  Die Verbindungsparameter
+     */
+    protected JSONObject getConnection() {
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    return services.getConnection();
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
+     * liefert die vorhandenen Titel
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            die Titel als String
+     */
+    public JSONObject getTitles() {
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    return services.getTitles();
+                }
+            });
+        } catch (PrivilegedActionException e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
         return obj;

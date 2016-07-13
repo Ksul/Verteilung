@@ -24,7 +24,7 @@ public class CMISSessionGeneratorTest extends AlfrescoTest{
 
     @Test
     public void testGenerateSession() throws Exception {
-      CMISSessionGenerator gen = new CMISSessionGenerator(properties.getProperty("user"), properties.getProperty("password"), properties.getProperty("bindingUrl"), "Archiv");
+      CMISSessionGenerator gen = new CMISSessionGenerator(properties.getProperty("user"), properties.getProperty("password"), properties.getProperty("binding"), "Archiv");
       Session ses = gen.generateSession();
       Assert.assertThat(ses, Matchers.notNullValue());
       Assert.assertThat(gen.getRepositoryName(), Matchers.equalTo("Archiv"));

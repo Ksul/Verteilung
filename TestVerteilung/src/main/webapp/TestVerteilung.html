@@ -56,7 +56,6 @@
         var globalLayout;
         var alfrescoTicket;
         var anOpen = [];
-        var titleValues = [];
 
         window.onload = function() {
 
@@ -116,7 +115,6 @@
                 }
                 loadCssEntries(cssEntries);
                 loadJsEntries(jsEntries, function() {
-
                     start();
                 });
             }
@@ -183,6 +181,10 @@
                 //obj.setAttribute('codebase', './applet');
                 obj.setAttribute('archive', '../applet/TestVerteilung-jar-with-dependencies.jar');
                 obj.setAttribute('code', 'de.schulte.testverteilung.VerteilungApplet.class');
+                obj.setAttribute('server', '${server}');
+                obj.setAttribute('binding', '${binding}');
+                obj.setAttribute('user', '${user}');
+                obj.setAttribute('password', '${password}');
                 document.getElementById('appl').appendChild(obj);
                 var app =  document.applets[0];
                 return;
@@ -204,7 +206,7 @@
              * Handler der aufgerufen wird wenn das Applet geladen ist
              */
             function onLoadHandler() {
-                var text = document.reader.openResources(document.URL.slice(0, document.URL.lastIndexOf('/')+1)+"resources/templates/resource.template");
+                var text = document.reader.openResources(document.URL.slice(0, document.URL.lastIndexOf('/') + 1) + "resources/templates/resource.template");
                 if (text)
                     loadResources(atob(text));
             }
@@ -274,7 +276,7 @@
                                 params[index].value = btoa(params[index].value);
                             // prüfen, ob Parameter zu lang ist
                             if (typeof params[index].value == "String" && params[index].value.length > maxLen) {
-                                // den Inhalt häppchenweise übertragen
+                                // den derInhalt häppchenweise übertragen
                                 longParameter = true;
                                 for (var k = 0; k < Math.ceil(params[index].value.length / maxLen); k++)
                                     document.reader.fillParameter(params[index].value.substr(k * maxLen, maxLen), k == 0);
@@ -284,7 +286,7 @@
                                 paramValues.push(params[index].value);
                         }
                     }
-                    var obj = document.reader[service]( ...paramValues.reverse() );
+                    var obj = document.reader[service]( ...paramValues.reverse());
                     done(jQuery.parseJSON(obj));
                     times.push(new Date().getTime());
                 } else {
@@ -319,29 +321,29 @@
                                 message("Fehler", str + "<br>" + response.responseText);
                             }
                         },
-                        success: function(json) {
-                            if (!json.success) {
+                        success: function(data) {
+                            if (!data.success) {
                                 if (exist(errorMessage))
-                                    errorString = errorMessage + "<br>" + json.result;
+                                    errorString = errorMessage + "<br>" + data.result;
                                 else
-                                    errorString = json.result;
+                                    errorString = data.result;
                                 // gibt es eine Fehlermeldung aus dem Service?
-                                if (json.error && !ignoreError) {
-                                    errorString = errorString + "<br>" + json.error;
-                                    REC.log(ERROR, json.error);
+                                if (data.error && !ignoreError) {
+                                    errorString = errorString + "<br>" + data.error;
+                                    REC.log(ERROR, data.error);
                                 }
                                 if (!ignoreError) {
-                                    REC.log(ERROR, json.result);
+                                    REC.log(ERROR, data.result);
                                     fillMessageBox(true);
                                 } else
-                                    json.error = errorString;
-                                return json;
+                                    data.error = errorString;
+                                json = data;
                             } else {
                                 if (exist(successMessage)) {
                                     REC.log(INFORMATIONAL, successMessage);
                                     fillMessageBox(true);
                                 }
-                                done(json);
+                                done(data);
                             }
 
                         }

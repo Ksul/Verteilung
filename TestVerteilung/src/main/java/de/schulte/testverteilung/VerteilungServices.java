@@ -44,6 +44,44 @@ public class VerteilungServices {
     // Cache für listFolder
     private CacheAccess<String, JSONArray> cache;
 
+    //Speicher für Titel
+    private HashSet<String> titles = new HashSet<>();
+
+    /**
+     * prüft, ob schon eine Verbindung zu einem Alfresco Server besteht
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            true, wenn Verbindung vorhanden
+     */
+    public JSONObject isConnected() {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("success", true);
+            obj.put("result", con.isConnected());
+
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
+
+    /**
+     * liefert die vorhandenen Titel
+     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                          result            die Titel als String
+     */
+    public JSONObject getTitles() {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("success", true);
+            obj.put("result", new JSONArray(titles));
+
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
 
     /**
      * Konstruktor
@@ -80,8 +118,56 @@ public class VerteilungServices {
                              String username,
                              String password) {
         this.con = new AlfrescoConnector(username, password, server, binding);
+        if (this.con.isConnected()) {
+            collectTitle();
+            logger.info("Connected to Alfresco Server!");
+        } else {
+            logger.info("Could not establish Connection to Alfresco Server!");
+        }
     }
 
+    /**
+     * sucht alle Titel und stellt sie in einer Liste zur Verfügung
+     */
+    private void collectTitle()  {
+        try {
+            String documentFolderId = con.getNode("/Archiv/Dokumente").getId();
+            if (documentFolderId != null && documentFolderId.length() > 0) {
+                for (List<PropertyData<?>> propData : con.query("SELECT T.cm:title FROM cmis:document AS D JOIN cm:titled AS T ON D.cmis:objectId = T.cmis:objectId WHERE IN_TREE(D, '" + documentFolderId + "')")) {
+                    titles.add((String) propData.get(0).getValues().get(0));
+                }
+                titles.remove("");
+            }
+        } catch (Exception e) {}
+    }
+
+    /**
+     * liefert Informationen zur Connection
+     * @return obj               ein JSONObject mit den Feldern success: true        die Operation war erfolgreich
+     *                                                                   false       ein Fehler ist aufgetreten
+     *                                                          result   false       keine Connection
+     *                                                                   JSONObjekt  Die Verbindungsparameter
+     */
+    public JSONObject getConnection() {
+
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("success", true);
+            if (this.con.isConnected()) {
+                JSONObject obj1 = new JSONObject();
+                obj1.put("server", this.con.getServer());
+                obj1.put("binding", this.con.getBinding());
+                obj1.put("user", this.con.getUser());
+                obj1.put("password", this.con.getPassword());
+                obj.put("result", obj1);
+            } else {
+                obj.put("result", false);
+            }
+        } catch (Throwable t) {
+            obj = VerteilungHelper.convertErrorToJSON(t);
+        }
+        return obj;
+    }
 
     /**
      * liefert ein Ticket zur Authentifizierung

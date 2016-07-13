@@ -35,7 +35,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        con = new AlfrescoConnector(properties.getProperty("user"), properties.getProperty("password"), properties.getProperty("server"), properties.getProperty("bindingUrl"));
+        con = new AlfrescoConnector(properties.getProperty("user"), properties.getProperty("password"), properties.getProperty("server"), properties.getProperty("binding"));
         assertThat(con, Matchers.notNullValue());
         CmisObject cmisObject = con.getNode("/Archiv/TestDocument.txt");
 
