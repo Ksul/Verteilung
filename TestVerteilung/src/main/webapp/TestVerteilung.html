@@ -387,21 +387,20 @@
 <div id="clientPage" class="ui-state-active">
     <!--Tab Bereich-->
     <div id="tabs" class="container">
-        <!--Tabulatoren-->
-        <ul id="tabButtons" class="container">
-            <li id="tabArchiv" ><a href="#tab1">Archiv</a></li>
-            <li id="tabSuche" ><a href="#tab2">Suche</a></li>
-            <li id="tabVerteilung"><a  href="#tab3">Verteilung</a></li>
-        </ul>
-            <div>
-                <input style="float:right" onclick="startSettingsDialog();"
-                       name="settings" id="settings" type="submit" class="settings"
-                       title="Open Settings" value=""/>
-                <div style="float:right" id="switcher"  class="themes" title="Farbschema"></div>
+        <div id="tabNorth" class="ui-layout-north container">
+            <!--Tabulatoren-->
+            <div id="tabNorthCenter" class="ui-layout-center container">
+                <ul id="tabButtons" class="container">
+                    <li id="tabArchiv"><a href="#tab1">Archiv</a></li>
+                    <li id="tabSuche"><a href="#tab2">Suche</a></li>
+                    <li id="tabVerteilung"><a href="#tab3">Verteilung</a></li>
+                </ul>
             </div>
-
+            <div  style="float:right" id="switcher" class="themes" title="Farbschema"></div>
+            <input style="float:right" id="settings" onclick="startSettingsDialog();" class="settings" title="Open Settings">
+         </div>
         <!--Tab Panels-->
-        <div id="tabPanels" class="container ui-state-active">
+        <div id="tabPanels" class="ui-layout-center container ui-state-active">
             <!--Tab Archiv-->
             <div id="tab1" class="tabPanel ui-widget-content hidden">
                 <div id="alfrescoWest" class="ui-tab-layout-west container  hidden">

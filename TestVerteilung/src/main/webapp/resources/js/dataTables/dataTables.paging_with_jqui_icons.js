@@ -12,13 +12,16 @@
         nNext.innerHTML = "";
         nLast.innerHTML = "";
 
-        nFirst.className = "ui-icon ui-icon-seek-first first";
+        nFirst.className = "fa fa-step-backward";
         nFirst.style.display = "inline-block";
-        nPrevious.className = "ui-icon ui-icon-seek-prev previous";
+        nFirst.style.paddingRight = "6px";
+        nPrevious.className = "fa fa-play fa-rotate-180";
         nPrevious.style.display = "inline-block";
-        nNext.className = "ui-icon ui-icon-seek-next next";
+        nPrevious.style.paddingRight = "6px";
+        nNext.className = "fa fa-play";
         nNext.style.display = "inline-block";
-        nLast.className = "ui-icon ui-icon-seek-end last";
+        nNext.style.paddingRight = "6px";
+        nLast.className = "fa fa-step-forward";
         nLast.style.display = "inline-block";
 
         if (oSettings.sTableId !== '') {

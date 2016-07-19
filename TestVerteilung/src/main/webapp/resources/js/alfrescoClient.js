@@ -234,7 +234,15 @@ function loadLayout() {
             showDebugMessages:			true,
             contentSelector: ".ui-widget-content",
             north: {
-                paneSelector: "#tabButtons"
+                paneSelector: "#tabNorth",
+                children: {
+                    name: "tabNorthInnerLayout",
+                    center: {
+                        size: "auto",
+                        name: "tabNorthInnerCenterLayout",
+                        paneSelector: "#tabNorthCenter"
+                    }
+                }
             },
             center: {
                 paneSelector: "#tabPanels",
@@ -1435,12 +1443,12 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         var container = document.createElement("div");
         var image = document.createElement("div");
         image.href = "#";
-        image.className = "detailEdit";
-        image.style.backgroundImage = "url(resources/images/beautify16.png)";
+        image.className = "detailEdit fa fa-pencil";
+        //image.style.backgroundImage = "url(resources/images/beautify16.png)";
         image.title = "Details bearbeiten";
         image.style.cursor = "pointer";
-        image.style.width = "16px";
-        image.style.height = "16px";
+        //image.style.width = "16px";
+        //image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);
@@ -1449,41 +1457,43 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image.href = "#";
 
         if (data.commentCount > 0) {
-            image.style.backgroundImage = "url(resources/images/forum-16.gif)";
+            //image.style.backgroundImage = "url(resources/images/forum-16.gif)";
             image.style.cursor = "pointer";
-            image.className = "showComments";
+            if (data.commentCount == 1)
+                image.className = "showComments fa fa-comment";
+            else
+                image.className = "showComments fa fa-comments";
         }
         else {
-            image.style.backgroundImage = "url(resources/images/forum-16-bw.gif)";
+            //image.style.backgroundImage = "url(resources/images/forum-16-bw.gif)";
+            image.className = "showComments fa fa-comment-o";
             image.style.cursor = "none";
         }
         image.title = "Kommentare";
-        image.style.width = "16px";
-        image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);
 
         image = document.createElement("div");
         image.href = "#";
-        image.className = "deleteDocument";
-        image.style.backgroundImage = "url(resources/images/deleteDocument.gif)";
+        image.className = "deleteDocument fa fa-trash";
+        //image.style.backgroundImage = "url(resources/images/deleteDocument.gif)";
         image.title = "Dokument löschen";
         image.style.cursor = "pointer";
-        image.style.width = "16px";
-        image.style.height = "16px";
+        //image.style.width = "16px";
+        //image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);
 
         image = document.createElement("div");
         image.href = "#";
-        image.className = "rulesDocument";
-        image.style.backgroundImage = "url(resources/images/rules.png)";
+        image.className = "rulesDocument fa fa-wpforms";
+        //image.style.backgroundImage = "url(resources/images/rules.png)";
         image.title = "Dokument Regel erstellen";
         image.style.cursor = "pointer";
-        image.style.width = "16px";
-        image.style.height = "16px";
+        //image.style.width = "16px";
+        //image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);

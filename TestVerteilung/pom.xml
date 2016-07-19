@@ -57,10 +57,15 @@
                                     <directory>src${file.separator}main${file.separator}webapp</directory>
                                     <filtering>true</filtering>
                                     <excludes>
-                                        <exclude>**/css</exclude>
-                                        <exclude>**/images</exclude>
-                                        <exclude>**/fonts</exclude>
-                                        <exclude>**/themes</exclude>
+                                        <exclude>**/*.css</exclude>
+                                        <exclude>**/*.jpg</exclude>
+                                        <exclude>**/*.png</exclude>
+                                        <exclude>**/*.woff</exclude>
+                                        <exclude>**/*.woff2</exclude>
+                                        <exclude>**/*.svg</exclude>
+                                        <exclude>**/*.eot</exclude>
+                                        <exclude>**/*.ttf</exclude>
+                                        <exclude>**/*.otf</exclude>
                                     </excludes>
                                 </resource>
                             </webResources>
@@ -101,10 +106,15 @@
                                     <directory>src${file.separator}main${file.separator}webapp</directory>
                                     <filtering>true</filtering>
                                     <excludes>
-                                        <exclude>**/css</exclude>
-                                        <exclude>**/images</exclude>
-                                        <exclude>**/fonts</exclude>
-                                        <exclude>**/themes</exclude>
+                                        <exclude>**/*.css</exclude>
+                                        <exclude>**/*.jpg</exclude>
+                                        <exclude>**/*.png</exclude>
+                                        <exclude>**/*.woff</exclude>
+                                        <exclude>**/*.woff2</exclude>
+                                        <exclude>**/*.svg</exclude>
+                                        <exclude>**/*.eot</exclude>
+                                        <exclude>**/*.ttf</exclude>
+                                        <exclude>**/*.otf</exclude>
                                     </excludes>
                                 </resource>
                             </webResources>

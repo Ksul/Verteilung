@@ -647,9 +647,56 @@ h2 {
     width: 100%;
 }
 
-.dataTables_paginate {
+div.dataTables_paginate {
     float: right;
 }
+
+div.dataTables_paginate a.paginate_button.first,
+div.dataTables_paginate a.paginate_button.previous {
+    position: relative;
+    padding-left: 24px;
+}
+
+div.dataTables_paginate a.paginate_button.next,
+div.dataTables_paginate a.paginate_button.last {
+    position: relative;
+    padding-right: 24px;
+}
+
+div.dataTables_paginate a.first:before,
+div.dataTables_paginate a.previous:before {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    display: block;
+    font-family: FontAwesome;
+}
+
+div.dataTables_paginate a.next:after,
+div.dataTables_paginate a.last:after {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    display: block;
+    font-family: FontAwesome;
+}
+
+div.dataTables_paginate a.first:before {
+    content: "\f100";
+}
+
+div.dataTables_paginate a.previous:before {
+    content: "\f104";
+}
+
+div.dataTables_paginate a.next:after {
+    content: "\f105";
+}
+
+div.dataTables_paginate a.last:after {
+    content: "\f101";
+}
+
 .dataTables_info {
     float: left;
 }
