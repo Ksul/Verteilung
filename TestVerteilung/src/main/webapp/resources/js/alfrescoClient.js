@@ -1374,12 +1374,9 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
         // Ordner bearbeiten
         image = document.createElement("div");
         image.href = "#";
-        image.className = "folderEdit";
-        image.style.backgroundImage = "url(resources/images/beautify16.png)";
+        image.className = "folderEdit fa fa-pencil";
         image.title = "Ordner Details bearbeiten";
         image.style.cursor = "pointer";
-        image.style.width = "16px";
-        image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);
@@ -1444,11 +1441,8 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         var image = document.createElement("div");
         image.href = "#";
         image.className = "detailEdit fa fa-pencil";
-        //image.style.backgroundImage = "url(resources/images/beautify16.png)";
         image.title = "Details bearbeiten";
         image.style.cursor = "pointer";
-        //image.style.width = "16px";
-        //image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);
@@ -1457,7 +1451,6 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image.href = "#";
 
         if (data.commentCount > 0) {
-            //image.style.backgroundImage = "url(resources/images/forum-16.gif)";
             image.style.cursor = "pointer";
             if (data.commentCount == 1)
                 image.className = "showComments fa fa-comment";
@@ -1465,8 +1458,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
                 image.className = "showComments fa fa-comments";
         }
         else {
-            //image.style.backgroundImage = "url(resources/images/forum-16-bw.gif)";
-            image.className = "showComments fa fa-comment-o";
+             image.className = "showComments fa fa-comment-o";
             image.style.cursor = "none";
         }
         image.title = "Kommentare";
@@ -1477,11 +1469,8 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image = document.createElement("div");
         image.href = "#";
         image.className = "deleteDocument fa fa-trash";
-        //image.style.backgroundImage = "url(resources/images/deleteDocument.gif)";
-        image.title = "Dokument löschen";
+           image.title = "Dokument löschen";
         image.style.cursor = "pointer";
-        //image.style.width = "16px";
-        //image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);
@@ -1489,11 +1478,8 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image = document.createElement("div");
         image.href = "#";
         image.className = "rulesDocument fa fa-wpforms";
-        //image.style.backgroundImage = "url(resources/images/rules.png)";
         image.title = "Dokument Regel erstellen";
         image.style.cursor = "pointer";
-        //image.style.width = "16px";
-        //image.style.height = "16px";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);

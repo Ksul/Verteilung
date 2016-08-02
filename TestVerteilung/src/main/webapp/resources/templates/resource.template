@@ -1,5 +1,5 @@
 resources/css/bootstrap-datetimepicker${css.ending}
-resources/font-awesome-4.6.3/css/font-awesome${css.ending}
+resources/css/font-awesome${css.ending}
 resources/css/dataTables${css.ending}
 resources/css/Base${css.ending}
 resources/css/BreadCrumb${css.ending}
