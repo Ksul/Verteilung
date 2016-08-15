@@ -542,7 +542,7 @@ function loadAlfrescoTable() {
             },
             "columns": [
                 {
-                    "class": 'details-control',
+                    "class": 'alignCenter details-control',
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
@@ -626,14 +626,13 @@ function loadAlfrescoTable() {
                         try {
                                 if (exist(data) && data == "application/pdf") {
                                     var span = document.createElement("span");
-                                    var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/resources/images/pdf.png";
-                                    var image = document.createElement('img');
+                                    var image = document.createElement('div');
                                     image.id = "alfrescoTableIcon" + row.objectID;
-                                    image.className = "alfrescoTableIconEvent alfrescoTableDragable treeDropable";
+                                    image.className = "alfrescoTableIconEvent alfrescoTableDragable treeDropable fa fa-file-pdf-o fa-2x awesomeEntity";
                                     image.title = "PDF Dokument";
                                     image.draggable = true;
                                     image.style.cursor = "pointer";
-                                    image.src =url;
+                                    image.style.color = "#ff8512";
                                     $('#alfrescoTabelle tbody').on( 'click', '#' + image.id, function (event) {
                                         openDocument(this, event);
                                     });
@@ -757,13 +756,13 @@ function loadAlfrescoTable() {
             if (row.child.isShown()) {
                 // This row is already open - close it
                 row.child.hide();
-                tr.removeClass('shown');
+                $(tr.get(0).childNodes[0]).removeClass('shown');
                 calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             }
             else {
                 // Open this row
                 row.child(formatAlfrescoTabelleDetailRow(row.data())).show();
-                tr.addClass('shown');
+                $(tr.get(0).childNodes[0]).addClass('shown');
                 calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
             }
         });
@@ -850,11 +849,11 @@ function loadAlfrescoFolderTable() {
             "order": [[2, 'desc']],
             "columns": [
                 {
-                    "class": 'folder-control treeDropable',
+                    "class": 'alignCenter folder-control awesomeEntity treeDropable',
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
-                    "width": "40px"
+                    "width": "30px"
                 },
                 {
                     "data": "name",
@@ -1093,10 +1092,9 @@ function loadAlfrescoSearchTable() {
                         try {
                             if (exist(data) && data == "application/pdf") {
                                 var span = document.createElement("span");
-                                var url = location.href.substr(0, location.href.lastIndexOf('/')) + "/resources/images/pdf.png";
-                                var image = document.createElement('img');
+                                var image = document.createElement('div');
                                 image.id = "alfrescoSearchTableIcon" + row.objectID;
-                                image.className = "alfrescoSearchTableIconEvent";
+                                image.className = "alfrescoSearchTableIconEvent fa fa-file-pdf-o fa-2x ";
                                 image.title = "PDF Dokument";
                                 image.draggable = true;
                                 image.style.cursor = "pointer";
@@ -1370,11 +1368,13 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
 
         var container = document.createElement("div");
         var image;
+        var inner1;
+        var inner2;
 
         // Ordner bearbeiten
-        image = document.createElement("div");
+        image = document.createElement("i");
         image.href = "#";
-        image.className = "folderEdit fa fa-pencil";
+        image.className = "folderEdit fa fa-pencil fa-2x awesomeEntity";
         image.title = "Ordner Details bearbeiten";
         image.style.cursor = "pointer";
         image.style.cssFloat = "left";
@@ -1388,14 +1388,19 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             data.objectID != unknownFolderId &&
             data.objectID != doubleFolderId &&
             data.objectID != inboxFolderId) {
-            image = document.createElement("div");
+            image = document.createElement("i");
             image.href = "#";
-            image.className = "folderCreate";
-            image.style.backgroundImage = "url(resources/images/folder_add.png)";
+            //image.style.fontSize ="xx-small";
+            image.className = "folderCreate fa-stack fa-1x";
+            inner1 = document.createElement("i");
+            inner1.className = "fa fa-folder-o fa-stack-2x awesomeEntity" ;
+            inner2 = document.createElement("i");
+            inner2.className = " fa fa-plus fa-stack-1x awesomeAction";
+            inner2.style.color = "green";
+            image.appendChild(inner1);
+            image.appendChild(inner2);
             image.title = "neuen Ordner anlegen";
             image.style.cursor = "pointer";
-            image.style.width = "16px";
-            image.style.height = "16px";
             image.style.cssFloat = "left";
             image.style.marginRight = "5px";
             container.appendChild(image);
@@ -1409,14 +1414,19 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             data.objectID != doubleFolderId &&
             data.objectID != inboxFolderId &&
             data.objectID != documentFolderId) {
-            image = document.createElement("div");
+            image = document.createElement("i");
             image.href = "#";
-            image.className = "folderRemove";
-            image.style.backgroundImage = "url(resources/images/folder_remove.png)";
+            //image.style.fontSize ="xx-small";
+            image.className = "folderRemove fa-stack fa-1x";
+            inner1 = document.createElement("i");
+            inner1.className = "fa fa-folder-o fa-stack-2x awesomeEntity" ;
+            inner2 = document.createElement("i");
+            inner2.className = " fa fa-remove fa-stack-1x awesomeAction";
+            inner2.style.color = "red";
+            image.appendChild(inner1);
+            image.appendChild(inner2);
             image.title = "Ordner löschen";
             image.style.cursor = "pointer";
-            image.style.width = "16px";
-            image.style.height = "16px";
             image.style.cssFloat = "left";
             image.style.marginRight = "5px";
             container.appendChild(image);
@@ -1438,27 +1448,27 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
 function alfrescoAktionFieldFormatter(data, type, full) {
     try {
         var container = document.createElement("div");
-        var image = document.createElement("div");
+        var image = document.createElement("i");
         image.href = "#";
-        image.className = "detailEdit fa fa-pencil";
+        image.className = "detailEdit fa fa-pencil fa-2x awesomeEntity";
         image.title = "Details bearbeiten";
         image.style.cursor = "pointer";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);
 
-        image = document.createElement("div");
+        image = document.createElement("i");
         image.href = "#";
 
         if (data.commentCount > 0) {
             image.style.cursor = "pointer";
             if (data.commentCount == 1)
-                image.className = "showComments fa fa-comment";
+                image.className = "showComments fa fa-comment fa-2x awesomeEntity";
             else
-                image.className = "showComments fa fa-comments";
+                image.className = "showComments fa fa-comments fa-2x awesomeEntity";
         }
         else {
-             image.className = "showComments fa fa-comment-o";
+             image.className = "showComments fa fa-comment-o fa-2x awesomeEntity";
             image.style.cursor = "none";
         }
         image.title = "Kommentare";
@@ -1466,18 +1476,18 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         image.style.marginRight = "5px";
         container.appendChild(image);
 
-        image = document.createElement("div");
+        image = document.createElement("i");
         image.href = "#";
-        image.className = "deleteDocument fa fa-trash";
-           image.title = "Dokument löschen";
+        image.className = "deleteDocument fa fa-trash fa-2x awesomeEntity";
+        image.title = "Dokument löschen";
         image.style.cursor = "pointer";
         image.style.cssFloat = "left";
         image.style.marginRight = "5px";
         container.appendChild(image);
 
-        image = document.createElement("div");
+        image = document.createElement("i");
         image.href = "#";
-        image.className = "rulesDocument fa fa-wpforms";
+        image.className = "rulesDocument fa fa-wpforms fa-2x awesomeEntity";
         image.title = "Dokument Regel erstellen";
         image.style.cursor = "pointer";
         image.style.cssFloat = "left";

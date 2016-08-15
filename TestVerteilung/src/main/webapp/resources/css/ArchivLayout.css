@@ -35,19 +35,27 @@ th {
     font-size: 0.7em;
 }*/
 
-/*Child Rows*/
-td.details-control {
-    background: url(../images/details_open.png) no-repeat center center;
-    cursor: pointer;
+td.folder-control:before  {
+    content: "\f115";
+    /* fa-folder-open-o */
+    font-family: FontAwesome;
+    font-size: 2em;
 }
 
-tr.shown td.details-control {
-    background: url(../images/details_close.png) no-repeat center center;
+ td.details-control:before  {
+    content: "\f055";
+    /* fa-plus-circle */
+    font-family: FontAwesome;
+    font-size: 2em;
+    color: #009900;
 }
 
-td.folder-control {
-    background: url(../images/folder1.png) no-repeat center center;
-    cursor: pointer;
+td.shown.details-control:before {
+    content: "\f056";
+    /* fa-minus-circle */
+    font-family: FontAwesome;
+    font-size: 2em;
+    color: red ;
 }
 
 /* remove padding & scrolling from panes that are 'containers' for nested layouts */
@@ -707,4 +715,26 @@ div.dataTables_paginate a.last:after {
 
 .alpaca-control {
     background-color: white;
+}
+
+
+.awesomeEntity, .awesomeAction {
+    color:gray;
+}
+
+.awesomeEntity {
+    /*text-shadow: 1px 2px 3px black;*/
+}
+.awesomeAction {
+    font-size: 120%;
+    margin: 40% 0px 0px 50%;
+    text-shadow: -1px 0 black, 0 1px 2px black, 1px 0 2px black, 0 -1px black;
+}
+
+/* awesomeBlue */
+span.awesomeBlue i {
+    color: #2E5888;
+}
+span.awesomeBlue i.awesomeAction {
+    text-shadow: -1px 0 white, 0 2px 3px black, 2px 0 3px black, 0 -1px white;
 }
