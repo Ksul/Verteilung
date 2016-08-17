@@ -476,6 +476,7 @@ function setXMLPosition(position) {
  * @returns {string}
  */
 function printResults(results) {
+    var key;
     var ret = "";
     var blanks = "                                               ";
     var maxLength = 0;

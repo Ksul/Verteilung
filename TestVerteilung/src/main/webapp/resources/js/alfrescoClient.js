@@ -119,14 +119,19 @@ function handleDropInbox(evt) {
  * @param footerId      die Id des Footers
  */
 function calculateTableHeight(panel, tabelle, divId, tabelleId,headerId, footerId) {
-    var div = $('#'+divId);
-    var table = $('#'+tabelleId);
-    var completePanel = $('#'+panel).height();
-    var topPanel = div.children().children()[0].offsetHeight;
-    var downPanel = div.children().children()[2].offsetHeight;
-    var columnPanel = div.children().children()[1].children[0].offsetHeight;
-    var headerPanel = $('#'+headerId).height();
-    var footerPanel = $('#'+footerId).height();
+    var div, table, completePanel, topPanel, downPanel,columnPanel, headerPanel, footerPanel = 0;
+    var children;
+    div = $('#'+divId);
+    table = $('#'+tabelleId);
+    completePanel = $('#'+panel).height();
+    children =  div.children().children();
+    topPanel = children[0].offsetHeight;
+    if (children.length > 2)
+        downPanel = children[2].offsetHeight;
+    if (children.length > 1)
+        columnPanel = children[1].children[0].offsetHeight;
+    headerPanel = $('#'+headerId).height();
+    footerPanel = $('#'+footerId).height();
     while (((completePanel - topPanel - headerPanel - columnPanel - downPanel - footerPanel) > table.height()) && tabelle.page.len() < 50) {
         tabelle.page.len(tabelle.page.len() + 1).draw();
     }
@@ -526,7 +531,7 @@ function loadAlfrescoTable() {
     try {
         $.fn.dataTable.moment('DD.MM.YYYY');
         alfrescoTabelle = $('#alfrescoTabelle').DataTable({
-            "jQueryUI": true,
+            "jQueryUI": false,
             "pagingType": "paging_with_jqui_icons",
             "data": [],
             "scrollX": "100%",
@@ -542,7 +547,7 @@ function loadAlfrescoTable() {
             },
             "columns": [
                 {
-                    "class": 'alignCenter details-control',
+                    "class": 'alignCenter details-control awesomeEntity',
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
@@ -808,7 +813,7 @@ function loadAlfrescoTable() {
 function loadAlfrescoFolderTable() {
     try {
         alfrescoFolderTabelle = $('#alfrescoFolderTabelle').DataTable({
-            "jQueryUI": true,
+            "jQueryUI": false,
             "pagingType": "paging_with_jqui_icons",
             "data": [],
             "scrollX": "100%",
@@ -997,7 +1002,7 @@ function loadAlfrescoSearchTable() {
     try {
         $.fn.dataTable.moment('DD.MM.YYYY');
         alfrescoSearchTabelle = $('#alfrescoSearchTabelle').DataTable({
-            "jQueryUI": true,
+            "jQueryUI": false,
             "pagingType": "paging_with_jqui_icons",
             "data": [],
             "scrollX": "100%",
@@ -1008,7 +1013,7 @@ function loadAlfrescoSearchTable() {
             "order": [[3, 'desc']],
             "columns": [
                 {
-                    "class": 'details-control',
+                    "class": 'alignCenter details-control awesomeEntity',
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
@@ -1259,7 +1264,7 @@ function loadVerteilungTable() {
     try {
         $('#dtable').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="tabelle"></table>');
         tabelle = $('#tabelle').DataTable({
-            "jQueryUI": true,
+            "jQueryUI": false,
             "pagingType": "paging_with_jqui_icons",
             "data": [],
             "scrollX": "100%",
@@ -1270,7 +1275,7 @@ function loadVerteilungTable() {
             //"pageLength": Math.max(Math.floor((verteilungLayout.state.west.innerHeight - 24 - 26 - 20) / 29), 1),
             "columns": [
                 {
-                    "class": 'details-control',
+                    "class": 'alignCenter details-control awesomeEntity',
                     "orderable": false,
                     "data": null,
                     "defaultContent": '',
@@ -2722,7 +2727,9 @@ function loadAlfrescoTree() {
     } catch (e) {
     }
 
-
+    /*
+    Aufbau des Tree's
+     */
     try {
         tree = $("#tree").jstree({
             'core': {
@@ -2787,7 +2794,7 @@ function loadAlfrescoTree() {
                     }
                 },
                 'themes': {
-                    'responsive': false,
+                    'responsive': true,
                     'variant': 'big',
                     'stripes': false,
                     'dots': true,
@@ -2799,22 +2806,28 @@ function loadAlfrescoTree() {
                     "max_children" : 1
                 },
                 'archivRootStandard' : {
-                    "valid_children" : ["archivFolderStandard", "archivDocumentFolderStandard", "archivFehlerFolderStandard"]
+                    "valid_children" : ["archivFolderStandard", "archivDocumentFolderStandard", "archivFehlerFolderStandard"],
+                    "icon": "fa fa-file-text-o fa-15x awesomeEntity"
                 },
                 'archivFolderStandard' : {
-                    "valid_children" : []
+                    "valid_children" : [],
+                    "icon": "fa fa-file-text-o fa-15x awesomeEntity"
                 },
                 'archivDoubleFolderStandard' : {
-                    "valid_children" : []
+                    "valid_children" : [],
+                    "icon": "fa fa-file-text-o fa-15x awesomeEntity"
                 },
                 'archivFehlerFolderStandard' : {
-                    "valid_children" : ["archivDoubleFolderStandard"]
+                    "valid_children" : ["archivDoubleFolderStandard"],
+                    "icon": "fa fa-file-text-o fa-15x awesomeEntity"
                 },
                 'archivDocumentFolderStandard' : {
-                    "valid_children" : ["documentFolderStandard"]
+                    "valid_children" : ["documentFolderStandard"] ,
+                    "icon": "fa fa-file-text-o fa-15x awesomeEntity"
                 },
                 'documentFolderStandard' : {
-                    "valid_children" : -1
+                    "valid_children" : -1,
+                    "icon": "fa fa-file-text-o fa-15x awesomeEntity"
                 }
             },
             "contextmenu": {
@@ -3296,11 +3309,11 @@ function start() {
         propsEditor.setReadOnly(true);
         propsEditor.renderer.setShowGutter(false);
         propsEditor.setShowPrintMargin(false);
-
+        propsEditor.$blockScrolling = Infinity;
         outputEditor = ace.edit("inOutput");
         outputEditor.setReadOnly(true);
         outputEditor.setShowPrintMargin(false);
-
+        outputEditor.$blockScrolling = Infinity;
         var zoneRules = document.getElementById('inRules');
         zoneRules.addEventListener('dragover', handleDragOver, false);
         zoneRules.addEventListener('drop', handleRulesSelect, false);
@@ -3327,7 +3340,7 @@ function start() {
             },
             exec: format
         });
-
+        rulesEditor.$blockScrolling = Infinity;
         textEditor = ace.edit("inTxt");
         textEditor.setTheme("ace/theme/chrome");
         textEditor.setShowInvisibles(true);
@@ -3335,6 +3348,7 @@ function start() {
         jsMode = require("ace/mode/javascript").Mode;
         txtMode = require("ace/mode/text").Mode;
         textEditor.getSession().setMode(new txtMode());
+        textEditor.$blockScrolling = Infinity;
         var zone = document.getElementById('inTxt');
         zone.addEventListener('dragover', handleDragOver, false);
         zone.addEventListener('drop', handleFileSelect, false);
