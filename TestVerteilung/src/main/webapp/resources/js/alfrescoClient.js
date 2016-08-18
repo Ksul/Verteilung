@@ -18,6 +18,10 @@ function changeCss(className, classValue) {
     classContainer.html('<style>' + className + ' {' + classValue + '}</style>');
 }
 
+/**
+ *  liefert ein Alfresco Ticket
+ *  @return alfrescoTicket das Alfresco Ticket
+ */
 function getAlfrescoTicket() {
     if (!exist(alfrescoTicket)) {
         var obj = executeService("getTicket");
@@ -28,7 +32,7 @@ function getAlfrescoTicket() {
 }
 
 /**
- * startet den normalen Alfresco View
+ * startet die normalen Alfresco View
  */
 function showAlfrescoNormalView(){
     viewMenu.children('li:first').superfish('hide');
@@ -40,7 +44,7 @@ function showAlfrescoNormalView(){
 }
 
 /**
- * startet den normalen Alfresco SearchView
+ * startet die normalen Alfresco SearchView
  */
 function showAlfrescoSearchNormalView(){
     viewMenu.children('li:first').superfish('hide');
@@ -51,7 +55,7 @@ function showAlfrescoSearchNormalView(){
 }
 
 /**
- * startet den Alfresco Icon View
+ * startet die Alfresco Icon View
  */
 function showAlfrescoIconView(){
     viewMenu.children('li:first').superfish('hide');
@@ -63,7 +67,7 @@ function showAlfrescoIconView(){
 }
 
 /**
- * startet den Alfresco Search Icon View
+ * startet die Alfresco Search Icon View
  */
 function showAlfrescoSearchIconView() {
     viewMenu.children('li:first').superfish('hide');
@@ -73,7 +77,7 @@ function showAlfrescoSearchIconView() {
     calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
 }
 
-    /**
+/**
  * Eventhandler der für die Verarbeitung von fallen gelassen Dateien auf die Inbox zuständig ist
  * @param evt  das Event
  */
@@ -119,17 +123,18 @@ function handleDropInbox(evt) {
  * @param footerId      die Id des Footers
  */
 function calculateTableHeight(panel, tabelle, divId, tabelleId,headerId, footerId) {
-    var div, table, completePanel, topPanel, downPanel,columnPanel, headerPanel, footerPanel = 0;
+    var div, table, completePanel = 0, topPanel = 0, downPanel = 0,columnPanel = 0, headerPanel = 0, footerPanel = 0;
     var children;
     div = $('#'+divId);
     table = $('#'+tabelleId);
     completePanel = $('#'+panel).height();
     children =  div.children().children();
-    topPanel = children[0].offsetHeight;
+    if (children.length > 0)
+        topPanel = children[0].offsetHeight;
     if (children.length > 2)
         downPanel = children[2].offsetHeight;
     if (children.length > 1)
-        columnPanel = children[1].children[0].offsetHeight;
+        columnPanel = children[0].offsetHeight;
     headerPanel = $('#'+headerId).height();
     footerPanel = $('#'+footerId).height();
     while (((completePanel - topPanel - headerPanel - columnPanel - downPanel - footerPanel) > table.height()) && tabelle.page.len() < 50) {
@@ -201,6 +206,8 @@ function loadLayout() {
             fxSpeed_close: 1000,
             fxSettings_open: {easing: "easeInQuint"},
             fxSettings_close: {easing: "easeOutQuint"},
+            resizerClass: "ui-widget-content",
+            togglerClass: "ui-widget-content",
             spacing_open: 8,
             spacing_closed: 12,
             closable: true,
@@ -236,7 +243,9 @@ function loadLayout() {
             resizable: false,
             closable: false,
             initPanes: true,
-            showDebugMessages:			true,
+            resizerClass: "ui-widget-content",
+            togglerClass: "ui-widget-content",
+            showDebugMessages: true,
             contentSelector: ".ui-widget-content",
             north: {
                 paneSelector: "#tabNorth",
@@ -275,6 +284,8 @@ function loadLayout() {
             fxSettings_close: {easing: "easeOutQuint"},
             closable: true,
             resizable: true,
+            resizerClass: "ui-widget-content",
+            togglerClass: "ui-widget-content",
             //slidable:				true,
             livePaneResizing: true,
             spacing_open: 8,
@@ -315,6 +326,8 @@ function loadLayout() {
             fxSettings_close: {easing: "easeOutQuint"},
             closable: true,
             resizable: true,
+            resizerClass: "ui-widget-content",
+            togglerClass: "ui-widget-content",
             //slidable:				true,
             livePaneResizing: true,
             spacing_open: 8,
@@ -363,6 +376,7 @@ function loadLayout() {
                     },
                     center: {
                         size: "auto",
+
                         name: "alfrescoCenterCenterLayout",
                         paneSelector: "#alfrescoCenterCenter",
 
@@ -370,12 +384,22 @@ function loadLayout() {
                             resizable: true,
                             closable: false,
                             slidable: true,
+                            resizerTip: "Größe ändern",
+                            fxName: "slide",
+                            fxSpeed_open: 800,
+                            fxSpeed_close: 1000,
+                            fxSettings_open: {easing: "easeInQuint"},
+                            fxSettings_close: {easing: "easeOutQuint"},
+                            resizerClass: "ui-widget-content",
+                            togglerClass: "ui-widget-content",
+                            livePaneResizing: true,
                             spacing_open: 8,
                             spacing_closed: 12,
                             name: "alfrescoCenterCenterInnerLayout",
                             north: {
                                 size: 225,
                                 paneSelector: "#alfrescoCenterCenterNorth",
+                                resizeable: true,
                                 name: "alfrescoCenterCenterNorthLayout",
                                 onresize: function () {
                                     try {
@@ -387,6 +411,7 @@ function loadLayout() {
                             },
                             center: {
                                 size: "auto",
+                                resizeable: true,
                                 paneSelector: "#alfrescoCenterCenterCenter",
                                 name: "alfrescoCenterCenterCenterLayout",
                                 onresize: function () {
@@ -416,6 +441,8 @@ function loadLayout() {
             fxSettings_close: {easing: "easeOutQuint"},
             closable: true,
             resizable: true,
+            resizerClass: "ui-widget-content",
+            togglerClass: "ui-widget-content",
             //slidable:				true,
             livePaneResizing: true,
             spacing_open: 8,
@@ -637,7 +664,6 @@ function loadAlfrescoTable() {
                                     image.title = "PDF Dokument";
                                     image.draggable = true;
                                     image.style.cursor = "pointer";
-                                    image.style.color = "#ff8512";
                                     $('#alfrescoTabelle tbody').on( 'click', '#' + image.id, function (event) {
                                         openDocument(this, event);
                                     });
@@ -1099,7 +1125,7 @@ function loadAlfrescoSearchTable() {
                                 var span = document.createElement("span");
                                 var image = document.createElement('div');
                                 image.id = "alfrescoSearchTableIcon" + row.objectID;
-                                image.className = "alfrescoSearchTableIconEvent fa fa-file-pdf-o fa-2x ";
+                                image.className = "alfrescoSearchTableIconEvent fa fa-file-pdf-o fa-2x awesomeEnity";
                                 image.title = "PDF Dokument";
                                 image.draggable = true;
                                 image.style.cursor = "pointer";

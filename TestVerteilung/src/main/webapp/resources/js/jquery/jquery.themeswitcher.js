@@ -15,7 +15,7 @@
         var themes;
         var settings = {
             loadtheme: "",
-            height: 200,
+            height: 300,
             width: 175,
             rounded: true,
             imgpath: "resources/images/",

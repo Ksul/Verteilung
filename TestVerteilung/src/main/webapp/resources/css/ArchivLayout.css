@@ -23,8 +23,8 @@
     text-align: center;
 }
 
-.ui-widget .ui-widget {
-    font-size: 0.87em;
+.ui-widget-content {
+    color:inherit;
 }
 
 /*td {
@@ -434,13 +434,6 @@ p {
     opacity: 0.3;
 }
 
-.ui-layout-resizer-open-hover, .ui-layout-resizer-dragging {
-    background: none !important;
-}
-
-.ui-layout-resizer {
-    background: none !important;
-}
 
 button.ui-dialog-titlebar-close span.ui-icon {
     margin-left: -8px !important;
@@ -448,7 +441,6 @@ button.ui-dialog-titlebar-close span.ui-icon {
 }
 
 .header {
-    background: #80ade5 url(../images/80ade5_40x100_textures_04_highlight_hard_100.png) 0 50% repeat-x;
     border-bottom: 1px solid #777;
     font-weight: bold;
     text-align: center;
@@ -756,7 +748,7 @@ div.dataTables_paginate a.last:after {
 
 
 .awesomeEntity, .awesomeAction {
-    color:gray;
+    color:inherit;
 }
 
 .awesomeEntity {
@@ -784,10 +776,11 @@ span.awesomeBlue i.awesomeAction {
     font-size: 1.5em;
 }
 
-.jstree {
-    font-size: 1.02em;
-}
 
 .jstree-icon:empty {
     padding-right: 25px;
+}
+
+.sf-with-ul {
+    padding-left: 5px;
 }
