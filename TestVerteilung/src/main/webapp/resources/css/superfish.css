@@ -9,7 +9,7 @@
 }
 .sf-menu ul {
 	position: absolute;
-	display: none;
+	display: block;
 	top: 100%;
 	left: 0;
 	z-index: 99;
@@ -51,24 +51,24 @@
 	zoom: 1; /* IE7 */
 }
 .sf-menu a {
-	color: #13a;
+	color: inherit;
 }
 .sf-menu li {
-	background: #BDD2FF;
+	background: inherit;
 	white-space: nowrap; /* no need for Supersubs plugin */
 	*white-space: normal; /* ...unless you support IE7 (let it wrap) */
 	-webkit-transition: background .2s;
 	transition: background .2s;
 }
 .sf-menu ul li {
-	background: #AABDE6;
+	background: inherit;
 }
 .sf-menu ul ul li {
-	background: #9AAEDB;
+	/*background: inherit;*/
 }
 .sf-menu li:hover,
 .sf-menu li.sfHover {
-	background: #CFDEFF;
+	/*background: inherit;*/
 	/* only transition out, not in */
 	-webkit-transition: none;
 	transition: none;

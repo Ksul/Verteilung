@@ -16,7 +16,7 @@
         var settings = {
             loadtheme: "",
             height: 300,
-            width: 175,
+            width: 135,
             rounded: true,
             imgpath: "resources/images/",
             themepath: "https://ajax.googleapis.com/ajax/libs/jqueryui/",

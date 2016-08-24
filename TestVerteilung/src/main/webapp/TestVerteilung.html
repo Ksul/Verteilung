@@ -34,7 +34,8 @@
         var alfrescoTabelle;
         var alfrescoFolderTabelle;
         var alfrescoSearchTabelle;
-        var viewMenu;
+        var viewMenuNormal;
+        var viewMenuSearch;
         var viewMode = 0;
         var workDocument = null;
         var multiMode = false;
@@ -446,7 +447,7 @@
                             <ul id="menu-1" class="sf-menu" onmouseover="alfrescoLayout.allowOverflow(this);">
                                 <li class="current">
                                     <a href="#ansicht">Ansicht</a>
-                                    <ul>
+                                    <ul class="ui-widget-header">
                                         <li>
                                             <a href="#normal" onclick="showAlfrescoNormalView();">Normal</a>
                                         </li>

@@ -35,7 +35,7 @@ function getAlfrescoTicket() {
  * startet die normalen Alfresco View
  */
 function showAlfrescoNormalView(){
-    viewMenu.children('li:first').superfish('hide');
+    viewMenuNormal.children('li:first').superfish('hide');
     alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.show("north");
     alfrescoTabelle.column(0).visible(true);
     alfrescoTabelle.column(1).visible(true);
@@ -47,7 +47,7 @@ function showAlfrescoNormalView(){
  * startet die normalen Alfresco SearchView
  */
 function showAlfrescoSearchNormalView(){
-    viewMenu.children('li:first').superfish('hide');
+    viewMenuSearch.children('li:first').superfish('hide');
     alfrescoSearchTabelle.column(0).visible(true);
     alfrescoSearchTabelle.column(1).visible(true);
     alfrescoSearchTabelle.column(2).visible(false);
@@ -58,7 +58,7 @@ function showAlfrescoSearchNormalView(){
  * startet die Alfresco Icon View
  */
 function showAlfrescoIconView(){
-    viewMenu.children('li:first').superfish('hide');
+    viewMenuNormal.children('li:first').superfish('hide');
     alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.hide("north");
     alfrescoTabelle.column(0).visible(false);
     alfrescoTabelle.column(1).visible(false);
@@ -70,7 +70,7 @@ function showAlfrescoIconView(){
  * startet die Alfresco Search Icon View
  */
 function showAlfrescoSearchIconView() {
-    viewMenu.children('li:first').superfish('hide');
+    viewMenuSearch.children('li:first').superfish('hide');
     alfrescoSearchTabelle.column(0).visible(false);
     alfrescoSearchTabelle.column(1).visible(false);
     alfrescoSearchTabelle.column(2).visible(true);
@@ -660,7 +660,7 @@ function loadAlfrescoTable() {
                                     var span = document.createElement("span");
                                     var image = document.createElement('div');
                                     image.id = "alfrescoTableIcon" + row.objectID;
-                                    image.className = "alfrescoTableIconEvent alfrescoTableDragable treeDropable fa fa-file-pdf-o fa-2x awesomeEntity";
+                                    image.className = "alfrescoTableIconEvent alfrescoTableDragable treeDropable fa fa-file-pdf-o fa-15x awesomeEntity";
                                     image.title = "PDF Dokument";
                                     image.draggable = true;
                                     image.style.cursor = "pointer";
@@ -1125,7 +1125,7 @@ function loadAlfrescoSearchTable() {
                                 var span = document.createElement("span");
                                 var image = document.createElement('div');
                                 image.id = "alfrescoSearchTableIcon" + row.objectID;
-                                image.className = "alfrescoSearchTableIconEvent fa fa-file-pdf-o fa-2x awesomeEnity";
+                                image.className = "alfrescoSearchTableIconEvent fa fa-file-pdf-o fa-15x awesomeEnity";
                                 image.title = "PDF Dokument";
                                 image.draggable = true;
                                 image.style.cursor = "pointer";
@@ -1405,7 +1405,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
         // Ordner bearbeiten
         image = document.createElement("i");
         image.href = "#";
-        image.className = "folderEdit fa fa-pencil fa-2x awesomeEntity";
+        image.className = "folderEdit fa fa-pencil fa-15x awesomeEntity";
         image.title = "Ordner Details bearbeiten";
         image.style.cursor = "pointer";
         image.style.cssFloat = "left";
@@ -1422,7 +1422,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             image = document.createElement("i");
             image.href = "#";
             //image.style.fontSize ="xx-small";
-            image.className = "folderCreate fa-stack fa-1x";
+            image.className = "folderCreate fa-stack fa-09x";
             inner1 = document.createElement("i");
             inner1.className = "fa fa-folder-o fa-stack-2x awesomeEntity" ;
             inner2 = document.createElement("i");
@@ -1448,7 +1448,7 @@ function alfrescoFolderAktionFieldFormatter(data, type, full) {
             image = document.createElement("i");
             image.href = "#";
             //image.style.fontSize ="xx-small";
-            image.className = "folderRemove fa-stack fa-1x";
+            image.className = "folderRemove fa-stack fa-09x";
             inner1 = document.createElement("i");
             inner1.className = "fa fa-folder-o fa-stack-2x awesomeEntity" ;
             inner2 = document.createElement("i");
@@ -1481,7 +1481,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         var container = document.createElement("div");
         var image = document.createElement("i");
         image.href = "#";
-        image.className = "detailEdit fa fa-pencil fa-2x awesomeEntity";
+        image.className = "detailEdit fa fa-pencil fa-15x awesomeEntity";
         image.title = "Details bearbeiten";
         image.style.cursor = "pointer";
         image.style.cssFloat = "left";
@@ -1494,12 +1494,12 @@ function alfrescoAktionFieldFormatter(data, type, full) {
         if (data.commentCount > 0) {
             image.style.cursor = "pointer";
             if (data.commentCount == 1)
-                image.className = "showComments fa fa-comment fa-2x awesomeEntity";
+                image.className = "showComments fa fa-comment fa-15x awesomeEntity";
             else
-                image.className = "showComments fa fa-comments fa-2x awesomeEntity";
+                image.className = "showComments fa fa-comments fa-15x awesomeEntity";
         }
         else {
-             image.className = "showComments fa fa-comment-o fa-2x awesomeEntity";
+             image.className = "showComments fa fa-comment-o fa-15x awesomeEntity";
             image.style.cursor = "none";
         }
         image.title = "Kommentare";
@@ -1509,7 +1509,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
 
         image = document.createElement("i");
         image.href = "#";
-        image.className = "deleteDocument fa fa-trash fa-2x awesomeEntity";
+        image.className = "deleteDocument fa fa-trash fa-15x awesomeEntity";
         image.title = "Dokument löschen";
         image.style.cursor = "pointer";
         image.style.cssFloat = "left";
@@ -1518,7 +1518,7 @@ function alfrescoAktionFieldFormatter(data, type, full) {
 
         image = document.createElement("i");
         image.href = "#";
-        image.className = "rulesDocument fa fa-wpforms fa-2x awesomeEntity";
+        image.className = "rulesDocument fa fa-wpforms fa-15x awesomeEntity";
         image.title = "Dokument Regel erstellen";
         image.style.cursor = "pointer";
         image.style.cssFloat = "left";
@@ -3411,8 +3411,8 @@ function start() {
             }
         });
 
-        var viewMenu = $('#menu-1').superfish();
-        viewMenu = $('#menu-2').superfish();
+        viewMenuNormal = $('#menu-1').superfish();
+        viewMenuSearch = $('#menu-2').superfish();
         fillMessageBox(true);
     } catch(e) {
         errorHandler(e);
