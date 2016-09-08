@@ -388,18 +388,20 @@
 <div id="clientPage" class="ui-state-active">
     <!--Tab Bereich-->
     <div id="tabs" class="container">
-        <div id="tabNorth" onmouseover="alfrescoLayout.allowOverflow(this);" class="ui-layout-north container">
+        <div id="tabNorth" class="ui-layout-north container">
             <!--Tabulatoren-->
-            <div id="tabNorthCenter" class="ui-layout-center container">
+            <div id="tabNorthInnerCenter" class="inner-center container">
                 <ul id="tabButtons" class="container">
                     <li id="tabArchiv"><a href="#tab1">Archiv</a></li>
                     <li id="tabSuche"><a href="#tab2">Suche</a></li>
                     <li id="tabVerteilung"><a href="#tab3">Verteilung</a></li>
                 </ul>
             </div>
-            <div  style="float:right" id="switcher" class="themes" title="Farbschema"></div>
-            <input style="float:right" id="settings" onclick="startSettingsDialog();" class="settings" title="Open Settings">
-         </div>
+            <div style="float:right; padding-right:10px;" id="settings" onclick="startSettingsDialog();" class="fa fa-cogs fa-2x" title="Einstellungen"></div>
+            <div style="float:right; padding-right:10px;position: relative;" id="refresh" onclick="refreshCache();" class="fa fa-refresh fa-2x" title="Aktualisieren"></div>
+
+
+        </div>
         <!--Tab Panels-->
         <div id="tabPanels" class="ui-layout-center container ui-state-active">
             <!--Tab Archiv-->

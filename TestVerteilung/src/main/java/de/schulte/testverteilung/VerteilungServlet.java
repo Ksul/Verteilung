@@ -89,6 +89,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_GETTITLES = "getTitles";
     public static final String FUNCTION_ISCONNECTED = "isConnected";
     public static final String FUNCTION_GETCONNECTION = "getConnection";
+    public static final String FUNCTION_CLEARCACHE = "clearCache";
 
 
     @Override
@@ -264,6 +265,8 @@ public class VerteilungServlet extends HttpServlet {
                     obj = isConnected();
                 } else if (value.equalsIgnoreCase(FUNCTION_GETCONNECTION)) {
                     obj = getConnection();
+                } else if (value.equalsIgnoreCase(FUNCTION_CLEARCACHE)) {
+                    obj = clearCache();
                 } else if (value.equalsIgnoreCase(FUNCTION_GETDATAFROMINTERNALSTORAGE)) {
                     String fileName = getURLParameter(req, PARAMETER_FILENAME, false);
                     if (fileName == null || fileName.isEmpty())
@@ -294,6 +297,17 @@ public class VerteilungServlet extends HttpServlet {
      */
     protected JSONObject getConnection() {
         return services.getConnection();
+    }
+
+    /**
+     * löscht den Cache
+     * @return obj               ein JSONObject mit den Feldern success: true        die Operation war erfolgreich
+     *                                                                   false       ein Fehler ist aufgetreten
+     *                                                          result   false       keine Connection
+     *                                                                   JSONObjekt  Die Verbindungsparameter
+     */
+    protected JSONObject clearCache() {
+        return services.clearCache();
     }
 
     /**

@@ -1,5 +1,7 @@
+resources/css/jquery-ui-custom${css.ending}
 resources/css/bootstrap-datetimepicker${css.ending}
 resources/css/font-awesome${css.ending}
+resources/themes/paper/bootstrap-paper{css.ending}
 resources/css/dataTables${css.ending}
 resources/css/Base${css.ending}
 resources/css/BreadCrumb${css.ending}
@@ -33,7 +35,6 @@ resources/js/jquery/jquery.layout.resizeTabLayout-1.3${js.ending}
 resources/js/jquery/jquery.cookie${js.ending}
 resources/js/jquery/jquery.hotkeys${js.ending}
 resources/js/jstree/jstree${js.ending}
-resources/js/jquery/jquery.themeswitcher${js.ending}
 resources/js/dataTables/dataTables${js.ending}
 resources/js/dataTables/dataTables.paging_with_jqui_icons${js.ending}
 resources/js/moment/moment-with-locales${js.ending}

@@ -1218,6 +1218,24 @@ public class VerteilungServices {
         return obj;
     }
 
+    /**
+     * löscht den Cache
+     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
+     *                                                                  false    ein Fehler ist aufgetreten
+     *                                                         result            der Inhalt der Datei als Base64 encodeter String oder der Fehler
+     */
+    public JSONObject clearCache() {
+        JSONObject obj = new JSONObject();
+        try {
+            getCache().clear();
+            obj.put("success", true);
+            obj.put("result", "");
+        } catch (Exception e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
 
     /**
      * liest eine Datei

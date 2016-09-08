@@ -32,6 +32,19 @@ function getAlfrescoTicket() {
 }
 
 /**
+ * führt einen Refresh durch
+ */
+function refreshCache() {
+    var obj = executeService("clearCache");
+    if (obj.success) {
+        var data  = {
+            'objectID': $('#tree').jstree('get_selected')[0]
+        };
+        switchAlfrescoDirectory(data);
+    }
+}
+
+/**
  * startet die normalen Alfresco View
  */
 function showAlfrescoNormalView(){
@@ -243,6 +256,7 @@ function loadLayout() {
             resizable: false,
             closable: false,
             initPanes: true,
+            size:30,
             resizerClass: "ui-widget-content",
             togglerClass: "ui-widget-content",
             showDebugMessages: true,
@@ -253,8 +267,10 @@ function loadLayout() {
                     name: "tabNorthInnerLayout",
                     center: {
                         size: "auto",
+                        resizable: false,
+                        closable: false,
                         name: "tabNorthInnerCenterLayout",
-                        paneSelector: "#tabNorthCenter"
+                        paneSelector: "#tabNorthInnerCenter"
                     }
                 }
             },
@@ -556,7 +572,7 @@ function loadAlfrescoTable() {
     }
 
     try {
-        $.fn.dataTable.moment('DD.MM.YYYY');
+        $.fn.dataTable.moment('DD.MM.YY');
         alfrescoTabelle = $('#alfrescoTabelle').DataTable({
             "jQueryUI": false,
             "pagingType": "paging_with_jqui_icons",
@@ -1026,7 +1042,7 @@ function loadAlfrescoSearchTable() {
 
 
     try {
-        $.fn.dataTable.moment('DD.MM.YYYY');
+        $.fn.dataTable.moment('DD.MM.YY');
         alfrescoSearchTabelle = $('#alfrescoSearchTabelle').DataTable({
             "jQueryUI": false,
             "pagingType": "paging_with_jqui_icons",
@@ -3326,7 +3342,7 @@ function start() {
 
         $(document).tooltip();
         $('.ui-dialog-titlebar-close').tooltip('disable');
-        $("#switcher").themeswitcher();
+        //$("#switcher").themeswitcher();
         jQuery("#breadcrumb").jBreadCrumb();
         loadLayout();
         document.getElementById('filesinput').addEventListener('change', readMultiFile, false);

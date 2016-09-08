@@ -165,6 +165,28 @@ public class VerteilungApplet extends Applet {
     }
 
     /**
+     * löscht den Cache
+     * @return obj               ein JSONObject mit den Feldern success: true        die Operation war erfolgreich
+     *                                                                   false       ein Fehler ist aufgetreten
+     *                                                          result   false       keine Connection
+     *                                                                   JSONObjekt  Die Verbindungsparameter
+     */
+    protected JSONObject clearCache() {
+        JSONObject obj;
+        try {
+            obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
+
+                public JSONObject run() throws VerteilungException, IOException, JSONException {
+                    return services.clearCache();
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            obj = VerteilungHelper.convertErrorToJSON(e);
+        }
+        return obj;
+    }
+
+    /**
      * liefert die vorhandenen Titel
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten

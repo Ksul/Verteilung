@@ -14,13 +14,13 @@
 
         nFirst.className = "fa fa-step-backward";
         nFirst.style.display = "inline-block";
-        nFirst.style.paddingRight = "6px";
+        nFirst.style.paddingRight = "24px";
         nPrevious.className = "fa fa-play fa-rotate-180";
         nPrevious.style.display = "inline-block";
-        nPrevious.style.paddingRight = "6px";
+        nPrevious.style.paddingLeft = "24px";
         nNext.className = "fa fa-play";
         nNext.style.display = "inline-block";
-        nNext.style.paddingRight = "6px";
+        nNext.style.paddingRight = "24px";
         nLast.className = "fa fa-step-forward";
         nLast.style.display = "inline-block";
 
