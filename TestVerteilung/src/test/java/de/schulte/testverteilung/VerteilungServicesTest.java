@@ -5,6 +5,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.Matchers;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,6 +36,14 @@ public class VerteilungServicesTest extends AlfrescoTest {
         services.deleteDocument(services.getNodeId("/Archiv/Fehler/TestDocument.txt").getString("result"));
         services.deleteDocument(services.getNodeId("/Archiv/Fehler/Test.pdf").getString("result"));
         services.deleteFolder(services.getNodeId("/Archiv/TestFolder").getString("result"));
+    }
+
+    @After
+    public void cleanUp() throws Exception {
+        services.deleteDocument(services.getNodeId("/Archiv/Test.pdf").getString("result"));
+        services.deleteDocument(services.getNodeId("/Archiv/TestDocument.txt").getString("result"));
+        services.deleteDocument(services.getNodeId("/Archiv/Fehler/TestDocument.txt").getString("result"));
+        services.deleteDocument(services.getNodeId("/Archiv/Fehler/Test.pdf").getString("result"));
     }
 
     @Test
@@ -442,7 +451,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(document.getString("name"), Matchers.equalToIgnoringCase("TestDocument.txt"));
         assertThat(document.getString("objectID"), Matchers.notNullValue());
         long time = new Date().getTime();
-        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}}";
+        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument', 'cm:title':'Testdokument \tTest'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}}";
         obj = services.updateProperties(document.getString("objectID"), extraProperties);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
@@ -450,10 +459,11 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         JSONObject result = new JSONObject(obj.getString("result"));
         assertThat(result, Matchers.notNullValue());
+        assertThat(result.get("title"), Matchers.is ("Testdokument \tTest"));
         assertThat(result.getDouble("amount"), Matchers.equalTo(25.33));
         assertThat(result.getBoolean("tax"), is(true));
         document = new JSONObject(obj.getString("result"));
-        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.34', 'my:tax':'true'}}";
+        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument','cm:title':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.34', 'my:tax':'true'}}";
         obj = services.updateProperties(document.getString("objectID"), extraProperties);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
@@ -461,6 +471,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         result = new JSONObject(obj.getString("result"));
         assertThat(result, Matchers.notNullValue());
+        assertThat(result.get("title"), Matchers.is ("Testdokument"));
         assertThat(result.getDouble("amount"), Matchers.equalTo(25.34));
         assertThat(result.getBoolean("tax"), is(true));
         document = new JSONObject(obj.getString("result"));
