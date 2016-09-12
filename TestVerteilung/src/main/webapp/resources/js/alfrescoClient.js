@@ -1,24 +1,4 @@
 /**
- * ändert das CSS für einen bestimmte Class
- * @param className   der Name der Class
- * @param classValue  der neue Wert
- */
-function changeCss(className, classValue) {
-    var cssMainContainer = $('#css-modifier-container');
-    if (cssMainContainer.length == 0) {
-        cssMainContainer = $('<div id="css-modifier-container"></div>');
-        cssMainContainer.hide();
-        cssMainContainer.appendTo($('body'));
-    }
-    classContainer = cssMainContainer.find('div[data-class="' + className + '"]');
-    if (classContainer.length == 0) {
-        classContainer = $('<div data-class="' + className + '"></div>');
-        classContainer.appendTo(cssMainContainer);
-    }
-    classContainer.html('<style>' + className + ' {' + classValue + '}</style>');
-}
-
-/**
  *  liefert ein Alfresco Ticket
  *  @return alfrescoTicket das Alfresco Ticket
  */
@@ -32,16 +12,19 @@ function getAlfrescoTicket() {
 }
 
 /**
- * führt einen Refresh durch
+ * führt einen Refresh der angezeigten Inhalte durch
  */
 function refreshCache() {
-    var obj = executeService("clearCache");
-    if (obj.success) {
-        var data  = {
-            'objectID': $('#tree').jstree('get_selected')[0]
-        };
-        switchAlfrescoDirectory(data);
-    }
+    $('#refresh').addClass("fa-spin");
+    var done = function(json){
+        if (json.success) {
+            var data  = $('#tree').jstree('get_selected', true)[0].data;
+            switchAlfrescoDirectory(data);
+            $('#refresh').removeClass("fa-spin");
+        }
+    };
+    var obj = executeService("clearCache", done);
+
 }
 
 /**
@@ -1666,57 +1649,60 @@ function formatAlfrescoTabelleDetailRow(data) {
 /**
  * füllt die BreadCrumb Leiste
  * @param data          der aktuelle Folder
-
  */
 function fillBreadCrumb(data) {
-    var object;
-    var id;
-    var parentObj;
-    var fill = true;
-    var tree = $("#tree").jstree(true);
-    var oldLi = $('#breadcrumblist');
-    if (exist(oldLi))
-        oldLi.remove();
-    var container = $('#breadcrumb');
-    var ul = document.createElement('ul');
-    ul.id = 'breadcrumblist';
-    do {
-        if (!exist(data)) {
-            object = ["Archiv"];
-            id = archivFolderId;
-            parentObj = null;
-            name = "Archiv";
-        }
-        else {
-            object = data.path.split('/');
-            id = data.objectID;
-            parentObj = data.parentId;
-            name = data.name;
-        }
-        var li = document.createElement('li');
-        li.data  = {
-            'objectID': id,
-            'path': object.join('/'),
-            'name': name,
-            'parentId': parentObj
-        };
-        li.id = id;
-        li.onclick = function () {
-            tree.deselect_all(false);
-            switchAlfrescoDirectory(this.data);
-        };
-        $.data( li, "data", data);
-        var a = document.createElement('a');
-        a.href = '#';
-        a.text = name;
-        li.appendChild(a);
-        if (parentObj == null)
-            fill = false;
-        else
-            data = tree.get_node(parentObj).data;
-        ul.insertBefore(li, ul.firstChild);
-    } while (fill);
-    container.append(ul);
+    try {
+        var object;
+        var id;
+        var parentObj;
+        var fill = true;
+        var tree = $("#tree").jstree(true);
+        var oldLi = $('#breadcrumblist');
+        if (exist(oldLi))
+            oldLi.remove();
+        var container = $('#breadcrumb');
+        var ul = document.createElement('ul');
+        ul.id = 'breadcrumblist';
+        do {
+            if (!exist(data)) {
+                object = ["Archiv"];
+                id = archivFolderId;
+                parentObj = null;
+                name = "Archiv";
+            }
+            else {
+                object = data.path.split('/');
+                id = data.objectID;
+                parentObj = data.parentId;
+                name = data.name;
+            }
+            var li = document.createElement('li');
+            li.data = {
+                'objectID': id,
+                'path': object.join('/'),
+                'name': name,
+                'parentId': parentObj
+            };
+            li.id = id;
+            li.onclick = function () {
+                tree.deselect_all(false);
+                switchAlfrescoDirectory(this.data);
+            };
+            $.data(li, "data", data);
+            var a = document.createElement('a');
+            a.href = '#';
+            a.text = name;
+            li.appendChild(a);
+            if (parentObj == null)
+                fill = false;
+            else
+                data = tree.get_node(parentObj).data;
+            ul.insertBefore(li, ul.firstChild);
+        } while (fill);
+        container.append(ul);
+    } catch (e) {
+        errorHandler(e);
+    }
 }
 
 /**

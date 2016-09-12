@@ -1,7 +1,6 @@
 resources/css/jquery-ui-custom${css.ending}
 resources/css/bootstrap-datetimepicker${css.ending}
 resources/css/font-awesome${css.ending}
-resources/themes/paper/bootstrap-paper{css.ending}
 resources/css/dataTables${css.ending}
 resources/css/Base${css.ending}
 resources/css/BreadCrumb${css.ending}

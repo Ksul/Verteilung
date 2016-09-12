@@ -655,18 +655,17 @@ public class AlfrescoConnector {
      * @return            die Properties mit den richtigen Typen
      */
     private Map<String, Object> convertProperties(Map<String, Object> properties,
-                                                         String type)  {
+                                                  String type) {
         HashMap<String, Object> props = new HashMap<>();
         Map<String, PropertyDefinition<?>> definitions = this.session.getTypeDefinition(type).getPropertyDefinitions();
         for (String key : properties.keySet()) {
             PropertyDefinition<?> definition = definitions.get(key);
             //TODO Hier fehlt noch das parsen auf die anderen Datentypen
             if (definition instanceof PropertyDateTimeDefinition) {
-                if (properties.get(key) instanceof Long) {
-                    GregorianCalendar gc = new GregorianCalendar();
-                    gc.setTime(new Date((Long) properties.get(key)));
-                    props.put(key, gc);
-                }
+                long l = Long.parseLong((String) properties.get(key));
+                GregorianCalendar gc = new GregorianCalendar();
+                gc.setTime(new Date(l));
+                props.put(key, gc);
             } else {
                 props.put(key, properties.get(key));
             }

@@ -440,6 +440,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
         String archivId = obj.getString("result");
         String content = "";
+        long time = new Date().getTime();
         String extraProperties = "{'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
         obj = services.createDocument(archivId, "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
         assertThat(obj, Matchers.notNullValue());
@@ -450,8 +451,9 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(document, Matchers.notNullValue());
         assertThat(document.getString("name"), Matchers.equalToIgnoringCase("TestDocument.txt"));
         assertThat(document.getString("objectID"), Matchers.notNullValue());
-        long time = new Date().getTime();
-        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument', 'cm:title':'Testdokument \tTest'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}}";
+        assertThat(document.getLong("documentDate"), is(time));
+        time = new Date().getTime();
+        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument', 'cm:title':'Testdokument \tTest'}, 'D:my:archivContent': { 'my:documentDate': '" + time + "', 'my:person': 'Katja'},'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}, 'P:my:idable': {'my:idvalue': 'null'}}";
         obj = services.updateProperties(document.getString("objectID"), extraProperties);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
@@ -462,7 +464,9 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(result.get("title"), Matchers.equalTo("Testdokument \tTest"));
         assertThat(result.getDouble("amount"), Matchers.equalTo(25.33));
         assertThat(result.getBoolean("tax"), is(true));
-        document = new JSONObject(obj.getString("result"));
+        assertThat(result.getString("person"), is("Katja"));
+        assertThat(result.getLong("documentDate"), is(time));
+        assertThat(result.getLong("sentdate"), is(time));
         extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument','cm:title':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.34', 'my:tax':'true'}}";
         obj = services.updateProperties(document.getString("objectID"), extraProperties);
         assertThat(obj, Matchers.notNullValue());

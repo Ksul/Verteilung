@@ -19,7 +19,7 @@
     <properties>
         <de.lvm.appName>testverteilung</de.lvm.appName>
         <jasmine.version>2.1</jasmine.version>
-        <opencmis.version>0.14.0</opencmis.version>
+        <opencmis.version>1.0.0</opencmis.version>
         <js.source.dir>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}resources${file.separator}js</js.source.dir>
         <css.source.dir>${project.basedir}${file.separator}src${file.separator}main${file.separator}webapp${file.separator}resources${file.separator}css</css.source.dir>
     </properties>
