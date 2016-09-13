@@ -467,7 +467,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(result.getString("person"), is("Katja"));
         assertThat(result.getLong("documentDate"), is(time));
         assertThat(result.getLong("sentdate"), is(time));
-        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument','cm:title':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.34', 'my:tax':'true'}}";
+        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument','cm:title':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.34', 'my:tax':'true'}, 'P:my:idable': {'my:idvalue': '123'}}";
         obj = services.updateProperties(document.getString("objectID"), extraProperties);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
@@ -478,6 +478,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(result.get("title"), Matchers.equalTo("Testdokument"));
         assertThat(result.getDouble("amount"), Matchers.equalTo(25.34));
         assertThat(result.getBoolean("tax"), is(true));
+        assertThat(result.getInt("idvalue"), is(123));
         document = new JSONObject(obj.getString("result"));
         extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'', 'my:tax':''}}";
         obj = services.updateProperties(document.getString("objectID"), extraProperties);

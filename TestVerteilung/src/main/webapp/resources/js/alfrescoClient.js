@@ -686,16 +686,13 @@ function loadAlfrescoTable() {
                                 span.href = "#";
                                 span.style.width = "100px";
                                 span.style.height = "100px";
-                                var server = getSettings("server");
-                                if (!server.endsWith('/'))
-                                    server = server + '/';
-                                var url = server + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
+                                var url = "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true";
                                 var image = document.createElement('img');
                                 image.id = "alfrescoTableThumbnail" + row.objectID;
                                 image.className = "alfrescoTableThumbnailEvent alfrescoTableDragable treeDropable";
                                 image.draggable = true;
                                 image.style.cursor = "pointer";
-                                image.src =url;
+                                image.src = "/TestVerteilung/VerteilungServlet?function=openImage&imageLink=" + url;
                                 $('#alfrescoTabelle tbody').on( 'click', '#' + image.id, function (event) {
                                     openDocument(this, event);
                                 });

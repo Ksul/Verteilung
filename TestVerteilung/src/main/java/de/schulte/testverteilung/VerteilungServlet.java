@@ -36,7 +36,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_DOCUMENTTEXT = "documentText";
     public static final String PARAMETER_FILEPATH = "filePath";
     public static final String PARAMETER_FILENAME = "fileName";
-    public static final String PARAMETER_FIELDNAME = "fieldName";
+    public static final String PARAMETER_IMAGELINK = "imageLink";
     public static final String PARAMETER_CMISQUERY = "cmisQuery";
     public static final String PARAMETER_MIMETYPE = "mimeType";
     public static final String PARAMETER_SERVER = "server";
@@ -77,6 +77,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_MOVENODE = "moveNode";
     public static final String FUNCTION_OPENFILE = "openFile";
     public static final String FUNCTION_OPENPDF = "openPDF";
+    public static final String FUNCTION_OPENIMAGE = "openImage";
     public static final String FUNCTION_SETPARAMETER = "setParameter";
     public static final String FUNCTION_UPDATEDOCUMENT = "updateDocument";
     public static final String FUNCTION_UPLOADDOCUMENT = "uploadDocument";
@@ -202,6 +203,9 @@ public class VerteilungServlet extends HttpServlet {
                 logger.info("Call of Method " + value);
                 if (value.equalsIgnoreCase(FUNCTION_OPENPDF)) {
                     openPDF(getURLParameter(req, PARAMETER_FILENAME, true), resp);
+                    return;
+                } else if (value.equalsIgnoreCase(FUNCTION_OPENIMAGE)) {
+                    openImage(getURLParameter(req, PARAMETER_IMAGELINK, true), resp);
                     return;
                 } else if (value.equalsIgnoreCase(FUNCTION_SETPARAMETER)) {
                     obj = setParameter(getURLParameter(req, PARAMETER_SERVER, true), getURLParameter(req, PARAMETER_BINDING, true), getURLParameter(req, PARAMETER_USERNAME, true), getURLParameter(req, PARAMETER_PASSWORD, true));
@@ -787,6 +791,53 @@ public class VerteilungServlet extends HttpServlet {
     protected JSONObject openFile(String fileName) throws VerteilungException {
 
         return services.openFile(getServletContext().getRealPath(fileName).replace("\\", "/"));
+    }
+
+    /**
+     * öffnet ein Image auf dem Alfrsco Server
+     * @param link      der link zu dem Image
+     * @param resp       der Response zum Öffnen
+     */
+    protected void openImage(String link,
+                             HttpServletResponse resp) {
+        ServletOutputStream sout = null;
+        String server = services.getServer();
+
+        if (!server.endsWith("/"))
+            server = server + "/";
+        try {
+
+            String ticket = services.getTicket().getJSONObject("result").getJSONObject("data").getString("ticket");
+            URL url = new URL(server + link + "&alf_ticket=" + ticket);
+            InputStream is = url.openStream();
+
+            byte[] b = new byte[2048];
+            int length;
+
+            resp.reset();
+            resp.resetBuffer();
+            resp.setContentType("image/jpeg");
+            sout = resp.getOutputStream();
+
+            while ((length = is.read(b)) != -1) {
+                sout.write(b, 0, length);
+            }
+
+            is.close();
+            sout.flush();
+            sout.close();
+        } catch (Exception e) {
+            logger.severe(e.getLocalizedMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (sout != null)
+                    sout.close();
+            } catch (IOException io) {
+                logger.severe(io.getLocalizedMessage());
+                io.printStackTrace();
+            }
+        }
     }
 
     /**

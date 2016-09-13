@@ -1434,4 +1434,12 @@ public class VerteilungServices {
         }
         return cache;
     }
+
+    /**
+     * liefert den Alfresco Server
+     * @return   den Alfresco Server
+     */
+    protected String getServer() {
+        return con.getServer();
+    }
 }
