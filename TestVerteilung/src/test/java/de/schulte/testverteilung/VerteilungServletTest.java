@@ -98,7 +98,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/TestFolder");
@@ -106,7 +106,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
-        String testFolderId = obj.getString("result");
+        String testFolderId = obj.getString("data");
         sr.getBuffer().delete(0, 9999);
 
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
@@ -118,7 +118,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         sr.getBuffer().delete(0, 9999);
         if (obj.getBoolean("success")) {
             when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
             servlet.doPost(request, response);
             writer.flush();
             sr.getBuffer().delete(0, 9999);
@@ -132,7 +132,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         sr.getBuffer().delete(0, 9999);
         if (obj.getBoolean("success")) {
             when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
             servlet.doPost(request, response);
             writer.flush();
             sr.getBuffer().delete(0, 9999);
@@ -146,7 +146,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         sr.getBuffer().delete(0, 9999);
         if (obj.getBoolean("success")) {
             when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
             servlet.doPost(request, response);
             writer.flush();
             sr.getBuffer().delete(0, 9999);
@@ -166,7 +166,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn("unbekannt");
@@ -176,7 +176,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
         sr.getBuffer().delete(0, 9999);
     }
@@ -190,9 +190,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.get("result"), Matchers.instanceOf(JSONArray.class));
+        assertThat(obj.get("data"), Matchers.instanceOf(JSONArray.class));
         sr.getBuffer().delete(0, 9999);
     }
 
@@ -205,9 +205,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject connection = (JSONObject) obj.get("result");
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject connection = (JSONObject) obj.get("data");
         assertThat(connection.getString("server"), Matchers.equalTo(properties.getProperty("server")));
         assertThat(connection.getString("binding"), Matchers.equalTo(properties.getProperty("binding")));
         assertThat(connection.getString("user"), Matchers.equalTo(properties.getProperty("user")));
@@ -223,8 +223,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETCONNECTION);
         servlet.doPost(request, response);
         writer.flush();
@@ -232,9 +232,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getBoolean("result"), Matchers.is(false));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getBoolean("data"), Matchers.is(false));
     }
 
     @Test
@@ -246,8 +246,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getBoolean("result"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getBoolean("data"), Matchers.is(true));
     }
 
     @Test
@@ -257,8 +257,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject ticket = (JSONObject) obj.get("result");
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject ticket = (JSONObject) obj.get("data");
         assertThat(((JSONObject) ticket.get("data")).getString("ticket"), Matchers.startsWith("TICKET_"));
     }
 
@@ -271,11 +271,11 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         // Dokument erstellen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
         when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
@@ -288,9 +288,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         sr.getBuffer().delete(0, 9999);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject document = new JSONObject(obj.getString("result"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject document = new JSONObject(obj.getString("data"));
 
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETTICKET);
         servlet.doPost(request, response);
@@ -298,8 +298,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject ticket = (JSONObject) obj.get("result");
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject ticket = (JSONObject) obj.get("data");
 
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_ADDCOMMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getString("objectId"));
@@ -310,7 +310,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
 
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETCOMMENTS);
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getString("objectId"));
@@ -320,8 +320,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject comment = (JSONObject) obj.get("result");
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject comment = (JSONObject) obj.get("data");
         assertThat(((JSONObject) ((JSONArray) comment.get("items")).get(0)).getString("content"), Matchers.equalTo("Testkommentar"));
 
         // und das Dokument wieder löschen
@@ -340,7 +340,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Datenverzeichnis/Skripte/recognition.js");
@@ -348,7 +348,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -359,8 +359,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject doc = (JSONObject) ((JSONArray) obj.get("result")).get(0);
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject doc = (JSONObject) ((JSONArray) obj.get("data")).get(0);
         assertThat(doc, Matchers.notNullValue());
         assertThat(doc.getString("name"), Matchers.equalToIgnoringCase("doc.xml"));
     }
@@ -373,7 +373,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -384,17 +384,17 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETDOCUMENTCONTENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
         when(request.getParameter(VerteilungServlet.PARAMETER_EXTRACT)).thenReturn("false");
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getString("result"), Matchers.containsString("xmlns:my=\"http://www.schulte.local/archiv\""));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getString("data"), Matchers.containsString("xmlns:my=\"http://www.schulte.local/archiv\""));
     }
 
     @Test
@@ -423,7 +423,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        String archivId = obj.getString("result");
+        String archivId = obj.getString("data");
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_UPLOADDOCUMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(archivId);
@@ -435,19 +435,19 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
         servlet.doPost(request, response);
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -458,11 +458,11 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         // Dokument erstellen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
         when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
@@ -474,9 +474,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject doc = new JSONObject(obj.getString("result"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject doc = new JSONObject(obj.getString("data"));
         assertThat(doc, Matchers.notNullValue());
         assertThat(doc.getString("name"), Matchers.equalToIgnoringCase("TestDocument.txt"));
         sr.getBuffer().delete(0, 9999);
@@ -488,8 +488,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getString("result"), Matchers.equalTo(content));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getString("data"), Matchers.equalTo(content));
         // und das Dokument wieder löschen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
@@ -506,12 +506,12 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         // Folder erstellen
         String extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Testfolder'}, 'P:cm:titled':{'cm:title': 'Testtitel', 'cm:description':'Dies ist ein Test Folder'}}";
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEFOLDER);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
         when(request.getParameter(VerteilungServlet.PARAMETER_EXTRAPROPERTIES)).thenReturn(extraProperties);
         servlet.doPost(request, response);
         writer.flush();
@@ -519,9 +519,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject folder = new JSONObject(obj.getString("result"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject folder = new JSONObject(obj.getString("data"));
         assertThat(folder, Matchers.notNullValue());
         assertThat(folder.getString("name"), Matchers.equalToIgnoringCase("TestFolder"));
         // und den Folder wieder löschen
@@ -532,10 +532,10 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject result = new JSONObject(obj.getString("result"));
-        assertNotNull(result);
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject data = new JSONObject(obj.getString("data"));
+        assertNotNull(data);
     }
 
     @Test
@@ -546,11 +546,11 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         // Dokument erstellen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
         when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MAJOR.value());
         when(request.getParameter(VerteilungServlet.PARAMETER_EXTRAPROPERTIES)).thenReturn("{'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}");
@@ -563,9 +563,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject doc = new JSONObject(obj.getString("result"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject doc = new JSONObject(obj.getString("data"));
         assertThat(doc, Matchers.notNullValue());
         assertThat(doc.getString("objectId"), Matchers.notNullValue());
         assertThat(doc.getString("versionLabel"), Matchers.equalTo("1.0"));
@@ -583,9 +583,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        doc = new JSONObject(obj.getString("result"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        doc = new JSONObject(obj.getString("data"));
         assertThat(doc, Matchers.notNullValue());
         assertThat(doc.getString("objectId"), Matchers.notNullValue());
         assertEquals("2.0", doc.getString("versionLabel"));
@@ -598,8 +598,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertEquals(content, obj.getString("result"));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertEquals(content, obj.getString("data"));
         sr.getBuffer().delete(0, 9999);
 
         // Dokument ändern
@@ -617,9 +617,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        doc = new JSONObject(obj.getString("result"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        doc = new JSONObject(obj.getString("data"));
         assertThat(doc, Matchers.notNullValue());
         // wegen der 2 Aspekte nicht 2.1 sondern 2.3
         assertThat(doc.getString("versionLabel"), Matchers.equalTo("2.3"));
@@ -644,8 +644,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        String currentLocationId = obj.getString("result");
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        String currentLocationId = obj.getString("data");
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Fehler");
@@ -653,8 +653,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        String destinationId = obj.getString("result");
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        String destinationId = obj.getString("data");
         sr.getBuffer().delete(0, 9999);
         // Dokument erstellen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
@@ -670,9 +670,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject doc = new JSONObject(obj.getString("result"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        JSONObject doc = new JSONObject(obj.getString("data"));
         assertThat(doc, Matchers.notNullValue());
         assertThat(doc.getString("objectId"), Matchers.notNullValue());
         sr.getBuffer().delete(0, 9999);
@@ -687,8 +687,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Fehler/TestDocument.txt");
@@ -696,10 +696,10 @@ public class VerteilungServletTest extends AlfrescoTest {
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         // und das Dokument wieder löschen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("result"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
         servlet.doPost(request, response);
         writer.flush();
         sr.getBuffer().delete(0, 9999);
@@ -719,9 +719,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getString("result"), Matchers.startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getString("data"), Matchers.startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
         sr.getBuffer().delete(0, 9999);
     }
 
@@ -737,9 +737,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getString("result"), Matchers.startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getString("data"), Matchers.startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
         sr.getBuffer().delete(0, 9999);
     }
 
@@ -758,9 +758,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getInt("result"), Matchers.is(1));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getInt("data"), Matchers.is(1));
         sr.getBuffer().delete(0, 9999);
     }
 
@@ -778,8 +778,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
     }
 
@@ -797,9 +797,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getInt("result"), Matchers.is(2));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getInt("data"), Matchers.is(2));
         sr.getBuffer().delete(0, 9999);
     }
 
@@ -817,9 +817,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getInt("result"), Matchers.is(2));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getInt("data"), Matchers.is(2));
         sr.getBuffer().delete(0, 9999);
     }
 
@@ -832,7 +832,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("Test");
@@ -842,7 +842,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
         sr.getBuffer().delete(0, 9999);
     }
@@ -856,8 +856,8 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
     }
 
@@ -873,9 +873,9 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getString("result").isEmpty(), Matchers.is(false));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getString("data").isEmpty(), Matchers.is(false));
         sr.getBuffer().delete(0, 9999);
     }
 

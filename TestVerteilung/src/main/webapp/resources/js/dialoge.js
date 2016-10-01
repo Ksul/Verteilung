@@ -297,9 +297,9 @@ function startDocumentDialog(data, modus, modal) {
                                     var results = [];
                                     var json = executeService("getTitles", null, [
                                     ], null, true);
-                                    for (var i = 0; i < json.result.length; i++) {
+                                    for (var i = 0; i < json.data.length; i++) {
                                         results.push({
-                                            "value": json.result[i]
+                                            "value": json.data[i]
                                         });
                                     }
                                     return results;

@@ -26,8 +26,8 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.setParameter(properties.getProperty("server"), properties.getProperty("binding"), properties.getProperty("user"), properties.getProperty("password"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -35,17 +35,17 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.getTicket();
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
     }
 
     @Test
     public void testGetConnection() throws Exception {
         JSONObject obj = applet.getConnection();
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.get("result"), Matchers.instanceOf(JSONObject.class));
-        JSONObject connection = (JSONObject) obj.get("result");
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.instanceOf(JSONObject.class));
+        JSONObject connection = (JSONObject) obj.get("data");
         assertThat(connection.getString("server"), Matchers.equalTo(properties.getProperty("server")));
         assertThat(connection.getString("binding"), Matchers.equalTo(properties.getProperty("binding")));
         assertThat(connection.getString("user"), Matchers.equalTo(properties.getProperty("user")));
@@ -53,9 +53,9 @@ public class VerteilungAppletTest extends AlfrescoTest {
         applet.setParameter(" ", " ", " ", " ");
         obj = applet.getConnection();
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getBoolean("result"), Matchers.is(false));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getBoolean("data"), Matchers.is(false));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.getComments("a", "b");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.addComment("a", "b", "c");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
     }
 
     @Test
@@ -80,16 +80,16 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.isURLAvailable(urlString, "10000");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
     public void testListFolderAsJSON() throws Exception {
         JSONObject obj = applet.listFolder("-1", "0");
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -97,19 +97,19 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.getNodeId("/Archiv");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
     public void testGetNodeById() throws Exception {
         JSONObject obj = applet.getNodeId("/Archiv");
         assertThat(obj, Matchers.notNullValue());
-        obj = applet.getNodeById(obj.getString("result"));
+        obj = applet.getNodeById(obj.getString("data"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -117,8 +117,8 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.getNode("/Archiv");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -126,8 +126,8 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'") ;
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -135,8 +135,8 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.query("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'") ;
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -144,7 +144,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.getDocumentContent("abcde", "false");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
     }
 
@@ -153,7 +153,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.uploadDocument("/Archiv", "abcde", "none");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
     }
 
@@ -162,7 +162,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.deleteDocument("/Archiv/abcde");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
     }
 
@@ -171,7 +171,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.createDocument("/Archiv", "abcde", "", "", "", "");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
     }
 
@@ -180,7 +180,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.updateDocument("/Archiv", "abcde", "", "", "", "");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
     }
 
@@ -197,7 +197,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.createFolder("/abcde", "abcde");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
     }
 
@@ -206,7 +206,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.deleteFolder("abcde");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
     }
 
@@ -217,8 +217,8 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.loadProperties(fullPath);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -231,15 +231,15 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.saveToFile(fullPath, content);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
         byte[] bytes = readFile("Test.test");
         assertThat(content, Matchers.equalTo(new String(bytes)));
         obj = applet.deleteFile(fullPath);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
@@ -253,9 +253,9 @@ public class VerteilungAppletTest extends AlfrescoTest {
             applet.fillParameter(encodedContent.substring(k * 1000, Math.min(encodedContent.length(), k * 1000 + 1000)), k == 0);
         JSONObject obj = applet.extractPDFContent();
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getString("result"), Matchers.startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getString("data"), Matchers.startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
     }
 
     @Test
@@ -265,9 +265,9 @@ public class VerteilungAppletTest extends AlfrescoTest {
         String fullPath = "file:///" + System.getProperty("user.dir").replace("\\", "/") + fileName;
         JSONObject obj = applet.extractPDFFile(fullPath);
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getString("result"), Matchers.startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getString("data"), Matchers.startsWith("Herr\nKlaus Schulte\nBredeheide 33\n48161 Münster"));
     }
 
     @Test
@@ -282,9 +282,9 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.extractPDFToInternalStorage(System.getProperty("user.dir"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getInt("result"), Matchers.is(1));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getInt("data"), Matchers.is(1));
     }
 
     @Test
@@ -299,9 +299,9 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.extractZIP();
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
-        JSONArray erg = obj.getJSONArray("result");
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
+        JSONArray erg = obj.getJSONArray("data");
         assertThat(erg, Matchers.notNullValue());
         assertThat(erg.length(), Matchers.is(2));
         String str = erg.getString(0);
@@ -323,9 +323,9 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.extractZIPAndExtractPDFToInternalStorage();
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getInt("result"), Matchers.is(2));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getInt("data"), Matchers.is(2));
     }
 
     @Test
@@ -340,9 +340,9 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.extractZIPToInternalStorage();
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getInt("result"), Matchers.is(2));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.getInt("data"), Matchers.is(2));
     }
 
     @Test
@@ -350,12 +350,12 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.getDataFromInternalStorage("abcde");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
         obj = applet.getDataFromInternalStorage();
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
     }
 
@@ -364,7 +364,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.clearInternalStorage();
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(true));
     }
 
@@ -373,9 +373,9 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.openPDF("test");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
+        assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.getBoolean("success"), Matchers.is(false));
-        assertThat(obj.getString("result"), Matchers.equalTo("PDF konnte nicht gefunden werden!"));
+        assertThat(obj.getString("data"), Matchers.equalTo("PDF konnte nicht gefunden werden!"));
     }
 
     @Test
@@ -386,7 +386,7 @@ public class VerteilungAppletTest extends AlfrescoTest {
         JSONObject obj = applet.openFile(fullPath);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("result"), Matchers.notNullValue());
-        assertThat(obj.get("result").toString(), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
     }
 }

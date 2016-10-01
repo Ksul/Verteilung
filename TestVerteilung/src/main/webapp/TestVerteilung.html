@@ -57,6 +57,7 @@
         var globalLayout;
         var alfrescoTicket;
         var anOpen = [];
+        var iconView = false;
 
         window.onload = function() {
 
@@ -325,16 +326,16 @@
                         success: function(data) {
                             if (!data.success) {
                                 if (exist(errorMessage))
-                                    errorString = errorMessage + "<br>" + data.result;
+                                    errorString = errorMessage + "<br>" + data.data;
                                 else
-                                    errorString = data.result;
+                                    errorString = data.data;
                                 // gibt es eine Fehlermeldung aus dem Service?
                                 if (data.error && !ignoreError) {
                                     errorString = errorString + "<br>" + data.error;
                                     REC.log(ERROR, data.error);
                                 }
                                 if (!ignoreError) {
-                                    REC.log(ERROR, data.result);
+                                    REC.log(ERROR, data.data);
                                     fillMessageBox(true);
                                 } else
                                     data.error = errorString;

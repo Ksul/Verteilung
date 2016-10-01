@@ -155,7 +155,7 @@ function openPDF(name, fromServer) {
                         }
                     },
                     success: function (data) {
-                        window.open(name + "?alf_ticket=" + data.result.toString());
+                        window.open(name + "?alf_ticket=" + data.data.toString());
                     }
                 });
             }
@@ -305,9 +305,9 @@ function readFiles(files) {
                                     ], "PDF Datei konte nicht geparst werden:");
                                     if (json.success) {
                                         if (count == 1)
-                                            loadText(evt.target.result, json.result, theFile.name, theFile.type, null);
+                                            loadText(evt.target.result, json.data, theFile.name, theFile.type, null);
                                         else
-                                            loadMultiText(evt.target.result, json.result, theFile.name, theFile.type, "false", null);
+                                            loadMultiText(evt.target.result, json.data, theFile.name, theFile.type, "false", null);
                                     }
                                 }
                             } catch (e) {
@@ -329,10 +329,10 @@ function readFiles(files) {
                                         {"name": "documentText", "value": evt.target.result, "type": "byte"}
                                     ], "ZIP Datei konte nicht entpackt werden:");
                                     if (json.success) {
-                                        count = count + json.result - 1;
+                                        count = count + json.data - 1;
                                         var json1 = executeService("getDataFromInternalStorage");
                                         if (json1.success) {
-                                            var erg = json1.result;
+                                            var erg = json1.data;
                                             for (var pos in erg) {
                                                 var entry = erg[pos];
                                                 if (count == 1)
@@ -506,14 +506,16 @@ function printResults(results) {
  * @param reverse   die Reihenfolge wird umgedreht
  */
 function fillMessageBox(reverse) {
-    outputEditor.getSession().setValue(REC.getMessage(reverse));
+    if (typeof outputEditor != "undefined" && outputEditor != null)
+        outputEditor.getSession().setValue(REC.getMessage(reverse));
 }
 
 /**
  * löscht den Inhalt des Meldungsfensters
  */
 function clearMessageBox(){
-    outputEditor.getSession().setValue("");
+    if (typeof outputEditor != "undefined" && outputEditor != null)
+        outputEditor.getSession().setValue("");
 }
 
 /**
@@ -753,7 +755,7 @@ function sendRules() {
             ], "Regeln konnten nicht übertragen werden:");
             if (json.success) {
                 REC.log(INFORMATIONAL, "Regeln erfolgreich zum Server übertragen!");
-                rulesID = $.parseJSON(json.result).objectId;
+                rulesID = $.parseJSON(json.data).objectId;
                 erg = true;
                 fillMessageBox(true);
             }
@@ -784,12 +786,12 @@ function getRules(rulesId, loadLocal) {
                 {"name": "extract", "value": "false"}
             ], "Regeln konnten nicht gelesen werden:");
             if (json.success) {
-                rulesEditor.getSession().setValue(json.result);
+                rulesEditor.getSession().setValue(json.data);
                 rulesEditor.getSession().foldAll(1);
                 REC.log(INFORMATIONAL, "Regeln erfolgreich vom Server übertragen!");
                 fillMessageBox(true);
             } else
-                message("Fehler", "Fehler bei der Übertragung: " + json.result);
+                message("Fehler", "Fehler bei der Übertragung: " + json.data);
         }
         currentRules = "doc.xml";
     } catch (e) {
@@ -871,7 +873,7 @@ function openFile(file) {
         if (json.success) {
             REC.log(INFORMATIONAL, "Datei " + name + " erfolgreich geöffnet!");
             fillMessageBox(true);
-            return UTF8ArrToStr(base64DecToArr(json.result));
+            return UTF8ArrToStr(base64DecToArr(json.data));
         }
         else
             return "";
@@ -938,7 +940,7 @@ function getScript() {
             {"name": "extract", "value": "false"}
         ], "Skript konnte nicht gelesen werden:");
         if (json.success) {
-            textEditor.getSession().setValue(json.result);
+            textEditor.getSession().setValue(json.data);
             REC.log(INFORMATIONAL, "Script erfolgreich heruntergeladen!");
             fillMessageBox(true);
         }
@@ -995,7 +997,7 @@ function openScript() {
                     {"name": "extract", "value": "false"}
                 ], "Skript konnte nicht gelesen werden:");
                 if (json.success) {
-                    content = json.result;
+                    content = json.data;
                     read = true;
                     REC.log(INFORMATIONAL, "Script erfolgreich vom Server geladen!");
                 }
@@ -1071,7 +1073,7 @@ function sendScript() {
             ], "Skript konnte nicht zum Server gesendet werden:");
             if (json.success) {
                 REC.log(INFORMATIONAL, "Script erfolgreich zum Server gesendet!");
-                scriptID = $.parseJSON(json.result).objectId;
+                scriptID = $.parseJSON(json.data).objectId;
                 erg = true;
                 fillMessageBox(true);
             }

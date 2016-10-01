@@ -31,6 +31,7 @@ function refreshCache() {
  * startet die normalen Alfresco View
  */
 function showAlfrescoNormalView(){
+    iconView = false;
     viewMenuNormal.children('li:first').superfish('hide');
     alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.show("north");
     alfrescoTabelle.column(0).visible(true);
@@ -54,6 +55,7 @@ function showAlfrescoSearchNormalView(){
  * startet die Alfresco Icon View
  */
 function showAlfrescoIconView(){
+    iconView = true;
     viewMenuNormal.children('li:first').superfish('hide');
     alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.hide("north");
     alfrescoTabelle.column(0).visible(false);
@@ -547,7 +549,7 @@ function loadAlfrescoTable() {
             var url = server + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/" + data.contentStreamFileName;
             var erg = executeService("getTicket");
             if (erg.success)
-                url = url + "?alf_ticket=" + erg.result.data.ticket;
+                url = url + "?alf_ticket=" + erg.data.data.ticket;
             window.open(url);
         } catch (e) {
             errorHandler(e);
@@ -686,16 +688,13 @@ function loadAlfrescoTable() {
                                 span.href = "#";
                                 span.style.width = "100px";
                                 span.style.height = "100px";
-                                var server = getSettings("server");
-                                if (!server.endsWith('/'))
-                                    server = server + '/';
-                                var url = server + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
+                                var url = "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true";
                                 var image = document.createElement('img');
                                 image.id = "alfrescoTableThumbnail" + row.objectID;
                                 image.className = "alfrescoTableThumbnailEvent alfrescoTableDragable treeDropable";
                                 image.draggable = true;
                                 image.style.cursor = "pointer";
-                                image.src =url;
+                                image.src = "/TestVerteilung/VerteilungServlet?function=openImage&imageLink=" + url;
                                 $('#alfrescoTabelle tbody').on( 'click', '#' + image.id, function (event) {
                                     openDocument(this, event);
                                 });
@@ -1016,7 +1015,7 @@ function loadAlfrescoSearchTable() {
             var url = server + "service/api/node/content/workspace/" + data.nodeRef.substr(12) + "/" + data.contentStreamFileName;
             var result = executeService("getTicket");
             if (result.success)
-                url = url + "?alf_ticket=" + result.result.data.ticket;
+                url = url + "?alf_ticket=" + result.data.data.ticket;
             window.open(url);
         } catch (e) {
             errorHandler(e);
@@ -1152,16 +1151,13 @@ function loadAlfrescoSearchTable() {
                                 span.href = "#";
                                 span.style.width = "100px";
                                 span.style.height = "100px";
-                                var server = getSettings("server");
-                                if (!server.endsWith('/'))
-                                    server = server + '/';
-                                var url = server + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true&alf_ticket=" + getAlfrescoTicket();
+                                var url = server + "service/api/node/workspace/" + row.nodeRef.substr(12) + "/content/thumbnails/doclib?c=queue&ph=true";
                                 var image = document.createElement('img');
                                 image.id = "alfrescoSearchTableThumbnail" + row.objectID;
                                 image.className = "alfrescoSearchTableThumbnailEvent";
                                 image.draggable = true;
                                 image.style.cursor = "pointer";
-                                image.src =url;
+                                image.src = "/TestVerteilung/VerteilungServlet?function=openImage&imageLink=" + url;
                                 $('#alfrescoSearchTabelle tbody').on( 'click', '#' + image.id, function (event) {
                                     openDocument(this, event);
                                 });
@@ -1920,7 +1916,7 @@ function editDocument(input, id) {
             {"name": "extraProperties", "value": JSON.stringify(extraProperties)}
         ], "Dokument konnte nicht aktualisiert werden!", true);
         if (erg.success) {
-            var data = $.parseJSON(erg.result);
+            var data = $.parseJSON(erg.data);
             // Tabelle updaten
             var row = alfrescoTabelle.row('#' + data.objectID);
             if (row && row.length)
@@ -1981,7 +1977,7 @@ function createFolder(input, origData) {
         ], "Ordner konnte nicht erstellt werden!", false);
         if (erg.success) {
             var lastElement = $("#breadcrumblist").children().last();
-            var newData = $.parseJSON(erg.result);
+            var newData = $.parseJSON(erg.data);
             var tree = $.jstree.reference('#tree');
             // Tree updaten
             var node = tree.get_node(newData.parentId);
@@ -2026,7 +2022,7 @@ function editFolder(input, id) {
         ], "Ordner konnte nicht aktualisiert werden!", true);
         if (erg.success) {
             var lastElement = $("#breadcrumblist").children().last();
-            var newData = $.parseJSON(erg.result);
+            var newData = $.parseJSON(erg.data);
             // Tree updaten
             var tree = $.jstree.reference('#tree');
             var node = tree.get_node(newData.objectID);
@@ -2106,7 +2102,7 @@ function switchAlfrescoDirectory(data) {
         times.push(new Date().getTime());
         var done = function(json){
             alfrescoFolderTabelle.clear();
-            alfrescoFolderTabelle.rows.add(json.result).draw();
+            alfrescoFolderTabelle.rows.add(json.data).draw();
             calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
             $.fn.dataTable.makeEditable( alfrescoFolderTabelle, updateInLineFolderFieldFieldDefinition());
             fillBreadCrumb(data);
@@ -2120,7 +2116,7 @@ function switchAlfrescoDirectory(data) {
         ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
         var done1 = function(json) {
             alfrescoTabelle.clear();
-            alfrescoTabelle.rows.add(json.result).draw();
+            alfrescoTabelle.rows.add(json.data).draw();
             times.push(new Date().getTime());
             REC.log(DEBUG, "SwitchDirectory: " + (times[1] -times[0]) + " ms");
             fillMessageBox(true);
@@ -2148,10 +2144,10 @@ function startSearch(searchText) {
             {"name": "cmisQuery", "value": sql}
         ], null, true);
         if (json.success) {
-            if (json.result.length == 0)
+            if (json.data.length == 0)
                 message("Suche", "Keine Dokumente gefunden", 4000, 100, 300);
             alfrescoSearchTabelle.clear();
-            alfrescoSearchTabelle.rows.add(json.result).draw();
+            alfrescoSearchTabelle.rows.add(json.data).draw();
             calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
             $.fn.dataTable.makeEditable(alfrescoSearchTabelle, updateInLineDocumentFieldDefinition());
         }
@@ -2225,10 +2221,10 @@ function handleAlfrescoImageClicks() {
                         "name": "documentId",
                         "value": $('#' + tr[0].parentElement.parentElement.id).DataTable().row(tr).data().objectID
                     },
-                    {"name": "ticket", "value": obj.result.data.ticket}
+                    {"name": "ticket", "value": obj.data.data.ticket}
                 ], ["Kommentare konnten nicht gelesen werden!"]);
                 if (json.success) {
-                    startCommentsDialog(json.result);
+                    startCommentsDialog(json.data);
                 }
             }
         } catch (e) {
@@ -2255,7 +2251,7 @@ function handleAlfrescoImageClicks() {
                 {"name": "extract", "value": "true"}
             ], ["Dokument konnten nicht gelesen werden!"]);
             if (json.success) {
-                loadText(json.result, json.result, tabelle.row(tr).data().name, tabelle.row(tr).data().contentStreamMimeType, null);
+                loadText(json.data, json.data, tabelle.row(tr).data().name, tabelle.row(tr).data().contentStreamMimeType, null);
                 tabLayout.tabs("option", "active", 2);
             }
         } catch (e) {
@@ -2279,7 +2275,7 @@ function handleAlfrescoImageClicks() {
                         {"name": "documentId", "value": data.parents[0]}
                     ], ["Dokument konnten nicht gelesen werden!"]);
                     if (json.success) {
-                        data = json.result;
+                        data = json.data;
                         results.push(data);
                         if (data && data.parents )
                             node = tree.get_node(data.parents[0]);
@@ -2547,8 +2543,8 @@ function loadAndConvertDataForTree(aNode, callBack) {
                 var done = function (json) {
                     if (json.success) {
                         obj = [];
-                        for (var index = 0; index < json.result.length; index++) {
-                            obj.push(buildObjectForTree(json.result[index]));
+                        for (var index = 0; index < json.data.length; index++) {
+                            obj.push(buildObjectForTree(json.data[index]));
                         }
                         if (aNode.id == "#")
                             obj = [
@@ -2907,7 +2903,7 @@ function loadAlfrescoTree() {
                     {"name": "destinationId", "value": destinationId}
                 ], "Ordner konnte nicht verschoben werden:");
                 if (json.success) {
-                    var newData = $.parseJSON(json.result);
+                    var newData = $.parseJSON(json.data);
                     var source = $.parseJSON(json.source);
                     var target = $.parseJSON(json.target);
                     REC.log(INFORMATIONAL, "Ordner " + data.node.data.name + " von " + source.path + " nach " + target.path + " verschoben");
@@ -2997,7 +2993,7 @@ function loadAlfrescoTree() {
                                     {"name": "destinationId", "value": targetData.objectID}
                                 ], "Dokument konnte nicht verschoben werden:");
                                 if (json.success) {
-                                    var newData = $.parseJSON(json.result);
+                                    var newData = $.parseJSON(json.data);
                                     var source = $.parseJSON(json.source);
                                     var target = $.parseJSON(json.target);
                                     REC.log(INFORMATIONAL, "Dokument " + sourceData.name + " von " + source.path + " nach " + target.path + " verschoben");
@@ -3081,7 +3077,7 @@ function checkAndBuidAlfrescoEnvironment() {
     var ret, erg;
     // ist schon ein Alfresco Server verbunden?
     erg = executeService("isConnected", null, []);
-    if (erg.success && erg.result)
+    if (erg.success && erg.data)
         alfrescoServerAvailable = true;
     else {
         // prüfen, ob Server ansprechbar ist
@@ -3097,7 +3093,7 @@ function checkAndBuidAlfrescoEnvironment() {
             if (erg.success) {
                 // Binding prüfen
                 if (alfrescoServerAvailable && exist(getSettings("binding")))
-                if (checkServerStatus(getSettings("binding") + "?alf_ticket=" + erg.result.data.ticket)) {
+                if (checkServerStatus(getSettings("binding") + "?alf_ticket=" + erg.data.data.ticket)) {
                     erg = executeService("setParameter", null, [
                         {"name": "server", "value": getSettings("server")},
                         {"name": "binding", "value": getSettings("binding")},
@@ -3124,7 +3120,7 @@ function checkAndBuidAlfrescoEnvironment() {
             {"name": "filePath", "value": "/Datenverzeichnis/Skripte"}
         ], null, true);
         if (erg.success)
-            scriptFolderId = erg.result;
+            scriptFolderId = erg.data;
         else {
             REC.log(WARN, "Verzeichnis '/Datenverzeichnis/Skripte' auf dem Alfresco Server nicht gefunden!");
         }
@@ -3156,14 +3152,14 @@ function checkAndBuidAlfrescoEnvironment() {
                         {"name": "versionState", "value": "major"}
                     ], "Verteilungsskript konnte nicht erstellt werden!");
                     if (erg.success)
-                        scriptID = $.parseJSON(erg.result).objectId;
+                        scriptID = $.parseJSON(erg.data).objectId;
                     else {
                         REC.log(WARN, "Verteilscript (recognition.js) konnte auf dem Alfresco Server nicht angelegt werden!");
                     }
                 } else
                     REC.log(WARN, "Verteilscript (recognition.js) konnte nicht gelesen werden!");
             } else {
-                scriptID = erg.result;
+                scriptID = erg.data;
             }
         }
         if (erg.success) {
@@ -3195,14 +3191,14 @@ function checkAndBuidAlfrescoEnvironment() {
 
                     ], "Verteilungsregeln konnten nicht erstellt werden!");
                     if (erg.success)
-                        rulesID = $.parseJSON(erg.result).objectId;
+                        rulesID = $.parseJSON(erg.data).objectId;
                     else {
                         REC.log(WARN, "Verteilregeln (doc.xml) konnten auf dem Alfresco Server nicht angelegt werden!");
                     }
                 } else
                     REC.log(WARN, "Verteilregeln (doc.xml) konnten nicht gelesen werden!");
             } else {
-                rulesID = erg.result;
+                rulesID = erg.data;
             }
         }
         if (erg.success) {
@@ -3211,7 +3207,7 @@ function checkAndBuidAlfrescoEnvironment() {
                 {"name": "filePath", "value": "/"}
             ], "Archiv konnte nicht gefunden werden:");
             if (erg.success) {
-                alfrescoRootFolderId = erg.result;
+                alfrescoRootFolderId = erg.data;
             } else {
                 REC.log(WARN, "Root konnte auf dem Server nicht gefunden werden!");
             }
@@ -3219,7 +3215,7 @@ function checkAndBuidAlfrescoEnvironment() {
         if (erg.success) {
             erg = buildAlfrescoFolder("/Archiv", alfrescoRootFolderId, "Der Archiv Root Ordner");
             if (erg.success)
-                archivFolderId = erg.result;
+                archivFolderId = erg.data;
             else
                 REC.log(WARN, "Archiv konnte auf dem Alfresco Server nicht gefunden werden!");
 
@@ -3228,35 +3224,35 @@ function checkAndBuidAlfrescoEnvironment() {
             // Archiv Root prüfen
             erg = buildAlfrescoFolder("/Archiv/Dokumente", archivFolderId, "Der Ordner für die abgelegten Dokumente");
             if (erg.success) {
-                documentFolderId = erg.result;
+                documentFolderId = erg.data;
             }
         }
         if (erg.success) {
             // Inbox prüfen
             erg = buildAlfrescoFolder("/Archiv/Inbox", archivFolderId, "Der Posteingangsordner");
             if (erg.success) {
-                inboxFolderId = erg.result;
+                inboxFolderId = erg.data;
             }
         }
         if (erg.success) {
             // Fehlerbox prüfen
             erg = buildAlfrescoFolder("/Archiv/Fehler", archivFolderId, "Der Ordner für nicht verteilbare Dokumente");
             if (erg.success) {
-                fehlerFolderId = erg.result;
+                fehlerFolderId = erg.data;
             }
         }
         if (erg.success) {
             // Unbekanntbox prüfen
             erg = buildAlfrescoFolder("/Archiv/Unbekannt", archivFolderId, "Der Ordner für unbekannte Dokumente");
             if (erg.success) {
-                unknownFolderId = erg.result;
+                unknownFolderId = erg.data;
             }
         }
         if (erg.success) {
             // Doppelte Box prüfen
             erg = buildAlfrescoFolder("/Archiv/Fehler/Doppelte", fehlerFolderId, "Verzeichnis für doppelte Dokumente");
             if (erg.success) {
-                doubleFolderId = erg.result;
+                doubleFolderId = erg.data;
             }
         }
         
@@ -3289,15 +3285,15 @@ function initApplication() {
     var erg;
     try {
         erg = executeService("isConnected", null, [], null, true);
-        if (erg.success && erg.result) {
+        if (erg.success && erg.data) {
             erg = executeService("getConnection", null, [], null, true);
             if (erg.success) {
                 settings = {
                     "settings": [
-                        {"key": "server", "value": erg.result.server},
-                        {"key": "user", "value": erg.result.user},
-                        {"key": "password", "value": erg.result.password},
-                        {"key": "binding", "value": erg.result.binding}                    ]
+                        {"key": "server", "value": erg.data.server},
+                        {"key": "user", "value": erg.data.user},
+                        {"key": "password", "value": erg.data.password},
+                        {"key": "binding", "value": erg.data.binding}                    ]
                 };
             }
         }
