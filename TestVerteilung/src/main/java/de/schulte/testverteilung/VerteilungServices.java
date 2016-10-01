@@ -51,13 +51,13 @@ public class VerteilungServices {
      * prüft, ob schon eine Verbindung zu einem Alfresco Server besteht
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            true, wenn Verbindung vorhanden
+     *                                                          data            true, wenn Verbindung vorhanden
      */
     public JSONObject isConnected() {
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", true);
-            obj.put("result", con.isConnected());
+            obj.put("data", con.isConnected());
 
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -69,13 +69,13 @@ public class VerteilungServices {
      * liefert die vorhandenen Titel
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            die Titel als String
+     *                                                          data            die Titel als String
      */
     public JSONObject getTitles() {
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", true);
-            obj.put("result", new JSONArray(titles));
+            obj.put("data", new JSONArray(titles));
 
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -145,7 +145,7 @@ public class VerteilungServices {
      * liefert Informationen zur Connection
      * @return obj               ein JSONObject mit den Feldern success: true        die Operation war erfolgreich
      *                                                                   false       ein Fehler ist aufgetreten
-     *                                                          result   false       keine Connection
+     *                                                          data   false       keine Connection
      *                                                                   JSONObjekt  Die Verbindungsparameter
      */
     public JSONObject getConnection() {
@@ -159,9 +159,9 @@ public class VerteilungServices {
                 obj1.put("binding", this.con.getBinding());
                 obj1.put("user", this.con.getUser());
                 obj1.put("password", this.con.getPassword());
-                obj.put("result", obj1);
+                obj.put("data", obj1);
             } else {
-                obj.put("result", false);
+                obj.put("data", false);
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -173,13 +173,13 @@ public class VerteilungServices {
      * liefert ein Ticket zur Authentifizierung
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            das Ticket als JSON Objekt
+     *                                                          data            das Ticket als JSON Objekt
      */
     public JSONObject getTicket() {
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", true);
-            obj.put("result", con.getTicket());
+            obj.put("data", con.getTicket());
 
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -194,7 +194,7 @@ public class VerteilungServices {
      * @param server             der Alfresco Server
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            das Ticket als JSON Objekt
+     *                                                          data            das Ticket als JSON Objekt
      */
     public JSONObject getTicketWithUserAndPassword( String user,
                                                     String password,
@@ -203,7 +203,7 @@ public class VerteilungServices {
         try {
             AlfrescoConnector connector = new AlfrescoConnector();
             obj.put("success", true);
-            obj.put("result", connector.getTicket(user, password, server));
+            obj.put("data", connector.getTicket(user, password, server));
 
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -217,7 +217,7 @@ public class VerteilungServices {
      * @param ticket        das Ticket zur Identifizierung
      * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                              false    ein Fehler ist aufgetreten
-     *                                                     result            die Kommentare  als JSON Objekt
+     *                                                     data            die Kommentare  als JSON Objekt
      */
     public JSONObject getComments(String documentId, String ticket) {
 
@@ -225,7 +225,7 @@ public class VerteilungServices {
         try {
             CmisObject cmisObject = con.getNodeById(documentId);
             obj.put("success", true);
-            obj.put("result", con.getComments(cmisObject, ticket));
+            obj.put("data", con.getComments(cmisObject, ticket));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -239,78 +239,64 @@ public class VerteilungServices {
      * @param comment       der Kommentar
      * @return obj          ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                              false    ein Fehler ist aufgetreten
-     *                                                     result            der neue Kommentare  als JSON Objekt
+     *                                                     data            der neue Kommentare  als JSON Objekt
      */
     public JSONObject addComment(String documentId, String ticket, String comment){
         JSONObject obj = new JSONObject();
         try {
             CmisObject cmisObject = con.getNodeById(documentId);
             obj.put("success", true);
-            obj.put("result", con.addComment(cmisObject, ticket, comment));
+            obj.put("data", con.addComment(cmisObject, ticket, comment));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
         return obj;
     }
 
+
     /**
      * liefert die Dokumente eines Alfresco Folders als JSON Objekte
      *
      * @param  filePath          der Pfad, der geliefert werden soll
-     * @param  listFolder        was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @param  maxItemsPerPage   die maximale Anzahl
-     * @param  pagesToSkip       die Anzahl Seiten die übersprungen werden soll
+     * @param  order             die Spalte nach der sortiuert werden soll
+     * @param  orderDirection    die Sortierreihenfolge: ASC oder DESC
+     * @param  modus             was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
+     * @param  maxItemsPerPage   die Anzahl der Records insgesamt pro Seite. Bei -1 werden alle übertragen
+     * @param  start             Startposition
+     * @param  draw              draw Counter
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
+     *                                                          data              der Inhalt des Verzeichnisses als JSON Objekte
      */
     public JSONObject listFolder(String filePath,
-                                 int listFolder,
+                                 String order,
+                                 String orderDirection,
+                                 int modus,
                                  int maxItemsPerPage,
-                                 int pagesToSkip) {
-
-        JSONArray list = new JSONArray();
-        JSONObject obj = new JSONObject();
-
-        try {
-           // state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
-             // das Root Object übergeben?
-            if (filePath.equals("-1"))
-                filePath = con.getNode("/Archiv").getId();
-
-            for (CmisObject cmisObject : con.listFolder(filePath, maxItemsPerPage, pagesToSkip)) {
-
-                // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
-                if ((cmisObject instanceof Folder && listFolder < 1) || (cmisObject instanceof Document && listFolder > -1))
-                    list.put(convertObjectToJson(filePath, cmisObject));
-
-            }
-            obj.put("success", true);
-            obj.put("result", list);
-
-        } catch (Throwable t) {
-            obj = VerteilungHelper.convertErrorToJSON(t);
-        }
-        return obj;
-    }
-
-    /**
-     * liefert die Dokumente eines Alfresco Folders als JSON Objekte
-     *
-     * @param  filePath          der Pfad, der geliefert werden soll
-     * @param  listFolder        was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
-     *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
-     */
-    public JSONObject listFolder(String filePath,
-                                 int listFolder) {
+                                 int start,
+                                 int draw) {
 
         JSONArray list = new JSONArray();
         JSONObject obj = new JSONObject();
         JSONArray result;
-        //JSONObject state;
+        long itemsToSkip;
+        long items;
+        ItemIterable<CmisObject> cmisObjects;
         try {
+            if (maxItemsPerPage == -1) {
+                maxItemsPerPage = Integer.MAX_VALUE;
+                itemsToSkip = 0;
+            } else
+                itemsToSkip = start;
+            if (orderDirection == null || orderDirection.isEmpty())
+                orderDirection = "DESC";
+            if (order == null || order.isEmpty()) {
+                if (modus == 1)
+                    order = "my:documentDate";
+                else
+                    order = "cmis:name";
+            }
+
             // state = new JSONObject("{state: {opened: false, disabled: false, selected: false}}");
             // das Root Object übergeben?
             if (filePath.equals("-1"))
@@ -321,23 +307,27 @@ public class VerteilungServices {
             }
             else {
                 logger.fine("listFolder: Result for Id " + filePath + " -> not <- found in Cache! Read...");
-                result = new JSONArray();
-                for (CmisObject cmisObject : con.listFolder(filePath)){
-                    result.put(convertObjectToJson(filePath, cmisObject));
+                cmisObjects = con.listFolder(filePath, order, orderDirection, modus).skipTo(itemsToSkip).getPage(maxItemsPerPage);
+
+
+                for (CmisObject cmisObject : cmisObjects) {
+                    list.put(convertObjectToJson(filePath, cmisObject));
                 }
-                getCache().put(filePath, result);
+                if (cmisObjects.getHasMoreItems())
+                    items = Long.MAX_VALUE;
+                else
+                    items = itemsToSkip + list.length();
+                obj.put("recordsTotal", items);
+                obj.put("draw", draw);
+                //cmisObjects.getTotalNumItems()
+                obj.put("recordsFiltered", items);
+                obj.put("hasMoreItems", cmisObjects.getHasMoreItems());
+                //getCache().put(filePath, result);
             }
 
-            for (int i = 0; i < result.length(); i++) {
-                JSONObject json = result.getJSONObject(i);
 
-                // prüfen, ob das gefundene Objekt überhaupt ausgegeben werden soll
-                if ((json.getString("baseTypeId").equalsIgnoreCase("cmis:folder") && listFolder < 1) || (json.getString("baseTypeId").equalsIgnoreCase("cmis:document") && listFolder > -1))
-                    list.put(json);
-
-            }
+            obj.put("data", list);
             obj.put("success", true);
-            obj.put("result", list);
 
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -352,14 +342,14 @@ public class VerteilungServices {
      * @param  path         der Pfad zum Dokument
      * @return obj          ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                              false   ein Fehler ist aufgetreten
-     *                                                     result   die Id des Knotens
+     *                                                     data   die Id des Knotens
      */
     public JSONObject getNodeId(String path) {
 
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", true);
-            obj.put("result", con.getNode(path).getId());
+            obj.put("data", con.getNode(path).getId());
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -373,14 +363,14 @@ public class VerteilungServices {
      * @param  path         der Pfad zum Dokument
      * @return obj          ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                              false   ein Fehler ist aufgetreten
-     *                                                     result   der Knoten als JSON Object
+     *                                                     data   der Knoten als JSON Object
      */
     public JSONObject getNode(String path) {
 
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", true);
-            obj.put("result", convertCmisObjectToJSON(con.getNode(path)));
+            obj.put("data", convertCmisObjectToJSON(con.getNode(path)));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -392,14 +382,14 @@ public class VerteilungServices {
      * @param  nodeId                die Id des Objektes
      * @return obj          ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                              false   ein Fehler ist aufgetreten
-     *                                                     result   der Knoten als JSON Objekt
+     *                                                     data   der Knoten als JSON Objekt
      */
     public JSONObject getNodeById(String nodeId) {
 
         JSONObject obj = new JSONObject();
         try {
             obj.put("success", true);
-            obj.put("result", convertCmisObjectToJSON(con.getNodeById(nodeId)));
+            obj.put("data", convertCmisObjectToJSON(con.getNodeById(nodeId)));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -412,7 +402,7 @@ public class VerteilungServices {
      * @param  cmisQuery        die CMIS Query zum suchen
      * @return obj              ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                  false   ein Fehler ist aufgetreten
-     *                                                         result           eine Liste mit JSON Objecten
+     *                                                         data           eine Liste mit JSON Objecten
      */
     public JSONObject findDocument(String cmisQuery) {
 
@@ -426,7 +416,7 @@ public class VerteilungServices {
 
             }
             obj.put("success", true);
-            obj.put("result", list);
+            obj.put("data", list);
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -438,7 +428,7 @@ public class VerteilungServices {
      * @param query        der String mit der Query
      * @return obj         ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                             false   ein Fehler ist aufgetreten
-     *                                                    result           eine Liste mit JSON Objekten
+     *                                                    data           eine Liste mit JSON Objekten
      */
     public JSONObject query(String query) {
 
@@ -457,7 +447,7 @@ public class VerteilungServices {
 
                 }
                 obj.put("success", true);
-                obj.put("result", list);
+                obj.put("data", list);
             }
 
         } catch (Throwable t) {
@@ -472,7 +462,7 @@ public class VerteilungServices {
      * @param  extract               wenn gesetzt, wird der Inhalt als lesbarer String zuürckgegeben
      * @return obj                   ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                       false   ein Fehler ist aufgetreten
-     *                                                              result           der Inhalt als String
+     *                                                              data           der Inhalt als String
      */
     public JSONObject getDocumentContent(String documentId,
                                          boolean extract) {
@@ -481,18 +471,18 @@ public class VerteilungServices {
         try {
             Document document = (Document) con.getNodeById(documentId);
             obj.put("success", true);
-            obj.put("result", con.getDocumentContent(document));
+            obj.put("data", con.getDocumentContent(document));
             if (obj.getBoolean("success")) {
                 if (extract) {
                     PDFConnector con = new PDFConnector();
-                    InputStream is = new ByteArrayInputStream((byte[]) obj.get("result"));
-                    obj.put("result", con.pdftoText(is));
+                    InputStream is = new ByteArrayInputStream((byte[]) obj.get("data"));
+                    obj.put("data", con.pdftoText(is));
                 } else
                     try {
-                        obj.put("result", new String((byte[]) obj.get("result"), "UTF-8"));
+                        obj.put("data", new String((byte[]) obj.get("data"), "UTF-8"));
                     } catch (UnsupportedEncodingException e) {
                         obj.put("success", false);
-                        obj.put("result", e.getMessage());
+                        obj.put("data", e.getMessage());
                     }
             }
         } catch (Throwable t) {
@@ -507,7 +497,7 @@ public class VerteilungServices {
      * @param  fileName                der Name der Datei als String
      * @return obj                     ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                         false   ein Fehler ist aufgetreten
-     *                                                                 result          bei Erfolg die Id als String, ansonsten der Fehler
+     *                                                                 data          bei Erfolg die Id als String, ansonsten der Fehler
      */
     public JSONObject uploadDocument(String documentId,
                                      String fileName,
@@ -524,10 +514,10 @@ public class VerteilungServices {
                 String id = con.uploadDocument(((Folder) cmisObject), file, typ, createVersionState(versionState));
                 //TODO Cache
                 obj.put("success", true);
-                obj.put("result", id);
+                obj.put("data", id);
             } else {
                 obj.put("success", false);
-                obj.put("result", "Der verwendete Pfad ist kein Folder!");
+                obj.put("data", "Der verwendete Pfad ist kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -540,7 +530,7 @@ public class VerteilungServices {
      * @param  documentId        die Id des Folders in dem sich das Dokument befindet als String
      * @return obj               ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                   false   ein Fehler ist aufgetreten
-     *                                                          result           bei Erfolg nichts, ansonsten der Fehler
+     *                                                          data           bei Erfolg nichts, ansonsten der Fehler
      */
     public JSONObject deleteDocument(String documentId) {
 
@@ -555,10 +545,10 @@ public class VerteilungServices {
                 clearCache(document);
                 document.delete(true);
                 obj.put("success", true);
-                obj.put("result", "");
+                obj.put("data", "");
             } else {
                 obj.put("success", false);
-                obj.put("result", document == null ? "Das Document ist nicht vorhanden!" : "Das Document ist nicht vom Typ Document!");
+                obj.put("data", document == null ? "Das Document ist nicht vorhanden!" : "Das Document ist nicht vom Typ Document!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -576,7 +566,7 @@ public class VerteilungServices {
      * @param  versionState         der VersionsStatus ( none, major, minor, checkedout)
      * @return obj                  ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                      false   ein Fehler ist aufgetreten
-     *                                                             result           das Document als JSON Object
+     *                                                             data           das Document als JSON Object
      */
     public JSONObject createDocument(String documentId,
                                      String documentName,
@@ -602,14 +592,14 @@ public class VerteilungServices {
                 if (document != null) {
                     clearCache(document);
                     obj.put("success", true);
-                    obj.put("result", convertCmisObjectToJSON(document).toString());
+                    obj.put("data", convertCmisObjectToJSON(document).toString());
                 } else {
                     obj.put("success", false);
-                    obj.put("result", "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!");
+                    obj.put("data", "Ein Document mit dem Namen " + documentName + " ist nicht vorhanden!");
                 }
             } else {
                 obj.put("success", false);
-                obj.put("result", folderObject == null ? "Der angegebene Pfad  ist nicht vorhanden!" : "Der verwendete Pfad ist kein Folder!");
+                obj.put("data", folderObject == null ? "Der angegebene Pfad  ist nicht vorhanden!" : "Der verwendete Pfad ist kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -628,7 +618,7 @@ public class VerteilungServices {
      * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
-     *                                                                  result           bei Erfolg das Document als JSON Object, ansonsten der Fehler
+     *                                                                  data           bei Erfolg das Document als JSON Object, ansonsten der Fehler
      */
     public JSONObject updateDocument(String documentId,
                                      String documentContent,
@@ -650,10 +640,10 @@ public class VerteilungServices {
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
                 clearCache(document);
                 obj.put("success", true);
-                obj.put("result", convertCmisObjectToJSON(document).toString());
+                obj.put("data", convertCmisObjectToJSON(document).toString());
             } else {
                 obj.put("success", false);
-                obj.put("result", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
+                obj.put("data", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -667,7 +657,7 @@ public class VerteilungServices {
      * @param  extraCMSProperties        zusätzliche Properties
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
-     *                                                                  result           bei Erfolg das CmisObject als JSON Object, ansonsten der Fehler
+     *                                                                  data           bei Erfolg das CmisObject als JSON Object, ansonsten der Fehler
      */
     public JSONObject updateProperties(String documentId,
                                        String extraCMSProperties) {
@@ -682,17 +672,17 @@ public class VerteilungServices {
                     outMap = buildProperties(extraCMSProperties);
                 else {
                     obj.put("success", false);
-                    obj.put("result", "keine Properties vorhanden!");
+                    obj.put("data", "keine Properties vorhanden!");
                 }
 
                 cmisObject = con.updateProperties(cmisObject, outMap);
                 clearCache(cmisObject);
 
                 obj.put("success", true);
-                obj.put("result", convertCmisObjectToJSON(cmisObject).toString());
+                obj.put("data", convertCmisObjectToJSON(cmisObject).toString());
             } else {
                 obj.put("success", false);
-                obj.put("result","Ein Document mit der Id " + documentId + " ist nicht vorhanden!");
+                obj.put("data","Ein Document mit der Id " + documentId + " ist nicht vorhanden!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -707,7 +697,7 @@ public class VerteilungServices {
      * @param  newFolderId               der Folder, in das der Knoten verschoben werden soll
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
-     *                                                                  result           bei Erfolg das Document als JSONObject, ansonsten der Fehler
+     *                                                                  data           bei Erfolg das Document als JSONObject, ansonsten der Fehler
      */
     public JSONObject moveNode(String documentId,
                                String oldFolderId,
@@ -726,23 +716,23 @@ public class VerteilungServices {
                         logger.fine("Knoten " + node.getId() + " von " + ((FileableCmisObject) node).getPaths().get(0) + " nach " + fileableCmisObject.getPaths().get(0) + " verschoben!");
                         clearCache(fileableCmisObject);
                         obj.put("success", true);
-                        obj.put("result", convertObjectToJson(newFolderId, fileableCmisObject).toString());
+                        obj.put("data", convertObjectToJson(newFolderId, fileableCmisObject).toString());
                         // Quell und Zielordner zurückgeben
                         obj.put("source", convertCmisObjectToJSON(oldFolder).toString());
                         obj.put("target", convertCmisObjectToJSON(newFolder).toString());
                     } else {
                         obj.put("success", false);
-                        obj.put("result", "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
+                        obj.put("data", "Der verwendete Pfad mit der Id" + newFolderId + " ist kein Folder!");
 
                     }
                 } else {
                     obj.put("success", false);
-                    obj.put("result", oldFolder == null ? "Der Pfad mit der Id " + oldFolderId + "  ist nicht vorhanden!" : "Der verwendete Pfad mit der Id" + oldFolderId + " ist kein Folder!");
+                    obj.put("data", oldFolder == null ? "Der Pfad mit der Id " + oldFolderId + "  ist nicht vorhanden!" : "Der verwendete Pfad mit der Id" + oldFolderId + " ist kein Folder!");
 
                 }
             } else {
                 obj.put("success", false);
-                obj.put("result", node == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document oder Folder!");
+                obj.put("data", node == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document oder Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -756,7 +746,7 @@ public class VerteilungServices {
      * @param  extraCMSProperties      zusätzliche Properties
      * @return obj                     ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                         false   ein Fehler ist aufgetreten
-     *                                                                result           der Folder als JSON Object
+     *                                                                data           der Folder als JSON Object
      */
     public JSONObject createFolder(String documentId,
                                    String extraCMSProperties) {
@@ -771,7 +761,7 @@ public class VerteilungServices {
                 outMap = buildProperties(extraCMSProperties);
             else {
                 obj.put("success", false);
-                obj.put("result", "keine Properties vorhanden!");
+                obj.put("data", "keine Properties vorhanden!");
             }
 
             target = con.getNodeById(documentId);
@@ -785,14 +775,14 @@ public class VerteilungServices {
                     o.put("hasChildren", false);
                     o.put("hasChildFolder", false);
                     o.put("hasChildDocuments", false);
-                    obj.put("result", o.toString());
+                    obj.put("data", o.toString());
                 } else {
                     obj.put("success", false);
-                    obj.put("result", "Ein Folder konnte nicht angelegt werden!" );
+                    obj.put("data", "Ein Folder konnte nicht angelegt werden!" );
                 }
             } else {
                 obj.put("success", false);
-                obj.put("result", target == null ? "Der angebene Pfad mit der Id " + documentId + " ist nicht vorhanden!" : "Der verwendete Pfad " + target + " ist kein Folder!");
+                obj.put("data", target == null ? "Der angebene Pfad mit der Id " + documentId + " ist nicht vorhanden!" : "Der verwendete Pfad " + target + " ist kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -805,7 +795,7 @@ public class VerteilungServices {
      * @param  documentId        die Id des Folders, der gelöscht werden soll
      * @return obj               ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                   false   ein Fehler ist aufgetreten
-     *                                                          result           bei Erfolg nichts, ansonsten der Fehler
+     *                                                          data           bei Erfolg nichts, ansonsten der Fehler
      */
     public JSONObject deleteFolder(String documentId) {
 
@@ -818,10 +808,10 @@ public class VerteilungServices {
                 clearCache(folder);
                 List<String> list = ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
                 obj.put("success", true);
-                obj.put("result", new JSONObject(list).toString());
+                obj.put("data", new JSONObject(list).toString());
             } else {
                 obj.put("success", false);
-                obj.put("result", folder == null ? "Der  angegebene Pfad ist nicht vorhanden!" : "Der verwendete Pfad st kein Folder!");
+                obj.put("data", folder == null ? "Der  angegebene Pfad ist nicht vorhanden!" : "Der verwendete Pfad st kein Folder!");
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -835,7 +825,7 @@ public class VerteilungServices {
      * @param propFile       der Name der Properties Datei
      * @return               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                               false    ein Fehler ist aufgetreten
-     *                                                      result            die Properties als JSON Objekte
+     *                                                      data            die Properties als JSON Objekte
      */
     public JSONObject loadProperties(String propFile) {
 
@@ -845,7 +835,7 @@ public class VerteilungServices {
             InputStream inp = new FileInputStream(new File(new URI(propFile)));
             properties.load(inp);
             obj.put("success", true);
-            obj.put("result", new JSONObject(properties));
+            obj.put("data", new JSONObject(properties));
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
@@ -858,7 +848,7 @@ public class VerteilungServices {
      * @param timeout      der Tiemout in Millisekunden
      * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
-     *                                                    result            true, wenn die URL verfügbar ist
+     *                                                    data            true, wenn die URL verfügbar ist
      */
     public JSONObject isURLAvailable(String urlString, int timeout) {
 
@@ -878,11 +868,11 @@ public class VerteilungServices {
             if (erg == HttpURLConnection.HTTP_OK || erg == HttpURLConnection.HTTP_UNAUTHORIZED) {
                 logger.fine("URL is available: " + urlString);
                 obj.put("success", true);
-                obj.put("result", true);
+                obj.put("data", true);
             } else {
                 logger.fine("URL is not available: " + urlString);
                 obj.put("success", false);
-                obj.put("result", httpUrlConn.getResponseMessage());
+                obj.put("data", httpUrlConn.getResponseMessage());
             }
         } catch (Throwable t) {
             obj = VerteilungHelper.convertErrorToJSON(t);
@@ -896,7 +886,7 @@ public class VerteilungServices {
      * @param fileName          der Name der PDF Datei
      * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
-     *                                                         result            der Inhalt der PDF Datei als String
+     *                                                         data            der Inhalt der PDF Datei als String
      */
     public JSONObject extractPDFToInternalStorage(String pdfContent,
                                                   String fileName) {
@@ -910,7 +900,7 @@ public class VerteilungServices {
                 entries.add(new FileEntry(fileName, bytes, con.pdftoText(bais)));
             }
             obj.put("success", true);
-            obj.put("result", 1);
+            obj.put("data", 1);
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
@@ -922,7 +912,7 @@ public class VerteilungServices {
      * @param filePath          der Pfad zur PDF-Datei
      * @return                  ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
-     *                                                         result            der Inhalt der PDF Datei als String
+     *                                                         data            der Inhalt der PDF Datei als String
      */
     public JSONObject extractPDFFile(String filePath) {
 
@@ -931,7 +921,7 @@ public class VerteilungServices {
             byte[] bytes = readFile(filePath);
             PDFConnector con = new PDFConnector();
             obj.put("success", true);
-            obj.put("result", con.pdftoText(new ByteArrayInputStream(bytes)));
+            obj.put("data", con.pdftoText(new ByteArrayInputStream(bytes)));
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
@@ -944,7 +934,7 @@ public class VerteilungServices {
      * @param pdfContent        der Inhalt der Datei als Base64 encodeter String
      * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
-     *                                                         result            der Inhalt der PDF Datei als String
+     *                                                         data            der Inhalt der PDF Datei als String
      */
     public JSONObject extractPDFContent(String pdfContent) {
 
@@ -953,7 +943,7 @@ public class VerteilungServices {
             byte[] bytes = Base64.decodeBase64(pdfContent);
             PDFConnector con = new PDFConnector();
             obj.put("success", true);
-            obj.put("result", con.pdftoText(new ByteArrayInputStream(bytes)));
+            obj.put("data", con.pdftoText(new ByteArrayInputStream(bytes)));
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
@@ -965,7 +955,7 @@ public class VerteilungServices {
      * @param zipContent        der Inhalt des ZIP Files
      * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
-     *                                                         result            der Inhalt der ZIP Datei als JSON Array mit Base64 encodeten STrings
+     *                                                         data            der Inhalt der ZIP Datei als JSON Array mit Base64 encodeten STrings
      */
     protected JSONObject extractZIP(String zipContent) {
 
@@ -992,10 +982,10 @@ public class VerteilungServices {
             }
             if (jsonArray.length() == 0) {
                 obj.put("success", false);
-                obj.put("result", "Keine Files im ZIP File gefunden!");
+                obj.put("data", "Keine Files im ZIP File gefunden!");
             } else {
                 obj.put("success", true);
-                obj.put("result", jsonArray);
+                obj.put("data", jsonArray);
             }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
@@ -1015,7 +1005,7 @@ public class VerteilungServices {
      * @param zipContent         der Inhalt des ZIP's als Base64 dekodierter String String
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
+     *                                                          data            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
      */
     protected JSONObject extractZIPToInternalStorage(String zipContent) {
         JSONObject obj = new JSONObject();
@@ -1044,10 +1034,10 @@ public class VerteilungServices {
             }
             if (counter == 0) {
                 obj.put("success", false);
-                obj.put("result", "Keine Files im ZIP File gefunden!");
+                obj.put("data", "Keine Files im ZIP File gefunden!");
             } else {
                 obj.put("success", true);
-                obj.put("result", counter);
+                obj.put("data", counter);
             }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
@@ -1067,7 +1057,7 @@ public class VerteilungServices {
      * @param zipContent          der Inhalt der ZIP Datei als Base64 encodeter String
      * @return obj                ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                    false    ein Fehler ist aufgetreten
-     *                                                           result            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
+     *                                                           data            bei Erfolg die Anzahl der Dokumente im ZIP File, ansonsten der Fehler
      */
     public JSONObject extractZIPAndExtractPDFToInternalStorage(String zipContent) {
 
@@ -1089,7 +1079,7 @@ public class VerteilungServices {
                     entry.setExtractedData(extractedData);
                     counter++;
                 }
-                obj.put("result", counter);
+                obj.put("data", counter);
             }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
@@ -1102,17 +1092,17 @@ public class VerteilungServices {
      * @param fileName           der Name der zu suchenden Datei
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (als Base64 String encoded) und er Inhalt als Text, ansonsten der Fehler
+     *                                                          data            bei Erfolg ein JSONObjekt mit den Binärdaten (als Base64 String encoded) und er Inhalt als Text, ansonsten der Fehler
      */
     public JSONObject getDataFromInternalStorage(String fileName) {
 
         JSONObject obj = new JSONObject();
-        JSONObject result = new JSONObject();
+        JSONObject data = new JSONObject();
         boolean found = false;
         try {
             if (entries.isEmpty()) {
                 obj.put("success", false);
-                obj.put("result", "keine Einträge vorhanden");
+                obj.put("data", "keine Einträge vorhanden");
             } else {
                 for (FileEntry entry : entries) {
                     if (entry.getName().equals(fileName)) {
@@ -1123,8 +1113,8 @@ public class VerteilungServices {
                             jEntry.put("data", Base64.encodeBase64String(entry.getData()));
                             if (entry.getExtractedData() != null && !entry.getExtractedData().isEmpty())
                                 jEntry.put("extractedData", entry.getExtractedData());
-                            result.put(entry.getName(), jEntry);
-                            obj.put("result", result);
+                            data.put(entry.getName(), jEntry);
+                            obj.put("data", data);
                             found = true;
                             break;
                         }
@@ -1132,7 +1122,7 @@ public class VerteilungServices {
                 }
                 if (!found) {
                     obj.put("success", false);
-                    obj.put("result", "keine Einträge vorhanden");
+                    obj.put("data", "keine Einträge vorhanden");
                 }
             }
 
@@ -1147,17 +1137,17 @@ public class VerteilungServices {
      * liefert den kompletten Inhalt aus dem internen Speicher
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg ein JSONObjekt mit den Binärdaten (als Base64 String encoded) und er Inhalt als Text, ansonsten der Fehler
+     *                                                          data            bei Erfolg ein JSONObjekt mit den Binärdaten (als Base64 String encoded) und er Inhalt als Text, ansonsten der Fehler
      */
 
     public JSONObject getDataFromInternalStorage() {
 
         JSONObject obj = new JSONObject();
-        JSONObject results = new JSONObject();
+        JSONObject data = new JSONObject();
         try {
             if (entries.isEmpty()) {
                 obj.put("success", false);
-                obj.put("result", "keine Einträge vorhanden");
+                obj.put("data", "keine Einträge vorhanden");
             } else {
                 for (FileEntry entry: entries) {
                     JSONObject jEntry = new JSONObject();
@@ -1166,11 +1156,11 @@ public class VerteilungServices {
                         jEntry.put("data", Base64.encodeBase64String(entry.getData()));
                         if (entry.getExtractedData() != null && !entry.getExtractedData().isEmpty())
                             jEntry.put("extractedData", entry.getExtractedData());
-                        results.put(entry.getName(), jEntry);
+                        data.put(entry.getName(), jEntry);
                     }
                 }
                 obj.put("success", true);
-                obj.put("result", results);
+                obj.put("data", data);
             }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
@@ -1183,7 +1173,7 @@ public class VerteilungServices {
      * löscht den internen Speicher
      * @return obj               ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
-     *                                                          result            bei Erfolg nichts, ansonsten der Fehler
+     *                                                          data            bei Erfolg nichts, ansonsten der Fehler
      */
     public JSONObject clearInternalStorage() {
 
@@ -1191,7 +1181,7 @@ public class VerteilungServices {
         try {
             entries.clear();
             obj.put("success", true);
-            obj.put("result", "");
+            obj.put("data", "");
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
@@ -1203,7 +1193,7 @@ public class VerteilungServices {
      * @param filePath          der Pfad zur Datei
      * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
-     *                                                         result            der Inhalt der Datei als Base64 encodeter String oder der Fehler
+     *                                                         data            der Inhalt der Datei als Base64 encodeter String oder der Fehler
      */
     public JSONObject openFile(String filePath) {
 
@@ -1211,7 +1201,7 @@ public class VerteilungServices {
         try {
             byte[] buffer = readFile(filePath);
             obj.put("success", true);
-            obj.put("result", Base64.encodeBase64String(buffer));
+            obj.put("data", Base64.encodeBase64String(buffer));
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
@@ -1222,14 +1212,14 @@ public class VerteilungServices {
      * löscht den Cache
      * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
      *                                                                  false    ein Fehler ist aufgetreten
-     *                                                         result            der Inhalt der Datei als Base64 encodeter String oder der Fehler
+     *                                                         data            der Inhalt der Datei als Base64 encodeter String oder der Fehler
      */
     public JSONObject clearCache() {
         JSONObject obj = new JSONObject();
         try {
             getCache().clear();
             obj.put("success", true);
-            obj.put("result", "");
+            obj.put("data", "");
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
@@ -1374,11 +1364,15 @@ public class VerteilungServices {
         JSONObject o = convertCmisObjectToJSON(cmisObject);
         // prüfen, ob Children vorhanden sind
         if (cmisObject instanceof Folder) {
-            ItemIterable<CmisObject> children = con.listFolder(cmisObject.getId());
+            OperationContext operationContext = con.getSession().createOperationContext();
+            operationContext.setIncludeAcls(false);
+            operationContext.setIncludePolicies(false);
+            operationContext.setIncludeAllowableActions(false);
+            ItemIterable<CmisObject> children = ((Folder) cmisObject).getChildren(operationContext);
             o.put("hasChildren", children.getTotalNumItems() > 0);
             boolean hasChildFolder = false;
             boolean hasChildDocuments = false;
-            for (CmisObject childObject : con.listFolder(cmisObject.getId())) {
+            for (CmisObject childObject : children) {
                 if (childObject instanceof Folder) {
                     hasChildFolder = true;
                 }

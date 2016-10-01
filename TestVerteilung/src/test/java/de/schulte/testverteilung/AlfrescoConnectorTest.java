@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,6 +34,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
     private AlfrescoConnector con;
 
     @Before
+    @After
     public void setUp() throws Exception {
         super.setUp();
         con = new AlfrescoConnector(properties.getProperty("user"), properties.getProperty("password"), properties.getProperty("server"), properties.getProperty("binding"));
@@ -45,9 +47,13 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
             cmisObject.delete(true);
         }
         cmisObject = con.getNode("/Archiv/Fehler/TestDocument.txt");
+        if (cmisObject != null && ((AlfrescoDocument) cmisObject).isPrivateWorkingCopy())
+            ((AlfrescoDocument) cmisObject).cancelCheckOut();
         if (cmisObject != null && cmisObject instanceof Document)
             cmisObject.delete(true);
         cmisObject = con.getNode("/Archiv/Test.pdf");
+        if (cmisObject != null && ((AlfrescoDocument) cmisObject).isPrivateWorkingCopy())
+            ((AlfrescoDocument) cmisObject).cancelCheckOut();
         if (cmisObject != null && cmisObject instanceof Document)
             cmisObject.delete(true);
         cmisObject = con.getNode("/Archiv/TestFolder");
@@ -64,9 +70,9 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testListFolder() throws Exception {
-        ItemIterable<CmisObject> list = con.listFolder(con.getNode("/Archiv").getId());
+        ItemIterable<CmisObject> list = con.listFolder(con.getNode("/Archiv").getId(), "cmis:name", "DESC", 0);
         assertThat(list.getTotalNumItems(), Matchers.is(4L));
-        list = con.listFolder(con.getNode("/Archiv/Fehler").getId());
+        list = con.listFolder(con.getNode("/Archiv/Fehler").getId(), "cmis:name", "DESC", 0);
         int count = 0;
         for (CmisObject obj : list) {
             if (obj instanceof Folder)
@@ -108,6 +114,61 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         assertThat(erg, Matchers.notNullValue());
         assertThat(erg.size(), Matchers.is(1));
         assertThat((String) erg.get(0).get(0).getFirstValue(), Matchers.equalTo("doc.xml"));
+    }
+
+    @Test
+    public void testTotalNumItems() throws Exception {
+        ItemIterable<CmisObject> result = null;
+        CMISSessionGenerator gen = new CMISSessionGenerator("admin", "admin", "http://localhost:9080/alfresco/api/-default-/public/cmis/versions/1.1/atom", "Session");
+        Session session = gen.generateSession();
+        CmisObject cmisObject = session.getObjectByPath("/");
+        Folder folder = (Folder) cmisObject;
+        OperationContext operationContext = session.createOperationContext();
+        //operationContext.setMaxItemsPerPage(2);
+        QueryStatement stmt = session.createQueryStatement("IN_FOLDER(?)");
+        stmt.setString(1, folder.getId());
+        result = session.queryObjects("cmis:folder", stmt.toString(), false, operationContext);
+        long totalNumItems = result.getTotalNumItems();
+        operationContext.setMaxItemsPerPage(1);
+        result = con.getSession().queryObjects("cmis:folder", stmt.toString(), false, operationContext);
+        //System.out.println(result.getTotalNumItems());
+        assertThat(result.getTotalNumItems(), Matchers.is(totalNumItems));
+    }
+
+    @Test
+    public void testTotalNumItems1() throws Exception {
+        ItemIterable<CmisObject> result = null;
+        CMISSessionGenerator gen = new CMISSessionGenerator("admin", "admin", "http://localhost:9080/alfresco/api/-default-/public/cmis/versions/1.1/atom", "Session");
+        Session session = gen.generateSession();
+        CmisObject cmisObject = session.getObjectByPath("/");
+        Folder folder = (Folder) cmisObject;
+        OperationContext operationContext = session.createOperationContext();
+        result = folder.getChildren(operationContext);
+        long totalNumItems = result.getTotalNumItems();
+        operationContext.setMaxItemsPerPage(1);
+        result = folder.getChildren(operationContext);
+        assertThat(result.getTotalNumItems(), Matchers.is(totalNumItems));
+    }
+
+
+
+    @Test
+    public void testTest() throws Exception {
+        CMISSessionGenerator gen = new CMISSessionGenerator("admin", "admin", "http://localhost:9080/alfresco/api/-default-/public/cmis/versions/1.0/atom", "Session");
+        Session session = gen.generateSession();
+
+        String queryString = "SELECT cmis:name FROM cmis:document";
+        OperationContext context = session.createOperationContext();
+        context.setIncludeAcls(false);
+        context.setIncludePolicies(false);
+        context.setMaxItemsPerPage(999);
+        ItemIterable<QueryResult> results = session.query(queryString, false, context);
+        long total = results.getTotalNumItems();
+        System.out.println("total: "+total);
+        context.setMaxItemsPerPage(150);
+        results = session.query(queryString, false, context);
+        total = results.getTotalNumItems();
+        System.out.println("total: "+total);
     }
 
     @Test
@@ -164,7 +225,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         titledMap.put("cm:description","Testdokument");
         amountMap.put("my:amount","25.33");
         archivModelMap.put("my:person", "Klaus");
-        archivModelMap.put("my:documentDate", new Date().getTime());
+        archivModelMap.put("my:documentDate", Long.toString(new Date().getTime()));
        // properties.put(PropertyIds.OBJECT_TYPE_ID, "D:my:archivContent");
         properties.put("P:cm:titled", titledMap);
         properties.put("P:my:amountable", amountMap);
@@ -186,7 +247,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> archivModelMap = new HashMap<>();
         archivModelMap.put("my:person", "Klaus");
-        archivModelMap.put("my:documentDate", new Date().getTime());
+        archivModelMap.put("my:documentDate", Long.toString(new Date().getTime()));
         properties.put("D:my:archivContent", archivModelMap);
         //Achtung: Wenn hier das Dokument noch nicht auf den Typ my:archivContent gesetzt würde, dann ist das mit dem nachfolgenden Update nicht mehr zu ändern.
         // Wird im Alfresco eine Regel verwendet, die den Typ automatisch setzt, so muss das Dokument neu gelesen werden, denn die Rückgabe des create wird nicht automatisch aktualisiert

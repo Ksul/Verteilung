@@ -2,15 +2,17 @@ package de.schulte.testverteilung;
 
 import org.alfresco.cmis.client.AlfrescoAspects;
 import org.apache.chemistry.opencmis.client.api.*;
+import org.apache.chemistry.opencmis.client.bindings.spi.atompub.AbstractAtomPubService;
+import org.apache.chemistry.opencmis.client.runtime.util.AbstractPageFetcher;
+import org.apache.chemistry.opencmis.client.runtime.util.CollectionIterable;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
-import org.apache.chemistry.opencmis.commons.data.Ace;
-import org.apache.chemistry.opencmis.commons.data.ContentStream;
-import org.apache.chemistry.opencmis.commons.data.PropertyData;
+import org.apache.chemistry.opencmis.commons.data.*;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDateTimeDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.apache.chemistry.opencmis.commons.spi.DiscoveryService;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -149,7 +151,7 @@ public class AlfrescoConnector {
      * liefert die CMIS Session
      * @return  die CMIS Session
      */
-    private Session getSession() {
+    protected Session getSession() {
         if (this.session != null)
           return this.session;
         else {
@@ -213,29 +215,73 @@ public class AlfrescoConnector {
     /**
      * listet den Inhalt eines Folders
      * @param folderId              die Id des Folders
-     * @param maxItemsPerPage       die maximale Anzahl
-     * @param pagesToSkip           die Anzahl Seiten die übersprungen werden soll
+     * @param order                 Die Spalte nach der sortiuert werden soll
+     * @param orderDirection        die Sortierreihenfolge: ASC oder DESC
+     * @param modus                 was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
      * @return                      die gefundenen Children
      */
 
-    public ItemIterable<CmisObject> listFolder(String folderId, int maxItemsPerPage, int pagesToSkip) throws VerteilungException{
+    public ItemIterable<CmisObject> listFolder(String folderId,
+                                               String order,
+                                               String orderDirection,
+                                               int modus) throws VerteilungException{
+
+        ItemIterable<CmisObject> result = null;
         CmisObject object = getSession().getObject(getSession().createObjectId(folderId));
         Folder folder = (Folder) object;
         OperationContext operationContext = getSession().createOperationContext();
-        operationContext.setMaxItemsPerPage(maxItemsPerPage);
+        operationContext.setOrderBy(order + " " + orderDirection);
+        switch (modus) {
+            case 0: {  // Dokumente und Folder
+                result = folder.getChildren(operationContext);
+                break;
+            }
+            case 1:{  // nur Dokumente
+                QueryStatement stmt = session.createQueryStatement("select d.*, o.* from my:archivContent as d join cm:titled as o on d.cmis:objectId = o.cmis:objectId  WHere IN_FOLDER(d, ?)");
+                stmt.setString(1, folder.getId());
+                final DiscoveryService discoveryService = getSession().getBinding().getDiscoveryService();
+                final ObjectFactory of = getSession().getObjectFactory();
+                result = new CollectionIterable<CmisObject>(new AbstractPageFetcher<CmisObject>(operationContext.getMaxItemsPerPage()) {
 
-        ItemIterable<CmisObject> children = folder.getChildren(operationContext);
-        return children.skipTo(pagesToSkip).getPage();
+                    @Override
+                    protected AbstractPageFetcher.Page<CmisObject> fetchPage(long skipCount) {
+                        // fetch the data
+                        ObjectList resultList = discoveryService.query(getSession().getRepositoryInfo().getId(), stmt.toString(),
+                                false, operationContext.isIncludeAllowableActions(), operationContext.getIncludeRelationships(),
+                                operationContext.getRenditionFilterString(), BigInteger.valueOf(this.maxNumItems),
+                                BigInteger.valueOf(skipCount), null);
+
+                        // convert query results
+                        List<CmisObject> page = new ArrayList<CmisObject>();
+                        if (resultList.getObjects() != null) {
+                            for (ObjectData objectData : resultList.getObjects()) {
+                                if (objectData == null) {
+                                    continue;
+                                }
+
+                                page.add(of.convertObject(objectData, operationContext));
+                            }
+                        }
+
+                        return new AbstractPageFetcher.Page<CmisObject>(page, resultList.getNumItems(),
+                                resultList.hasMoreItems());
+                    }
+                });
+
+                break;
+            }
+            case -1: { // nur Folder
+                QueryStatement stmt = session.createQueryStatement("IN_FOLDER(?) AND cmis:objectTypeId<>'F:cm:systemfolder'");
+                stmt.setString(1, folder.getId());
+                result = session.queryObjects("cmis:folder", stmt.toString(), false, operationContext);
+                break;
+            }
+        }
+
+        return result;
     }
 
-    /**
-     * listet den Inhalt eines Folders
-     * @param folderId              die Id des Folders
-     * @return                      eine Liste mit CmisObjekten
-     */
-    public ItemIterable<CmisObject> listFolder( String folderId) throws VerteilungException{
-        return listFolder(folderId, 99999, 0);
-    }
+
 
     /**
      * liefert einen Knotens
@@ -457,7 +503,7 @@ public class AlfrescoConnector {
      * @param  documentType              der Typ des Dokumentes
      * @param  extraCMSProperties        zusätzliche Properties
      * @param  versionState              bestimmt die Versionierung @seeVersionState
-     * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
+     * @param  versionComment            falls Dokument versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return document                  das geänderte Dokument
      */
     public Document updateDocument(Document document,
@@ -662,10 +708,11 @@ public class AlfrescoConnector {
             PropertyDefinition<?> definition = definitions.get(key);
             //TODO Hier fehlt noch das parsen auf die anderen Datentypen
             if (definition instanceof PropertyDateTimeDefinition) {
-                long l = Long.parseLong((String) properties.get(key));
-                GregorianCalendar gc = new GregorianCalendar();
-                gc.setTime(new Date(l));
-                props.put(key, gc);
+                if (properties.get(key) instanceof Long) {
+                    GregorianCalendar gc = new GregorianCalendar();
+                    gc.setTime(new Date((Long) properties.get(key)));
+                    props.put(key, gc);
+                }
             } else {
                 props.put(key, properties.get(key));
             }

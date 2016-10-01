@@ -333,24 +333,30 @@ public class VerteilungApplet extends Applet {
     /**
      * liefert die Dokumente eines Alfresco Folders seitenweise als JSON Objekte
      * @param filePath           der Pfad, der geliefert werden soll
+     * @param order              die Spalte nach der sortiuert werden soll
+     * @param orderDirection     die Sortierreihenfolge: ASC oder DESC
      * @param listFolder         was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @param  maxItemsPerPage   die maximale Anzahl
-     * @param  pagesToSkip       die Anzahl Seiten die übersprungen werden soll
+     * @param maxItemsPerPage    die maximale Anzahl
+     * @param start              die Anzahl Items die übersprungen werden soll
+     * @param draw               Draw Counter
      * @return obj               ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                                   false    ein Fehler ist aufgetreten
      *                                                          result            der Inhalt des Verzeichnisses als JSON Objekte
      */
     public JSONObject listFolderWithPagination(final String filePath,
+                                               final String order,
+                                               final String orderDirection,
                                                final String listFolder,
                                                final String maxItemsPerPage,
-                                               final String pagesToSkip)  {
+                                               final String start,
+                                               final String draw)  {
 
         JSONObject obj;
         try {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws VerteilungException, IOException, JSONException {
-                    return services.listFolder(filePath, Integer.parseInt(listFolder), Integer.parseInt(maxItemsPerPage), Integer.parseInt(pagesToSkip));
+                    return services.listFolder(filePath, order, orderDirection, Integer.parseInt(listFolder), Integer.parseInt(maxItemsPerPage), Integer.parseInt(start), Integer.parseInt(draw));
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -375,7 +381,7 @@ public class VerteilungApplet extends Applet {
             obj = AccessController.doPrivileged(new PrivilegedExceptionAction<JSONObject>() {
 
                 public JSONObject run() throws VerteilungException, IOException, JSONException {
-                    return services.listFolder(filePath, Integer.parseInt(listFolder));
+                    return services.listFolder(filePath, "my:documentDate", "DESC", Integer.parseInt(listFolder), -1, 0, 0);
                 }
             });
         } catch (PrivilegedActionException e) {

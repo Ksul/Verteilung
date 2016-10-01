@@ -50,9 +50,14 @@ public class VerteilungServlet extends HttpServlet {
     public static final String PARAMETER_EXTRAPROPERTIES = "extraProperties";
     public static final String PARAMETER_TICKET = "ticket";
     public static final String PARAMETER_COMMENT = "comment";
-    public static final String PARAMETER_MAXITEMSPERPAGE = "maxItemsPerPage";
-    public static final String PARAMETER_PAGESTOSKIP = "pagesToSkip";
+    public static final String PARAMETER_MAXITEMSPERPAGE = "length";
+    public static final String PARAMETER_ITEMSTOSKIP = "start";
+    public static final String PARAMETER_DRAW = "draw";
     public static final String PARAMETER_TIMEOUT = "timeout";
+    public static final String PARAMETER_ORDER = "order[0][column]";
+    public static final String PARAMETER_ORDERDIRECTION = "order[0][dir]";
+
+
 
     public static final String FUNCTION_CLEARINTERNALSTORAGE = "clearInternalStorage";
     public static final String FUNCTION_CREATEDOCUMENT = "createDocument";
@@ -146,10 +151,10 @@ public class VerteilungServlet extends HttpServlet {
             if (server != null && !server.isEmpty() && binding != null && !binding.isEmpty() && user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
                 services.setParameter(server, binding, user, password);
                 obj.put("success", true);
-                obj.put("result", "Server:" + server + " Binding:" + binding + " User:" + user + " Password:" + password);
+                obj.put("data", "Server:" + server + " Binding:" + binding + " User:" + user + " Password:" + password);
             } else {
                 obj.put("success", false);
-                obj.put("result", "Parameter fehlt: Server: " + server + " Binding: " + binding + " User: " + user + " Password:" + password);
+                obj.put("data", "Parameter fehlt: Server: " + server + " Binding: " + binding + " User: " + user + " Password:" + password);
             }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
@@ -198,7 +203,7 @@ public class VerteilungServlet extends HttpServlet {
         try {
             if (value == null || "".equals(value)) {
                 obj.put("success", false);
-                obj.put("result", "Function Name is missing!\nPlease check for Tomcat maxPostSize and maxHeaderSizer Property for HTTPConnector");
+                obj.put("data", "Function Name is missing!\nPlease check for Tomcat maxPostSize and maxHeaderSizer Property for HTTPConnector");
             } else {
                 logger.info("Call of Method " + value);
                 if (value.equalsIgnoreCase(FUNCTION_OPENPDF)) {
@@ -250,7 +255,9 @@ public class VerteilungServlet extends HttpServlet {
                 } else if (value.equalsIgnoreCase(FUNCTION_LISTFOLDERASJSON)) {
                     obj = listFolder(getURLParameter(req, PARAMETER_FILEPATH, true), getURLParameter(req, PARAMETER_WITHFOLDER, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_LISTFOLDERASJSONWITHPAGINATION)) {
-                    obj = listFolderWithPagination(getURLParameter(req, PARAMETER_FILEPATH, true), getURLParameter(req, PARAMETER_WITHFOLDER, true), getURLParameter(req, PARAMETER_MAXITEMSPERPAGE, true), getURLParameter(req, PARAMETER_PAGESTOSKIP, true));
+                    String orderColumn =  getURLParameter(req, PARAMETER_ORDER, true);
+                    String order = getURLParameter(req, "columns[" + orderColumn.trim() + "][name]", true);
+                    obj = listFolderWithPagination(getURLParameter(req, PARAMETER_FILEPATH, true), order, getURLParameter(req, PARAMETER_ORDERDIRECTION, true), getURLParameter(req, PARAMETER_WITHFOLDER, true), getURLParameter(req, PARAMETER_MAXITEMSPERPAGE, true), getURLParameter(req, PARAMETER_ITEMSTOSKIP, true), getURLParameter(req, PARAMETER_DRAW, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_EXTRACTPDFCONTENT)) {
                     obj = extractPDFContent(getURLParameter(req, PARAMETER_DOCUMENTTEXT, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_EXTRACTPDFFILE)) {
@@ -283,7 +290,7 @@ public class VerteilungServlet extends HttpServlet {
                     obj = openFile(getURLParameter(req, PARAMETER_FILENAME, true));
             } else {
                     obj.put("success", false);
-                    obj.put("result", "Function " + value + " ist dem Servlet unbekannt!");
+                    obj.put("data", "Function " + value + " ist dem Servlet unbekannt!");
                 }
             }
         } catch (Exception e) {
@@ -648,25 +655,33 @@ public class VerteilungServlet extends HttpServlet {
     protected JSONObject listFolder(String filePath,
                                           String listFolder) throws VerteilungException {
 
-        return services.listFolder(filePath, Integer.parseInt(listFolder));
+        return services.listFolder(filePath, null, null, Integer.parseInt(listFolder), -1, 0, 0);
     }
 
     /**
      * liefert die Dokumente eines Alfresco Folders seitenweise als JSON Objekte
      * @param filePath           der Pfad, der geliefert werden soll (als NodeId)
+     * @param order              die Spalte nach der sortiuert werden soll
+     * @param orderDirection     die Sortierreihenfolge: ASC oder DESC
      * @param listFolder         was soll geliefert werden: 0: Folder und Dokumente,  1: nur Dokumente,  -1: nur Folder
-     * @param  maxItemsPerPage   die maximale Anzahl
-     * @param  pagesToSkip       die Anzahl Seiten die übersprungen werden soll
-     * @return                    ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
-     *                                                                    false    ein Fehler ist aufgetreten
-     *                                                           result            der Inhalt des Verzeichnisses als JSON Objekte
+     * @param maxItemsPerPage    die maximale Anzahl
+     * @param start              die Startposition
+     * @param draw               die Anzahl Seiten die übersprungen werden soll
+     * @return                   ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                                   false    ein Fehler ist aufgetreten
+     *                                                           result           der Inhalt des Verzeichnisses als JSON Objekte
      */
     protected JSONObject listFolderWithPagination(String filePath,
+                                                  String order,
+                                                  String orderDirection,
                                                   String listFolder,
                                                   String maxItemsPerPage,
-                                                  String pagesToSkip) throws VerteilungException {
-
-        return services.listFolder(filePath, Integer.parseInt(listFolder), Integer.parseInt(maxItemsPerPage), Integer.parseInt(pagesToSkip));
+                                                  String start,
+                                                  String draw) throws VerteilungException {
+        int itemsPerPage = Integer.parseInt(maxItemsPerPage);
+        int drawPosition = Integer.parseInt(draw);
+        int startPosition = Integer.parseInt(start);
+        return services.listFolder(filePath, order, orderDirection,Integer.parseInt(listFolder), itemsPerPage, startPosition, drawPosition);
     }
 
 
@@ -807,7 +822,7 @@ public class VerteilungServlet extends HttpServlet {
             server = server + "/";
         try {
 
-            String ticket = services.getTicket().getJSONObject("result").getJSONObject("data").getString("ticket");
+            String ticket = services.getTicket().getJSONObject("data").getJSONObject("data").getString("ticket");
             URL url = new URL(server + link + "&alf_ticket=" + ticket);
             InputStream is = url.openStream();
 
