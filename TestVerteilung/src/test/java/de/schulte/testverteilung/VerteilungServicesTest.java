@@ -462,7 +462,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         JSONObject data = new JSONObject(obj.getString("data"));
         assertThat(data, Matchers.notNullValue());
-        assertThat(data.get("title"), Matchers.equalTo("Testdokument \tTest"));
+        assertThat(data.get("title"), Matchers.equalTo((Object) "Testdokument \tTest"));
         assertThat(data.getDouble("amount"), Matchers.equalTo(25.33));
         assertThat(data.getBoolean("tax"), is(true));
         assertThat(data.getString("person"), is("Katja"));
@@ -476,7 +476,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         data = new JSONObject(obj.getString("data"));
         assertThat(data, Matchers.notNullValue());
-        assertThat(data.get("title"), Matchers.equalTo("Testdokument"));
+        assertThat(data.get("title"), Matchers.equalTo((Object) "Testdokument"));
         assertThat(data.getDouble("amount"), Matchers.equalTo(25.34));
         assertThat(data.getBoolean("tax"), is(true));
         assertThat(data.getInt("idvalue"), is(123));
