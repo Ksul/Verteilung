@@ -1920,7 +1920,7 @@ function Check(srch, parent) {
 }
 
 /**
- * stellt di Funktionalität für die Kommentare zur Verfügung
+ * stellt die Funktionalität für die Kommentare zur Verfügung
  * @constructor
  */
 function Comments() {

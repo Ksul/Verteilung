@@ -87,9 +87,10 @@ public class CMISSessionGenerator {
 //		Session session = factory.createSession(parameter);
 
             // Set the alfresco object factory
-            parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+            //parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
 
             // create session
+
             List<Repository> repositories = factory.getRepositories(parameter);
             session = repositories.get(0).createSession();
 

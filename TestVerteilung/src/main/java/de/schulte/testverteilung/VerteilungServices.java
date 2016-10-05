@@ -1,6 +1,8 @@
 package de.schulte.testverteilung;
 
+import com.sun.deploy.util.StringUtils;
 import org.apache.chemistry.opencmis.client.api.*;
+import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.*;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
@@ -613,7 +615,7 @@ public class VerteilungServices {
      * @param  documentId                Die Id des zu aktualisierenden Dokumentes
      * @param  documentContent           der neue Inhalt als Base64 decodierter String. Falls der Content <null> ist, dann werden nur die Properties upgedated.
      * @param  documentType              der Typ des Dokumentes
-     * @param  extraCMSProperties        zusätzliche Properties
+     * @param  properties                zusätzliche Properties
      * @param  versionState              der VersionsStatus ( none, major, minor, checkedout)
      * @param  versionComment            falls Dokuemnt versionierbar, dann kann hier eine Kommentar zur Version mitgegeben werden
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
@@ -623,53 +625,68 @@ public class VerteilungServices {
     public JSONObject updateDocument(String documentId,
                                      String documentContent,
                                      String documentType,
-                                     String extraCMSProperties,
+                                     String properties,
                                      String versionState,
                                      String versionComment) {
 
         //TODO Content als String oder als Stream?
         JSONObject obj = new JSONObject();
-        try {
-            Map<String, Object> outMap = new HashMap<>();
 
+        try {
+
+            Map<String, Object> outMap = new HashMap<>();
+            List<String> asp = null;
             CmisObject cmisObject = con.getNodeById(documentId);
+
             if (cmisObject != null && cmisObject instanceof Document) {
-                if (extraCMSProperties != null && extraCMSProperties.length() > 0) {
-                    outMap = buildProperties(extraCMSProperties);
+
+
+
+                if (properties != null && properties.length() > 0) {
+                    outMap = buildProperties(properties);
                 }
+
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
                 clearCache(document);
                 obj.put("success", true);
                 obj.put("data", convertCmisObjectToJSON(document).toString());
+
             } else {
+
                 obj.put("success", false);
                 obj.put("data", cmisObject == null ? "Ein Document mit der Id " + documentId + " ist nicht vorhanden!" : "Das verwendete Document mit der Id" + documentId + " ist nicht vom Typ Document!");
             }
+
         } catch (Throwable t) {
+
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
+
         return obj;
     }
 
     /**
      * aktualisiert die Properties eines Objectes
      * @param  documentId                Die Id des zu aktualisierenden Objectes
-     * @param  extraCMSProperties        zusätzliche Properties
+     * @param  properties                die Properties
      * @return obj                       ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
      *                                                                           false   ein Fehler ist aufgetreten
-     *                                                                  data           bei Erfolg das CmisObject als JSON Object, ansonsten der Fehler
+     *                                                                  data             bei Erfolg das CmisObject als JSON Object, ansonsten der Fehler
      */
     public JSONObject updateProperties(String documentId,
-                                       String extraCMSProperties) {
+                                       String properties) {
+
         JSONObject obj = new JSONObject();
+
         try {
+
             Map<String, Object> outMap = null;
             CmisObject cmisObject = con.getNodeById(documentId);
             if (cmisObject != null) {
 
+                if (properties != null && properties.length() > 0)
+                    outMap = buildProperties(properties);
 
-                if (extraCMSProperties != null && extraCMSProperties.length() > 0)
-                    outMap = buildProperties(extraCMSProperties);
                 else {
                     obj.put("success", false);
                     obj.put("data", "keine Properties vorhanden!");
@@ -684,9 +701,12 @@ public class VerteilungServices {
                 obj.put("success", false);
                 obj.put("data","Ein Document mit der Id " + documentId + " ist nicht vorhanden!");
             }
+
         } catch (Throwable t) {
+
             obj = VerteilungHelper.convertErrorToJSON(t);
         }
+
         return obj;
     }
 
@@ -1259,22 +1279,32 @@ public class VerteilungServices {
      * @param extraCMSProperties    der String mit den Properties im JSON Format
      * @throws JSONException
      */
-    private Map<String, Object> buildProperties(String extraCMSProperties) throws JSONException {
+    protected Map<String, Object> buildProperties(String extraCMSProperties) throws JSONException {
 
         logger.fine("buildProperties from " + extraCMSProperties);
         JSONObject props = new JSONObject(extraCMSProperties);
         Iterator nameItr = props.keys();
         Map<String, Object> outMap = new HashMap<>();
+        List<String> liste = new ArrayList<>();
         while (nameItr.hasNext()) {
             String name = (String) nameItr.next();
-            Map<String, Object> inMap = new HashMap<>();
+            // Aspekte
+            if (name.toUpperCase().startsWith("P:")) {
+                liste.add(name);
+
+            }
+            // Type Definition
+            if (name.toUpperCase().startsWith("D:")) {
+                outMap.put(PropertyIds.OBJECT_TYPE_ID, name);
+            }
             Iterator innerItr = ((JSONObject) props.get(name)).keys();
             while (innerItr.hasNext()) {
                 String innerName = (String) innerItr.next();
-                inMap.put(innerName, ((JSONObject) props.get(name)).get(innerName));
+                outMap.put(innerName, ((JSONObject) props.get(name)).get(innerName));
             }
-            outMap.put(name, inMap);
         }
+        if (liste.size() > 0)
+            outMap.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, liste);
         return outMap;
     }
 

@@ -1,5 +1,6 @@
 package de.schulte.testverteilung;
 
+import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.Matchers;
@@ -100,80 +101,15 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/TestFolder");
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        String testFolderId = obj.getString("data");
-        sr.getBuffer().delete(0, 9999);
-
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Test.pdf");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        sr.getBuffer().delete(0, 9999);
-        if (obj.getBoolean("success")) {
-            when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
-            servlet.doPost(request, response);
-            writer.flush();
-            sr.getBuffer().delete(0, 9999);
-        }
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/TestDocument.txt");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        sr.getBuffer().delete(0, 9999);
-        if (obj.getBoolean("success")) {
-            when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
-            servlet.doPost(request, response);
-            writer.flush();
-            sr.getBuffer().delete(0, 9999);
-        }
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Fehler/TestDocument.txt");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        sr.getBuffer().delete(0, 9999);
-        if (obj.getBoolean("success")) {
-            when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-            when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
-            servlet.doPost(request, response);
-            writer.flush();
-            sr.getBuffer().delete(0, 9999);
-        }
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEFOLDER);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(testFolderId);
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
     }
 
     @Test
     public void testDoGetAndDoPost() throws Exception {
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.getBoolean("success"), Matchers.is(false));
-        sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn("unbekannt");
         servlet.doPost(request, response);
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
+        JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -264,45 +200,20 @@ public class VerteilungServletTest extends AlfrescoTest {
 
     @Test
     public void testGetComments() throws Exception {
-
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
-        assertThat(sr, Matchers.notNullValue());
-        JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        sr.getBuffer().delete(0, 9999);
-        // Dokument erstellen
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
-        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
-        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
-        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        sr.getBuffer().delete(0, 9999);
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject document = new JSONObject(obj.getString("data"));
+        CmisObject folder = buildTestFolder("TestFolder", null);
+        CmisObject document = buildDocument("TestDocument", folder);
 
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETTICKET);
         servlet.doPost(request, response);
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
+        JSONObject obj = new JSONObject(sr.toString());
         sr.getBuffer().delete(0, 9999);
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         JSONObject ticket = (JSONObject) obj.get("data");
 
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_ADDCOMMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getString("objectId"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getId());
         when(request.getParameter(VerteilungServlet.PARAMETER_TICKET)).thenReturn(((JSONObject) ticket.get("data")).getString("ticket"));
         when(request.getParameter(VerteilungServlet.PARAMETER_COMMENT)).thenReturn("Testkommentar");
         servlet.doPost(request, response);
@@ -313,7 +224,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
 
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETCOMMENTS);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getString("objectId"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getId());
         when(request.getParameter(VerteilungServlet.PARAMETER_TICKET)).thenReturn(((JSONObject) ticket.get("data")).getString("ticket"));
         servlet.doPost(request, response);
         writer.flush();
@@ -324,37 +235,24 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject comment = (JSONObject) obj.get("data");
         assertThat(((JSONObject) ((JSONArray) comment.get("items")).get(0)).getString("content"), Matchers.equalTo("Testkommentar"));
 
-        // und das Dokument wieder löschen
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getString("objectId"));
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
+        document.delete();
     }
 
     @Test
     public void testGetNodeId() throws Exception {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Datenverzeichnis/Skripte/doc.xml");
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Datenverzeichnis/Skripte/backup.js.sample");
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Datenverzeichnis/Skripte/recognition.js");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
     public void testFindDocument() throws Exception {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_FINDDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_CMISQUERY)).thenReturn("SELECT cmis:objectId from cmis:document where cmis:name='doc.xml'");
+        when(request.getParameter(VerteilungServlet.PARAMETER_CMISQUERY)).thenReturn("SELECT cmis:objectId from cmis:document where cmis:name='backup.js.sample'");
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
@@ -362,13 +260,13 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         JSONObject doc = (JSONObject) ((JSONArray) obj.get("data")).get(0);
         assertThat(doc, Matchers.notNullValue());
-        assertThat(doc.getString("name"), Matchers.equalToIgnoringCase("doc.xml"));
+        assertThat(doc.getString("name"), Matchers.equalToIgnoringCase("backup.js.sample"));
     }
 
     @Test
     public void testQuery() throws Exception {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_QUERY);
-        when(request.getParameter(VerteilungServlet.PARAMETER_CMISQUERY)).thenReturn("SELECT cmis:objectId, cmis:name from cmis:document where cmis:name='doc.xml'");
+        when(request.getParameter(VerteilungServlet.PARAMETER_CMISQUERY)).thenReturn("SELECT cmis:objectId, cmis:name from cmis:document where cmis:name='backup.js.sample'");
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
@@ -379,7 +277,7 @@ public class VerteilungServletTest extends AlfrescoTest {
     @Test
     public void testGetDocumentContent() throws Exception {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Datenverzeichnis/Skripte/doc.xml");
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Datenverzeichnis/Skripte/backup.js.sample");
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());
@@ -394,84 +292,66 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getString("data"), Matchers.containsString("xmlns:my=\"http://www.schulte.local/archiv\""));
+        assertThat(obj.getString("data"), Matchers.startsWith("//"));
     }
 
     @Test
     public void testListFolder() throws Exception {
+        CmisObject folder = buildTestFolder("TestFolder", null);
+        buildDocument("TestDocument", folder);
+        buildDocument("TestDocument1", folder);
+        buildDocument("TestDocument2", folder);
+        buildTestFolder("FolderTest", folder);
+
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_LISTFOLDERASJSON);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("-1");
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn(folder.getId());
+        when(request.getParameter(VerteilungServlet.PARAMETER_ORDER)).thenReturn(null);
+        when(request.getParameter(VerteilungServlet.PARAMETER_ORDERDIRECTION)).thenReturn(null);
         when(request.getParameter(VerteilungServlet.PARAMETER_WITHFOLDER)).thenReturn("0"); // alles suchen
+
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
-        assertThat(sr.toString(), Matchers.containsString("\"name\":\"Inbox\""));
-        assertThat(sr.toString(), Matchers.containsString("\"name\":\"Fehler\""));
-        assertThat(sr.toString(), Matchers.containsString("\"name\":\"Unbekannt\""));
-        assertThat(sr.toString(), Matchers.containsString("\"name\":\"Dokumente\""));
-        sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("8e6d4fbd-32f1-41ed-b0a2-b7ff8a9934ab");
-        when(request.getParameter(VerteilungServlet.PARAMETER_WITHFOLDER)).thenReturn("1");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
+        assertThat(sr.toString(), Matchers.containsString("\"name\":\"TestDocument\""));
+        assertThat(sr.toString(), Matchers.containsString("\"name\":\"TestDocument1\""));
+        assertThat(sr.toString(), Matchers.containsString("\"name\":\"TestDocument2\""));
+        assertThat(sr.toString(), Matchers.containsString("\"name\":\"FolderTest\""));
     }
 
     @Test
     public void testUploadDocument() throws Exception {
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        JSONObject obj = new JSONObject(sr.toString());
-        String archivId = obj.getString("data");
-        sr.getBuffer().delete(0, 9999);
+        CmisObject folder = buildTestFolder("TestFolder", null);
+
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_UPLOADDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(archivId);
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(folder.getId());
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn(System.getProperty("user.dir") + properties.getProperty("testPDF"));
         when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
         servlet.doPost(request, response);
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
+        JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
     }
 
     @Test
     public void testCreateDocument() throws Exception {
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
-        assertThat(sr, Matchers.notNullValue());
-        JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        sr.getBuffer().delete(0, 9999);
+        CmisObject folder = buildTestFolder("TestFolder", null);
+
         // Dokument erstellen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(folder.getId());
         when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
         when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
-        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(VerteilungConstants.DOCUMENT_TYPE_TEXT);
         servlet.doPost(request, response);
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
+        JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -480,87 +360,46 @@ public class VerteilungServletTest extends AlfrescoTest {
         assertThat(doc, Matchers.notNullValue());
         assertThat(doc.getString("name"), Matchers.equalToIgnoringCase("TestDocument.txt"));
         sr.getBuffer().delete(0, 9999);
-        // Inhalt lesen
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETDOCUMENTCONTENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
-        when(request.getParameter(VerteilungServlet.PARAMETER_EXTRACT)).thenReturn("false");
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.getString("data"), Matchers.equalTo(content));
-        // und das Dokument wieder löschen
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
-    }
+     }
 
     @Test
     public void testCreateFolder() throws Exception {
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
-        assertThat(sr, Matchers.notNullValue());
-        JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        sr.getBuffer().delete(0, 9999);
+        CmisObject folder = buildTestFolder("TestFolder", null);
+
         // Folder erstellen
-        String extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'Testfolder'}, 'P:cm:titled':{'cm:title': 'Testtitel', 'cm:description':'Dies ist ein Test Folder'}}";
+        String extraProperties = "{'cmis:folder': {'cmis:objectTypeId': 'cmis:folder', 'cmis:name': 'FolderTest'}, 'P:cm:titled':{'cm:title': 'Testtitel', 'cm:description':'Dies ist ein Test Folder'}}";
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEFOLDER);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(folder.getId());
         when(request.getParameter(VerteilungServlet.PARAMETER_EXTRAPROPERTIES)).thenReturn(extraProperties);
         servlet.doPost(request, response);
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
+        JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject folder = new JSONObject(obj.getString("data"));
-        assertThat(folder, Matchers.notNullValue());
-        assertThat(folder.getString("name"), Matchers.equalToIgnoringCase("TestFolder"));
-        // und den Folder wieder löschen
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEFOLDER);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(folder.getString("objectId"));
-        servlet.doPost(request, response);
-        writer.flush();
-        obj = new JSONObject(sr.toString());
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject data = new JSONObject(obj.getString("data"));
-        assertNotNull(data);
+        JSONObject fold = new JSONObject(obj.getString("data"));
+        assertThat(fold, Matchers.notNullValue());
+        assertThat(fold.getString("name"), Matchers.equalToIgnoringCase("FolderTest"));
     }
 
     @Test
     public void testUpdateDocument() throws Exception {
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
-        servlet.doPost(request, response);
-        writer.flush(); // it may not have been flushed yet...
-        assertThat(sr, Matchers.notNullValue());
-        JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        sr.getBuffer().delete(0, 9999);
-        // Dokument erstellen
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
-        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MAJOR.value());
-        when(request.getParameter(VerteilungServlet.PARAMETER_EXTRAPROPERTIES)).thenReturn("{'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}");
-        String content = " ";
+        CmisObject folder = buildTestFolder("TestFolder", null);
+        CmisObject document = buildDocument("TestDocument", folder);
+
+               // Dokument ändern
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_UPDATEDOCUMENT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getId());
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
-        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(VerteilungConstants.DOCUMENT_TYPE_TEXT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MAJOR.value());
         servlet.doPost(request, response);
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
+        JSONObject obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -568,27 +407,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         JSONObject doc = new JSONObject(obj.getString("data"));
         assertThat(doc, Matchers.notNullValue());
         assertThat(doc.getString("objectId"), Matchers.notNullValue());
-        assertThat(doc.getString("versionLabel"), Matchers.equalTo("1.0"));
-        sr.getBuffer().delete(0, 9999);
-        // Dokument ändern
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_UPDATEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
-        content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(Base64.encodeBase64String(content.getBytes()));
-        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MAJOR.value());
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        doc = new JSONObject(obj.getString("data"));
-        assertThat(doc, Matchers.notNullValue());
-        assertThat(doc.getString("objectId"), Matchers.notNullValue());
-        assertEquals("2.0", doc.getString("versionLabel"));
+        assertEquals("1.0", doc.getString("versionLabel"));
         sr.getBuffer().delete(0, 9999);
         // Inhalt lesen
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETDOCUMENTCONTENT);
@@ -608,7 +427,7 @@ public class VerteilungServletTest extends AlfrescoTest {
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
         when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(null);
         when(request.getParameter(VerteilungServlet.PARAMETER_EXTRAPROPERTIES)).thenReturn(extraProperties);
-        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
+        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(VerteilungConstants.DOCUMENT_TYPE_TEXT);
         when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
         when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONCOMMENT)).thenReturn("1. Versionskommentar");
         servlet.doPost(request, response);
@@ -622,87 +441,43 @@ public class VerteilungServletTest extends AlfrescoTest {
         doc = new JSONObject(obj.getString("data"));
         assertThat(doc, Matchers.notNullValue());
         // wegen der 2 Aspekte nicht 2.1 sondern 2.3
-        assertThat(doc.getString("versionLabel"), Matchers.equalTo("2.3"));
+        assertThat(doc.getString("versionLabel"), Matchers.equalTo("1.1"));
         assertThat(doc.getString("checkinComment"), Matchers.equalTo("1. Versionskommentar"));
         assertThat(doc.getDouble("amount"), Matchers.equalTo(25.33));
         assertThat(doc.getBoolean("tax"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
-        // und das Dokument wieder löschen
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn("/Archiv/TestDocument.txt");
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
+
     }
 
 
     @Test
     public void testMoveNode() throws Exception {
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv");
+        CmisObject folder = buildTestFolder("TestFolder", null);
+        CmisObject document = buildDocument("TestDocument", folder);
+        CmisObject newFolder = buildTestFolder("FolderTest", null);
+
+
+        // Dokument verschieben
+        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn("moveNode");
+        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(document.getId());
+        when(request.getParameter(VerteilungServlet.PARAMETER_CURENTLOCATIONID)).thenReturn(folder.getId());
+        when(request.getParameter(VerteilungServlet.PARAMETER_DESTINATIONID)).thenReturn(newFolder.getId());
         servlet.doPost(request, response);
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         JSONObject obj = new JSONObject(sr.toString());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        String currentLocationId = obj.getString("data");
-        sr.getBuffer().delete(0, 9999);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Fehler");
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        String destinationId = obj.getString("data");
-        sr.getBuffer().delete(0, 9999);
-        // Dokument erstellen
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_CREATEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(currentLocationId);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILENAME)).thenReturn("TestDocument.txt");
-        when(request.getParameter(VerteilungServlet.PARAMETER_VERSIONSTATE)).thenReturn(VersioningState.MINOR.value());
-        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTTEXT)).thenReturn(content);
-        when(request.getParameter(VerteilungServlet.PARAMETER_MIMETYPE)).thenReturn(CMISConstants.DOCUMENT_TYPE_TEXT);
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject doc = new JSONObject(obj.getString("data"));
-        assertThat(doc, Matchers.notNullValue());
-        assertThat(doc.getString("objectId"), Matchers.notNullValue());
-        sr.getBuffer().delete(0, 9999);
-        // Dokument verschieben
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn("moveNode");
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(doc.getString("objectId"));
-        when(request.getParameter(VerteilungServlet.PARAMETER_CURENTLOCATIONID)).thenReturn(currentLocationId);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DESTINATIONID)).thenReturn(destinationId);
-        servlet.doPost(request, response);
-        writer.flush();
-        assertThat(sr, Matchers.notNullValue());
-        obj = new JSONObject(sr.toString());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         sr.getBuffer().delete(0, 9999);
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_GETNODEID);
-        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/Archiv/Fehler/TestDocument.txt");
+        when(request.getParameter(VerteilungServlet.PARAMETER_FILEPATH)).thenReturn("/FolderTest/TestDocument");
         servlet.doPost(request, response);
         writer.flush();
         assertThat(sr, Matchers.notNullValue());
         obj = new JSONObject(sr.toString());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        // und das Dokument wieder löschen
-        when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_DELETEDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_DOCUMENTID)).thenReturn(obj.getString("data"));
-        servlet.doPost(request, response);
-        writer.flush();
-        sr.getBuffer().delete(0, 9999);
     }
 
     @Test

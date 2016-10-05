@@ -1,16 +1,19 @@
 package de.schulte.testverteilung;
 
+import org.apache.chemistry.opencmis.client.api.CmisObject;
+import org.apache.chemistry.opencmis.client.api.Document;
+import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.Matchers;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -31,19 +34,27 @@ public class VerteilungServicesTest extends AlfrescoTest {
         super.setUp();
         services = new VerteilungServices(properties.getProperty("server"), properties.getProperty("binding"), properties.getProperty("user"), properties.getProperty("password"));
         assertThat(services, Matchers.notNullValue());
-        services.deleteDocument(services.getNodeId("/Archiv/Test.pdf").getString("data"));
-        services.deleteDocument(services.getNodeId("/Archiv/TestDocument.txt").getString("data"));
-        services.deleteDocument(services.getNodeId("/Archiv/Fehler/TestDocument.txt").getString("data"));
-        services.deleteDocument(services.getNodeId("/Archiv/Fehler/Test.pdf").getString("data"));
-        services.deleteFolder(services.getNodeId("/Archiv/TestFolder").getString("data"));
+
     }
 
-    @After
-    public void cleanUp() throws Exception {
-        services.deleteDocument(services.getNodeId("/Archiv/Test.pdf").getString("data"));
-        services.deleteDocument(services.getNodeId("/Archiv/TestDocument.txt").getString("data"));
-        services.deleteDocument(services.getNodeId("/Archiv/Fehler/TestDocument.txt").getString("data"));
-        services.deleteDocument(services.getNodeId("/Archiv/Fehler/Test.pdf").getString("data"));
+    @Test
+    public void testBuildProperties() throws Exception {
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().getTime() + "'}, 'P:my:amountable':{'my:amount':'25.33'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
+        Map<String, Object> prop = services.buildProperties(extraProperties);
+        assertThat(prop, notNullValue());
+        assertThat(prop.containsKey(PropertyIds.SECONDARY_OBJECT_TYPE_IDS), Matchers.is(true));
+        List<String> aspekte = (List<String>) prop.get(PropertyIds.SECONDARY_OBJECT_TYPE_IDS);
+        assertThat(aspekte.contains("P:cm:emailed"), is(true));
+        assertThat(aspekte.contains("P:cm:titled"), is(true));
+        assertThat(aspekte.contains("P:my:amountable"), is(true));
+        assertThat(prop.size(), is(7));
+        assertThat(prop.containsKey("cm:description"), is(true));
+        assertThat(prop.containsKey("cm:sentdate"), is(true));
+        assertThat(prop.containsKey("my:amount"), is(true));
+        assertThat(prop.containsKey("my:person"), is(true));
+        assertThat(prop.containsKey("my:documentDate"), is(true));
+        assertThat(prop.containsKey(PropertyIds.OBJECT_TYPE_ID), is(true));
+        assertThat(prop.get(PropertyIds.OBJECT_TYPE_ID), is("D:my:archivContent"));
     }
 
     @Test
@@ -86,63 +97,44 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testListFolder() throws Exception {
-        JSONObject obj = services.listFolder("-1", null, null, 0, -1, 0, 0);
+        CmisObject folder = buildTestFolder("TestFolder", null);
+
+        buildDocument("TestDocument", folder);
+        buildDocument("TestDocument1", folder);
+        buildDocument("TestDocument2", folder);
+        buildTestFolder("FolderTest", folder);
+
+        JSONObject obj = services.listFolder(folder.getId(), null, null, VerteilungConstants.LIST_MODUS_FOLDER, -1, 0, 0);
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         assertThat(obj.get("data"), instanceOf(JSONArray.class));
-        assertThat(obj.getJSONArray("data").length(), is(4));
-        for (int i = 0; i < obj.getJSONArray("data").length(); i++) {
-            assertThat( obj.getJSONArray("data").getJSONObject(i).getString("name"), anyOf(is("Dokumente"), is("Fehler"), is("Unbekannt"), is("Inbox")));
-            if (obj.getJSONArray("data").getJSONObject(i).getString("name").equalsIgnoreCase("Fehler"))
-                assertTrue(obj.getJSONArray("data").getJSONObject(i).getBoolean("hasChildFolder"));
-            assertThat(obj.getJSONArray("data").getJSONObject(i).getString("objectId"), Matchers.notNullValue());
-        }
-        obj = services.uploadDocument(services.getNodeId("/Archiv/Fehler").getString("data"), System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        obj = services.listFolder("-1", null, null, -1, -1, 0, 0);
+        assertThat(obj.getJSONArray("data").length(), is(1));
+        assertThat( obj.getJSONArray("data").getJSONObject(0).getString("name"), is("FolderTest"));
+        assertThat( obj.getJSONArray("data").getJSONObject(0).getBoolean("hasChildFolder"), is(false));
+        assertThat(obj.getJSONArray("data").getJSONObject(0).getString("objectId"), Matchers.notNullValue());
+
+        obj = services.listFolder(folder.getId(), null, null, VerteilungConstants.LIST_MODUS_ALL, -1, 0, 0);
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         assertThat(obj.get("data"), instanceOf(JSONArray.class));
         assertThat( obj.getJSONArray("data").length(), Matchers.is(4));
         for (int i = 0; i < obj.getJSONArray("data").length(); i++) {
-            assertThat( obj.getJSONArray("data").getJSONObject(i).getString("name"), anyOf(is("Dokumente"), is("Fehler"), is("Unbekannt"), is("Inbox")));
+            assertThat( obj.getJSONArray("data").getJSONObject(i).getString("name"), anyOf(is("TestDocument"), is("TestDocument1"), is("TestDocument2"), is("FolderTest")));
             assertThat(obj.getJSONArray("data").getJSONObject(i).getString("objectId"), Matchers.notNullValue());
         }
-        obj = services.getNodeId("/Archiv");
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        String id = obj.getString("data");
-        obj = services.listFolder(id, null, null, 1, -1, 0, 0);
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.get("data"), instanceOf(JSONArray.class));
-        assertThat(obj.getJSONArray("data").length(), is(0));
-        obj = services.listFolder(id, null, null, 0, -1, 0, 0);
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        assertThat(obj.get("data"), instanceOf(JSONArray.class));
-        assertThat(obj.getJSONArray("data").length(), Matchers.is(4));
-        for (int i = 0; i < obj.getJSONArray("data").length(); i++) {
-            if ( obj.getJSONArray("data").getJSONObject(i).getString("name").equalsIgnoreCase("Fehler")) {
-                assertThat(obj.getJSONArray("data").getJSONObject(i).getBoolean("hasChildFolder"), Matchers.is(true));
-                assertThat(obj.getJSONArray("data").getJSONObject(i).getBoolean("hasChildren"), Matchers.is(true));
-            }
-        }
 
-        obj = services.deleteDocument(services.getNodeId("/Archiv/Fehler/Test.pdf").getString("data"));
-        assertThat(obj, Matchers.notNullValue());
+        obj = services.listFolder(folder.getId(), null, null, VerteilungConstants.LIST_MODUS_DOCUMENTS, -1, 0, 0);
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        //obj = services.listFolder(services.getNodeId("/Archiv/Inbox").getString("data"), 0, -1, 0, 0);
+        assertThat(obj.get("data"), instanceOf(JSONArray.class));
+        assertThat( obj.getJSONArray("data").length(), Matchers.is(3));
+        for (int i = 0; i < obj.getJSONArray("data").length(); i++) {
+            assertThat( obj.getJSONArray("data").getJSONObject(i).getString("name"), anyOf(is("TestDocument"), is("TestDocument1"), is("TestDocument2")));
+            assertThat(obj.getJSONArray("data").getJSONObject(i).getString("objectId"), Matchers.notNullValue());
+        }
     }
 
     @Test
@@ -226,24 +218,24 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testGetDocumentContent() throws Exception {
-        JSONObject obj = services.getDocumentContent(services.getNodeId("/Datenverzeichnis/Skripte/doc.xml").getString("data"), false);
+        JSONObject obj = services.getDocumentContent(services.getNodeId("/Datenverzeichnis/Skripte/backup.js.sample").getString("data"), false);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         String document = obj.getString("data");
-        assertThat(document.startsWith("<documentTypes"), is(true));
-        assertThat(document.indexOf("xmlns:my=\"http://www.schulte.local/archiv\""), Matchers.not(-1));
+        assertThat(document.startsWith("//"), is(true));
     }
 
     @Test
     public void testUploadDocument() throws Exception {
-        JSONObject obj = services.uploadDocument(services.getNodeId("/Archiv").getString("data"), System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
+        CmisObject folder = buildTestFolder("TestFolder", null);
+        JSONObject obj = services.uploadDocument(folder.getId(), System.getProperty("user.dir") + properties.getProperty("testPDF"), VersioningState.MINOR.value());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        obj = services.deleteDocument(services.getNodeId("/Archiv/Test.pdf").getString("data"));
+        obj = services.deleteDocument(services.getNodeId("/TestFolder/Test.pdf").getString("data"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -252,14 +244,10 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testCreateDocument() throws Exception {
-        JSONObject obj = services.getNodeId("/");
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length() >= 2, is(true));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), is(true));
+        CmisObject folder = buildTestFolder("TestFolder", null);
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}}";
-        obj = services.createDocument(obj.getString("data"), "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
+        JSONObject obj = services.createDocument(folder.getId(), "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), VerteilungConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length() >= 2, is(true));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -274,7 +262,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), is(true));
         String document = obj.getString("data");
         assertThat(document, is("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?"));
-        obj = services.deleteDocument(services.getNodeId("/TestDocument.txt").getString("data"));
+        obj = services.deleteDocument(services.getNodeId("/TestFolder/TestDocument.txt").getString("data"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length() >= 2, is(true));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -283,14 +271,10 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testCreateDocumentWithCustomModel() throws Exception {
-        JSONObject obj = services.getNodeId("/");
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        CmisObject folder = buildTestFolder("TestFolder", null);
         String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
         String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().getTime() + "'}, 'P:my:amountable':{'my:amount':'25.33'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
-        obj = services.createDocument(obj.getString("data"), "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
+        JSONObject obj = services.createDocument(folder.getId(), "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), VerteilungConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -305,7 +289,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         String document = obj.getString("data");
         assertThat(document, Matchers.equalTo("Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?"));
-        obj = services.deleteDocument(services.getNodeId("/TestDocument.txt").getString("data"));
+        obj = services.deleteDocument(services.getNodeId("/TestFolder/TestDocument.txt").getString("data"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -337,52 +321,44 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testUpdateDocument() throws Exception {
-        JSONObject obj = services.getNodeId("/Archiv");
+        CmisObject folder = buildTestFolder("TestFolder", null);
+        Document document = (Document) buildDocument("TestDocument", folder);
+
+        String extraProperties;
+        String aspects;
+        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
+        JSONObject obj = services.updateDocument(document.getId(), Base64.encodeBase64String(content.getBytes()), VerteilungConstants.DOCUMENT_TYPE_TEXT,  null, VersioningState.MINOR.value(), null);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        String archivId = obj.getString("data");
-        String content = "";
-        obj = services.createDocument(archivId, "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR.value());
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject document = new JSONObject(obj.getString("data"));
-        assertThat(document, Matchers.notNullValue());
-        assertThat(document.getString("name"), Matchers.equalToIgnoringCase("TestDocument.txt"));
-        assertThat(document.getString("objectId"), Matchers.notNullValue());
-        content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        obj = services.updateDocument(document.getString("objectId"), Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR.value(), null);
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        document = new JSONObject(obj.getString("data"));
-        obj = services.getDocumentContent(document.getString("objectId"), false);
+        JSONObject doc = new JSONObject(obj.getString("data"));
+        obj = services.getDocumentContent(doc.getString("objectId"), false);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         assertEquals(content, obj.getString("data"));
-        obj = services.deleteDocument(document.getString("objectId"));
+
+        obj = services.deleteDocument(doc.getString("objectId"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        String extraProperties = "{'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
-        obj = services.createDocument(archivId, "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MAJOR.value());
+
+        extraProperties = "{'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
+        obj = services.createDocument(folder.getId(), "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), VerteilungConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MAJOR.value());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        document = new JSONObject(obj.getString("data"));
-        assertThat(document, Matchers.notNullValue());
-        assertThat(document.getString("versionLabel"), Matchers.equalTo("1.0"));
-        assertThat(document.getString("checkinComment"), Matchers.equalTo("Initial Version"));
+        doc = new JSONObject(obj.getString("data"));
+        assertThat(doc, Matchers.notNullValue());
+        assertThat(doc.getString("versionLabel"), Matchers.equalTo("1.0"));
+        assertThat(doc.getString("checkinComment"), Matchers.equalTo("Initial Version"));
+
         content = "Dies ist ein neuer Inhalt";
-        obj = services.updateDocument(document.getString("objectId"), Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MAJOR.value(), "neuer Versionskommentar");
+        obj = services.updateDocument(doc.getString("objectId"), Base64.encodeBase64String(content.getBytes()), VerteilungConstants.DOCUMENT_TYPE_TEXT,  null, VersioningState.MAJOR.value(), "neuer Versionskommentar");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -391,8 +367,9 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(data, Matchers.notNullValue());
         assertThat(data.getString("versionLabel"), Matchers.equalTo("2.0"));
         assertThat(data.getString("checkinComment"), Matchers.equalTo("neuer Versionskommentar"));
+
         extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + new Date().getTime() + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}, 'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
-        obj = services.updateDocument(data.getString("objectId"), null, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MAJOR.value(), "2. Versionskommentar");
+        obj = services.updateDocument(data.getString("objectId"), null, VerteilungConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MAJOR.value(), "2. Versionskommentar");
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -403,7 +380,8 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(data.getString("checkinComment"), Matchers.equalTo("2. Versionskommentar"));
         assertThat(data.getDouble("amount"), Matchers.equalTo(25.33));
         assertThat(data.getBoolean("tax"), Matchers.is(true));
-        obj = services.deleteDocument(document.getString("objectId"));
+
+        obj = services.deleteDocument(doc.getString("objectId"));
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -412,50 +390,35 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testChangeFolder() throws Exception {
-        JSONObject obj = services.getNodeId("/Archiv/Fehler");
+        CmisObject folder = buildTestFolder("TestFolder", null);
+
+        String extraProperties = "{'cmis:folder':{'cmis:objectTypeId': 'cmis:folder','cmis:name': 'FolderTest'}, 'P:cm:titled': {'cm:title': 'Titel','cm:description': 'Beschreibung' }}";
+        JSONObject obj = services.updateProperties(folder.getId(), extraProperties);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        String extraProperties = "{'cmis:folder':{'cmis:objectTypeId': 'cmis:folder','cmis:name': 'Fehler1'}, 'P:cm:titled': {'cm:title': 'Titel','cm:description': 'Beschreibung' }}";
-        String id = obj.getString("data");
-        obj = services.updateProperties(id, extraProperties);
+        folder.refresh();
+        assertThat(folder.getName(), is(("FolderTest")));
+
+        extraProperties = "{'cmis:folder':{'cmis:objectTypeId': 'cmis:folder','cmis:name': 'TestFolder'}, 'P:cm:titled': {'cm:title': '','cm:description': '' }}";
+        obj = services.updateProperties(folder.getId(), extraProperties);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        extraProperties = "{'cmis:folder':{'cmis:objectTypeId': 'cmis:folder','cmis:name': 'Fehler'}, 'P:cm:titled': {'cm:title': '','cm:description': '' }}";
-        obj = services.updateProperties(id, extraProperties);
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        folder.refresh();
+        //assertThat(folder.getName(), is(("TestFolder")));
     }
 
     @Test
     public void testUpdateProperties() throws Exception {
-        JSONObject obj = services.getNodeId("/Archiv");
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data").toString(), obj.getBoolean("success"), Matchers.is(true));
-        String archivId = obj.getString("data");
-        String content = "";
+        CmisObject folder = buildTestFolder("TestFolder", null);
+        CmisObject document = buildDocument("TestDocument", folder);
         long time = new Date().getTime();
-        String extraProperties = "{'D:my:archivContent':{'my:person':'Katja', 'my:documentDate':'" + new Date().getTime() + "'}}";
-        obj = services.createDocument(archivId, "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, extraProperties, VersioningState.MINOR.value());
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject document = new JSONObject(obj.getString("data"));
-        assertThat(document, Matchers.notNullValue());
-        assertThat(document.getString("name"), Matchers.equalToIgnoringCase("TestDocument.txt"));
-        assertThat(document.getString("objectID"), Matchers.notNullValue());
-        assertThat(document.getLong("documentDate"), is(time));
-        time = new Date().getTime();
-        extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument', 'cm:title':'Testdokument \tTest'}, 'D:my:archivContent': { 'my:documentDate': '" + time + "', 'my:person': 'Katja'},'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}, 'P:my:idable': {'my:idvalue': 'null'}}";
-        obj = services.updateProperties(document.getString("objectID"), extraProperties);
+
+        String extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument', 'cm:title':'Testdokument \tTest'}, 'D:my:archivContent': { 'my:documentDate': '" + time + "', 'my:person': 'Katja'},'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.33', 'my:tax':'true'}, 'P:my:idable': {'my:idvalue': 'null'}}";
+        JSONObject obj = services.updateProperties(document.getId(), extraProperties);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -468,8 +431,10 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(data.getString("person"), is("Katja"));
         assertThat(data.getLong("documentDate"), is(time));
         assertThat(data.getLong("sentdate"), is(time));
+
+        document.refresh();
         extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument','cm:title':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'25.34', 'my:tax':'true'}, 'P:my:idable': {'my:idvalue': '123'}}";
-        obj = services.updateProperties(document.getString("objectID"), extraProperties);
+        obj = services.updateProperties(document.getId(), extraProperties);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -480,17 +445,19 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(data.getDouble("amount"), Matchers.equalTo(25.34));
         assertThat(data.getBoolean("tax"), is(true));
         assertThat(data.getInt("idvalue"), is(123));
-        document = new JSONObject(obj.getString("data"));
+
+        document.refresh();
         extraProperties = "{'P:cm:titled':{'cm:description':'Testdokument'}, 'P:cm:emailed':{'cm:sentdate':'" + time + "'}, 'P:my:amountable':{'my:amount':'', 'my:tax':''}}";
-        obj = services.updateProperties(document.getString("objectID"), extraProperties);
+        obj = services.updateProperties(document.getId(), extraProperties);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         data = new JSONObject(obj.getString("data"));
         assertThat(data, Matchers.notNullValue());
-        document = new JSONObject(obj.getString("data"));
-        obj = services.deleteDocument(document.getString("objectID"));
+
+        document.refresh();
+        obj = services.deleteDocument(document.getId());
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
@@ -499,42 +466,19 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testMoveNode() throws Exception {
-        JSONObject oldFolder = services.getNodeId("/Archiv");
-        assertThat(oldFolder, Matchers.notNullValue());
-        assertThat(oldFolder.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(oldFolder.get("data"), Matchers.notNullValue());
-        assertThat(oldFolder.get("data").toString(), oldFolder.getBoolean("success"), Matchers.is(true));
-        String oldFolderId = oldFolder.getString("data");
-        JSONObject newFolder = services.getNodeId("/Archiv/Fehler");
-        assertThat(newFolder, Matchers.notNullValue());
-        assertThat(newFolder.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(newFolder.get("data"), Matchers.notNullValue());
-        String newFolderId = newFolder.getString("data");
-        assertThat(newFolder.get("data").toString(), newFolder.getBoolean("success"), Matchers.is(true));
-        String content = "";
-        JSONObject document = services.createDocument(oldFolderId, "TestDocument.txt", content, CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR.value());
+        CmisObject folder = buildTestFolder("TestFolder", null);
+        CmisObject document = buildDocument("TestDocument", folder);
+        CmisObject newFolder = buildTestFolder("FolderTest", null);
+
+        JSONObject obj = services.moveNode(document.getId(), folder.getId(), newFolder.getId());
+        assertThat(obj, Matchers.notNullValue());
+        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
+        assertThat(obj.get("data"), Matchers.notNullValue());
+        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        document = con.getNode("/FolderTest/TestDocument");
         assertThat(document, Matchers.notNullValue());
-        assertThat(document.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(document.get("data"), Matchers.notNullValue());
-        assertThat(document.get("data").toString(), document.getBoolean("success"), Matchers.is(true));
-        JSONObject documentResult = new JSONObject(document.get("data").toString());
-        assertThat(documentResult, Matchers.notNullValue());
-        assertThat(documentResult.getString("objectId"), Matchers.notNullValue());
-        JSONObject obj = services.moveNode(documentResult.getString("objectId"), oldFolderId, newFolderId);
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        obj = services.getNodeId("/Archiv/Fehler/TestDocument.txt");
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        obj = services.deleteDocument(obj.getString("data"));
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        assertThat(document.getName(), Matchers.is("TestDocument"));
+        document.delete();
     }
 
     @Test
@@ -771,38 +715,23 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testGetComments() throws Exception {
-        JSONObject obj = services.getNodeId("/");
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        String content = "Dies ist ein Inhalt mit Umlauten: äöüßÄÖÜ/?";
-        obj = services.createDocument(obj.getString("data"), "TestDocument.txt", Base64.encodeBase64String(content.getBytes()), CMISConstants.DOCUMENT_TYPE_TEXT, null, VersioningState.MINOR.value());
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
-        JSONObject document = new JSONObject(obj.getString("data"));
-        assertThat(document, Matchers.notNullValue());
-        obj = services.getTicket();
+        CmisObject folder = buildTestFolder("TestFolder", null);
+        CmisObject document = buildDocument("TestDocument", folder);
+        JSONObject obj = services.getTicket();
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
         JSONObject ticket = (JSONObject) obj.get("data");
 
-        obj = services.addComment(document.getString("objectId"), ((JSONObject) ticket.get("data")).getString("ticket"), "Testkommentar");
+        obj = services.addComment(document.getId(), ((JSONObject) ticket.get("data")).getString("ticket"), "Testkommentar");
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());
         assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
 
-        obj = services.getComments(document.getString("objectId"), ((JSONObject) ticket.get("data")).getString("ticket"));
+        obj = services.getComments(document.getId(), ((JSONObject) ticket.get("data")).getString("ticket"));
         JSONObject comment = (JSONObject) obj.get("data");
         assertThat("Testkommentar", equalTo(((JSONObject) ((JSONArray) comment.get("items")).get(0)).getString("content")));
 
-        obj = services.deleteDocument(document.getString("objectId"));
-        assertThat(obj, Matchers.notNullValue());
-        assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
-        assertThat(obj.get("data"), Matchers.notNullValue());
-        assertThat(obj.get("data") + (obj.has("error") ? obj.getString("error") : ""), obj.getBoolean("success"), Matchers.is(true));
+        document.delete();
     }
 }

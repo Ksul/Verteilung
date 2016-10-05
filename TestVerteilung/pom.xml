@@ -359,11 +359,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.alfresco.cmis.client</groupId>
-            <artifactId>alfresco-opencmis-extension</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-ext-jdk15on</artifactId>
             <version>1.54</version>
@@ -443,6 +438,7 @@
             <artifactId>woodstox-core-asl</artifactId>
             <version>4.4.1</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.mockito</groupId>

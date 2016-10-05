@@ -571,7 +571,7 @@ public class VerteilungServlet extends HttpServlet {
                                         String extraCMSProperties,
                                         String majorVersion,
                                         String versionComment) throws VerteilungException {
-
+         //TODO ASpekte
         return services.updateDocument(documentId, documentContent, documentType, extraCMSProperties, majorVersion, versionComment);
     }
 
