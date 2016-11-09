@@ -120,7 +120,11 @@ public class AlfrescoTest {
         assertThat(folder, Matchers.notNullValue());
         assertThat(folder, Matchers.instanceOf( Folder.class));
         Map<String, Object> props = new HashMap<>();
+        List<String> aspects = new ArrayList<>();
+        aspects.add("P:cm:titled");
+        props.put("cm:title", "");
         props.put(PropertyIds.NAME, name);
+        props.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, aspects);
         folder = con.createFolder((Folder) folder, props);
         assertThat(folder, Matchers.notNullValue());
         assertThat(folder, Matchers.instanceOf( Folder.class));
@@ -146,6 +150,8 @@ public class AlfrescoTest {
         props.put("cm:title", "");
         props.put(PropertyIds.OBJECT_TYPE_ID, "D:my:archivContent");
         aspects.add("P:cm:titled");
+        aspects.add("P:my:amountable");
+        aspects.add("P:my:idable");
         props.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, aspects);
         document = con.createDocument((Folder) folder, name, new byte[]{}, VerteilungConstants.DOCUMENT_TYPE_TEXT, props, VersioningState.MINOR);
         assertThat(document, Matchers.notNullValue());

@@ -95,6 +95,8 @@ public class VerteilungServicesTest extends AlfrescoTest {
         assertThat(((JSONObject) ticket.get("data")).getString("ticket"), Matchers.startsWith("TICKET_"));
     }
 
+
+
     @Test
     public void testListFolder() throws Exception {
         CmisObject folder = buildTestFolder("TestFolder", null);
@@ -196,7 +198,7 @@ public class VerteilungServicesTest extends AlfrescoTest {
 
     @Test
     public void testFindDocument() throws Exception {
-        JSONObject obj = services.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='backup.js.sample'");
+        JSONObject obj = services.findDocument("SELECT * from cmis:document where cmis:name='backup.js.sample'", null, null, -1, 0, 0);
         assertThat(obj, Matchers.notNullValue());
         assertThat(obj.length(), Matchers.greaterThanOrEqualTo(2));
         assertThat(obj.get("data"), Matchers.notNullValue());

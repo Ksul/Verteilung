@@ -23,7 +23,8 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -38,7 +39,7 @@ public class AlfrescoConnector {
 
     private static final String NODES_URL = "service/api/node/workspace/SpacesStore/";
     private static final String LOGIN_URL = "service/api/login";
-    private static Logger logger = Logger.getLogger(AlfrescoConnector.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(AlfrescoConnector.class.getName());
     private String user = null;
     private String password = null;
     private String binding = null;
@@ -144,7 +145,7 @@ public class AlfrescoConnector {
         URL url = new URL(server + (server.endsWith("/") ? "" : "/") + LOGIN_URL);
         String urlParameters = "{ \"username\" : \"" + user + "\", \"password\" : \"" + password + "\" }";
         JSONObject obj = new JSONObject(startRequest(url, RequestType.POST, urlParameters));
-        logger.fine("Ticket für User " + user + " und Password " + password + " ausgestellt.");
+        logger.trace("Ticket für User " + user + " und Password " + password + " ausgestellt.");
         return obj;
     }
 
@@ -159,10 +160,10 @@ public class AlfrescoConnector {
             try {
             this.session = initSession();
             } catch (Exception e) {
-                logger.severe(" Mit den Parametern Server: " + this.server + " Binding: " + this.binding + " User: " + this.user + " Password: " + this.password + " konnte keine Cmis Session etabliert werden!");
+                logger.error(" Mit den Parametern Server: " + this.server + " Binding: " + this.binding + " User: " + this.user + " Password: " + this.password + " konnte keine Cmis Session etabliert werden!");
                 return null;
             }
-            logger.fine(" Mit den Parametern Server: " + this.server + " Binding: " + this.binding + " User: " + this.user + " Password: " + this.password + " konnte eine Cmis Session erfolgreich etabliert werden!");
+            logger.trace(" Mit den Parametern Server: " + this.server + " Binding: " + this.binding + " User: " + this.user + " Password: " + this.password + " konnte eine Cmis Session erfolgreich etabliert werden!");
             return this.session;
         }
     }
@@ -230,58 +231,51 @@ public class AlfrescoConnector {
         ItemIterable<CmisObject> result = null;
 
         OperationContext operationContext = getSession().createOperationContext();
-        operationContext.setOrderBy(order + " " + orderDirection);
+        operationContext.setIncludeAllowableActions(false);
+        operationContext.setIncludePolicies(false);
+        operationContext.setIncludeAcls(false);
         switch (modus) {
             case VerteilungConstants.LIST_MODUS_ALL: {  // Dokumente und Folder
+                operationContext.setOrderBy(order + " " + orderDirection);
                 CmisObject object = getSession().getObject(getSession().createObjectId(folderId));
                 Folder folder = (Folder) object;
                 result = folder.getChildren(operationContext);
                 break;
             }
             case VerteilungConstants.LIST_MODUS_DOCUMENTS:{  // nur Dokumente
-                StringBuilder query = new StringBuilder("select d.*, o.* from my:archivContent as d join cm:titled as o on d.cmis:objectId = o.cmis:objectId  WHere IN_FOLDER(d, ?) ");
-                String orderBy = operationContext.getOrderBy();
-                if (orderBy != null && orderBy.trim().length() > 0) {
+                StringBuilder query = new StringBuilder("select d.*, o.*, c.*, i.* from my:archivContent as d " +
+                                                            "join cm:titled as o on d.cmis:objectId = o.cmis:objectId " +
+                                                            "join my:amountable as c on d.cmis:objectId = c.cmis:objectId " +
+                                                            "join my:idable as i on d.cmis:objectId = i.cmis:objectId " +
+                                                            "WHERE IN_FOLDER(d, ?) ");
+
+                if (order != null && order.trim().length() > 0) {
                     query.append(" ORDER BY ");
-                    query.append(orderBy);
+                    query.append(order + " ");
+                    if (orderDirection != null && orderDirection.trim().length() > 0)
+                        query.append(orderDirection);
                 }
                 QueryStatement stmt = session.createQueryStatement(query.toString());
                 stmt.setString(1, folderId);
-                final DiscoveryService discoveryService = getSession().getBinding().getDiscoveryService();
-                final ObjectFactory of = getSession().getObjectFactory();
-                result = new CollectionIterable<CmisObject>(new AbstractPageFetcher<CmisObject>(operationContext.getMaxItemsPerPage()) {
-
-                    @Override
-                    protected AbstractPageFetcher.Page<CmisObject> fetchPage(long skipCount) {
-                        // fetch the data
-                        ObjectList resultList = discoveryService.query(getSession().getRepositoryInfo().getId(), stmt.toString(),
-                                false, operationContext.isIncludeAllowableActions(), operationContext.getIncludeRelationships(),
-                                operationContext.getRenditionFilterString(), BigInteger.valueOf(this.maxNumItems),
-                                BigInteger.valueOf(skipCount), null);
-
-                        // convert query results
-                        List<CmisObject> page = new ArrayList<CmisObject>();
-                        if (resultList.getObjects() != null) {
-                            for (ObjectData objectData : resultList.getObjects()) {
-                                if (objectData == null) {
-                                    continue;
-                                }
-
-                                page.add(of.convertObject(objectData, operationContext));
-                            }
-                        }
-
-                        return new AbstractPageFetcher.Page<CmisObject>(page, resultList.getNumItems(),
-                                resultList.hasMoreItems());
-                    }
-                });
+                result = getCmisObjects(stmt, operationContext);
 
                 break;
             }
             case VerteilungConstants.LIST_MODUS_FOLDER: { // nur Folder
-                QueryStatement stmt = session.createQueryStatement("IN_FOLDER(?) AND cmis:objectTypeId<>'F:cm:systemfolder'");
+                StringBuilder query = new StringBuilder("select d.*, o.* from cmis:folder as d " +
+                                                            "join cm:titled as o on d.cmis:objectId = o.cmis:objectId " +
+                                                            "WHERE IN_FOLDER(d, ?) AND d.cmis:objectTypeId<>'F:cm:systemfolder'");
+
+                if (order != null && order.trim().length() > 0) {
+                    query.append(" ORDER BY ");
+                    query.append(order + " ");
+                    if (orderDirection != null && orderDirection.trim().length() > 0)
+                        query.append(orderDirection);
+                }
+                QueryStatement stmt = session.createQueryStatement(query.toString());
                 stmt.setString(1, folderId);
-                result = session.queryObjects("cmis:folder", stmt.toString(), false, operationContext);
+                result = getCmisObjects(stmt, operationContext);
+
                 break;
             }
         }
@@ -289,6 +283,49 @@ public class AlfrescoConnector {
         return result;
     }
 
+    /**
+     * führt die Query aus
+     * @param stmt                      die Such Query
+     * @param operationContext          der Operation Context
+     * @return                          eine Liste mit Cmis Objekten
+     */
+    public ItemIterable<CmisObject> getCmisObjects(QueryStatement stmt,
+                                                   final OperationContext operationContext) {
+        ItemIterable<CmisObject> result;
+
+        ItemIterable<QueryResult> cntResult = session.query(stmt.toString(), false, operationContext).skipTo(Long.MAX_VALUE).getPage(Integer.MAX_VALUE);
+        final long totalNumItems = cntResult.getTotalNumItems();
+        final DiscoveryService discoveryService = getSession().getBinding().getDiscoveryService();
+        final ObjectFactory of = getSession().getObjectFactory();
+
+        result = new CollectionIterable<CmisObject>(new AbstractPageFetcher<CmisObject>(operationContext.getMaxItemsPerPage()) {
+
+            @Override
+            protected Page<CmisObject> fetchPage(long skipCount) {
+                // fetch the data
+                ObjectList resultList = discoveryService.query(getSession().getRepositoryInfo().getId(), stmt.toString(),
+                        false, operationContext.isIncludeAllowableActions(), operationContext.getIncludeRelationships(),
+                        operationContext.getRenditionFilterString(), BigInteger.valueOf(this.maxNumItems),
+                        BigInteger.valueOf(skipCount), null);
+
+                // convert query results
+                List<CmisObject> page = new ArrayList<CmisObject>();
+                if (resultList.getObjects() != null) {
+                    for (ObjectData objectData : resultList.getObjects()) {
+                        if (objectData == null) {
+                            continue;
+                        }
+
+                        page.add(of.convertObject(objectData, operationContext));
+                    }
+                }
+
+                return new Page<CmisObject>(page, totalNumItems,
+                        resultList.hasMoreItems());
+            }
+        });
+        return result;
+    }
 
 
     /**
@@ -299,7 +336,7 @@ public class AlfrescoConnector {
     public CmisObject getNode(String path) throws VerteilungException {
         try {
             CmisObject cmisObject = getSession().getObjectByPath(path);
-            logger.fine("getNode with " + path + " found " + cmisObject.getId());
+            logger.trace("getNode with " + path + " found " + cmisObject.getId());
             return cmisObject;
         } catch (CmisObjectNotFoundException e) {
             return null;
@@ -314,30 +351,40 @@ public class AlfrescoConnector {
      */
     public CmisObject getNodeById(String nodeId) throws VerteilungException {
         CmisObject cmisObject = getSession().getObject(getSession().createObjectId(nodeId));
-        logger.fine("getNodeById with " + nodeId + " found " + cmisObject.getId());
+        logger.trace("getNodeById with " + nodeId + " found " + cmisObject.getId());
         return cmisObject;
     }
+
 
     /**
      * sucht Dokumente
      * @param queryString           die Abfragequery
-     * @return                      eine Liste mit CmisObjekten
+     * @param order                 Die Spalte nach der sortiuert werden soll
+     * @param orderDirection        die Sortierreihenfolge: ASC oder DESC
+     * @return                      die gefundenen Dokumente
      * //TODO Das hier unterstüzt keine Aliase ala SELECT * from cmis:document AS D!!!
      */
-    public List<CmisObject> findDocument(String queryString) throws VerteilungException {
-        List<CmisObject> erg = new ArrayList<CmisObject>();
+    public ItemIterable<CmisObject> findDocument(String queryString,
+                                         String order,
+                                         String orderDirection) throws VerteilungException {
 
-        ItemIterable<QueryResult> results =  getSession().query(queryString, false);
-        for (Iterator<QueryResult> iterator = results.iterator(); iterator.hasNext(); ) {
-            QueryResult qResult = iterator.next();
-            String objectId = qResult.getPropertyValueByQueryName("cmis:objectId");
-            if(objectId != null && objectId.length() != 0)
-                erg.add(getSession().getObject(getSession().createObjectId(objectId)));
-            else
-                logger.warning("Found object without Id!");
+        OperationContext operationContext = getSession().createOperationContext();
+        operationContext.setOrderBy(order + " " + orderDirection);
+        operationContext.setIncludeAllowableActions(false);
+        operationContext.setIncludePolicies(false);
+        operationContext.setIncludeAcls(false);
+
+        StringBuilder query = new StringBuilder(queryString);
+        if (order != null && order.trim().length() > 0) {
+            query.append(" ORDER BY ");
+            query.append(order + " ");
+            if (orderDirection != null && orderDirection.trim().length() > 0)
+                query.append(orderDirection);
         }
-        logger.fine("Start Search with " + queryString + " Found " + erg.size() + " Entries!");
-        return erg;
+        QueryStatement stmt = session.createQueryStatement(query.toString());
+
+        return getCmisObjects(stmt, operationContext);
+
     }
 
     /**
@@ -429,7 +476,7 @@ public class AlfrescoConnector {
                                    Map<String, Object> properties,
                                    VersioningState versioningState) throws VerteilungException {
 
-        logger.fine("Create Document: " + documentName + " Type: " + documentType + " in Folder " + parentFolder.getName() + " Version: " + versioningState.value());
+        logger.trace("Create Document: " + documentName + " Type: " + documentType + " in Folder " + parentFolder.getName() + " Version: " + versioningState.value());
 
         Document newDocument;
 
@@ -469,7 +516,7 @@ public class AlfrescoConnector {
                                Folder newFolder) {
 
         FileableCmisObject object = fileableCmisObject.move(oldFolder, newFolder);
-        logger.fine("Object " + fileableCmisObject.getId() + " moved from " + oldFolder.getId() + " to folder " + newFolder.getId());
+        logger.trace("Object " + fileableCmisObject.getId() + " moved from " + oldFolder.getId() + " to folder " + newFolder.getId());
         return object;
     }
 
@@ -485,7 +532,7 @@ public class AlfrescoConnector {
     public Folder createFolder(Folder targetFolder,
                                Map<String, Object> properties ) throws VerteilungException {
 
-        logger.fine("createFolder: " + targetFolder.getPath() + " Properties: " + properties);
+        logger.trace("createFolder: " + targetFolder.getPath() + " Properties: " + properties);
 
         if (!properties.containsKey(PropertyIds.OBJECT_TYPE_ID))
             properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
@@ -537,16 +584,9 @@ public class AlfrescoConnector {
         properties = convertProperties(properties);
 
         asp = (List<String>) properties.get(PropertyIds.SECONDARY_OBJECT_TYPE_IDS);
-        if (asp != null && asp.size() > 0) {
-            for (SecondaryType type : document.getSecondaryTypes()) {
-                if (asp.contains(type.getId()))
-                    asp.remove(type.getId());
-            }
-        }
-
 
         //Aspekte hinzufügen
-        if (properties != null && properties.size() > 0 && asp != null && asp.size() > 0) {
+        if (properties != null && properties.size() > 0 ) {
             obj.updateProperties(properties, asp, null, true);
             properties.clear();
         }
@@ -601,7 +641,7 @@ public class AlfrescoConnector {
             properties.put(PropertyIds.OBJECT_TYPE_ID, obj.getPropertyValue(PropertyIds.OBJECT_TYPE_ID));
 
         obj = session.getObject(obj.updateProperties(convertProperties(properties), true));
-        logger.fine("updateProperties for node " + obj.getId());
+        logger.trace("updateProperties for node " + obj.getId());
         return obj;
     }
 
@@ -622,7 +662,7 @@ public class AlfrescoConnector {
     public CmisObject checkOutDocument(Document document) {
         if (isDocumentVersionable(document)) {
             CmisObject cmisObject = session.getObject(document.checkOut());
-            logger.fine("Object " + cmisObject.getId() + " checked out!");
+            logger.trace("Object " + cmisObject.getId() + " checked out!");
             return cmisObject;
         }
         else
@@ -646,7 +686,7 @@ public class AlfrescoConnector {
 
         if (isDocumentVersionable(document)) {
             CmisObject cmisObject = session.getObject(document.checkIn(major, convertProperties(properties), contentStream, checkinComment));
-            logger.fine("Object " + cmisObject.getId() + " checked in with Version " + cmisObject.getPropertyValue("versionLabel"));
+            logger.trace("Object " + cmisObject.getId() + " checked in with Version " + cmisObject.getPropertyValue("versionLabel"));
             return cmisObject;
         }
         else

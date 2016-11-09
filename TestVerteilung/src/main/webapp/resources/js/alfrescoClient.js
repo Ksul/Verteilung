@@ -12,67 +12,55 @@ function getAlfrescoTicket() {
 }
 
 /**
- * führt einen Refresh der angezeigten Inhalte durch
- */
-function refreshCache() {
-    $('#refresh').addClass("fa-spin");
-    var done = function(json){
-        if (json.success) {
-            var data  = $('#tree').jstree('get_selected', true)[0].data;
-            switchAlfrescoDirectory(data);
-            $('#refresh').removeClass("fa-spin");
-        }
-    };
-    var obj = executeService("clearCache", done);
-
-}
-
-/**
  * startet die normalen Alfresco View
  */
 function showAlfrescoNormalView(){
-    iconView = false;
+    alfrescoTabelle.settings().init().iconView = false;
     viewMenuNormal.children('li:first').superfish('hide');
-    alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.show("north");
     alfrescoTabelle.column(0).visible(true);
     alfrescoTabelle.column(1).visible(true);
     alfrescoTabelle.column(2).visible(false);
-    calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
-}
-
-/**
- * startet die normalen Alfresco SearchView
- */
-function showAlfrescoSearchNormalView(){
-    viewMenuSearch.children('li:first').superfish('hide');
-    alfrescoSearchTabelle.column(0).visible(true);
-    alfrescoSearchTabelle.column(1).visible(true);
-    alfrescoSearchTabelle.column(2).visible(false);
-    calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+    //alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.show("north");
+    resizeTable("alfrescoCenterCenterCenter", "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
 }
 
 /**
  * startet die Alfresco Icon View
  */
 function showAlfrescoIconView(){
-    iconView = true;
+    alfrescoTabelle.settings().init().iconView = true;
     viewMenuNormal.children('li:first').superfish('hide');
-    alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.hide("north");
     alfrescoTabelle.column(0).visible(false);
     alfrescoTabelle.column(1).visible(false);
     alfrescoTabelle.column(2).visible(true);
-    calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+    //alfrescoLayout.children.center.alfrescoCenterInnerLayout.children.center.alfrescoCenterCenterInnerLayout.hide("north");
+
+    resizeTable("alfrescoCenterCenterCenter", "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+}
+
+
+/**
+ * startet die normalen Alfresco SearchView
+ */
+function showAlfrescoSearchNormalView(){
+    alfrescoSearchTabelle.settings().init().iconView = false;
+    viewMenuSearch.children('li:first').superfish('hide');
+    alfrescoSearchTabelle.column(0).visible(true);
+    alfrescoSearchTabelle.column(1).visible(true);
+    alfrescoSearchTabelle.column(2).visible(false);
+    resizeTable("searchCenter", "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
 }
 
 /**
  * startet die Alfresco Search Icon View
  */
 function showAlfrescoSearchIconView() {
+    alfrescoSearchTabelle.settings().init().iconView = true;
     viewMenuSearch.children('li:first').superfish('hide');
     alfrescoSearchTabelle.column(0).visible(false);
     alfrescoSearchTabelle.column(1).visible(false);
     alfrescoSearchTabelle.column(2).visible(true);
-    calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+    resizeTable("searchCenter", "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
 }
 
 /**
@@ -112,20 +100,18 @@ function handleDropInbox(evt) {
 }
 
 /**
- * berechnet die passende Tabellengröße
+ * berechnet die passende Pagelength der Tabelle
  * @param panel         das Layoutpanel, welches die Tabelle enthält
- * @param tabelle       die Tabelle
  * @param divId         die Id des DIV's welches die Tabelle enthält
- * @param tabelleId     die Id der Tabelle
+ * @param tabelle     die Id der Tabelle
  * @param headerId      die Id des headers
  * @param footerId      die Id des Footers
  */
-function calculateTableHeight(panel, tabelle, divId, tabelleId,headerId, footerId) {
-    var div, table, completePanel = 0, topPanel = 0, downPanel = 0,columnPanel = 0, headerPanel = 0, footerPanel = 0;
+function calculateTableHeight(panel, divId, tabelle, headerId, footerId) {
+    var div, table, rowHeight = 0, availableHeight = 0, topPanel = 0, downPanel = 0,columnPanel = 0, headerPanel = 0, footerPanel = 0;
     var children;
     div = $('#'+divId);
-    table = $('#'+tabelleId);
-    completePanel = $('#'+panel).height();
+    availableHeight = $('#'+panel).height();
     children =  div.children().children();
     if (children.length > 0)
         topPanel = children[0].offsetHeight;
@@ -135,11 +121,38 @@ function calculateTableHeight(panel, tabelle, divId, tabelleId,headerId, footerI
         columnPanel = children[0].offsetHeight;
     headerPanel = $('#'+headerId).height();
     footerPanel = $('#'+footerId).height();
-    while (((completePanel - topPanel - headerPanel - columnPanel - downPanel - footerPanel) > table.height()) && tabelle.page.len() < 50) {
-        tabelle.page.len(tabelle.page.len() + 1).draw();
-    }
-    while (((completePanel - topPanel - headerPanel - columnPanel - downPanel - footerPanel) < table.height()) && tabelle.page.len() > 2) {
-        tabelle.page.len(tabelle.page.len() - 1).draw();
+    if (exist(tabelle.settings().init().iconView) && tabelle.settings().init().iconView) // fest nach aktueller CSS
+        rowHeight = 121;
+    else
+        rowHeight = 33.5;
+
+    availableHeight -= topPanel;
+    availableHeight -= headerPanel;
+    availableHeight -= columnPanel;
+    availableHeight -= downPanel;
+    availableHeight -= footerPanel;
+
+    return Math.floor(availableHeight / rowHeight);
+}
+
+/**
+ * setzt die Pagelength in der Tabelle
+ * @param panel         das Layoutpanel, welches die Tabelle enthält
+ * @param divId         die Id des DIV's welches die Tabelle enthält
+ * @param tabelleId     die Id der Tabelle
+ * @param headerId      die Id des headers
+ * @param footerId      die Id des Footers
+ */
+function resizeTable(panel, divId, tabelleId, headerId, footerId) {
+
+    var tabelle = $('#'+tabelleId).DataTable();
+    var drawRows = calculateTableHeight(panel, divId, tabelle, headerId, footerId);
+
+    if ( drawRows !== Infinity && drawRows !== -Infinity &&
+        ! isNaN( drawRows )   && drawRows > 0 &&
+        drawRows !== tabelle.page.len()
+    ) {
+        tabelle.page.len( drawRows ).draw("page");
     }
 }
 
@@ -241,7 +254,7 @@ function loadLayout() {
             resizable: false,
             closable: false,
             initPanes: true,
-            size:30,
+            size:10,
             resizerClass: "ui-widget-content",
             togglerClass: "ui-widget-content",
             showDebugMessages: true,
@@ -251,7 +264,7 @@ function loadLayout() {
                 children: {
                     name: "tabNorthInnerLayout",
                     center: {
-                        size: "auto",
+                        size: 15,
                         resizable: false,
                         closable: false,
                         name: "tabNorthInnerCenterLayout",
@@ -297,11 +310,24 @@ function loadLayout() {
                 north: {
                     paneSelector: "#searchNorth",
                     name: "searchNorthLayout",
-                    size: 85,
+                    size: 55,
                     fxSettings_open: {easing: "easeOutBounce"},
                     closable: false,
                     resizable: false,
-                    slidable: false
+                    slidable: false,
+                    children: {
+                        name: "searchNorthInnerLayout",
+                        center: {
+                            size: "auto",
+                            name: "searchNorthCenterLayout",
+                            paneSelector: "#searchNorthCenter"
+                        },
+                        east: {
+                            size: 90,
+                            name: "searchNorthEastLayout",
+                            paneSelector: "#searchNorthEast"
+                        }
+                    }
                 },
                 center: {
                     paneSelector: "#searchCenter",
@@ -336,6 +362,27 @@ function loadLayout() {
             initPanes: true,
             resizeWithWindow: false,
             contentSelector: ".ui-widget-content",
+            north: {
+                paneSelector: "#alfrescoNorth",
+                name: "alfrescoNorthLayout",
+                minSize: 25,
+                maxSize: 25,
+                resizable: false,
+                closable: false,
+                children: {
+                    name: "alfrescoNorthInnerLayout",
+                    center: {
+                        size: "auto",
+                        name: "alfrescoNorthCenterLayout",
+                        paneSelector: "#alfrescoNorthCenter"
+                    },
+                    east: {
+                        size: 90,
+                        name: "alfrescoNorthEastLayout",
+                        paneSelector: "#alfrescoNorthEast"
+                    }
+                }
+            },
             west: {
                 paneSelector: "#alfrescoWest",
                 name: "alfrescoWestLayout",
@@ -354,27 +401,6 @@ function loadLayout() {
                     name: "alfrescoCenterInnerLayout",
                     spacing_open: 8,
                     spacing_closed: 12,
-                    north: {
-                        paneSelector: "#alfrescoCenterNorth",
-                        name: "alfrescoCenterNorthLayout",
-                        minSize: 25,
-                        maxSize: 25,
-                        resizable: false,
-                        closable: false,
-                        children: {
-                            name: "alfrescoCenterNorthInnerLayout",
-                            center: {
-                                size: "auto",
-                                name: "alfrescoCenterNorthCenterLayout",
-                                paneSelector: "#alfrescoCenterNorthCenter"
-                            },
-                            east: {
-                                size: 90,
-                                name: "alfrescoCenterNorthEastLayout",
-                                paneSelector: "#alfrescoCenterNorthEast"
-                            }
-                        }
-                    },
                     center: {
                         size: "auto",
 
@@ -404,7 +430,7 @@ function loadLayout() {
                                 name: "alfrescoCenterCenterNorthLayout",
                                 onresize: function () {
                                     try {
-                                        calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
+                                        resizeTable("alfrescoCenterCenterNorth", "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
                                     } catch (e) {
                                         errorHandler(e);
                                     }
@@ -417,7 +443,7 @@ function loadLayout() {
                                 name: "alfrescoCenterCenterCenterLayout",
                                 onresize: function () {
                                     try {
-                                        calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+                                        resizeTable("alfrescoCenterCenterCenter", "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
                                       } catch (e) {
                                         errorHandler(e);
                                     }
@@ -463,7 +489,7 @@ function loadLayout() {
                 onresize: function () {
                     try {
                         textEditor.resize();
-                        calculateTableHeight("verteilungWest", tabelle, "dtable", "tabelle", "verteilungTabelleHeader", "verteilungTableFooter");
+                        resizeTable("verteilungWest", "dtable", "tabelle", "verteilungTabelleHeader", "verteilungTableFooter");
                     } catch (e){
                         errorHandler(e);
                     }
@@ -566,10 +592,17 @@ function loadAlfrescoTable() {
             "scrollXInner": "100%",
             "autoWidth": false,
             "deferRender": true,
-            "processing": true,
             "lengthChange": false,
             "searching": false,
             "order": [[3, 'desc']],
+            "processing": true,
+            "serverSide": true,
+            "iconView": false,
+            "pageLength": 1, // kann hier 1 sein, weil im Root keine Dokumente sind
+            "ajax": {
+                "url": "/TestVerteilung/VerteilungServlet?function=listFolderWithPagination&filePath=-1&withFolder=1&itemsToSkip=0",
+                "dataType": "json"
+            },
             "select": {
                 "style": 'os'
             },
@@ -601,6 +634,7 @@ function loadAlfrescoTable() {
                 {
                     "data": "title",
                     "title": "Titel",
+                    "name": "cm:title",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft alfrescoTableDragable"
@@ -608,6 +642,7 @@ function loadAlfrescoTable() {
                 {
                     "data": "documentDateDisplay",
                     "title": "Datum",
+                    "name": "my:documentDate",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -615,6 +650,7 @@ function loadAlfrescoTable() {
                 {
                     "data": "person",
                     "title": "Person",
+                    "name": "my:person",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -622,6 +658,7 @@ function loadAlfrescoTable() {
                 {
                     "data": "amountDisplay",
                     "title": "Betrag",
+                    "name": "my:amount",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -629,6 +666,7 @@ function loadAlfrescoTable() {
                 {
                     "data": "idvalue",
                     "title": "Schlüssel",
+                    "name": "my:idvalue",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -655,9 +693,9 @@ function loadAlfrescoTable() {
 
                 {
                     "targets": [1],
-                    "render": function (data, type, row) {
+                    "render": function (data, type, row, meta) {
                         try {
-                                if (exist(data) && data == "application/pdf") {
+                                if (exist(data) && data == "application/pdf" && !meta.settings.oInit.iconView) {
                                     var span = document.createElement("span");
                                     var image = document.createElement('div');
                                     image.id = "alfrescoTableIcon" + row.objectID;
@@ -680,9 +718,9 @@ function loadAlfrescoTable() {
                 },
                 {
                     "targets": [2],
-                    "render": function (data, type, row) {
+                    "render": function (data, type, row, meta) {
                         try {
-                            if (exist(data)) {
+                            if (exist(row) && exist(row.nodeRef) && meta.settings.oInit.iconView) {
                                 var span = document.createElement("span");
 
                                 span.href = "#";
@@ -786,13 +824,13 @@ function loadAlfrescoTable() {
                 // This row is already open - close it
                 row.child.hide();
                 $(tr.get(0).childNodes[0]).removeClass('shown');
-                calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+                calculateTableHeight("alfrescoCenterCenterCenter", "dtable2", alfrescoTabelle, "alfrescoTabelleHeader", "alfrescoTableFooter");
             }
             else {
                 // Open this row
                 row.child(formatAlfrescoTabelleDetailRow(row.data())).show();
                 $(tr.get(0).childNodes[0]).addClass('shown');
-                calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
+                calculateTableHeight("alfrescoCenterCenterCenter", "dtable2", alfrescoTabelle, "alfrescoTabelleHeader", "alfrescoTableFooter");
             }
         });
 
@@ -846,6 +884,7 @@ function loadAlfrescoFolderTable() {
             "autoWidth": true,
             "lengthChange": false,
             "searching": false,
+            "pageLength": 1,
             "select": {
                 "style": 'os'
             },
@@ -887,6 +926,7 @@ function loadAlfrescoFolderTable() {
                 {
                     "data": "name",
                     "title": "Name",
+                    "name" : "cm:title",
                     "defaultContent": '',
                     "type": "string",
                     "createdCell": function(tableData, value, data, row, column) {
@@ -906,6 +946,7 @@ function loadAlfrescoFolderTable() {
                 {
                     "data": "description",
                     "title": "Beschreibung",
+                    "name" : "cm:description",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft alfrescoFolderTableDragable treeDropable"
@@ -1035,7 +1076,17 @@ function loadAlfrescoSearchTable() {
             "lengthChange": false,
             "searching": false,
             "order": [[3, 'desc']],
+            "processing": true,
+            "serverSide": true,
+            "iconView": false,
+            "pageLength": 1, // kann hier 1 sein, weil im Root keine Dokumente sind
+            "deferLoading": 0,
+            "ajax": {
+                "url": "/TestVerteilung/VerteilungServlet?function=findDocumentWithPagination&cmisQuery=&itemsToSkip=0",
+                "dataType": "json"
+            },
             "columns": [
+
                 {
                     "class": 'alignCenter details-control awesomeEntity',
                     "orderable": false,
@@ -1063,6 +1114,7 @@ function loadAlfrescoSearchTable() {
                 {
                     "data": "title",
                     "title": "Titel",
+                    "name": "cm:title",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -1070,6 +1122,7 @@ function loadAlfrescoSearchTable() {
                 {
                     "data": "documentDateDisplay",
                     "title": "Datum",
+                    "name": "my:documentDate",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -1077,6 +1130,7 @@ function loadAlfrescoSearchTable() {
                 {
                     "data": "person",
                     "title": "Person",
+                    "name": "my:person",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -1084,6 +1138,7 @@ function loadAlfrescoSearchTable() {
                 {
                     "data": "amountDisplay",
                     "title": "Betrag",
+                    "name": "my:amount",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -1091,6 +1146,7 @@ function loadAlfrescoSearchTable() {
                 {
                     "data": "idvalue",
                     "title": "Schlüssel",
+                    "name": "my:idvalue",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -1117,9 +1173,9 @@ function loadAlfrescoSearchTable() {
 
                 {
                     "targets": [1],
-                    "render": function (data, type, row) {
+                    "render": function (data, type, row, meta) {
                         try {
-                            if (exist(data) && data == "application/pdf") {
+                            if (exist(data) && data == "application/pdf" && !meta.settings.oInit.iconView) {
                                 var span = document.createElement("span");
                                 var image = document.createElement('div');
                                 image.id = "alfrescoSearchTableIcon" + row.objectID;
@@ -1127,7 +1183,6 @@ function loadAlfrescoSearchTable() {
                                 image.title = "PDF Dokument";
                                 image.draggable = true;
                                 image.style.cursor = "pointer";
-                                image.src =url;
                                 $('#alfrescoSearchTabelle tbody').on( 'click', '#' + image.id, function (event) {
                                     openDocument(this, event);
                                 });
@@ -1143,9 +1198,9 @@ function loadAlfrescoSearchTable() {
                 },
                 {
                     "targets": [2],
-                    "render": function (data, type, row) {
+                    "render": function (data, type, row, meta) {
                         try {
-                            if (exist(data)) {
+                            if (exist(data) && meta.settings.oInit.iconView) {
                                 var span = document.createElement("span");
 
                                 span.href = "#";
@@ -1262,13 +1317,13 @@ function loadAlfrescoSearchTable() {
                 // This row is already open - close it
                 row.child.hide();
                 tr.removeClass('shown');
-                calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+                calculateTableHeight("searchCenter", "dtable4", alfrescoSearchTabelle, "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
             }
             else {
                 // Open this row
                 row.child(formatAlfrescoTabelleDetailRow(row.data())).show();
                 tr.addClass('shown');
-                calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+                calculateTableHeight("searchCenter", "dtable4", alfrescoSearchTabelle, "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
             }
         });
 
@@ -1367,13 +1422,13 @@ function loadVerteilungTable() {
                 // This row is already open - close it
                 row.child.hide();
                 tr.removeClass('shown');
-                calculateTableHeight("verteilungWest", tabelle, "dtable", "tabelle", "verteilungTabelleHeader", "verteilungTableFooter");
+                calculateTableHeight("verteilungWest", "dtable", tabelle, "verteilungTabelleHeader", "verteilungTableFooter");
             }
             else {
                 // Open this row
                 row.child(formatVerteilungTabelleDetailRow(row.data())).show();
                 tr.addClass('shown');
-                calculateTableHeight("verteilungWest", tabelle, "dtable", "tabelle", "verteilungTabelleHeader", "verteilungTableFooter");
+                calculateTableHeight("verteilungWest", "dtable", tabelle, "verteilungTabelleHeader", "verteilungTableFooter");
 
             }
         });
@@ -2094,17 +2149,15 @@ function deleteFolder() {
 function switchAlfrescoDirectory(data) {
     try {
         var objectID;
-        var times = [];
         if (exist(data))
             objectID = data.objectID;
         else
             objectID = "-1";
-        times.push(new Date().getTime());
         var done = function(json){
             alfrescoFolderTabelle.clear();
+            resizeTable("alfrescoCenterCenterNorth", "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
             alfrescoFolderTabelle.rows.add(json.data).draw();
-            calculateTableHeight("alfrescoCenterCenterNorth", alfrescoFolderTabelle, "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
-            $.fn.dataTable.makeEditable( alfrescoFolderTabelle, updateInLineFolderFieldFieldDefinition());
+             $.fn.dataTable.makeEditable( alfrescoFolderTabelle, updateInLineFolderFieldFieldDefinition());
             fillBreadCrumb(data);
             //$("#tree").jstree(true).refresh_node(objectID);
             $("#tree").jstree('select_node', objectID);
@@ -2114,19 +2167,12 @@ function switchAlfrescoDirectory(data) {
             {"name": "filePath", "value": objectID},
             {"name": "withFolder", "value": -1}
         ], "Verzeichnis konnte nicht aus dem Server gelesen werden:");
-        var done1 = function(json) {
-            alfrescoTabelle.clear();
-            alfrescoTabelle.rows.add(json.data).draw();
-            times.push(new Date().getTime());
-            REC.log(DEBUG, "SwitchDirectory: " + (times[1] -times[0]) + " ms");
-            fillMessageBox(true);
-            calculateTableHeight("alfrescoCenterCenterCenter", alfrescoTabelle, "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
-            $.fn.dataTable.makeEditable( alfrescoTabelle, updateInLineDocumentFieldDefinition());
-        };
-        json = executeService("listFolder", done1, [
-            {"name": "filePath", "value": objectID},
-            {"name": "withFolder", "value": "1"}
-        ], "Dokumente konnten nicht aus dem Server gelesen werden:");
+        if (objectID != -1) {
+            var len = calculateTableHeight("alfrescoCenterCenterCenter", "dtable2", alfrescoTabelle, "alfrescoTabelleHeader", "alfrescoTableFooter");
+            alfrescoTabelle.page.len(len);
+            alfrescoTabelle.ajax.url("/TestVerteilung/VerteilungServlet?function=listFolderWithPagination&filePath=" + objectID + "&withFolder=1&itemsToSkip=0").load(null, true);
+            $.fn.dataTable.makeEditable(alfrescoTabelle, updateInLineDocumentFieldDefinition());
+        }
 
     } catch (e) {
         errorHandler(e);
@@ -2139,18 +2185,14 @@ function switchAlfrescoDirectory(data) {
  */
 function startSearch(searchText) {
     try {
-        var sql = "SELECT * FROM cmis:document WHERE IN_TREE('" + archivFolderId + "') AND CONTAINS('" + searchText + "')";
-        var json = executeService("findDocument", null, [
-            {"name": "cmisQuery", "value": sql}
-        ], null, true);
-        if (json.success) {
-            if (json.data.length == 0)
-                message("Suche", "Keine Dokumente gefunden", 4000, 100, 300);
-            alfrescoSearchTabelle.clear();
-            alfrescoSearchTabelle.rows.add(json.data).draw();
-            calculateTableHeight("searchCenter", alfrescoSearchTabelle, "dtable4", "alfrescoSearchTabelle", "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
-            $.fn.dataTable.makeEditable(alfrescoSearchTabelle, updateInLineDocumentFieldDefinition());
-        }
+        var sql = "select d.*, o.*, c.*, i.* from my:archivContent as d " +
+            "join cm:titled as o on d.cmis:objectId = o.cmis:objectId " +
+            "join my:amountable as c on d.cmis:objectId = c.cmis:objectId " +
+            "join my:idable as i on d.cmis:objectId = i.cmis:objectId  WHERE IN_TREE(d, '" + archivFolderId + "') AND CONTAINS(d, '" + searchText + "')";
+        var len = calculateTableHeight("searchCenter", "dtable4", alfrescoSearchTabelle, "alfrescoSearchTabelleHeader", "alfrescoSearchTableFooter");
+        alfrescoSearchTabelle.page.len(len);
+        alfrescoSearchTabelle.ajax.url("/TestVerteilung/VerteilungServlet?function=findDocumentWithPagination&cmisQuery=" + sql + "&itemsToSkip=0").load(null, true);
+        $.fn.dataTable.makeEditable(alfrescoSearchTabelle, updateInLineDocumentFieldDefinition());
     } catch (e) {
         errorHandler(e);
     }
@@ -2269,16 +2311,16 @@ function handleAlfrescoImageClicks() {
             var data = tabelle.row(tr).data();
             var id = data.objectID;
             if (data && data.parents) {
-                var node = tree.get_node(data.parents[0]);
+                var node = tree.get_node(data.parents[0].objectId);
                 while (!node) {
                     var json = executeService("getNodeById", null, [
-                        {"name": "documentId", "value": data.parents[0]}
+                        {"name": "documentId", "value": data.parents[0].objectId}
                     ], ["Dokument konnten nicht gelesen werden!"]);
                     if (json.success) {
                         data = json.data;
                         results.push(data);
                         if (data && data.parents )
-                            node = tree.get_node(data.parents[0]);
+                            node = tree.get_node(data.parents[0].objectId);
                     } else {
                         break;
                     }
@@ -2861,33 +2903,38 @@ function loadAlfrescoTree() {
             'plugins': ["dnd", "types", "contextmenu"]
         }).on("changed.jstree",  function (event, data){
             try {
-                var tree =  $("#tree").jstree(true);
-                var evt =  window.event || event;
-                var button = evt.which || evt.button;
+                if (data.action == "select_node") {
+                    var tree = $("#tree").jstree(true);
+                    var evt = window.event || event;
+                    var button = evt.which || evt.button;
 
-                // Select Node nicht bei rechter Maustaste
-                if( button != 1 && ( typeof button != "undefined")){
-                    return false;
-                }
-                if (!data.node || !data.node.data)
-                    switchAlfrescoDirectory(null);
-                else {
-                    if (data.node.data.baseTypeId == "cmis:folder") {
-                        if (alfrescoServerAvailable) {
-                            switchAlfrescoDirectory(data.node.data);
-                            tree.open_node(data.node.id);
+                    // Select Node nicht bei rechter Maustaste
+                    if (button != 1 && ( typeof button != "undefined")) {
+                        return false;
+                    }
+                    if (!data.node || !data.node.data)
+                    // für den Root Node
+                        switchAlfrescoDirectory(null);
+                    else {
+                        if (data.node.data.baseTypeId == "cmis:folder") {
+                            if (alfrescoServerAvailable) {
+                                switchAlfrescoDirectory(data.node.data);
+                                tree.open_node(data.node.id);
+                            }
                         }
                     }
                 }
             } catch (e) {
                 errorHandler(e);
             }
-        }).on("loaded.jstree", function (event, data) {
+        }).on("load_node.jstree", function (event, data) {
             try {
-                // Eventlistner für Drop in Inbox
-                var zone = document.getElementById(inboxFolderId);
-                zone.addEventListener('dragover', handleDragOver, false);
-                zone.addEventListener('drop', handleDropInbox, false);
+                if (data.node.id == inboxFolderId ) {
+                    // Eventlistner für Drop in Inbox
+                    var zone = document.getElementById(inboxFolderId);
+                    zone.addEventListener('dragover', handleDragOver, false);
+                    zone.addEventListener('drop', handleDropInbox, false);
+                }
             } catch (e) {
                 errorHandler(e);
             }

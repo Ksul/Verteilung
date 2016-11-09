@@ -36,8 +36,43 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
     }
 
     @Test
+    public void testListFolder1() throws Exception {
+        long a ;
+        a= Long.MAX_VALUE;
+        String b=Long.toString(a);
+        a=Long.parseLong(b);
+
+        CmisObject cmisObject= con.getNode("/Archiv/Unbekannt/") ;
+        long start = System.currentTimeMillis();
+        ItemIterable<CmisObject>  l1 = con.listFolder(cmisObject.getId(), "cmis:name", "ASC", VerteilungConstants.LIST_MODUS_DOCUMENTS);
+        a= l1.getTotalNumItems();
+//        l1.skipTo(0).getPage(9999);
+        System.out.println(a + "   " + (System.currentTimeMillis()-start));
+    }
+
+    @Test
+    public void testListFolder2() throws Exception {
+        long b;
+        CmisObject cmisObject= con.getNode("/Archiv/Unbekannt/") ;
+        long start = System.currentTimeMillis();
+        ItemIterable<CmisObject>  l2 = con.listFolder(cmisObject.getId(), "cmis:name", "ASC", VerteilungConstants.LIST_MODUS_DOCUMENTS).skipTo(0).getPage(10);
+        b= l2.getTotalNumItems();
+        System.out.println(b + "   " + (System.currentTimeMillis()-start));
+    }
+
+    @Test
+    public void testListFolder3() throws Exception {
+        long b;
+        CmisObject cmisObject= con.getNode("/Archiv/Unbekannt/") ;
+        long start = System.currentTimeMillis();
+        ItemIterable<CmisObject>  l2 = con.listFolder(cmisObject.getId(), "cmis:name", "ASC", VerteilungConstants.LIST_MODUS_ALL);
+        b= l2.getTotalNumItems();
+        System.out.println(b + "   " + (System.currentTimeMillis()-start));
+    }
+
+    @Test
     public void testListFolder() throws Exception {
-        Document document;
+
         CmisObject folder = buildTestFolder("TestFolder", null);
 
         buildTestFolder("Folder", folder);
@@ -45,11 +80,8 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
         CmisObject cmisObject= buildDocument("BDocument", folder);
         buildDocument("CDocument", folder);
         Map<String, Object> properties = new HashMap<>();
-        ArrayList<String> aspects = new ArrayList<>();
-        aspects.add("P:cm:titled");
         properties.put(PropertyIds.OBJECT_TYPE_ID, "D:my:archivContent");
         properties.put("cm:title", "ATitel");
-        properties.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, aspects);
         con.updateProperties(cmisObject,  properties);
 
         ItemIterable<CmisObject> list = con.listFolder(folder.getId(), "cmis:name", "ASC", VerteilungConstants.LIST_MODUS_ALL);
@@ -112,23 +144,37 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
             count++;
         }
         assertThat(count, Matchers.is(3));
-        /*list = con.listFolder(folder.getId(), "cm:title, cmis:name", "ASC", VerteilungConstants.LIST_MODUS_DOCUMENTS);
+        list = con.listFolder(folder.getId(), "cm:title", "DESC", VerteilungConstants.LIST_MODUS_DOCUMENTS);
         assertThat(list, Matchers.notNullValue());
         count = 0;
         for (CmisObject obj : list) {
             switch (count) {
                 case 0:
-                    assertThat(obj.getName(), Matchers.is("TestDocument1"));
+                    assertThat(obj.getName(), Matchers.is("BDocument"));
                     break;
                 case 1:
-                    assertThat(obj.getName(), Matchers.is("TestDocument"));
+                    assertThat(obj.getName(), Matchers.is("ADocument"));
                     break;
                 case 2:
-                    assertThat(obj.getName(), Matchers.is("TestDocument2"));
+                    assertThat(obj.getName(), Matchers.is("CDocument"));
                     break;
             }
             count++;
-        }*/
+        }
+        assertThat(count, Matchers.is(3));
+        list = con.listFolder(folder.getId(), "cmis:name", "DESC", VerteilungConstants.LIST_MODUS_FOLDER);
+        assertThat(list, Matchers.notNullValue());
+        count = 0;
+        for (CmisObject obj : list) {
+            switch (count) {
+                case 0:
+                    assertThat(obj.getName(), Matchers.is("Folder"));
+                    break;
+            }
+            count++;
+        }
+        assertThat(count, Matchers.is(1));
+
         ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
     }
 
@@ -150,16 +196,16 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testFindDocument() throws Exception{
-        List<CmisObject> erg = con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='backup.js.sample'");
+        ItemIterable<CmisObject> erg = con.findDocument("SELECT * from cmis:document where cmis:name='backup.js.sample'", null, null);
         assertThat(erg, Matchers.notNullValue());
-        assertThat(erg.size(), Matchers.is(1));
-        Document doc = (Document) erg.get(0);
+        assertThat(erg.getTotalNumItems(), Matchers.is(1L));
+        Document doc = (Document) erg.iterator().next();
         assertThat(doc.getName(), Matchers.equalTo("backup.js.sample"));
     }
 
     @Test
     public void testQuery() throws Exception {
-        List<List<PropertyData<?>>> erg = con.query("SELECT cmis:name from cmis:document where cmis:name='backup.js.sample'");
+        List<List<PropertyData<?>>> erg = con.query("SELECT cmis:name, cmis:objectId from cmis:document where cmis:name='backup.js.sample'");
         assertThat(erg, Matchers.notNullValue());
         assertThat(erg.size(), Matchers.is(1));
         assertThat(erg.get(0).get(0).getFirstValue(), Matchers.equalTo("backup.js.sample"));
@@ -184,7 +230,7 @@ public class AlfrescoConnectorTest extends AlfrescoTest{
 
     @Test
     public void testGetDocumentContent() throws Exception{
-        byte[] content = con.getDocumentContent((Document) con.findDocument("SELECT cmis:objectId from cmis:document where cmis:name='backup.js.sample'").get(0));
+        byte[] content = con.getDocumentContent((Document) con.findDocument("SELECT * from cmis:document where cmis:name='backup.js.sample'", null, null).iterator().next());
         assertThat(content, Matchers.notNullValue());
         assertThat(content.length, Matchers.greaterThan(0));
         String document =  new String(content, Charset.forName("UTF-8"));

@@ -1,17 +1,13 @@
 package de.schulte.testverteilung;
 
-import com.sun.deploy.util.StringUtils;
 import org.apache.chemistry.opencmis.client.api.*;
+import org.apache.chemistry.opencmis.client.runtime.util.EmptyItemIterable;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
-import org.apache.chemistry.opencmis.commons.data.*;
+import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.jcs.JCS;
-import org.apache.commons.jcs.access.CacheAccess;
-import org.apache.commons.jcs.access.exception.CacheException;
-import org.apache.commons.jcs.engine.control.CompositeCacheManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,8 +19,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
-import java.util.Properties;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -38,13 +34,10 @@ public class VerteilungServices {
 
     private AlfrescoConnector con;
 
-    private static Logger logger = Logger.getLogger(VerteilungServices.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(VerteilungServices.class.getName());
 
     // Speicher für Files
     private Collection<FileEntry> entries = new ArrayList<>();
-
-    // Cache für listFolder
-    private CacheAccess<String, JSONArray> cache;
 
     //Speicher für Titel
     private HashSet<String> titles = new HashSet<>();
@@ -275,14 +268,12 @@ public class VerteilungServices {
                                  String orderDirection,
                                  int modus,
                                  int maxItemsPerPage,
-                                 int start,
+                                 long start,
                                  int draw) {
 
         JSONArray list = new JSONArray();
         JSONObject obj = new JSONObject();
-        JSONArray result;
         long itemsToSkip;
-        long items;
         ItemIterable<CmisObject> cmisObjects;
         try {
             if (maxItemsPerPage == -1) {
@@ -303,29 +294,20 @@ public class VerteilungServices {
             // das Root Object übergeben?
             if (filePath.equals("-1"))
                 filePath = con.getNode("/Archiv").getId();
-                result = getCache().get(filePath);
-            if (result != null) {
-                logger.fine("listFolder: Result for Id " + filePath + " found in Cache!");
+
+            cmisObjects = con.listFolder(filePath, order, orderDirection, modus).skipTo(itemsToSkip).getPage(maxItemsPerPage);
+
+            for (CmisObject cmisObject : cmisObjects) {
+                list.put(convertObjectToJson(filePath, cmisObject));
             }
-            else {
-                logger.fine("listFolder: Result for Id " + filePath + " -> not <- found in Cache! Read...");
-                cmisObjects = con.listFolder(filePath, order, orderDirection, modus).skipTo(itemsToSkip).getPage(maxItemsPerPage);
 
 
-                for (CmisObject cmisObject : cmisObjects) {
-                    list.put(convertObjectToJson(filePath, cmisObject));
-                }
-                if (cmisObjects.getHasMoreItems())
-                    items = Long.MAX_VALUE;
-                else
-                    items = itemsToSkip + list.length();
-                obj.put("recordsTotal", items);
-                obj.put("draw", draw);
-                //cmisObjects.getTotalNumItems()
-                obj.put("recordsFiltered", items);
-                obj.put("hasMoreItems", cmisObjects.getHasMoreItems());
-                //getCache().put(filePath, result);
-            }
+            obj.put("recordsTotal", cmisObjects.getTotalNumItems());
+            obj.put("draw", draw);
+
+            obj.put("recordsFiltered", cmisObjects.getTotalNumItems());
+            obj.put("hasMoreItems", cmisObjects.getHasMoreItems());
+            obj.put("parent", filePath);
 
 
             obj.put("data", list);
@@ -401,22 +383,51 @@ public class VerteilungServices {
     /**
      * liefert eine Liste mit Documenten aus einer CMIS Query
      *
-     * @param  cmisQuery        die CMIS Query zum suchen
-     * @return obj              ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
-     *                                                                  false   ein Fehler ist aufgetreten
-     *                                                         data           eine Liste mit JSON Objecten
+     * @param  cmisQuery         die CMIS Query zum suchen
+     * @param  order             die Spalte nach der sortiuert werden soll
+     * @param  orderDirection    die Sortierreihenfolge: ASC oder DESC
+     * @param  maxItemsPerPage   die Anzahl der Records insgesamt pro Seite. Bei -1 werden alle übertragen
+     * @param  start             Startposition
+     * @param  draw              draw Counter
+     * @return obj               ein JSONObject mit den Feldern success: true    die Operation war erfolgreich
+     *                                                                   false   ein Fehler ist aufgetreten
+     *                                                          data             eine Liste mit JSON Objecten
      */
-    public JSONObject findDocument(String cmisQuery) {
+    public JSONObject findDocument(String cmisQuery,
+                                   String order,
+                                   String orderDirection,
+                                   int maxItemsPerPage,
+                                   long start,
+                                   int draw) {
 
         JSONObject obj = new JSONObject();
-        JSONObject o;
         JSONArray list = new JSONArray();
+        long itemsToSkip;
+        ItemIterable<CmisObject> cmisObjects;
         try {
-            for (CmisObject cmisObject : con.findDocument(cmisQuery)) {
-                o = convertCmisObjectToJSON(cmisObject);
-                list.put(o);
 
+            if (maxItemsPerPage == -1) {
+                maxItemsPerPage = Integer.MAX_VALUE;
+                itemsToSkip = 0;
+            } else
+                itemsToSkip = start;
+
+            if (cmisQuery == null || cmisQuery.trim().length() == 0)
+                cmisObjects = EmptyItemIterable.instance();
+            else
+                cmisObjects = con.findDocument(cmisQuery, order, orderDirection).skipTo(itemsToSkip).getPage(maxItemsPerPage);
+
+            for (CmisObject cmisObject : cmisObjects) {
+                list.put(convertCmisObjectToJSON(cmisObject));
             }
+
+
+            obj.put("recordsTotal", cmisObjects.getTotalNumItems());
+            obj.put("draw", draw);
+
+            obj.put("recordsFiltered", cmisObjects.getTotalNumItems());
+            obj.put("hasMoreItems", cmisObjects.getHasMoreItems());
+
             obj.put("success", true);
             obj.put("data", list);
         } catch (Throwable t) {
@@ -543,8 +554,6 @@ public class VerteilungServices {
             if (document != null && document instanceof Document) {
                 if (((Document) document).isVersionSeriesCheckedOut())
                     ((Document) document).cancelCheckOut();
-                // Clear muss vor dem delete weil sonst die Parents nicht gefunden werden können
-                clearCache(document);
                 document.delete(true);
                 obj.put("success", true);
                 obj.put("data", "");
@@ -592,7 +601,6 @@ public class VerteilungServices {
 
                 document = con.createDocument((Folder) folderObject, documentName, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState));
                 if (document != null) {
-                    clearCache(document);
                     obj.put("success", true);
                     obj.put("data", convertCmisObjectToJSON(document).toString());
                 } else {
@@ -647,7 +655,6 @@ public class VerteilungServices {
                 }
 
                 Document document = con.updateDocument((Document) cmisObject, Base64.decodeBase64(documentContent), documentType, outMap, createVersionState(versionState), versionComment);
-                clearCache(document);
                 obj.put("success", true);
                 obj.put("data", convertCmisObjectToJSON(document).toString());
 
@@ -693,7 +700,6 @@ public class VerteilungServices {
                 }
 
                 cmisObject = con.updateProperties(cmisObject, outMap);
-                clearCache(cmisObject);
 
                 obj.put("success", true);
                 obj.put("data", convertCmisObjectToJSON(cmisObject).toString());
@@ -731,10 +737,8 @@ public class VerteilungServices {
             if (node != null && node instanceof Document || node instanceof Folder) {
                 if (oldFolder != null && oldFolder instanceof Folder) {
                     if (newFolder != null && newFolder instanceof Folder) {
-                        clearCache(node);
                         FileableCmisObject fileableCmisObject = con.moveNode((FileableCmisObject) node, (Folder) oldFolder, (Folder) newFolder);
-                        logger.fine("Knoten " + node.getId() + " von " + ((FileableCmisObject) node).getPaths().get(0) + " nach " + fileableCmisObject.getPaths().get(0) + " verschoben!");
-                        clearCache(fileableCmisObject);
+                        logger.trace("Knoten " + node.getId() + " von " + ((FileableCmisObject) node).getPaths().get(0) + " nach " + fileableCmisObject.getPaths().get(0) + " verschoben!");
                         obj.put("success", true);
                         obj.put("data", convertObjectToJson(newFolderId, fileableCmisObject).toString());
                         // Quell und Zielordner zurückgeben
@@ -788,7 +792,6 @@ public class VerteilungServices {
             if (target != null && target instanceof Folder) {
                 folder = con.createFolder((Folder) target, outMap);
                 if (folder != null ) {
-                    clearCache(folder);
                     obj.put("success", true);
                     JSONObject o = convertCmisObjectToJSON(folder);
                     // neu definierter Folder kann keine Children haben
@@ -824,8 +827,7 @@ public class VerteilungServices {
             CmisObject folder;
             folder = con.getNodeById(documentId);
             if (folder != null && folder instanceof Folder) {
-                // muss vor dem eigentlichen Delete sein sonst findet er die Parents nicht
-                clearCache(folder);
+
                 List<String> list = ((Folder) folder).deleteTree(true, UnfileObject.DELETE, true);
                 obj.put("success", true);
                 obj.put("data", new JSONObject(list).toString());
@@ -875,7 +877,7 @@ public class VerteilungServices {
         JSONObject obj = new JSONObject();
         URL url;
         try {
-            logger.fine("check availibility of: " + urlString);
+            logger.trace("check availibility of: " + urlString);
             url = new URL(urlString);
             HttpURLConnection httpUrlConn;
             httpUrlConn = (HttpURLConnection) url.openConnection();
@@ -886,11 +888,11 @@ public class VerteilungServices {
 
             int erg = httpUrlConn.getResponseCode();
             if (erg == HttpURLConnection.HTTP_OK || erg == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                logger.fine("URL is available: " + urlString);
+                logger.trace("URL is available: " + urlString);
                 obj.put("success", true);
                 obj.put("data", true);
             } else {
-                logger.fine("URL is not available: " + urlString);
+                logger.trace("URL is not available: " + urlString);
                 obj.put("success", false);
                 obj.put("data", httpUrlConn.getResponseMessage());
             }
@@ -1228,24 +1230,6 @@ public class VerteilungServices {
         return obj;
     }
 
-    /**
-     * löscht den Cache
-     * @return                  ein JSONObject mit den Feldern success: true     die Opertation war erfolgreich
-     *                                                                  false    ein Fehler ist aufgetreten
-     *                                                         data            der Inhalt der Datei als Base64 encodeter String oder der Fehler
-     */
-    public JSONObject clearCache() {
-        JSONObject obj = new JSONObject();
-        try {
-            getCache().clear();
-            obj.put("success", true);
-            obj.put("data", "");
-        } catch (Exception e) {
-            obj = VerteilungHelper.convertErrorToJSON(e);
-        }
-        return obj;
-    }
-
 
     /**
      * liest eine Datei
@@ -1281,7 +1265,7 @@ public class VerteilungServices {
      */
     protected Map<String, Object> buildProperties(String extraCMSProperties) throws JSONException {
 
-        logger.fine("buildProperties from " + extraCMSProperties);
+        logger.trace("buildProperties from " + extraCMSProperties);
         JSONObject props = new JSONObject(extraCMSProperties);
         Iterator nameItr = props.keys();
         Map<String, Object> outMap = new HashMap<>();
@@ -1342,7 +1326,7 @@ public class VerteilungServices {
             JSONObject obj = new JSONObject();
             int i = 0;
             for (Folder folder:parents) {
-                obj.put(Integer.toString(i++), folder.getId());
+                obj.put(Integer.toString(i++), convPropertiesToJSON(folder.getProperties()));
             }
             obj1.put("parents", obj);
         }
@@ -1382,11 +1366,11 @@ public class VerteilungServices {
 
     /**
      * konvertiert ein Objekt in ein JSON Objekt
-     * @param parentId               die Id des Parent Objektes
-     * @param cmisObject             das zu konvertierende CMIS Objekt
+     * @param  parentId               die Id des Parent Objektes
+     * @param  cmisObject             das zu konvertierende CMIS Objekt
      * @throws JSONException
      * @throws VerteilungException
-     * @return JSONObject           das gefüllte JSON Objekt
+     * @return JSONObject             das gefüllte JSON Objekt
      */
     private JSONObject convertObjectToJson(String parentId,
                                            CmisObject cmisObject) throws JSONException, VerteilungException {
@@ -1412,52 +1396,23 @@ public class VerteilungServices {
                 if (hasChildDocuments && hasChildFolder)
                     break;
             }
+
             o.put("hasChildFolder", hasChildFolder);
             o.put("hasChildDocuments", hasChildDocuments);
+            // JsTree
+            o.put("id", cmisObject.getId());
+            o.put("children", hasChildFolder);
+            o.put("text", cmisObject.getName());
+            //o.put("data", o);
+            o.put("a_attr", "'class': 'drop'");
+            o.put("icon", "");
+            o.put("state",  new JSONObject("{state: {opened: false, disabled: false, selected: false}}"));
         }
         o.put("parentId", parentId);
 
         return o;
     }
 
-    /**
-     * prüft, ob ein geändertes Objekt im Cache ist und entfernt dieses gegenenenfalls
-     * das dient dazu, das keine veralterten Objekte im Cache gespeichert werden
-     * @param cmisObject   das zu prüfende Objekt
-     */
-    private void clearCache(CmisObject cmisObject) throws CacheException{
-        // Cache bereinigen
-        List<Folder> folders = ((FileableCmisObject) cmisObject).getParents();
-        for (Folder folder : folders) {
-            String id = folder.getId();
-            id = VerteilungHelper.getRealId(id);
-            getCache().remove(id);
-        }
-    }
-
-    /**
-     * liefert eine Cacheinstanz
-     * @return   die Instanz
-     */
-    public CacheAccess<String, JSONArray> getCache() throws CacheException {
-        if (cache == null) {
-                CompositeCacheManager ccm = CompositeCacheManager.getUnconfiguredInstance();
-            Properties props = new Properties();
-            props.setProperty("jcs.default", "");
-            props.setProperty("jcs.default.cacheattributes","org.apache.commons.jcs.engine.CompositeCacheAttributes");
-            props.setProperty("jcs.default.cacheattributes.MemoryCacheName","org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache");
-            props.setProperty("jcs.default.cacheattributes.MaxObjects", "3000");
-            props.setProperty("jcs.default.cacheattributes.UseMemoryShrinker","true");
-            props.setProperty("jcs.default.cacheattributes.MaxMemoryIdleTimeSeconds", "10000");
-            props.setProperty("jcs.default.cacheattributes.ShrinkerIntervalSeconds", "5000");
-            props.setProperty("jcs.default.cacheattributes.UseDisk","false");
-            props.setProperty("jcs.default.cacheattributes.UseLateral","false");
-            props.setProperty("jcs.default.cacheattributes.UseRemote","false");
-            ccm.configure(props);
-            cache = JCS.getInstance("default");
-        }
-        return cache;
-    }
 
     /**
      * liefert den Alfresco Server

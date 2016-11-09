@@ -4,7 +4,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collection;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +16,7 @@ import java.util.logging.Logger;
  */
 public class VerteilungHelper {
 
-    private static Logger logger = Logger.getLogger(VerteilungHelper.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(VerteilungHelper.class.getName());
 
     /**
      * verpackt ein Throwable in ein JSON Object
@@ -34,8 +35,10 @@ public class VerteilungHelper {
                 sb.append("\n");
             }
             obj.put("error", sb.toString());
+            logger.error(e.getMessage());
+            e.printStackTrace();
         } catch (JSONException jse) {
-            logger.severe(jse.getMessage());
+            logger.error(jse.getMessage());
             jse.printStackTrace();
         }
         return obj;

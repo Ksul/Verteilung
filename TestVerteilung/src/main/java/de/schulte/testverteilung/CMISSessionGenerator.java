@@ -3,7 +3,8 @@ package de.schulte.testverteilung;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.Session;
@@ -23,7 +24,7 @@ import org.apache.chemistry.opencmis.commons.enums.BindingType;
  */
 public class CMISSessionGenerator {
 
-    private static Logger logger = Logger.getLogger(CMISSessionGenerator.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(CMISSessionGenerator.class.getName());
         private String user;
         private String password;
         private String atomPubURL;
@@ -95,7 +96,7 @@ public class CMISSessionGenerator {
             session = repositories.get(0).createSession();
 
         } catch(Exception e) {
-            logger.severe("Session konnte nicht aufgebaut werden: " + e.getMessage());
+            logger.error("Session konnte nicht aufgebaut werden: " + e.getMessage());
             throw e;
         }
         return session;

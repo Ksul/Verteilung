@@ -57,7 +57,6 @@
         var globalLayout;
         var alfrescoTicket;
         var anOpen = [];
-        var iconView = false;
 
         window.onload = function() {
 
@@ -389,7 +388,7 @@
 <div id="clientPage" class="ui-state-active">
     <!--Tab Bereich-->
     <div id="tabs" class="container">
-        <div id="tabNorth" class="ui-layout-north container">
+        <div id="tabNorth" class="ui-layout-north ui-widget">
             <!--Tabulatoren-->
             <div id="tabNorthInnerCenter" class="inner-center container">
                 <ul id="tabButtons" class="container">
@@ -399,12 +398,37 @@
                 </ul>
             </div>
             <div style="float:right; padding-right:10px;" id="settings" onclick="startSettingsDialog();" class="fa fa-cogs fa-2x" title="Einstellungen"></div>
-            <div style="float:right; padding-right:10px;position: relative;" id="refresh" onclick="refreshCache();" class="fa fa-refresh fa-2x" title="Aktualisieren"></div>
         </div>
         <!--Tab Panels-->
-        <div id="tabPanels" class="ui-layout-center container ui-state-active">
+        <div id="tabPanels" class="ui-layout-content ui-widget-content ui-corner-bottom">
             <!--Tab Archiv-->
             <div id="tab1" class="tabPanel ui-widget-content hidden">
+                <div id="alfrescoNorth" onmouseover="alfrescoLayout.allowOverflow(this);"
+                     class="inner-center container ui-widget-header hidden">
+                    <div id="alfrescoNorthCenter"
+                         class="inner-center container ui-widget-header hidden">
+                        <div class="breadCrumbHolder module">
+                            <div id="breadcrumb" class="breadCrumb module">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="alfrescoNorthEast"
+                         class="inner-center container ui-widget-header hidden">
+                        <ul id="menu-1" class="sf-menu" onmouseover="alfrescoLayout.allowOverflow(this);">
+                            <li class="current">
+                                <a href="#ansicht">Ansicht</a>
+                                <ul class="ui-widget-header">
+                                    <li>
+                                        <a href="#normal" onclick="showAlfrescoNormalView();">Normal</a>
+                                    </li>
+                                    <li>
+                                        <a href="#icons" onclick="showAlfrescoIconView();">Icons</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
                 <div id="alfrescoWest" class="ui-tab-layout-west container  hidden">
                     <div id="alfrescoHeaderWest" class="header  ui-widget-header">Archiv</div>
                     <div >
@@ -434,39 +458,12 @@
                             </div>
                         </div>
                     </div>
-                    <div id="alfrescoCenterNorth" onmouseover="alfrescoLayout.allowOverflow(this);"
-                         class="inner-center container ui-widget-header hidden">
-                        <div id="alfrescoCenterNorthCenter"
-                             class="inner-center container ui-widget-header hidden">
-                            <div class="breadCrumbHolder module">
-                                <div id="breadcrumb" class="breadCrumb module">
-                                </div>
-                            </div>
-                        </div>
-                        <div id="alfrescoCenterNorthEast"
-                             class="inner-center container ui-widget-header hidden">
-                            <ul id="menu-1" class="sf-menu" onmouseover="alfrescoLayout.allowOverflow(this);">
-                                <li class="current">
-                                    <a href="#ansicht">Ansicht</a>
-                                    <ul class="ui-widget-header">
-                                        <li>
-                                            <a href="#normal" onclick="showAlfrescoNormalView();">Normal</a>
-                                        </li>
-                                        <li>
-                                            <a href="#icons" onclick="showAlfrescoIconView();">Icons</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
             </div>
             <!--Tab Suche-->
             <div id="tab2" class="tabPanel ui-widget-content hidden">
-                <div id="searchNorth" class="ui-tab-layout-north container hidden">
-                    <div class="header  ui-widget-header">Suchen</div>
-                    <div>
+                <div id="searchNorth" class="inner-center container hidden" onmouseover="searchLayout.allowOverflow(this);">
+                    <div id="searchNorthCenter" class="inner-center container hidden">
                         <label for="alfrescoSearch" style="float:left;margin: 20px 5px 5px 5px;">Suche </label>
                         <input id="alfrescoSearch" style="width:400px;height:auto;float:left;margin: 20px 5px 5px 5px;"
                                class="ui-autocomplete-input" autocomplete="off"/>
@@ -474,14 +471,13 @@
                              style="margin: 18px 5px 5px 5px;">Suche
                         </div>
                     </div>
-                </div>
-                <div id="searchCenter" class="ui-tab-layout-center container hidden">
-                    <div class="header  ui-widget-header">Ergebnisse
+                    <div id="searchNorthEast"
+                         class="inner-center container hidden">
                         <ul id="menu-2" style="float: right;" class="sf-menu"
                             onmouseover="searchLayout.allowOverflow(this);">
                             <li class="current">
                                 <a href="#ansicht">Ansicht</a>
-                                <ul>
+                                <ul class="ui-widget-header">
                                     <li>
                                         <a href="#normal" onclick="showAlfrescoSearchNormalView();">Normal</a>
                                     </li>
@@ -492,14 +488,15 @@
                             </li>
                         </ul>
                     </div>
-                    <div>
-                        <div class="ui-widget-content">
-                            <div id="dtable4">
-                                <table cellpadding="0" cellspacing="0" border="0" class="display"
-                                       id="alfrescoSearchTabelle"></table>
-                            </div>
-                            <div class="header ui-widget-header" id="alfrescoSearchTableFooter"></div>
+                </div>
+                <div id="searchCenter" class="inner-center container  hidden">
+                    <div class="header ui-widget-header">Ergebnisse</div>
+                    <div class="ui-widget-content">
+                        <div id="dtable4">
+                            <table cellpadding="0" cellspacing="0" border="0" class="display"
+                                   id="alfrescoSearchTabelle"></table>
                         </div>
+                        <div class="header ui-widget-header" id="alfrescoSearchTableFooter"></div>
                     </div>
                 </div>
             </div>

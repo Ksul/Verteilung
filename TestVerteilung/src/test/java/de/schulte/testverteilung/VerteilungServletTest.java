@@ -252,7 +252,7 @@ public class VerteilungServletTest extends AlfrescoTest {
     @Test
     public void testFindDocument() throws Exception {
         when(request.getParameter(VerteilungServlet.PARAMETER_FUNCTION)).thenReturn(VerteilungServlet.FUNCTION_FINDDOCUMENT);
-        when(request.getParameter(VerteilungServlet.PARAMETER_CMISQUERY)).thenReturn("SELECT cmis:objectId from cmis:document where cmis:name='backup.js.sample'");
+        when(request.getParameter(VerteilungServlet.PARAMETER_CMISQUERY)).thenReturn("SELECT * from cmis:document where cmis:name='backup.js.sample'");
         servlet.doPost(request, response);
         writer.flush(); // it may not have been flushed yet...
         assertThat(sr, Matchers.notNullValue());

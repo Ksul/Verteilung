@@ -67,6 +67,8 @@
     <link type="text/css" href="resources/css/font-awesome.css" rel="stylesheet"/>
 
     <script type="text/javascript" charset="utf-8">
+        var tabelle;
+        var obj;
 
         /**
          * führt einen Service aus
@@ -228,120 +230,24 @@
             }
         }
 
-    var data = [
-        {
-            "name":       "Tiger Nixon",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Harry Hirsch",
-            "position":   "Developer",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Kurt Kiesewetter",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Donald Duck",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Garry Glitter",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Fred Panther",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Mike Smith",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "John Lennon",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Pablo Picasso",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Mick Jagger",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Heinz Rühmann",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Angela Merkel",
-            "position":   "System Architect",
-            "salary":     "$3,120",
-            "start_date": "2011/04/25",
-            "office":     "",
-            "extn":       "5421"
-        },
-        {
-            "name":       "Garrett Winters",
-            "position":   "Director",
-            "salary":     "$5,300",
-            "start_date": "2011/07/25",
-            "office":     "Edinburgh",
-            "extn":       "8422"
+        function change(){
+            obj = executeService("getNodeId", null, [
+                {"name": "filePath", "value": "/Archiv/Fehler"}
+            ], "Archiv konnte nicht gefunden werden:");
+            tabelle.ajax.url("/TestVerteilung/VerteilungServlet?function=listFolderWithPagination&filePath=" + obj.data + "&withFolder=1&itemsToSkip=0").load( null, true );
         }
-    ];
+
+        function length(){
+            tabelle.page.len( 4 ).draw("page");
+         }
 
 
     $(document).ready(function() {
-        var obj = executeService("getNodeId", null, [
-            {"name": "filePath", "value": "/Archiv/Fehler"}
+        obj = executeService("getNodeId", null, [
+            {"name": "filePath", "value": "/Archiv/Unbekannt"}
         ], "Archiv konnte nicht gefunden werden:");
         $('#dynamic').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>' );
-        var tabelle = $('#example').DataTable( {
+        tabelle = $('#example').DataTable( {
             "pagingType": "paging_with_jqui_icons",
             "processing": true,
             "serverSide": true,
@@ -353,7 +259,7 @@
                 "dataType": "json"
             },
             "language": {
-            "info": "Zeigt Einträge _START_ bis _END_  \f",
+                "info": "Zeigt Einträge _START_ bis _END_ von insgesamt _TOTAL_ \f",
                     "emptyTable": "",
                     "zeroRecords": "Keine Einträge!",
                     "infoEmpty":    "",
@@ -407,7 +313,7 @@
                 {
                     "data": "documentDateDisplay",
                     "title": "Datum",
-                    "name": "my:documentDate,cm:created",
+                    "name": "my:documentDate",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -415,6 +321,7 @@
                 {
                     "data": "person",
                     "title": "Person",
+                    "name": "d.my:person",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -422,6 +329,7 @@
                 {
                     "data": "amountDisplay",
                     "title": "Betrag",
+                    "name": "my:amount",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -429,6 +337,7 @@
                 {
                     "data": "idvalue",
                     "title": "Schlüssel",
+                    "name": "my:idvalue",
                     "defaultContent": '',
                     "type": "string",
                     "class": "alignLeft"
@@ -488,12 +397,15 @@
         } );
 
 
+
+
     } );
 </script>
 </head>
 <body id="dt_example">
 
 <div id="dynamic"></div>
-
+<button onclick="change()">Push</button>
+<button onclick="length()">Length</button>
 </body>
 </html>

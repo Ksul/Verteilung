@@ -1,22 +1,22 @@
 package de.schulte.testverteilung;
 
-import java.io.*;
-import java.net.*;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
-import java.util.logging.Logger;
-
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Properties;
 
 /**
  * Servlet implementation class VerteilungServlet
@@ -27,7 +27,7 @@ public class VerteilungServlet extends HttpServlet {
 
     private VerteilungServices services = new VerteilungServices();
 
-    private Logger logger = Logger.getLogger(VerteilungApplet.class.getName());
+    private Logger logger = LoggerFactory.getLogger(VerteilungServlet.class.getName());
 
     public static final String PARAMETER_FUNCTION = "function";
     public static final String PARAMETER_DOCUMENTID = "documentId";
@@ -71,6 +71,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_EXTRACTZIPANDEXTRACTPDFTOINTERNALSTORAGE = "extractZIPAndExtractPDFToInternalStorage";
     public static final String FUNCTION_EXTRACTZIPTOINTERNALSTORAGE = "extractZIPToInternalStorage";
     public static final String FUNCTION_FINDDOCUMENT = "findDocument";
+    public static final String FUNCTION_FINDDOCUMENTWITHPAGINATION = "findDocumentWithPagination";
     public static final String FUNCTION_GETDATAFROMINTERNALSTORAGE = "getDataFromInternalStorage";
     public static final String FUNCTION_GETDOCUMENTCONTENT = "getDocumentContent";
     public static final String FUNCTION_GETNODE = "getNode";
@@ -95,7 +96,7 @@ public class VerteilungServlet extends HttpServlet {
     public static final String FUNCTION_GETTITLES = "getTitles";
     public static final String FUNCTION_ISCONNECTED = "isConnected";
     public static final String FUNCTION_GETCONNECTION = "getConnection";
-    public static final String FUNCTION_CLEARCACHE = "clearCache";
+
 
 
     @Override
@@ -195,6 +196,7 @@ public class VerteilungServlet extends HttpServlet {
                              HttpServletResponse resp) throws IOException {
 
         // Get the value of a request parameter; the name is case-sensitive
+        long start = System.currentTimeMillis();
         JSONObject obj = new JSONObject();
         String value = req.getParameter(PARAMETER_FUNCTION);
         resp.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -208,9 +210,11 @@ public class VerteilungServlet extends HttpServlet {
                 logger.info("Call of Method " + value);
                 if (value.equalsIgnoreCase(FUNCTION_OPENPDF)) {
                     openPDF(getURLParameter(req, PARAMETER_FILENAME, true), resp);
+                    logger.info("Service " + value + " Duration: " + (System.currentTimeMillis() - start) + " ms");
                     return;
                 } else if (value.equalsIgnoreCase(FUNCTION_OPENIMAGE)) {
                     openImage(getURLParameter(req, PARAMETER_IMAGELINK, true), resp);
+                    logger.info("Service " + value + " Duration: " + (System.currentTimeMillis() - start) + " ms");
                     return;
                 } else if (value.equalsIgnoreCase(FUNCTION_SETPARAMETER)) {
                     obj = setParameter(getURLParameter(req, PARAMETER_SERVER, true), getURLParameter(req, PARAMETER_BINDING, true), getURLParameter(req, PARAMETER_USERNAME, true), getURLParameter(req, PARAMETER_PASSWORD, true));
@@ -232,6 +236,10 @@ public class VerteilungServlet extends HttpServlet {
                     obj = getNodeById(getURLParameter(req, PARAMETER_DOCUMENTID, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENT)) {
                     obj = findDocument(getURLParameter(req, PARAMETER_CMISQUERY, true));
+                } else if (value.equalsIgnoreCase(FUNCTION_FINDDOCUMENTWITHPAGINATION)) {
+                    String orderColumn =  getURLParameter(req, PARAMETER_ORDER, true);
+                    String order = getURLParameter(req, "columns[" + orderColumn.trim() + "][name]", true);
+                    obj = findDocumentWithPagination(getURLParameter(req, PARAMETER_CMISQUERY, true), order, getURLParameter(req, PARAMETER_ORDERDIRECTION, true), getURLParameter(req, PARAMETER_MAXITEMSPERPAGE, true), getURLParameter(req, PARAMETER_ITEMSTOSKIP, true), getURLParameter(req, PARAMETER_DRAW, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_QUERY)) {
                     obj = query(getURLParameter(req, PARAMETER_CMISQUERY, true));
                 } else if (value.equalsIgnoreCase(FUNCTION_UPLOADDOCUMENT)) {
@@ -276,8 +284,6 @@ public class VerteilungServlet extends HttpServlet {
                     obj = isConnected();
                 } else if (value.equalsIgnoreCase(FUNCTION_GETCONNECTION)) {
                     obj = getConnection();
-                } else if (value.equalsIgnoreCase(FUNCTION_CLEARCACHE)) {
-                    obj = clearCache();
                 } else if (value.equalsIgnoreCase(FUNCTION_GETDATAFROMINTERNALSTORAGE)) {
                     String fileName = getURLParameter(req, PARAMETER_FILENAME, false);
                     if (fileName == null || fileName.isEmpty())
@@ -292,11 +298,13 @@ public class VerteilungServlet extends HttpServlet {
                     obj.put("success", false);
                     obj.put("data", "Function " + value + " ist dem Servlet unbekannt!");
                 }
+                logger.info("Service " + value + " Duration: " + (System.currentTimeMillis() - start) + " ms");
             }
         } catch (Exception e) {
             obj = VerteilungHelper.convertErrorToJSON(e);
         }
         out.write(obj.toString());
+
     }
 
     /**
@@ -308,17 +316,6 @@ public class VerteilungServlet extends HttpServlet {
      */
     protected JSONObject getConnection() {
         return services.getConnection();
-    }
-
-    /**
-     * löscht den Cache
-     * @return obj               ein JSONObject mit den Feldern success: true        die Operation war erfolgreich
-     *                                                                   false       ein Fehler ist aufgetreten
-     *                                                          result   false       keine Connection
-     *                                                                   JSONObjekt  Die Verbindungsparameter
-     */
-    protected JSONObject clearCache() {
-        return services.clearCache();
     }
 
     /**
@@ -347,6 +344,7 @@ public class VerteilungServlet extends HttpServlet {
         String param = req.getParameter(parameter);
         if (param == null && neccesary)
             throw new VerteilungException("Parameter " + parameter + " fehlt");
+        logger.info("Parameter " + parameter + " found! Value: " + param);
         return param;
     }
 
@@ -518,7 +516,7 @@ public class VerteilungServlet extends HttpServlet {
      * erzeugt ein Document
      * @param  documentId           die Id des Folders in dem das Dokument erstellt werden soll als String
      * @param  fileName             der Name des Dokumentes als String
-     * @param  documentContent      der Inhalt als String
+     * @param  documentContent      der Inhamountablealt als String
      * @param  documentType         der Typ des Dokumentes
      * @param  extraCMSProperties   zusätzliche Properties
      * @param  versionState         der versionsStatus ( none, major, minor, checkedout)
@@ -620,8 +618,36 @@ public class VerteilungServlet extends HttpServlet {
         return services.deleteFolder(documentId);
     }
 
+
+
     /**
-     * findet ein Document
+     * findet Documente mit Pagination
+     * @param cmisQuery    die CMIS Query, mit der der Knoten gesucht werden soll
+     * @param order              die Spalte nach der sortiuert werden soll
+     * @param orderDirection     die Sortierreihenfolge: ASC oder DESC
+     * @param maxItemsPerPage    die maximale Anzahl
+     * @param start              die Startposition
+     * @param draw               die Anzahl Seiten die übersprungen werden soll
+     * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
+     *                                                             false    ein Fehler ist aufgetreten
+     *                                                    result            Dokument als JSONObject
+     */
+    protected JSONObject findDocumentWithPagination(String cmisQuery,
+                                      String order,
+                                      String orderDirection,
+                                      String maxItemsPerPage,
+                                      String start,
+                                      String draw) throws VerteilungException {
+
+        int itemsPerPage = Integer.parseInt(maxItemsPerPage);
+        int drawPosition = Integer.parseInt(draw);
+        long startPosition = Long.parseLong(start);
+
+        return services.findDocument(cmisQuery, order, orderDirection, itemsPerPage, startPosition, drawPosition);
+    }
+
+    /**
+     * findet Documente
      * @param cmisQuery    die CMIS Query, mit der der Knoten gesucht werden soll
      * @return             ein JSONObject mit den Feldern success: true     die Operation war erfolgreich
      *                                                             false    ein Fehler ist aufgetreten
@@ -629,7 +655,7 @@ public class VerteilungServlet extends HttpServlet {
      */
     protected JSONObject findDocument(String cmisQuery) throws VerteilungException {
 
-        return services.findDocument(cmisQuery);
+        return services.findDocument(cmisQuery, null, null, -1, 0, 0);
     }
 
     /**
@@ -640,6 +666,7 @@ public class VerteilungServlet extends HttpServlet {
      *                                                    result           eine Liste mit Strings
      */
     protected JSONObject query(String cmisQuery) throws VerteilungException {
+
         return services.query(cmisQuery);
     }
 
@@ -680,7 +707,7 @@ public class VerteilungServlet extends HttpServlet {
                                                   String draw) throws VerteilungException {
         int itemsPerPage = Integer.parseInt(maxItemsPerPage);
         int drawPosition = Integer.parseInt(draw);
-        int startPosition = Integer.parseInt(start);
+        long startPosition = Long.parseLong(start);
         return services.listFolder(filePath, order, orderDirection,Integer.parseInt(listFolder), itemsPerPage, startPosition, drawPosition);
     }
 
@@ -842,14 +869,14 @@ public class VerteilungServlet extends HttpServlet {
             sout.flush();
             sout.close();
         } catch (Exception e) {
-            logger.severe(e.getLocalizedMessage());
+            logger.error(e.getLocalizedMessage());
             e.printStackTrace();
         } finally {
             try {
                 if (sout != null)
                     sout.close();
             } catch (IOException io) {
-                logger.severe(io.getLocalizedMessage());
+                logger.error(io.getLocalizedMessage());
                 io.printStackTrace();
             }
         }
@@ -882,14 +909,14 @@ public class VerteilungServlet extends HttpServlet {
                 }
             }
         } catch (Exception e) {
-            logger.severe(e.getLocalizedMessage());
+            logger.error(e.getLocalizedMessage());
             e.printStackTrace();
         } finally {
             try {
                 if (sout != null)
                     sout.close();
             } catch (IOException io) {
-                logger.severe(io.getLocalizedMessage());
+                logger.error(io.getLocalizedMessage());
                 io.printStackTrace();
             }
         }
