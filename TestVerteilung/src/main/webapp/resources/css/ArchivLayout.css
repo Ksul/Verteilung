@@ -474,12 +474,14 @@ DIV#tabs {
 UL#tabButtons,
 DIV#tabPanels {
     margin: 0 !important; /* layout-panes should never have margins */
+
 }
 
 .tabPanel {
     /* container for tabLayout */
     height: 100%; /* need to 'fill' the tabPanels - layout container must have 'height' */
     padding: 0 !important;
+    background-color: wheat;
 / / DO NOT set top- or bottom-padding because height = 100 %
 }
 

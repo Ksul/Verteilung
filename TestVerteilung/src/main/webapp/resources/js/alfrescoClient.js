@@ -254,7 +254,6 @@ function loadLayout() {
             resizable: false,
             closable: false,
             initPanes: true,
-            size:10,
             resizerClass: "ui-widget-content",
             togglerClass: "ui-widget-content",
             showDebugMessages: true,
@@ -333,7 +332,7 @@ function loadLayout() {
                     paneSelector: "#searchCenter",
                     name: "searchCenterLayout",
                     minHeight: 80,
-                    size: .8,
+                    size: "auto",
                     resizable: true,
                 slidable: true
                         }
@@ -372,7 +371,6 @@ function loadLayout() {
                 children: {
                     name: "alfrescoNorthInnerLayout",
                     center: {
-                        size: "auto",
                         name: "alfrescoNorthCenterLayout",
                         paneSelector: "#alfrescoNorthCenter"
                     },
@@ -431,6 +429,7 @@ function loadLayout() {
                                 onresize: function () {
                                     try {
                                         resizeTable("alfrescoCenterCenterNorth", "dtable3", "alfrescoFolderTabelle", "alfrescoFolderTabelleHeader", "alfrescoFolderTableFooter");
+                                        resizeTable("alfrescoCenterCenterCenter", "dtable2", "alfrescoTabelle", "alfrescoTabelleHeader", "alfrescoTableFooter");
                                     } catch (e) {
                                         errorHandler(e);
                                     }

@@ -1661,7 +1661,7 @@ button.ui-button::-moz-focus-inner {
 .ui-tabs .ui-tabs-nav {
 	margin-bottom: 5px;
 	border: solid #ddd;
-	border-width: 0 0 1px 0;
+	border-width: 0 0 0 0;
 	-webkit-border-radius: 0; /* Safari 4 */
 	-moz-border-radius: 0; /* Firefox 3.6 */
 	border-radius: 0;
@@ -1729,13 +1729,13 @@ button.ui-button::-moz-focus-inner {
 /* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
 .ui-tabs .ui-tabs-panel {
 	display: block;
-	margin: 1em 0;
+	margin: 5px 5px 5px 5px;
 	border: 0;
 	-webkit-border-radius: 0; /* Safari 4 */
 	-moz-border-radius: 0; /* Firefox 3.6 */
 	border-radius: 0;
 	padding: 1px 0;
-	background: none;
+	background: white;
 }
 
 .ui-tabs .ui-tabs-hide {
@@ -2551,8 +2551,9 @@ div.wijmo-wijmenu .wijmo-wijmenu-child .wijmo-wijmenu-text {
 }*/
 
 .ui-state-default[role="tab"][aria-selected="true"] > .ui-tabs-anchor{
-	background-color: #B8CFEE !important;
+	background-color: Wheat !important;
 }
+
 
 .ui-state-default[role="tab"][aria-selected="false"] > .ui-tabs-anchor{
 	background-color: lightgrey;

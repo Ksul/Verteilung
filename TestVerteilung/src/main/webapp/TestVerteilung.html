@@ -385,26 +385,26 @@
 <!--Applet-->
 <div id="appl"></div>
 <!--Seite-->
-<div id="clientPage" class="ui-state-active">
+<div id="clientPage" >
     <!--Tab Bereich-->
     <div id="tabs" class="container">
         <div id="tabNorth" class="ui-layout-north ui-widget">
             <!--Tabulatoren-->
             <div id="tabNorthInnerCenter" class="inner-center container">
-                <ul id="tabButtons" class="container">
+                <ul id="tabButtons" class="container" style="width: 90%; float: left">
                     <li id="tabArchiv"><a href="#tab1">Archiv</a></li>
                     <li id="tabSuche"><a href="#tab2">Suche</a></li>
                     <li id="tabVerteilung"><a href="#tab3">Verteilung</a></li>
                 </ul>
+                <div style="float:right; padding-right:10px;" id="settings" onclick="startSettingsDialog();" class="fa fa-cogs fa-2x" title="Einstellungen"></div>
             </div>
-            <div style="float:right; padding-right:10px;" id="settings" onclick="startSettingsDialog();" class="fa fa-cogs fa-2x" title="Einstellungen"></div>
-        </div>
+         </div>
         <!--Tab Panels-->
-        <div id="tabPanels" class="ui-layout-content ui-widget-content ui-corner-bottom">
+        <div id="tabPanels" class="tabPanel">
             <!--Tab Archiv-->
-            <div id="tab1" class="tabPanel ui-widget-content hidden">
+            <div id="tab1" class="tabPanel hidden">
                 <div id="alfrescoNorth" onmouseover="alfrescoLayout.allowOverflow(this);"
-                     class="inner-center container ui-widget-header hidden">
+                     class="inner-north container ui-widget-header hidden">
                     <div id="alfrescoNorthCenter"
                          class="inner-center container ui-widget-header hidden">
                         <div class="breadCrumbHolder module">
@@ -429,13 +429,13 @@
                         </ul>
                     </div>
                 </div>
-                <div id="alfrescoWest" class="ui-tab-layout-west container  hidden">
+                <div id="alfrescoWest" class="inner-west container  hidden">
                     <div id="alfrescoHeaderWest" class="header  ui-widget-header">Archiv</div>
                     <div >
                         <div id="tree"></div>
                     </div>
                 </div>
-                <div id="alfrescoCenter" class="ui-tab-layout-center container hidden">
+                <div id="alfrescoCenter" class="inner-center container hidden">
                     <div id="alfrescoCenterCenter" class="inner-center container hidden">
                         <div id="alfrescoCenterCenterNorth" class="inner-center container hidden">
                             <div class="header ui-widget-header" id="alfrescoFolderTabelleHeader">Ordner</div>
@@ -461,7 +461,7 @@
                 </div>
             </div>
             <!--Tab Suche-->
-            <div id="tab2" class="tabPanel ui-widget-content hidden">
+            <div id="tab2" class="tabPanel hidden">
                 <div id="searchNorth" class="inner-center container hidden" onmouseover="searchLayout.allowOverflow(this);">
                     <div id="searchNorthCenter" class="inner-center container hidden">
                         <label for="alfrescoSearch" style="float:left;margin: 20px 5px 5px 5px;">Suche </label>
@@ -472,7 +472,7 @@
                         </div>
                     </div>
                     <div id="searchNorthEast"
-                         class="inner-center container hidden">
+                         class="inner-east container hidden">
                         <ul id="menu-2" style="float: right;" class="sf-menu"
                             onmouseover="searchLayout.allowOverflow(this);">
                             <li class="current">
@@ -501,7 +501,7 @@
                 </div>
             </div>
             <!--Tab Verteilung-->
-            <div id="tab3" class="tabPanel ui-widget-content hidden">
+            <div id="tab3" class="tabPanel hidden">
                 <!--Dokument-->
                 <div id="verteilungWest" class="ui-tab-layout-west container ui-widget-header hidden">
                     <div id="headerWest" class="header">Dokument</div>
